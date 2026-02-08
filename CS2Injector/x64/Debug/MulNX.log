@@ -1,0 +1,24 @@
+﻿C:\Program Files\Microsoft Visual Studio\18\Community\MSBuild\Microsoft\VC\v180\Microsoft.CppBuild.targets(534,5): warning MSB8004: Output Directory does not end with a trailing slash.  This build instance will add the slash as it is required to allow proper evaluation of the Output Directory.
+  ConfigManager.cpp
+  MulNXeCore.cpp
+  IPCer.cpp
+  Charsets.cpp
+  Main.cpp
+C:\Users\lenovo\Desktop\中文目录\MulNX\MulNX\Main\Main.cpp(98,9): warning C4297: “WinMain”: 假定函数不引发异常，但确实发生了
+      C:\Users\lenovo\Desktop\中文目录\MulNX\MulNX\Main\Main.cpp(98,9):
+      在函数上指定了 __declspec(nothrow)、throw()、noexcept(true)或 noexcept
+  
+  imgui.cpp
+  imgui_demo.cpp
+  imgui_draw.cpp
+  imgui_impl_dx11.cpp
+  imgui_impl_win32.cpp
+  imgui_tables.cpp
+  imgui_widgets.cpp
+  pugixml.cpp
+  正在生成代码...
+C:\Users\lenovo\Desktop\中文目录\MulNX\MulNX\MulNXeCore\IPCer\IPCer.cpp(224,1): warning C4715: “IPCer::OpenCS2”: 不是所有的控件路径都返回值
+C:\Users\lenovo\Desktop\中文目录\MulNX\MulNX\MulNXeCore\IPCer\IPCer.cpp(330,1): warning C4715: “IPCer::Inject”: 不是所有的控件路径都返回值
+  MulNX.vcxproj -> C:\Users\lenovo\Desktop\中文目录\MulNX\dist\MulNX\MulNX\MulNX.exe
+  'pwsh.exe' 不是内部或外部命令，也不是可运行的程序
+  或批处理文件。

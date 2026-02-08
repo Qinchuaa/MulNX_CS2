@@ -1,0 +1,90 @@
+#pragma once
+
+#include "../CSController/CSController.hpp"
+
+#include <MulNX/MulNX.hpp>
+
+class ScreenSettings {
+public:
+    bool XRay = true;
+    std::atomic<bool> ESPBox = false;
+
+    bool operator==(const ScreenSettings&)const = default;
+};
+
+class SoundSettings {
+public:
+    bool snd_mute_losefocus = false;//游戏窗口失去焦点时静音
+
+    float snd_menumusic_volume = 0; //主菜单音量
+    float snd_roundstart_volume = 0; //回合开始音量
+    float snd_roundaction_volume = 0; //回合开始行动音量
+    float snd_roundend_volume = 0; //回合结束音量
+    float snd_mvp_volume = 0; //MVP音量
+    float snd_mapobjective_volume = 0; //炸弹/人质音量
+    float snd_tensecondwarning_volume = 0; //十秒警告音量(0.04就是游戏设置中的20)
+    float snd_deathcamera_volume = 0; //死亡视角音量
+    bool snd_mute_mvp_music_live_players = true; //当双方团队成员都存活时关闭MVP音乐(0--否，1--是)
+
+    bool operator==(const SoundSettings&)const = default;
+};
+
+class C_GameSettings {
+public:
+    bool* cl_drawhud = nullptr;
+    bool* cl_draw_only_deathnotices = nullptr;
+    bool* cl_drawhud_force_radar = nullptr;
+    int* cl_showfps = nullptr;
+    int* cl_showtick = nullptr;
+    int* cl_trueview_show_status = nullptr;
+    float* host_timescale = nullptr;
+    int* fps_max = nullptr;
+    SoundSettings SoundSettings{};
+    ScreenSettings ScreenSettings{};
+
+    bool operator==(const C_GameSettings&)const = default;
+};
+
+class dof {
+public:
+    //bool指针，默认nullptr
+    bool* r_dof_override = nullptr;
+
+    float FocusDistance = 1000;
+    float CrispRadius = 100;
+    float BlurDistance = 100;
+
+    //float指针，默认nullptr
+    float* r_dof_override_far_blurry = nullptr;
+    float* r_dof_override_far_crisp = nullptr;
+    float* r_dof_override_near_blurry = nullptr;
+    float* r_dof_override_near_crisp = nullptr;
+    float* r_dof_override_tilt_to_ground = nullptr;
+};
+
+class GameSettingsManager final :public MulNX::ModuleBase {
+private:
+    CSController* CS = nullptr;
+    C_GameSettings GameSettings{};
+
+    dof dof{};
+    bool* sv_cheats = nullptr;
+
+    MulNXHandle hContext{};
+public:
+    GameSettingsManager() : ModuleBase() {
+        //this->Type = MulNX::ModuleType::GameSettingsManager;
+    }
+
+
+    //基类接口实现
+
+    bool Init()override;
+
+    void VirtualMain()override;
+
+    void SettingGraphFloat(const char* Label, float* V, const float& min, const float& max);
+    void SettingGraphInt(const char* Label, int* V, const int& min, const int& max);
+
+    void ESPDraw();
+};

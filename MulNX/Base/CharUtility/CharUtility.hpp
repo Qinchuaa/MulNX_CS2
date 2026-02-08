@@ -1,0 +1,13 @@
+#pragma once
+
+#include <filesystem>
+#include <string>
+
+namespace MulNX {
+	namespace Base {
+		namespace CharUtility {
+			// 从标准库的filesystem::path转换为std::string（utf-8编码）
+			std::string FilePathToString(const std::filesystem::path& path);
+		}
+	}
+}

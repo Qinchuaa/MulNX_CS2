@@ -1,0 +1,137 @@
+#include "Debugger.hpp"
+
+#include "../KeyTracker/KeyTracker.hpp"
+#include "../MulNXiGlobalVars/MulNXiGlobalVars.hpp"
+
+#include "../../Core/Cores.hpp"
+#include "../../Systems/Systems.hpp"
+
+#include <bitset>
+
+bool MulNX::Debugger::Init() {
+    this->MainMsgChannel = this->ICreateAndGetMessageChannel();
+    (*this->MainMsgChannel)
+        .Subscribe(MulNX::MsgType::Debugger_SetMaxInfoCount);
+    return true;
+}
+void MulNX::Debugger::ProcessMsg(MulNX::Message* Msg) {
+    switch (Msg->Type) {
+    case MulNX::MsgType::Debugger_SetMaxInfoCount: {
+        this->ResetMaxMsgCount(Msg->ParamInt);
+    }
+    }
+}
+void MulNX::Debugger::VirtualMain() {
+    this->EntryProcessMsg();
+}
+
+void MulNX::Debugger::Menu() {
+
+    return;
+}
+
+
+
+void MulNX::Debugger::ResetMaxMsgCount(const int Max) {
+    std::unique_lock lock(this->MyThreadMutex);
+    if (Max < 1) {
+        this->AddError("最大信息条数不能小于一1!");
+        return;
+    }
+    if (DebugMsg.size() > Max) {
+        DebugMsg.erase(DebugMsg.begin(), DebugMsg.end() - Max);
+    }
+    this->MaxMsgCount = Max;
+    lock.unlock();
+    this->AddInfo("已重置最大信息条数为 " + std::to_string(Max) + " 条");
+
+    return;
+}
+
+void MulNX::Debugger::PushBack(const std::string& NewMsg, const std::string& prefix) {
+    //这里不需要锁，因为调用此函数的上层函数已经加锁
+    //检查字符串是否包含换行符
+    if (NewMsg.find('\n') == std::string::npos && NewMsg.find('\r') == std::string::npos) {
+        //没有换行符，直接添加（注意：这里需要加上前缀）
+        if (this->DebugMsg.size() == this->MaxMsgCount) {
+            this->DebugMsg.pop_front();
+        }
+        this->DebugMsg.push_back(prefix + NewMsg);
+    }
+    else {
+        //有换行符，分割字符串并为每一行添加前缀
+        std::istringstream iss(NewMsg);
+        std::string line;
+        bool firstLine = true;
+        int lineCount = 0;
+
+        while (std::getline(iss, line)) {
+            //清理回车符
+            if (!line.empty() && line.back() == '\r') {
+                line.pop_back();
+            }
+
+            //跳过空行
+            if (line.empty()) continue;
+
+            std::string formattedLine;
+            if (firstLine) {
+                //第一行直接添加前缀
+                formattedLine = prefix + line;
+                firstLine = false;
+            }
+            else {
+                //后续行添加前缀//和缩进
+                formattedLine = prefix + line;
+            }
+
+            //添加到消息队列
+            if (this->DebugMsg.size() == this->MaxMsgCount) {
+                this->DebugMsg.pop_front();
+            }
+            this->DebugMsg.push_back(formattedLine);
+            lineCount++;
+        }
+    }
+
+    if (AutoScroll) {
+        this->NeedAutoScroll = true;
+    }
+    return;
+}
+
+void MulNX::Debugger::AddInfo(const std::string& NewMsg) {
+    std::unique_lock lock(this->MyThreadMutex);
+    this->PushBack(NewMsg, this->Info);
+}
+
+void MulNX::Debugger::AddSucc(const std::string& NewMsg) {
+    std::unique_lock lock(this->MyThreadMutex);
+    this->PushBack(NewMsg, this->Succ);
+}
+
+void MulNX::Debugger::AddWarning(const std::string& NewMsg) {
+    std::unique_lock lock(this->MyThreadMutex);
+    this->PushBack(NewMsg, this->Warning);
+}
+
+void MulNX::Debugger::AddError(const std::string& NewMsg) {
+    std::unique_lock lock(this->MyThreadMutex);
+    this->PushBack(NewMsg, this->Error);
+    if (this->ShowWhenError) {
+        this->ShowWindow = true;
+        this->IfShowStream = true;
+    }
+}
+
+void MulNX::Debugger::Windows() {
+    if (!this->ShowWindow)return;
+    std::shared_lock lock(this->MyThreadMutex);
+    this->ShowFunc(this);
+}
+void MulNX::Debugger::ShowStream() {
+    this->IfShowStream = true;
+}
+void MulNX::Debugger::HideStream() {
+    this->IfShowStream = false;
+}

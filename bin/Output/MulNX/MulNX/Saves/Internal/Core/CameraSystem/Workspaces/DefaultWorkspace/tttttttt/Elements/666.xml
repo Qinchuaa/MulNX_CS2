@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Element Type="FreeCameraPath" Name="666">
+	<ElementMain DurationTime="5.43248749">
+		<KeyFrame Time="94.8018875" Px="-519.046692" Py="-1813.82019" Pz="-129.690704" FOV="90" Pitch="-3.06964064" Yaw="171.830276" Roll="1.33593803e-08" />
+		<KeyFrame Time="97.8008194" Px="-460.362549" Py="-1822.24316" Pz="-132.875671" FOV="90" Pitch="-3.06964064" Yaw="171.830276" Roll="1.33593803e-08" />
+		<KeyFrame Time="100.234375" Px="-231.298096" Py="-1855.12402" Pz="-145.278809" FOV="90" Pitch="-3.06964064" Yaw="171.830276" Roll="1.33593803e-08" />
+	</ElementMain>
+</Element>
