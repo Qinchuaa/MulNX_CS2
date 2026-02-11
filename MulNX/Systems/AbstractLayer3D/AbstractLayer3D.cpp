@@ -2,10 +2,11 @@
 
 #include "../../Core/Cores.hpp"
 
-#include "../MulNXiGlobalVars/MulNXiGlobalVars.hpp"
+#include "../MulNXGlobalVars/MulNXGlobalVars.hpp"
 #include "../MessageManager/IMessageManager.hpp"
 #include "../Debugger/IDebugger.hpp"
 #include "../MulNXUISystem/IMulNXUISystem.hpp"
+#include "../../MulNXExtensions/WinExt/WinExt.hpp"
 
 using namespace MulNX;
 
@@ -41,12 +42,12 @@ uintptr_t AbstractLayer3D::GetCurrentTimePointer() {
 }
 void AbstractLayer3D::UpdateTime() {
     float rawTime;
-    //MulNX::Base::Memory::Read(this->pCurrentTime, rawTime);
-    /*if (rawTime < 0)return;
+    MulNX::Base::Memory::Read(this->pCurrentTime, rawTime);
+    if (rawTime < 0)return;
     if (rawTime > 1000000.0f)return;
     if (rawTime < this->CurrentTime && this->CurrentTime - rawTime < 0.5f)return;
 	
-    this->CurrentTime = rawTime;*/
+    this->CurrentTime = rawTime;
     
     return;
 }

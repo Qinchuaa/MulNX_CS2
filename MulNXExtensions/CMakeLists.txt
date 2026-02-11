@@ -7,6 +7,7 @@ add_subdirectory("WinExt")
 add_subdirectory("CameraSystem")
 add_subdirectory("MiniMap")
 add_subdirectory("VirtualUser")
+add_subdirectory("MulNXController")
 
 target_link_libraries(MulNXExtensions PUBLIC
     MulNX
@@ -15,4 +16,5 @@ target_link_libraries(MulNXExtensions PUBLIC
     CameraSystem
     MiniMap
     VirtualUser
+    MulNXController
 )

@@ -1,13 +1,13 @@
 #pragma once
 
-#include"MulNXSingleUIContext/MulNXSingleUIContext.hpp"
+#include "MulNXUINode/MulNXUINode.hpp"
 
-#include<queue>
+#include <queue>
 
 class MulNXUIContext {
 private:
-	friend class MulNXSingleUIContext;
-	bool CallSingleContext(const std::string& Name);
+	friend class MulNXUINode;
+	bool CallUINode(const std::string& Name);
 public:
 	bool Active = true;
 	MulNX::Core::Core* Core = nullptr;
@@ -26,5 +26,5 @@ public:
 
 	void Draw();
 	void AddSingleContext(MulNXHandle hContext, MulNX::Base::any_unique_ptr SContext);
-	MulNXSingleUIContext* GetSingleContext(const MulNXHandle& hContext);
+	MulNXUINode* GetSingleContext(const MulNXHandle& hContext);
 };

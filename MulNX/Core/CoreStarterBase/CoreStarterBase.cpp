@@ -31,10 +31,10 @@ void CoreStarterBase::StartUIWith(std::string&& EntryName) {
 	this->IPublish(std::move(StartMsg));
 }
 
-void CoreStarterBase::RegisteMainDrawWith(std::function<void(MulNXSingleUIContext*)>&& MainDrawFunc) {
+void CoreStarterBase::RegisteMainDrawWith(std::function<void(MulNXUINode*)>&& MainDrawFunc) {
 	// 注册主窗口UI上下文
-	auto SContext = MulNX::Base::make_any_unique<MulNXSingleUIContext>();
-	MulNXSingleUIContext* SContextPtr = SContext.get<MulNXSingleUIContext>();
+    auto SContext = MulNX::Base::make_any_unique<MulNXUINode>();
+    MulNXUINode* SContextPtr = SContext.get<MulNXUINode>();
 	SContextPtr->name = "MainDraw";
 	SContextPtr->MyMsgChannel = this->ICreateAndGetMessageChannel();
 	SContextPtr->MyFunc = MainDrawFunc;

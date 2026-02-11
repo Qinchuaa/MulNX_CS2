@@ -2,7 +2,7 @@
 
 #include <MulNX/MulNX.hpp>
 
-class MulNXSingleUIContext;
+class MulNXUINode;
 class TripleBufferBase;
 
 class DemoHelper final :public MulNX::ModuleBase {

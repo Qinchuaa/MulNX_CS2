@@ -179,7 +179,7 @@ MulNX::IMessageChannel* MulNX::ModuleBase::ICreateAndGetMessageChannel() {
     return this->IMsgManager->GetMessageChannel(this->IMsgManager->CreateMessageChannel());
 }
 
-MulNX::AutoChild::AutoChild(ModuleBase* Module, const std::string& Name, const float HeightRatio, const float WidthRatio)
+MulNX::AutoChild::AutoChild(const ModuleBase* Module, const std::string& Name, const float HeightRatio, const float WidthRatio)
     :Module(Module) {
     ImVec2 Available = ImGui::GetContentRegionAvail();
     ImGui::BeginChild(Name.c_str(), ImVec2(Available.x * WidthRatio, Available.y * HeightRatio), true);

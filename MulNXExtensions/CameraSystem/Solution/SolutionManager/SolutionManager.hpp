@@ -89,7 +89,7 @@ public:
     //展示所有解决方案信息
     void Solution_ShowAll();
     //获取所有解决方案名称容器（危险函数，只有摄像机系统内部可用）
-    const std::vector<std::string>& Solution_GetNames()const;
+    const std::vector<std::string> Solution_GetNames()const;
     //展示单个解决方案信息在一行上
     void Solution_ShowInLine(Solution* solution);
     //按行展示所有解决方案

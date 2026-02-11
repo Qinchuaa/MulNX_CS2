@@ -4,7 +4,7 @@
 #include "../IPCer/IPCer.hpp"
 #include "../HandleSystem/HandleSystem.hpp"
 #include "../KeyTracker/KeyTracker.hpp"
-#include "../MulNXiGlobalVars/MulNXiGlobalVars.hpp"
+#include "../MulNXGlobalVars/MulNXGlobalVars.hpp"
 
 #include "../../Core/Core.hpp"
 

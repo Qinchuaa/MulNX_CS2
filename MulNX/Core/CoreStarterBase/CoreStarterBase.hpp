@@ -3,7 +3,7 @@
 #include "../ModuleBase/ModuleBase.hpp"
 
 class CoreImpl;
-class MulNXSingleUIContext;
+class MulNXUINode;
 
 namespace MulNX {
     namespace Core {
@@ -21,7 +21,7 @@ namespace MulNX {
             // UI系统启动辅助函数
             void StartUIWith(std::string&& EntryName);
             // 注册主绘制函数
-            void RegisteMainDrawWith(std::function<void(MulNXSingleUIContext*)>&& MainDrawFunc);
+            void RegisteMainDrawWith(std::function<void(MulNXUINode*)>&& MainDrawFunc);
 
             // 核心完全初始化后回调
             std::function<void()>InitEndCall = nullptr;

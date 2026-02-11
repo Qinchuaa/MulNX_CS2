@@ -6,31 +6,36 @@
 #include <MulNXExtensions/MiniMap/MiniMap.hpp>
 #include <MulNXExtensions/CS2/MulNXCS2Ext.hpp>
 #include <MulNXExtensions/VirtualUser/VirtualUser.hpp>
+#include <MulNXExtensions/MulNXController/MulNXController.hpp>
 #include <MulNX/ThirdParty/All_ImGui.hpp>
 
 #include <Windows.h>
 
-static void MainDraw(MulNXSingleUIContext* This) {
+static void MainDraw(MulNXUINode* ThisNode) {
     ImGui::Begin("主窗口");
     if (ImGui::BeginTabBar("主标签页集")) {
         if (ImGui::BeginTabItem("Demo助手")) {
-            This->CallSingleUIContext("DemoHelper");
+            ThisNode->CallUINode("DemoHelper");
             ImGui::EndTabItem();
         }
         if (ImGui::BeginTabItem("游戏设置")) {
-            This->CallSingleUIContext("GameSettings");
+            ThisNode->CallUINode("GameSettings");
             ImGui::EndTabItem();
         }
         if (ImGui::BeginTabItem("总控台")) {
-            This->CallSingleUIContext("Control");
+            ThisNode->CallUINode("ConsoleManager");
             ImGui::EndTabItem();
         }
         if (ImGui::BeginTabItem("调试")) {
-            This->CallSingleUIContext("Debug");
+            ThisNode->CallUINode("Debug");
             ImGui::EndTabItem();
         }
         if (ImGui::BeginTabItem("摄像机系统")) {
-            This->CallSingleUIContext("CameraSystem");
+            ThisNode->CallUINode("CameraSystem");
+            ImGui::EndTabItem();
+        }
+        if (ImGui::BeginTabItem("MulNXController")) {
+            ThisNode->CallUINode("MulNXController");
             ImGui::EndTabItem();
         }
         ImGui::EndTabBar();
@@ -95,7 +100,8 @@ DWORD MulNX_CS2_Start(void*) {
         .CreateBack<GameCfgManager>("GameCfgManager", 206)// 游戏配置管理模块
         .CreateBack<DemoHelper>("DemoHelper", 207)// Demo辅助模块
         .CreateBack<GameSettingsManager>("GameSettingsManager", 208)// 游戏设置管理模块
-        .CreateBack<ConsoleManager>("ConsoleManager", 209);// 控制台管理模块
+        .CreateBack<ConsoleManager>("ConsoleManager", 209)// 控制台管理模块
+        .CreateBack<MulNXController>("MulNXController", 210);// MulNX控制器模块
 
     // 注册所有模块
     Core->ModuleManager()->RegisteModules(std::move(Modules));

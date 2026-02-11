@@ -367,7 +367,7 @@ void SolutionManager::Solution_ShowAll() {
         return;
     }
 }
-const std::vector<std::string>& SolutionManager::Solution_GetNames()const {
+const std::vector<std::string> SolutionManager::Solution_GetNames()const {
     std::vector<std::string> SolutionsNames;
     if (this->Solutions.empty())return SolutionsNames;
     SolutionsNames.reserve(this->Solutions.size());

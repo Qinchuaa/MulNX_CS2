@@ -30,11 +30,11 @@ bool GameSettingsManager::Init() {
 
 	MulNX::Message Msg(MulNX::MsgType::UISystem_ModulePush);
 
-	MulNX::Base::any_unique_ptr SingleContext = MulNXSingleUIContext::Create(this);
-	MulNXSingleUIContext* SContextPtr = SingleContext.get<MulNXSingleUIContext>();
+	MulNX::Base::any_unique_ptr SingleContext = MulNXUINode::Create(this);
+	MulNXUINode* SContextPtr = SingleContext.get<MulNXUINode>();
 	SContextPtr->name = "GameSettings";
 	//->pBuffer = MulNX::Base::make_any_unique<TripleBuffer<DemoHelperPrivateData>>();
-	SContextPtr->MyFunc = [this](MulNXSingleUIContext* This)->void {
+	SContextPtr->MyFunc = [this](MulNXUINode* This)->void {
 		MulNX::AutoChild Child(this, "GameSettingsManager");
 		if (ImGui::Button("一键修复数字切人bug")) {
 			this->AL3D->ExecuteCommand("unbind 1");

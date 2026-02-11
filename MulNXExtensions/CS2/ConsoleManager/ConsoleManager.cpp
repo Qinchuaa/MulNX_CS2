@@ -10,7 +10,18 @@
 #include <MulNX/ThirdParty/All_ImGui.hpp>
 
 bool ConsoleManager::Init() {
-	return true;
+    auto SingleContext = MulNXUINode::Create(this);
+    auto* SContextPtr = SingleContext.get<MulNXUINode>();
+    SContextPtr->name = "ConsoleManager";
+    SContextPtr->MyFunc = [this](MulNXUINode* This)->void {
+        this->Menu();
+    };
+
+    MulNX::Message Msg(MulNX::MsgType::UISystem_ModulePush);
+    Msg.Handle = this->Core->IHandleSystem().RegisteUnique(std::move(SingleContext));
+    this->IPublish(std::move(Msg));
+    
+    return true;
 }
 
 void ConsoleManager::Menu() {
@@ -79,65 +90,6 @@ void ConsoleManager::Menu() {
 			this->Core->ModuleManager()->FindModule("MiniMap")->CloseWindow();
 		}
 	}
-
-
-	//static bool aimbot = false;
-	//ImGui::Checkbox("自瞄", &this->Core->CS().AimbotEnable);
-
-	/*ImGui::InputInt("要瞄准的实体索引", &this->Core->CS().AimTargetIndex);
-	constexpr KeyCheckPack pack1 = { VK_F1,true,false,false,2 };
-	constexpr KeyCheckPack pack2 = { VK_F2,true,false,false,2 };
-	constexpr KeyCheckPack pack3 = { VK_F3,true,false,false,2 };
-	constexpr KeyCheckPack pack4 = { VK_F4,true,false,false,2 };
-	constexpr KeyCheckPack pack5 = { VK_F5,true,false,false,2 };
-	constexpr KeyCheckPack pack6 = { VK_F6,true,false,false,2 };
-	constexpr KeyCheckPack pack7 = { VK_F7,true,false,false,2 };
-	constexpr KeyCheckPack pack8 = { VK_F8,true,false,false,2 };
-	constexpr KeyCheckPack pack9 = { VK_F9,true,false,false,2 };
-	constexpr KeyCheckPack pack10 = { VK_F10,true,false,false,2 };
-
-	if (this->Core->KT().IsKeyPressed(VK_RBUTTON)) {
-		this->Core->CS().AimbotMain();
-		if (this->Core->KT().CheckWithPack(pack1)) {
-			this->Core->CS().AimTargetIndex = 1;
-		}
-
-		if (this->Core->KT().CheckWithPack(pack2)) {
-			this->Core->CS().AimTargetIndex = 2;
-		}
-
-		if (this->Core->KT().CheckWithPack(pack3)) {
-			this->Core->CS().AimTargetIndex = 3;
-		}
-
-		if (this->Core->KT().CheckWithPack(pack4)) {
-			this->Core->CS().AimTargetIndex = 4;
-		}
-
-		if (this->Core->KT().CheckWithPack(pack5)) {
-			this->Core->CS().AimTargetIndex = 5;
-		}
-
-		if (this->Core->KT().CheckWithPack(pack6)) {
-			this->Core->CS().AimTargetIndex = 6;
-		}
-
-		if (this->Core->KT().CheckWithPack(pack7)) {
-			this->Core->CS().AimTargetIndex = 7;
-		}
-
-		if (this->Core->KT().CheckWithPack(pack8)) {
-			this->Core->CS().AimTargetIndex = 8;
-		}
-
-		if (this->Core->KT().CheckWithPack(pack9)) {
-			this->Core->CS().AimTargetIndex = 9;
-		}
-
-		if (this->Core->KT().CheckWithPack(pack10)) {
-			this->Core->CS().AimTargetIndex = 10;
-		}
-	}*/
 
 	return;
 }

@@ -38,12 +38,6 @@ bool CSController::Init() {
     this->Catch();
     this->EntryCreateThread();// 包含线程创建
     this->SetMyThreadDelta(3);
-    //获取全局变量
-    if (!MulNX::Base::Memory::Read(this->Modules.client + cs2_dumper::offsets::client_dll::dwGlobalVars, this->CSGlobalVars.Address)) {
-        throw(111);
-    }
-    this->CSGlobalVars.Update();
-    this->AL3D->SetCurrentTimePointer(this->CSGlobalVars.GetCurrentTimePointer());
     this->AL3D->SetCmdInterface([this](const char* command) {
         this->Execute(command);
         return true;
@@ -99,8 +93,6 @@ int CSController::BasicUpdate() {
     if (int result = this->LocalPlayer.Update()) {
         return result;
     }
-    this->CSGlobalVars.Update();
-    //this->Core->IAbstractLayer3D().PushTime(this->Local.GlobalVars.CurrentTime);
 
     static int OldRoundStartCount = this->CSGameRules.m_nRoundStartCount;
     if (OldRoundStartCount != this->CSGameRules.m_nRoundStartCount) {

@@ -7,7 +7,7 @@
 #include "../Systems/IPCer/IPCer.hpp"
 #include "../Systems/KeyTracker/KeyTracker.hpp"
 #include "../Systems/MessageManager/MessageManager.hpp"
-#include "../Systems/MulNXiGlobalVars/MulNXiGlobalVars.hpp"
+#include "../Systems/MulNXGlobalVars/MulNXGlobalVars.hpp"
 #include "../Systems/MulNXUISystem/MulNXUISystem.hpp"
 #include "../Systems/AbstractLayer3D/AbstractLayer3D.hpp"
 

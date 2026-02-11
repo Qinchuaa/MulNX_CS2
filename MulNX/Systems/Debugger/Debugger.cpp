@@ -1,7 +1,7 @@
 #include "Debugger.hpp"
 
 #include "../KeyTracker/KeyTracker.hpp"
-#include "../MulNXiGlobalVars/MulNXiGlobalVars.hpp"
+#include "../MulNXGlobalVars/MulNXGlobalVars.hpp"
 
 #include "../../Core/Cores.hpp"
 #include "../../Systems/Systems.hpp"

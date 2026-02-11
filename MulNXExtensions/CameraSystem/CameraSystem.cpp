@@ -21,6 +21,10 @@ bool CameraSystem::Init() {
     this->WManager.EntryInit(this->Core);
     this->WManager.InjectDependence(&this->EManager, &this->SManager, &this->PManager);
 
+    MulNXUINode::CreateAndRegiste(this, "CameraSystem", [this](MulNXUINode* This)->void {
+        this->Menu();
+        });
+
     return true;
 }
 void CameraSystem::Menu() {

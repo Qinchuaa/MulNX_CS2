@@ -22,7 +22,7 @@ namespace MulNX {
 		
 		int Render()override;
 
-		MulNXSingleUIContext* GetSingleContext(const MulNXHandle& hContext)override {
+		MulNXUINode* GetSingleContext(const MulNXHandle& hContext)override {
 			return this->UIContext.GetSingleContext(hContext);
 		}
 

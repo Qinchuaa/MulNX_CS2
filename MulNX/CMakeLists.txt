@@ -22,10 +22,10 @@ add_library(MulNX
     "Systems/MessageManager/MulNXMessage/MulNXMessage.cpp"
     "Systems/MessageManager/MessageChannel/MessageChannel.cpp"
     "Systems/MessageManager/MessageManager.cpp"
-    "Systems/MulNXiGlobalVars/MulNXiGlobalVars.cpp"
+    "Systems/MulNXGlobalVars/MulNXGlobalVars.cpp"
     "Systems/MulNXUISystem/MulNXUISystem.cpp"
     "Systems/MulNXUISystem/MulNXUIContext/MulNXUIContext.cpp"
-    "Systems/MulNXUISystem/MulNXUIContext/MulNXSingleUIContext/MulNXSingleUIContext.cpp"
+    "Systems/MulNXUISystem/MulNXUIContext/MulNXUINode/MulNXUINode.cpp"
 
     "Systems/Systems.cpp"
 

@@ -137,10 +137,10 @@ namespace MulNX {
 	// 自动子窗口管理类，一般在Menu函数中使用
 	class AutoChild {
 	private:
-		ModuleBase* Module = nullptr;
+		const ModuleBase* Module = nullptr;
 	public:
 		// 构造时开始子窗口
-		AutoChild(ModuleBase* Module, const std::string& Name, const float HeightRatio = 1.0f, const float WidthRatio = 1.0f);
+		AutoChild(const ModuleBase* Module, const std::string& Name, const float HeightRatio = 1.0f, const float WidthRatio = 1.0f);
 		// 析构时结束子窗口
 		~AutoChild();
 		// 禁止拷贝

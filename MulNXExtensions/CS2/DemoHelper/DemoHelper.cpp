@@ -11,7 +11,7 @@ struct DemoHelperPrivateData {
 
 static std::atomic<int> ClickCount = 0;
 
-static void MyDraw(MulNXSingleUIContext* This) {
+static void MyDraw(MulNXUINode* This) {
 	auto ReadData = This->GetRead<DemoHelperPrivateData>();
 	auto ThisData = ReadData.get();
 	ImGui::Text("第一个异步模块");
@@ -46,8 +46,8 @@ bool DemoHelper::Init() {
 	(*this->MainMsgChannel)
 		.Subscribe(MulNX::MsgType::UISystem_UICommand);
 
-	auto SingleContext = MulNXSingleUIContext::Create(this);
-	auto* SContextPtr = SingleContext.get<MulNXSingleUIContext>();	
+	auto SingleContext = MulNXUINode::Create(this);
+	auto* SContextPtr = SingleContext.get<MulNXUINode>();	
 	SContextPtr->name = "DemoHelper";
 	SContextPtr->pBuffer = MulNX::Base::make_any_unique<MulNX::Base::TripleBuffer<DemoHelperPrivateData>>();
 	SContextPtr->MyFunc = MyDraw;
