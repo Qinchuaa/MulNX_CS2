@@ -14,17 +14,17 @@ public:
 
 class SoundSettings {
 public:
-    bool snd_mute_losefocus = false;//游戏窗口失去焦点时静音
+    bool* snd_mute_losefocus = nullptr;//游戏窗口失去焦点时静音
 
-    float snd_menumusic_volume = 0; //主菜单音量
-    float snd_roundstart_volume = 0; //回合开始音量
-    float snd_roundaction_volume = 0; //回合开始行动音量
-    float snd_roundend_volume = 0; //回合结束音量
-    float snd_mvp_volume = 0; //MVP音量
-    float snd_mapobjective_volume = 0; //炸弹/人质音量
-    float snd_tensecondwarning_volume = 0; //十秒警告音量(0.04就是游戏设置中的20)
-    float snd_deathcamera_volume = 0; //死亡视角音量
-    bool snd_mute_mvp_music_live_players = true; //当双方团队成员都存活时关闭MVP音乐(0--否，1--是)
+    float* snd_menumusic_volume = nullptr; //主菜单音量
+    float* snd_roundstart_volume = nullptr; //回合开始音量
+    float* snd_roundaction_volume = nullptr; //回合开始行动音量
+    float* snd_roundend_volume = nullptr; //回合结束音量
+    float* snd_mvp_volume = nullptr; //MVP音量
+    float* snd_mapobjective_volume = nullptr; //炸弹/人质音量
+    float* snd_tensecondwarning_volume = nullptr; //十秒警告音量(0.04就是游戏设置中的20)
+    float* snd_deathcamera_volume = nullptr; //死亡视角音量
+    bool* snd_mute_mvp_music_live_players = nullptr; //当双方团队成员都存活时关闭MVP音乐(0--否，1--是)
 
     bool operator==(const SoundSettings&)const = default;
 };
@@ -80,7 +80,7 @@ public:
     //基类接口实现
 
     bool Init()override;
-
+    void Menu();
     void VirtualMain()override;
 
     void SettingGraphFloat(const char* Label, float* V, const float& min, const float& max);

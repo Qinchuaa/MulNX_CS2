@@ -63,30 +63,7 @@ void CSController::GetModules() {
     auto pFunc = reinterpret_cast<void* (*)(const char*, int*)>(GetProcAddress(hModule, "CreateInterface"));
     this->CvarSystem.Address = (uintptr_t)pFunc(InterfaceName, nullptr);
 
-    C_ConVar* m_yawPtr = nullptr;
-    m_yawPtr = this->CvarSystem.GetCvar("m_yaw");
-    std::vector<int> schemas;
-    for (int schema = 0;schema < 0x100;++schema) {
-        const float targetValue = 0.0165f;
-        bool valueIsRight = false;
-        auto checkValue = [&]()->bool {
-            float currentValue = *(float*)((uintptr_t)m_yawPtr + schema);
-            if (fabs(currentValue - targetValue) < 0.001f) {
-                valueIsRight = true;
-            }
-            return true;// 无崩溃
-            };
-        MulNX::Base::UnsafeFunc(checkValue);
-        if (valueIsRight) {
-            schemas.push_back(schema);
-        }
-    }
-
     this->LocalPlayer.pGlobalFOV = this->CvarSystem.GetCvar("fov_cs_debug")->GetPtr<float>();
-    bool* sv_cheats = this->CvarSystem.GetCvar("sv_cheats")->GetPtr<bool>();
-    if (sv_cheats) {
-        *sv_cheats = true;
-    }
 }
 
 void CSController::Catch() {
@@ -272,3 +249,22 @@ C_CSGameRules CSController::GetCSGameRules() {
     std::shared_lock lock(this->CSGameRules.GameRulesMtx);
     return this->CSGameRules;
 }
+
+// C_ConVar* m_yawPtr = nullptr;
+// m_yawPtr = this->CvarSystem.GetCvar("m_yaw");
+// std::vector<int> schemas;
+// for (int schema = 0;schema < 0x100;++schema) {
+//     const float targetValue = 0.0165f;
+//     bool valueIsRight = false;
+//     auto checkValue = [&]()->bool {
+//         float currentValue = *(float*)((uintptr_t)m_yawPtr + schema);
+//         if (fabs(currentValue - targetValue) < 0.001f) {
+//             valueIsRight = true;
+//         }
+//         return true;// 无崩溃
+//         };
+//     MulNX::Base::UnsafeFunc(checkValue);
+//     if (valueIsRight) {
+//         schemas.push_back(schema);
+//     }
+// }

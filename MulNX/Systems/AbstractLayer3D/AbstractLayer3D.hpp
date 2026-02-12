@@ -29,7 +29,7 @@ namespace MulNX {
 		//阶段时长
 		float PhaseDuration = 0.0f;
 
-		std::atomic<uintptr_t> pCurrentTime = 0;
+		uintptr_t pCurrentTime = 0;
 
 		//当前屏幕宽高，默认1080P
 		int CurrentWindowWidth = 1920;

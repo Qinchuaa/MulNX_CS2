@@ -43,8 +43,6 @@ namespace MulNX {
 		private:
 			// 存储初始化优先级与模块句柄的映射
 			std::map<int, MulNXHandle>InitPriority;
-			
-			std::atomic<size_t> Index = 0;
 			// 存储已加载模块的映射
 			std::unordered_map<MulNXHandle, std::unique_ptr<MulNX::ModuleBase>> Modules;
 			// 存储从字符串到模块句柄的映射，便于按名称查找
