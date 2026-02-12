@@ -13,7 +13,5 @@ public:
     bool Init()override;
     void VirtualMain()override;
 
-    void Menu()override;
-
-    void ShowFilePath();
+    void Menu();
 };

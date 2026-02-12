@@ -49,7 +49,6 @@ bool ModuleManager::RegisteModule(std::unique_ptr<MulNX::ModuleBase>&& Module, s
 	MulNXHandle hModule = Module->HModule;
 	this->Modules[hModule] = std::move(Module);
 	this->NameToHandleMap[Name] = hModule;
-	this->HandleToNameMap[hModule] = std::move(Name);
 	this->InitPriority[Priority] = hModule;
 	return true;
 }

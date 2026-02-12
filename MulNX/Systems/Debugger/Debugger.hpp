@@ -29,7 +29,7 @@ namespace MulNX {
 		bool Init()override;
 		void VirtualMain()override;
 		void ProcessMsg(MulNX::Message* Msg)override;
-		void Menu()override;
+		void Menu();
 		void Windows()override;
 
 		//调试器接口实现

@@ -28,12 +28,6 @@ void ConsoleManager::Menu() {
 	MulNX::AutoChild Child(this,"ConsoleManager", 0.5f);// 占据半个窗口高度，另一半给VirtualUser
 
 	if (ImGui::CollapsingHeader("调试器控制")) {
-		// 调试功能设置
-		// 调试模式下提供更多功能，但可能影响性能和稳定性
-		static bool debugMode = this->GlobalVars->DebugMode;
-		if (ImGui::Checkbox("调试模式（Debug Mode），提供更多功能，但可能影响性能和稳定性", &debugMode)) {
-			this->GlobalVars->DebugMode = debugMode;
-		}
 		if (ImGui::Button("解限所有CS2控制台变量")) {
 			int Count = 0;
 			this->Core->ModuleManager()->FindModule<CSController>("CSController")->GetCvarSystem().UnlockHiddenCVars(Count);
@@ -57,17 +51,6 @@ void ConsoleManager::Menu() {
 				this->Core->ModuleManager()->FindModule<CSController>("CSController")->GetCvarSystem().GetNextCvarIterator(idx);
 			}
 			this->IDebugger->AddInfo("---------------------------------------------------------------------------------");
-		}
-	}
-
-	if (ImGui::CollapsingHeader("初始化控制")) {
-		if (ImGui::Button("初始化IPCer")) {
-			this->IDebugger->AddInfo("正在尝试初始化IPCer");
-			this->Core->IPCer().Init();
-		}
-		ImGui::SameLine();
-		if (ImGui::Button("查看IPCer结果")) {
-			this->ShowFilePath();
 		}
 	}
 
@@ -96,15 +79,4 @@ void ConsoleManager::Menu() {
 
 void ConsoleManager::VirtualMain() {
 
-}
-
-void ConsoleManager::ShowFilePath() {
-	if (this->Core->IPCer().Inited) {
-		this->IDebugger->AddInfo("---------------------------------------------------------------------------------");
-		this->IDebugger->AddInfo(this->Core->IPCer().GetAllPathMsg());
-		this->IDebugger->AddInfo("---------------------------------------------------------------------------------");
-	}
-	else {
-		this->IDebugger->AddError("IPCer尚未初始化成功！");
-	}
 }

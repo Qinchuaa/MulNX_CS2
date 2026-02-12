@@ -6,8 +6,12 @@ namespace MulNX {
 	// 模块基类
 	class ModuleBase {
 		friend MulNX::Core::Core;
-	protected:
-		// 核心管理器指针
+    protected:
+        //标记是否已经完成初始化，未完成前不允许执行主循环等操作
+        bool Inited = false;
+        //模块名称，唯一标识
+        std::string Name;
+        // 核心管理器指针
 		MulNX::Core::Core* Core;
 		// 全局变量指针
 		MulNX::GlobalVars* GlobalVars = nullptr;
@@ -18,8 +22,12 @@ namespace MulNX {
 		MulNX::IMessageChannel* MainMsgChannel = nullptr;
 	public:
 		// 当前消息指针
-		std::atomic<MulNX::Message*> CurrentMsg = nullptr;
-	public:
+        std::atomic<MulNX::Message*> CurrentMsg = nullptr;
+        // 是否初始化
+        bool IsInited()const {
+            return this->Inited;
+        }
+    public:
 		// 组件句柄
 		MulNXHandle HModule;
 		// 调试器指针
@@ -75,8 +83,6 @@ namespace MulNX {
 		// 消息处理函数，只需处理即可，消息会由入口点释放
 		virtual void ProcessMsg(MulNX::Message* Msg);
 
-		// 菜单绘制
-		virtual void Menu();
 		// 窗口绘制
 		virtual void Windows();
 
@@ -89,8 +95,6 @@ namespace MulNX {
 		void BaseVirtualMain();
 		// 基础消息处理
 		void BaseProcessMsg();
-		// 基础菜单
-		void BaseMenu();
 		// 基础窗口
 		void BaseWindows();
 
@@ -105,9 +109,6 @@ namespace MulNX {
 	protected:
 		// 消息处理入口
 		void EntryProcessMsg();
-	private:
-		// 菜单入口
-		void EntryMenu();
 	public:
 		// 窗口入口
 		void EntryWindows();

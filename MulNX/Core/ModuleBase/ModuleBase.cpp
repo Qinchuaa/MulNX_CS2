@@ -40,9 +40,6 @@ void MulNX::ModuleBase::ThreadMain() {
 void MulNX::ModuleBase::ProcessMsg(MulNX::Message* Msg) {
     return;
 }
-void MulNX::ModuleBase::Menu() {
-    return;
-}
 void MulNX::ModuleBase::Windows() {
     return;
 }
@@ -91,9 +88,6 @@ void MulNX::ModuleBase::BaseProcessMsg() {
             this->ProcessMsg(&Msg);
         }
     }
-    return;
-}
-void MulNX::ModuleBase::BaseMenu() {
     return;
 }
 void MulNX::ModuleBase::BaseWindows() {
@@ -151,10 +145,6 @@ void MulNX::ModuleBase::EntryProcessMsg() {
         this->CurrentMsg.store(nullptr);
         this->IMsgManager->Release();
     }
-}
-void MulNX::ModuleBase::EntryMenu() {
-    this->BaseMenu();
-    this->Menu();
 }
 void MulNX::ModuleBase::EntryWindows() {
     this->BaseWindows();

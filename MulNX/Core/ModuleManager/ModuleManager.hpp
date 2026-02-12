@@ -49,8 +49,6 @@ namespace MulNX {
 			std::unordered_map<MulNXHandle, std::unique_ptr<MulNX::ModuleBase>> Modules;
 			// 存储从字符串到模块句柄的映射，便于按名称查找
 			std::unordered_map<std::string, MulNXHandle> NameToHandleMap;
-			// 存储从模块句柄到字符串的映射，便于按句柄查找名称
-			std::unordered_map<MulNXHandle, std::string> HandleToNameMap;
 		public:
 			bool Init()override;
 			void ProcessMsg(MulNX::Message* Msg)override;

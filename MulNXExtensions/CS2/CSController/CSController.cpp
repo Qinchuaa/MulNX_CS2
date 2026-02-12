@@ -21,8 +21,6 @@ void CSController::Execute(const char* cmd) {
     return;
 }
 
-
-
 void CSController::InitInterface() {
     const char* ModuleName = "engine2.dll";
     const char* InterfaceName = "Source2EngineToClient001";
@@ -70,19 +68,20 @@ void CSController::GetModules() {
 }
 
 void CSController::Catch() {
-    //本地工作
-    //获取本地视图投影矩阵
+    // 本地工作
+    // 获取本地视图投影矩阵
     this->LocalPlayer.ViewMatrix = reinterpret_cast<float*>(this->Modules.client + cs2_dumper::offsets::client_dll::dwViewMatrix);
-    //获取本地欧拉角
+    // 获取本地欧拉角
     this->LocalPlayer.ViewAngles = reinterpret_cast<DirectX::XMFLOAT3*>(this->Modules.client + cs2_dumper::offsets::client_dll::dwViewAngles);
 
     return;
 }
 int CSController::BasicUpdate() {
-    //获取EntityList
+    // 获取EntityList
     if (!MulNX::Base::Memory::Read(this->Modules.client + cs2_dumper::offsets::client_dll::dwEntityList, this->EntityList.Address)) {
         return -1;
     }
+    // 获取CS2全局变量
     if (!MulNX::Base::Memory::Read(this->Modules.client + cs2_dumper::offsets::client_dll::dwGlobalVars, this->CSGlobalVars.Address)) {
         return -2;
     }
@@ -136,10 +135,8 @@ int CSController::EntityListUpdate() {
     return 0;
 }
 int CSController::GameRulesUpdate() {
-
     MulNX::Base::Memory::Read(this->Modules.client + cs2_dumper::offsets::client_dll::dwGameRules, this->CSGameRules.Address);
     this->CSGameRules.Update();
-
     return 0;
 }
 
@@ -148,7 +145,7 @@ void CSController::ThreadMain() {
     return;
 }
 int CSController::TryGetMsg() {
-    int Result;
+    int Result = 0;
     Result = this->BasicUpdate();
     if (Result) {
         this->GlobalVars->InGamePlaying = false;
@@ -234,11 +231,6 @@ bool CSController::CameraSystemIOOverride(const CameraSystemIO* const IO) {
 
     return true;
 }
-
-float CSController::CSGetCurrentTime() {
-    return this->CurrentTime;
-}
-
 
 void CSController::HandleAimAtEntity(int AimTargetIndexInMap) {
     DirectX::XMFLOAT3 LocalEyePos = this->LocalPlayer.Entity.Pawn.GetEyePos();

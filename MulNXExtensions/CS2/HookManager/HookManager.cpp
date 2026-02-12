@@ -137,11 +137,6 @@ DWORD HookManager::CreateHook() {
 	}
 	return 0;
 }
-bool HookManager::InitUIStyle() {
-	ImGuiStyle& style = ImGui::GetStyle();
-
-	return true;
-}
 void HookManager::d3dInit(IDXGISwapChain* _this) {
 	if (!this->d3dInited) {
 		_this->GetDevice(__uuidof(ID3D11Device), (void**)&this->pd3dDevice);
@@ -184,7 +179,6 @@ void HookManager::d3dInit(IDXGISwapChain* _this) {
 			this->imguiIniPathString = MulNX::Base::CharUtility::FilePathToString(this->imguiIniPath);
 			io.IniFilename = this->imguiIniPathString.c_str();
 
-			this->InitUIStyle();
 			this->ImGuiInited = true;
 		}
 
@@ -202,7 +196,7 @@ LRESULT __stdcall HookManager::EntryMyWndProc(HWND hwnd, UINT uMsg, WPARAM wPara
 
 
 
-//ImGui窗口处理函数导入
+// ImGui窗口处理函数导入
 extern LRESULT ImGui_ImplWin32_WndProcHandler(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 LRESULT __stdcall HookManager::MyWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 	std::unique_lock lock(this->Core->IUISystem().UIMtx);
@@ -211,11 +205,11 @@ LRESULT __stdcall HookManager::MyWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LP
 	}
 
 	ImGuiIO& io = ImGui::GetIO();
-	//鼠标：当ImGui想要捕获时总是拦截
+	// 鼠标：当ImGui想要捕获时总是拦截
 	if (io.WantCaptureMouse && MulNX::Base::WIN32Msg::IsMouseMessage(uMsg)) {
 		return true;
 	}
-	//键盘：只在WantTextInput为true时拦截（表示输入框激活）
+	// 键盘：只在WantTextInput为true时拦截（表示输入框激活）
 	else if (io.WantTextInput && MulNX::Base::WIN32Msg::IsKeyboardMessage(uMsg)) {
 		return true;
 	}

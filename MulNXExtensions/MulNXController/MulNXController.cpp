@@ -11,6 +11,12 @@ bool MulNXController::Init() {
     auto* pSC = SC.get<MulNXUINode>();
     pSC->name = "MulNXController";
     pSC->MyFunc = [this](MulNXUINode* This)->void {
+        // 调试功能设置
+        // 调试模式下提供更多功能，但可能影响性能和稳定性
+        static bool debugMode = this->GlobalVars->DebugMode;
+        if (ImGui::Checkbox("调试模式（Debug Mode），提供更多功能，但可能影响性能和稳定性", &debugMode)) {
+            this->GlobalVars->DebugMode = debugMode;
+        }
         if (ImGui::Button("打开调试器")) {
             this->IDebugger->OpenWindow();
         }
@@ -34,6 +40,23 @@ bool MulNXController::Init() {
             MulNX::Message Msg(MulNX::MsgType::ModuleManager_RequestModuleInfo);
             Msg.pMsgChannel = this->MainMsgChannel;
             this->IPublish(std::move(Msg));
+        }
+        if (ImGui::CollapsingHeader("初始化控制")) {
+            if (ImGui::Button("初始化IPCer")) {
+                this->IDebugger->AddInfo("正在尝试初始化IPCer");
+                this->Core->IPCer().Init();
+            }
+            ImGui::SameLine();
+            if (ImGui::Button("查看IPCer结果")) {
+                if (this->Core->IPCer().Inited) {
+                    this->IDebugger->AddInfo("---------------------------------------------------------------------------------");
+                    this->IDebugger->AddInfo(this->Core->IPCer().GetAllPathMsg());
+                    this->IDebugger->AddInfo("---------------------------------------------------------------------------------");
+                }
+                else {
+                    this->IDebugger->AddError("IPCer尚未初始化成功！");
+                }
+            }
         }
         };
     MulNX::Message Msg(MulNX::MsgType::UISystem_ModulePush);

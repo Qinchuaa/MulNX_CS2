@@ -43,7 +43,6 @@ public:
     bool ImGuiInited = false;
     std::filesystem::path imguiIniPath;
     std::string imguiIniPathString;
-    bool InitUIStyle();
     bool UIStyleInited()const { return this->UIInited; }
 private:
     void d3dInit(IDXGISwapChain* _this);

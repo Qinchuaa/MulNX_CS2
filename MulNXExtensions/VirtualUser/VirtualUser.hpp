@@ -17,5 +17,5 @@ public:
     void VirtualMain()override final;
     void ProcessMsg(MulNX::Message* Msg)override final;
 
-    void Menu()override final;
+    void Menu();
 };
