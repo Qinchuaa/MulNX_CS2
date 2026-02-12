@@ -1,6 +1,6 @@
-﻿#include"ConVarSystem.hpp"
+﻿#include "ConVarSystem.hpp"
 
-#include<string.h>
+#include <string.h>
 
 
 void* C_ConVarSystem::GetFirstCvarIterator(uint64_t& idx)const {
@@ -10,7 +10,9 @@ void* C_ConVarSystem::GetNextCvarIterator(uint64_t& idx)const {
 	return vmt::CallVirtual<void*>(13, this->Address, &idx, idx);
 }
 C_ConVar* C_ConVarSystem::GetCVarByIndex(uint64_t index)const {
-	return vmt::CallVirtual<C_ConVar*>(43, this->Address, index);
+    C_ConVar* pCvar = nullptr;
+    pCvar = vmt::CallVirtual<C_ConVar*>(43, this->Address, index);
+    return pCvar;
 }
 C_ConVar* C_ConVarSystem::GetCVarByName(const char* var_name)const {
 	uint64_t i = 0;

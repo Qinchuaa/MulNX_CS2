@@ -98,18 +98,11 @@ public:
     //char PAD2[0x1C]; // 0x34
     //CVValue_t value; // 0x50
 
-
-    template<typename T>
-    T GetValue() {
-        return *reinterpret_cast<T*>((uintptr_t)(this) + 0x50);
-    }
-    template<typename T>
-    void SetValue(T val) {
-        *reinterpret_cast<T*>((uintptr_t)(this) + 0x50) = val;
-    }
     template<typename T>
     T* GetPtr() {
-        return reinterpret_cast<T*>((uintptr_t)(this) + 0x50);
+        T* pValue = nullptr;
+        pValue = reinterpret_cast<T*>((uintptr_t)(this) + 88);
+        return pValue;
     }
 
     void Hide() {

@@ -6,7 +6,7 @@
 
 class ScreenSettings {
 public:
-    bool XRay = true;
+    int* spec_show_xray = nullptr;
     std::atomic<bool> ESPBox = false;
 
     bool operator==(const ScreenSettings&)const = default;

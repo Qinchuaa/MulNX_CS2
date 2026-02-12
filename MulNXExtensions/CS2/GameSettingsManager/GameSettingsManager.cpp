@@ -10,7 +10,9 @@ bool GameSettingsManager::Init() {
 	this->CS = this->Core->ModuleManager()->FindModule<CSController>("CSController");
 	C_ConVarSystem& CVarSystem = this->CS->GetCvarSystem();
 
-	this->dof.r_dof_override = CVarSystem.GetCvar("r_dof_override")->GetPtr<bool>();
+    this->GameSettings.ScreenSettings.spec_show_xray = CVarSystem.GetCvar("spec_show_xray")->GetPtr<int>();
+    
+    this->dof.r_dof_override = CVarSystem.GetCvar("r_dof_override")->GetPtr<bool>();
 	this->dof.r_dof_override_far_blurry = CVarSystem.GetCvar("r_dof_override_far_blurry")->GetPtr<float>();
 	this->dof.r_dof_override_far_crisp = CVarSystem.GetCvar("r_dof_override_far_crisp")->GetPtr<float>();
 	this->dof.r_dof_override_near_blurry = CVarSystem.GetCvar("r_dof_override_near_blurry")->GetPtr<float>();
@@ -83,7 +85,7 @@ bool GameSettingsManager::Init() {
 			}
 
 			if (ImGui::TreeNode("渲染设置")) {
-				ImGui::Checkbox("X光", &this->GameSettings.ScreenSettings.XRay);
+				ImGui::SliderInt("X光", this->GameSettings.ScreenSettings.spec_show_xray, 0, 100);
 				static bool bESP = this->GameSettings.ScreenSettings.ESPBox.load();
 				ImGui::Checkbox("方框透视", &bESP);
 				this->GameSettings.ScreenSettings.ESPBox = bESP;
