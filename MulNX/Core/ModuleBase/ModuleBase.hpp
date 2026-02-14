@@ -27,6 +27,13 @@ namespace MulNX {
         bool IsInited()const {
             return this->Inited;
         }
+        bool SetName(std::string&& Name){
+            this->Name = std::move(Name);
+            return true;
+        }
+        std::string GetName()const {
+            return this->Name;
+        }
     public:
 		// 组件句柄
 		MulNXHandle HModule;

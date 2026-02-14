@@ -179,7 +179,3 @@ MulNX::MessageManager::~MessageManager() {
 	this->SubscribeMap.clear();
 	return;
 }
-void MulNX::MessageManager::VirtualMain() {
-	
-	return;
-}

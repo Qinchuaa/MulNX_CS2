@@ -4,6 +4,7 @@ add_library(MulNX
     "Base/Math/Math.cpp"
     "Base/TripleBuffer/TripleBuffer.cpp"
     "Base/vmt/vmt.hpp"
+    "Base/MulNXHandle/MulNXHandle.cpp"
 
     "Base/Base.cpp"
 

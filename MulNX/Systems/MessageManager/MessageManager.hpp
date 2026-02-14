@@ -28,7 +28,6 @@ namespace MulNX {
         void ThreadMain()override;
         //返回true表示正在处理消息，false表示没有消息可处理
         bool NextMsg();
-        void VirtualMain()override;
 
         //接口实现：
 

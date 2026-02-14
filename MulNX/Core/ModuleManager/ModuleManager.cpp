@@ -45,22 +45,18 @@ bool ModuleManager::RegisteModule(std::unique_ptr<MulNX::ModuleBase>&& Module, s
 	std::unique_lock lock(this->MyThreadMutex);
 	if (!Module->HModule.IsValid()) {
 		Module->HModule = MulNXHandle::CreateHandle();
-	}
-	MulNXHandle hModule = Module->HModule;
-	this->Modules[hModule] = std::move(Module);
-	this->NameToHandleMap[Name] = hModule;
-	this->InitPriority[Priority] = hModule;
-	return true;
-}
-bool ModuleManager::RegisteModules(ModulePack&& ModulePack) {
-    bool Result = true;
-    for (auto& ModuleBuffer : ModulePack.Modules) {
-        Result &= this->RegisteModule(
-            std::move(ModuleBuffer.Module),
-            std::move(ModuleBuffer.Name),
-            ModuleBuffer.Priorty);
     }
-    return Result;
+    // 先保存模块句柄，因为后续需要使用
+    MulNXHandle hModule = Module->HModule;
+    // 再创建名称到句柄的映射
+    this->NameToHandleMap[Name] = hModule;
+    // 然后安全地移动Name到模块内部
+    Module->SetName(std::move(Name));
+    // 最后将模块保存到Modules中
+    this->Modules[hModule] = std::move(Module);
+    // 同时记录优先级
+    this->PriorityToHandleMap[Priority] = hModule;
+	return true;
 }
 MulNX::ModuleBase* ModuleManager::FindModule(const std::string& Name) {
 	std::shared_lock lock(this->MyThreadMutex);
@@ -79,8 +75,8 @@ MulNX::ModuleBase* ModuleManager::FindModule(const std::string& Name) {
 bool ModuleManager::PackedInit() {
 	std::shared_lock lock(this->MyThreadMutex);
     // 通过有序的初始化任务列表进行初始化，尽管Modules是无序的
-	for (auto& [Priority, HModule] : this->InitPriority) {
-		if (!this->Modules[HModule]->EntryInit(this->Core)) {
+	for (auto& [Priority, hModule] : this->PriorityToHandleMap) {
+		if (!this->Modules[hModule]->EntryInit(this->Core)) {
 			return false;
 		}
 	}
@@ -90,13 +86,13 @@ bool ModuleManager::PackedInit() {
 
 void ModuleManager::PackedVirtualMain() {
 	std::shared_lock lock(this->MyThreadMutex);
-	for (auto& Module : this->Modules) {
-		Module.second->EntryVirtualMain();
+    for (auto& [Priority, hModule] : this->PriorityToHandleMap) {
+		this->Modules[hModule]->EntryVirtualMain();
 	}
 }
 void ModuleManager::PackedWindows() {
 	std::shared_lock lock(this->MyThreadMutex);
-	for (auto& Module : this->Modules) {
-		Module.second->EntryWindows();
-	}
+    for (auto& [Priority, hModule] : this->PriorityToHandleMap) {
+        this->Modules[hModule]->EntryWindows();
+    }
 }

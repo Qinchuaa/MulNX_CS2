@@ -89,22 +89,18 @@ DWORD MulNX_CS2_Start(void*) {
 
     // 设置核心启动器
     Core->SetCoreStarter(std::move(Starter));
-    // 模块集合
-    MulNX::ModulePack Modules;
-    
-    Modules
-        .CreateBack<CameraSystem>("CameraSystem", 101)// 摄像机系统模块
-        .CreateBack<MiniMap>("MiniMap", 103)// 小地图模块
-        .CreateBack<VirtualUser>("VirtualUser", 104)// 虚拟用户模块
-        .CreateBack<CSController>("CSController", 201)// CS控制模块
-        .CreateBack<GameCfgManager>("GameCfgManager", 206)// 游戏配置管理模块
-        .CreateBack<DemoHelper>("DemoHelper", 207)// Demo辅助模块
-        .CreateBack<GameSettingsManager>("GameSettingsManager", 208)// 游戏设置管理模块
-        .CreateBack<ConsoleManager>("ConsoleManager", 209)// 控制台管理模块
-        .CreateBack<MulNXController>("MulNXController", 210);// MulNX控制器模块
 
     // 注册所有模块
-    Core->ModuleManager()->RegisteModules(std::move(Modules));
+    (*Core->ModuleManager())
+        .CreateModule<CameraSystem>("CameraSystem", 101)// 摄像机系统模块
+        .CreateModule<MiniMap>("MiniMap", 103)// 小地图模块
+        .CreateModule<VirtualUser>("VirtualUser", 104)// 虚拟用户模块
+        .CreateModule<CSController>("CSController", 201)// CS控制模块
+        .CreateModule<GameCfgManager>("GameCfgManager", 206)// 游戏配置管理模块
+        .CreateModule<DemoHelper>("DemoHelper", 207)// Demo辅助模块
+        .CreateModule<GameSettingsManager>("GameSettingsManager", 208)// 游戏设置管理模块
+        .CreateModule<ConsoleManager>("ConsoleManager", 209)// 控制台管理模块
+        .CreateModule<MulNXController>("MulNXController", 210);// MulNX控制器模块
 
     // 启动核心
     Core->Init();

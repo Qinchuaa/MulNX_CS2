@@ -229,7 +229,7 @@ bool ElementManager::Element_LoadFromXML_Pre(const std::filesystem::path& FullPa
 
     //创建基类指针
     std::shared_ptr<ElementBase> pElement = nullptr;
-    this->IDebugger->AddInfo("尝试进行分发，元素类型为 " + NewElementName + " ，文件路径：" + FullPath.string());
+    this->IDebugger->AddInfo("尝试进行分发，元素类型为 " + NewElementTypeString + " ，文件路径：" + FullPath.string());
     //分发到具体类型的加载函数
     switch (NewElementType) {
     case ElementType::FreeCameraPath:

@@ -56,13 +56,11 @@ void Core::VirtualMain() {
 	this->pImpl->GlobalVars.EntryVirtualMain();
 	this->pImpl->AL3D.EntryVirtualMain();
 	this->pImpl->Debugger.EntryVirtualMain();
-
 	// 包装的，所有的模块的VirtualMain
 	this->pImpl->ModuleManager.EntryVirtualMain();
-	this->pImpl->Debugger.EntryWindows();
-	
-	// 包装的，所有模块的窗口逻辑
-	this->pImpl->ModuleManager.EntryWindows();
+    // 包装的，所有模块的窗口逻辑
+    this->pImpl->Debugger.EntryWindows();
+    this->pImpl->ModuleManager.EntryWindows();
 
 	return;
 }
