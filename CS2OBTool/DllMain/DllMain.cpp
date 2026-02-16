@@ -71,6 +71,7 @@ DWORD MulNX_CS2_Start(void*) {
 
     // 创建核心启动器实例
     std::unique_ptr<MulNX::Core::CoreStarterBase> Starter = std::make_unique<HookManager>();
+    Starter->SetName("HookManager");
     // 设置初始化完成回调
     Starter->InitEndCall = [Core]() {
         MulNX::Core::CoreStarterBase* starter = Core->GetStarter();

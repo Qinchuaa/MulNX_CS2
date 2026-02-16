@@ -24,6 +24,14 @@ void MulNX::ModuleBase::CloseMyThread() {
     return;
 }
 
+bool MulNX::ModuleBase::SetName(std::string&& Name) {
+    this->ModuleName = std::move(Name);
+    return true;
+}
+std::string MulNX::ModuleBase::GetName()const {
+    return this->ModuleName;
+}
+
 //模块自用
 void MulNX::ModuleBase::SetMyThreadDelta(int Delta) {
     this->MyThreadDelta = Delta;

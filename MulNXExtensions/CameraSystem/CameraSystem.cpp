@@ -231,11 +231,11 @@ void CameraSystem::MenuSolution() {
         // 载入成功则清空输入框
         if (ImGui::Button("载入解决方案")) {
             if (this->SManager.Solution_LoadFromXML(LoadSolutionName, this->Core->IPCer().PathGet_CurrentSolutions())) {
-                this->IDebugger->AddSucc(("加载解决方案成功：" + LoadSolutionName).c_str());
+                this->ISys().LogSucc(("加载解决方案成功：" + LoadSolutionName).c_str());
                 LoadSolutionName.clear();
             }
             else {
-                this->IDebugger->AddError(("加载解决方案失败：" + LoadSolutionName).c_str());
+                this->ISys().LogError(("加载解决方案失败：" + LoadSolutionName).c_str());
             }
         }
     }
@@ -361,7 +361,7 @@ bool CameraSystem::CallSolution(const MulNX::Message& Msg) {
     }
 }
 bool CameraSystem::ShutDown() {
-    this->IDebugger->AddWarning("ShutDown被调用！");
+    this->ISys().LogWarning("ShutDown被调用！");
     this->EManager.Preview_Disable();
     this->SManager.Playing_Disable();
     return true;

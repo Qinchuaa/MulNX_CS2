@@ -13,18 +13,16 @@ public:
 	MulNX::Core::Core* Core = nullptr;
 	bool EnableErrorHandle = false;
 
-	//入口点字符串
+	// 入口点字符串
 	std::string EntryDraw{};
-	//由字符串映射到句柄
+	// 由字符串映射到句柄
 	std::unordered_map<std::string, MulNXHandle>CallMap{};
-	//这里存储所有句柄
-	std::vector<MulNXHandle>ContextOrder{};
-	//然后从句柄得到具体的单上下文
-	std::unordered_map<MulNXHandle, MulNX::Base::any_unique_ptr>ContextMap{};
-	
-	std::string next;
+	// 然后从句柄得到具体的UI节点
+	std::unordered_map<MulNXHandle, MulNX::Base::any_unique_ptr>UINodeMap{};
+	// 下一个要调用的UI节点名称
+	std::string Next;
 
 	void Draw();
-	void AddSingleContext(MulNXHandle hContext, MulNX::Base::any_unique_ptr SContext);
-	MulNXUINode* GetSingleContext(const MulNXHandle& hContext);
+    void AddUINode(MulNXHandle hUINode, MulNX::Base::any_unique_ptr UINode);
+    MulNXUINode* GetUINode(const MulNXHandle& hUINode);
 };

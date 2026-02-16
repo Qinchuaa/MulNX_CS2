@@ -65,11 +65,11 @@ void VirtualUser::VirtualMain() {
         bool AutoRunning = this->Running.load();
         if (AutoRunning) {
             this->Running.store(false);
-            this->IDebugger->AddWarning("自动化功能已关闭");
+            this->ISys().LogWarning("自动化功能已关闭");
         }
         else {
             this->Running.store(true);
-            this->IDebugger->AddWarning("自动化功能已开启");
+            this->ISys().LogWarning("自动化功能已开启");
         }
     }
     return;
@@ -79,13 +79,13 @@ void VirtualUser::ProcessMsg(MulNX::Message* Msg) {
     if (!this->Running)return;
     switch (Msg->Type) {
     case MulNX::MsgType::Game_NewRound: {
-        this->IDebugger->AddInfo("接收到新回合信息");
+        this->ISys().LogInfo("接收到新回合信息");
         this->CameraSystem->CallSolution(*Msg);
         break;
     }
     case MulNX::MsgType::CameraSystem_PlayingShutdown: {
         // 处理播放停止消息
-        this->IDebugger->AddInfo("接收到摄像机系统播放停止信息");
+        this->ISys().LogInfo("接收到摄像机系统播放停止信息");
         this->CameraSystem->ShutDown();
         break;
     }
@@ -95,7 +95,7 @@ void VirtualUser::ProcessMsg(MulNX::Message* Msg) {
     }
     case MulNX::MsgType::Core_Tick60: {
         this->CameraSystem->Save();
-        this->IDebugger->AddInfo("已触发自动保存（频率：每分钟）");
+        this->ISys().LogInfo("已触发自动保存（频率：每分钟）");
         break;
     }
 #ifdef _DEBUG

@@ -9,7 +9,7 @@ class DemoHelper final :public MulNX::ModuleBase {
 private:
     std::vector<float>Marks{};
     std::atomic<MulNX::Base::any_unique_ptr*>* ppUpdateData = nullptr;
-    MulNXHandle hContext{};
+    MulNXHandle hUINode{};
 public:
     DemoHelper() : ModuleBase() {};
 

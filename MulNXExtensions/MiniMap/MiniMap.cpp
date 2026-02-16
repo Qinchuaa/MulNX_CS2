@@ -117,7 +117,7 @@ void MiniMap::Windows() {
                 this->LastClickedPlayer = i;
                 std::ostringstream oss;
                 oss << "点击玩家: " << i << " 位置: (" << Player.Position.x << ", " << Player.Position.y << ", " << Player.Position.z << ")";
-                this->IDebugger->AddInfo(oss.str().c_str());
+                this->ISys().LogInfo(oss.str().c_str());
                 MulNX::Message ClickMsg(MulNX::MsgType::Command_SpecPlayer);
                 ClickMsg.ParamInt = i;
                 this->IPublish(std::move(ClickMsg));

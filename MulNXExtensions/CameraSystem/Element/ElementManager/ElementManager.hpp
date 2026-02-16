@@ -100,11 +100,11 @@ public:
     bool Element_Create(const std::string& Name) {
         // 检查是否已存在同名元素
         if (this->Element_Get<ElementBase>(Name)) {
-            this->IDebugger->AddError("元素名已占用！ 元素名：" + Name);
+            this->ISys().LogError("元素名已占用！ 元素名：" + Name);
             return false;
         }
         //输出成功信息
-        this->IDebugger->AddSucc("成功创建元素！  元素名：" + Name);
+        this->ISys().LogSucc("成功创建元素！  元素名：" + Name);
         //创建指针
         std::shared_ptr<T> Elem = std::make_shared<T>(std::move(Name));
         //添加进Elements
@@ -127,7 +127,7 @@ public:
     //展示所有元素信息（编号、名称）到调试窗口
     void Element_ShowAll();
     //展示某个元素的详细信息到调试窗口
-    void Element_ShowMsgToDebugMenu(const std::shared_ptr<ElementBase> element)const;
+    void Element_ShowMsgToDebugMenu(const std::shared_ptr<ElementBase> element);
     //获取元素名称容器
     std::vector<std::string> Element_GetNames()const;
 

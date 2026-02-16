@@ -302,13 +302,17 @@ namespace MulNX {
         };
 
         template<typename T, typename... Args>
-        any_unique_ptr make_any_unique(Args&&... args) {
-            return any_unique_ptr(new detail::any_derived<T>(std::forward<Args>(args)...));
+        std::pair<any_unique_ptr, T*> make_any_unique(Args&&... args) {
+            any_unique_ptr aup(new detail::any_derived<T>(std::forward<Args>(args)...));
+            T* p = aup.get<T>();
+            return std::make_pair(std::move(aup), p);
         }
 
         template<typename T, typename... Args>
-        any_shared_ptr make_any_shared(Args&&... args) {
-            return any_shared_ptr(new detail::any_derived<T>(std::forward<Args>(args)...));
+        std::pair<any_shared_ptr, T*> make_any_shared(Args&&... args) {
+            any_shared_ptr asp(new detail::any_derived<T>(std::forward<Args>(args)...));
+            T* p = asp.get<T>();
+            return std::make_pair(std::move(asp), p);
         }
     }
 }

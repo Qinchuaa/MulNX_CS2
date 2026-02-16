@@ -25,10 +25,10 @@ ModuleManager* Core::ModuleManager() {
 
 // 获取子模块的接口实现
 
-MulNX::IHandleSystem&				Core::IHandleSystem() { return this->pImpl->HandleSystem; }
-MulNX::IUISystem&					Core::IUISystem() { return this->pImpl->UISystem; }
-MulNX::IPCer&						Core::IPCer() { return this->pImpl->IPCer; }
-MulNX::IMessageManager&	Core::IMessageManager() { return this->pImpl->MessageManager; }
+MulNX::IHandleSystem&	Core::IHandleSystem() { return this->pImpl->HandleSystem; }
+MulNX::IUISystem&		Core::IUISystem() { return this->pImpl->UISystem; }
+MulNX::IPCer&			Core::IPCer() { return this->pImpl->IPCer; }
+MulNX::IMessageManager& Core::IMessageManager() { return this->pImpl->MessageManager; }
 
 // 专用初始化函数
 void Core::Init() {

@@ -88,10 +88,10 @@ void ElementManager::ElementDebugWindow() {
         if (ImGui::Button("保存到XML文件")) {
             std::string Ruselt;
             if (this->CurrentElement->SaveToXML(this->Core->IPCer().PathGet_CurrentElements(), Ruselt)) {
-                this->IDebugger->AddSucc(std::move(Ruselt));
+                this->ISys().LogSucc(std::move(Ruselt));
             }
             else {
-                this->IDebugger->AddError(std::move(Ruselt));
+                this->ISys().LogError(std::move(Ruselt));
             }
         }
         if (ImGui::Button("删除当前元素")) {
@@ -139,7 +139,7 @@ std::vector<std::shared_ptr<ElementBase>>::iterator ElementManager::Element_GetI
 bool ElementManager::Element_SaveAll() {
     //检查是否有元素
     if (this->Elements.empty()) {
-        this->IDebugger->AddWarning("当前没有任何元素，跳过保存操作！");
+        this->ISys().LogWarning("当前没有任何元素，跳过保存操作！");
         return true;
     }
     std::filesystem::path ElementFolderPath = this->Core->IPCer().PathGet_CurrentElements();
@@ -151,20 +151,20 @@ bool ElementManager::Element_SaveAll() {
         }
         std::string Ruselt;
         if (elem->SaveToXML(ElementFolderPath, Ruselt)) {
-            this->IDebugger->AddSucc(Ruselt);
+            this->ISys().LogSucc(std::move(Ruselt));
         }
         else {
-            this->IDebugger->AddError(Ruselt);
+            this->ISys().LogError(std::move(Ruselt));
             return false;
         }
     }
-    this->IDebugger->AddSucc("成功保存所有元素到XML文件！");
+    this->ISys().LogSucc("成功保存所有元素到XML文件！");
     return true;
 }
 bool ElementManager::Element_LoadFromXML_Pre(const std::string& XMLName, const std::filesystem::path& FolderPath) {
     //检查文件路径和名称存在性
     if (FolderPath.empty() || XMLName.empty()) {
-        this->IDebugger->AddError("文件夹路径或XML文件名为空，无法从XML文件加载元素！");
+        this->ISys().LogError("文件夹路径或XML文件名为空，无法从XML文件加载元素！");
         return false;
     }
     //拼接完整路径
@@ -173,10 +173,10 @@ bool ElementManager::Element_LoadFromXML_Pre(const std::string& XMLName, const s
     return this->Element_LoadFromXML_Pre(FullPath);
 }
 bool ElementManager::Element_LoadFromXML_Pre(const std::filesystem::path& FullPath) {
-    this->IDebugger->AddInfo("尝试从XML文件加载元素，文件路径：" + FullPath.string());
+    this->ISys().LogInfo("尝试从XML文件加载元素，文件路径：" + FullPath.string());
     //检查文件本身存在性
     if (!std::filesystem::exists(FullPath)) {
-        this->IDebugger->AddError("XML文件不存在！文件路径：" + FullPath.string());
+        this->ISys().LogError("XML文件不存在！文件路径：" + FullPath.string());
         return false;
     }
 
@@ -186,7 +186,7 @@ bool ElementManager::Element_LoadFromXML_Pre(const std::filesystem::path& FullPa
 
     //检验XML文件加载结果
     if (!result) {
-        this->IDebugger->AddError("尝试从XML文件加载元素失败，无法加载XML文件！ 文件路径：" + FullPath.string() +
+        this->ISys().LogError("尝试从XML文件加载元素失败，无法加载XML文件！ 文件路径：" + FullPath.string() +
             "\n     错误描述：" + result.description());
         return false;
     }
@@ -194,7 +194,7 @@ bool ElementManager::Element_LoadFromXML_Pre(const std::filesystem::path& FullPa
     //获取Element节点
     pugi::xml_node node_Element = NewXML.child("Element");
     if (!node_Element) {
-        this->IDebugger->AddError("尝试从XML文件加载元素失败，XML文件格式错误，找不到根节点！ 文件路径：" + FullPath.string());
+        this->ISys().LogError("尝试从XML文件加载元素失败，XML文件格式错误，找不到根节点！ 文件路径：" + FullPath.string());
         return false;
     }
 
@@ -202,7 +202,7 @@ bool ElementManager::Element_LoadFromXML_Pre(const std::filesystem::path& FullPa
     std::string NewElementTypeString = node_Element.attribute("Type").as_string();
     ElementType NewElementType = ElementType_StringToEnum(NewElementTypeString);
     if (static_cast<int>(NewElementType) <= 0) {
-        this->IDebugger->AddError("尝试从XML文件加载元素失败，不可加载的元素类型！");
+        this->ISys().LogError("尝试从XML文件加载元素失败，不可加载的元素类型！");
         return false;
     }
 
@@ -210,18 +210,18 @@ bool ElementManager::Element_LoadFromXML_Pre(const std::filesystem::path& FullPa
     std::string NewElementName = node_Element.attribute("Name").as_string();
     //检查元素名是否为空
     if (NewElementName.empty()) {
-        this->IDebugger->AddError("尝试从XML文件加载元素失败，元素名称为空！");
+        this->ISys().LogError("尝试从XML文件加载元素失败，元素名称为空！");
         return false;
     }
     //检查是否存在同名元素
     if (this->Element_Get<ElementBase>(NewElementName)) {
-        this->IDebugger->AddError("元素名已占用，无法从XML文件加载元素！ 元素名：" + NewElementName);
+        this->ISys().LogError("元素名已占用，无法从XML文件加载元素！ 元素名：" + NewElementName);
         return false;
     }
     //检查ElementMain节点是否存在，确保加载函数可以直接获取
     pugi::xml_node node_ElementMain = node_Element.child("ElementMain");
     if (!node_ElementMain) {
-        this->IDebugger->AddError("尝试从XML文件加载元素失败，找不到ElementMain节点！ 文件路径：" + FullPath.string());
+        this->ISys().LogError("尝试从XML文件加载元素失败，找不到ElementMain节点！ 文件路径：" + FullPath.string());
         return false;
     }
 
@@ -229,7 +229,7 @@ bool ElementManager::Element_LoadFromXML_Pre(const std::filesystem::path& FullPa
 
     //创建基类指针
     std::shared_ptr<ElementBase> pElement = nullptr;
-    this->IDebugger->AddInfo("尝试进行分发，元素类型为 " + NewElementTypeString + " ，文件路径：" + FullPath.string());
+    this->ISys().LogInfo("尝试进行分发，元素类型为 " + NewElementTypeString + " ，文件路径：" + FullPath.string());
     //分发到具体类型的加载函数
     switch (NewElementType) {
     case ElementType::FreeCameraPath:
@@ -248,7 +248,7 @@ bool ElementManager::Element_LoadFromXML_Pre(const std::filesystem::path& FullPa
 
     //判空
     if (!pElement) {
-        this->IDebugger->AddError("尝试从XML文件加载元素失败，无法创建指定类型的元素实例！ 元素类型：" + NewElementTypeString);
+        this->ISys().LogError("尝试从XML文件加载元素失败，无法创建指定类型的元素实例！ 元素类型：" + NewElementTypeString);
         return false;
     }
     //设置元素类型
@@ -260,19 +260,19 @@ bool ElementManager::Element_LoadFromXML_Pre(const std::filesystem::path& FullPa
     if (pElement->ReadElementMain(node_ElementMain, strRuselt)) {
         pElement->Refresh();
         pElement->Dirty = false;//刚刚进入内存，非脏
-        this->IDebugger->AddSucc(std::move(strRuselt));
+        this->ISys().LogSucc(std::move(strRuselt));
         this->Elements.push_back(std::move(pElement));
         return true;
     }
     else {
-        this->IDebugger->AddError(std::move(strRuselt));
+        this->ISys().LogError(std::move(strRuselt));
         return false;
     }
 }
 bool ElementManager::Element_Delete(const std::string& Name) {
     // 安全检查
     if (Name.empty()) {
-        this->IDebugger->AddError("尝试删除空名称的元素！");
+        this->ISys().LogError("尝试删除空名称的元素！");
         return false;
     }
 
@@ -280,7 +280,7 @@ bool ElementManager::Element_Delete(const std::string& Name) {
     auto it = this->Element_GetIterator(Name);
     //判空
     if (it == this->Elements.end()) {
-        this->IDebugger->AddError("未找到指定名称的元素：" + Name);
+        this->ISys().LogError("未找到指定名称的元素：" + Name);
         return false;
     }
 
@@ -303,13 +303,13 @@ bool ElementManager::Element_Delete(const std::string& Name) {
     //添加刷新信息
     this->SManager->NeedRefresh = true;
 
-    this->IDebugger->AddSucc("成功删除元素：" + Name);
+    this->ISys().LogSucc("成功删除元素：" + Name);
     return true;
 }
 bool ElementManager::Element_ClearAll() {
     //检查是否有元素
     if (this->Elements.empty()) {
-        this->IDebugger->AddWarning("当前没有任何元素，跳过清空操作！");
+        this->ISys().LogWarning("当前没有任何元素，跳过清空操作！");
         return true;
     }
     //禁用预览
@@ -326,12 +326,12 @@ bool ElementManager::Element_ClearAll() {
     this->Elements.clear();
     //添加刷新信息
     this->SManager->NeedRefresh = true;
-    this->IDebugger->AddSucc("成功清空所有元素！");
+    this->ISys().LogSucc("成功清空所有元素！");
     return true;
 }
 void ElementManager::Element_ShowInLine(const std::shared_ptr<ElementBase> element) {
     if (!element) {
-        this->IDebugger->AddError("元素指针为空，无法展示信息！");
+        this->ISys().LogError("元素指针为空，无法展示信息！");
         return;
     }
     ImGui::Text("|元素名称：");
@@ -347,24 +347,24 @@ void ElementManager::Element_ShowInLine(const std::shared_ptr<ElementBase> eleme
 void ElementManager::Element_ShowAll() {
     size_t Size = this->Elements.size();
     if (Size == 0) {
-        this->IDebugger->AddError("没有找到任何元素正存储在内存中！");
+        this->ISys().LogError("没有找到任何元素正存储在内存中！");
         return;
     }
-    this->IDebugger->AddInfo(Line_);
+    this->ISys().LogInfo(Line_);
     for (size_t i = 0; i < Size; ++i) {
-        this->IDebugger->AddInfo(" |元素编号：" + std::to_string(i) + "   元素名称：" + this->Elements.at(i).get()->Name);
+        this->ISys().LogInfo(" |元素编号：" + std::to_string(i) + "   元素名称：" + this->Elements.at(i).get()->Name);
     }
-    this->IDebugger->AddInfo(Line_);
+    this->ISys().LogInfo(Line_);
 }
-void ElementManager::Element_ShowMsgToDebugMenu(const std::shared_ptr<ElementBase> element)const {
-    this->IDebugger->AddInfo(Line_);
-    this->IDebugger->AddInfo("元素名称：" + element->Name);
-    this->IDebugger->AddInfo("元素类型：" + element->TypeGet_String());
-    this->IDebugger->AddInfo("持续时长：" + std::to_string(element->DurationTime));
-    this->IDebugger->AddInfo("详细信息：");
+void ElementManager::Element_ShowMsgToDebugMenu(const std::shared_ptr<ElementBase> element) {
+    this->ISys().LogInfo(Line_);
+    this->ISys().LogInfo("元素名称：" + element->Name);
+    this->ISys().LogInfo("元素类型：" + element->TypeGet_String());
+    this->ISys().LogInfo("持续时长：" + std::to_string(element->DurationTime));
+    this->ISys().LogInfo("详细信息：");
 
-    this->IDebugger->AddInfo(element->GetMsg());
-    this->IDebugger->AddInfo(Line_);
+    this->ISys().LogInfo(element->GetMsg());
+    this->ISys().LogInfo(Line_);
 }
 std::vector<std::string> ElementManager::Element_GetNames()const {
     std::vector<std::string> ElementsNames;
@@ -381,30 +381,30 @@ std::vector<std::string> ElementManager::Element_GetNames()const {
 //预览相关
 void ElementManager::Preview_Enable() {
     if (!this->Preview_CurrentElement) {
-        this->IDebugger->AddError("无法开启预览：未设置预览元素！");
+        this->ISys().LogError("无法开启预览：未设置预览元素！");
         return;
     }
     this->OnPreview = true;
     this->GlobalVars->CampathPlaying = true;
-    this->IDebugger->AddInfo("已开启预览");
+    this->ISys().LogInfo("已开启预览");
 }
 void ElementManager::Preview_Disable() {
     this->OnPreview = false;
     this->GlobalVars->CampathPlaying = false;
-    this->IDebugger->AddInfo("已关闭预览");
+    this->ISys().LogInfo("已关闭预览");
 }
 void ElementManager::Preview_SetElement(const std::string& Name) {
     std::shared_ptr<ElementBase>element = this->Element_Get<ElementBase>(Name);
     if (!element) {
-        this->IDebugger->AddError("找不到目标元素   元素名：" + Name);
+        this->ISys().LogError("找不到目标元素   元素名：" + Name);
         return;
     }
     this->Preview_CurrentElement = element;
-    this->IDebugger->AddInfo("准备预览该元素   元素名：" + Name);
+    this->ISys().LogInfo("准备预览该元素   元素名：" + Name);
 }
 void ElementManager::Preview_SetPreviewSchema(const float Time) {
     this->Preview_TimeSchema = Time;
-    this->IDebugger->AddInfo("元素预览时间偏移设置为：" + std::to_string(this->Preview_TimeSchema));
+    this->ISys().LogInfo("元素预览时间偏移设置为：" + std::to_string(this->Preview_TimeSchema));
     this->Preview_EndTime = this->Preview_CurrentElement->StartTime + this->Preview_CurrentElement->DurationTime;
 }
 bool ElementManager::Preview_Call(CameraSystemIO* IO) {

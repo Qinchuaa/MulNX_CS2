@@ -21,26 +21,26 @@ bool GameCfgManager::UpdateCfgList() {
 	this->ToolCfgs.clear();
 	//获取游戏目录Cfg文件列表
 	if (!this->IPCer->GetFileNames(this->GameCfgs, this->GamePath, std::vector<std::string>{".cfg"}, false)) {
-		this->IDebugger->AddError("获取游戏目录Cfg文件列表失败");
+		this->ISys().LogError("获取游戏目录Cfg文件列表失败");
 		return false;
 	}
 	//获取工具目录Cfg文件列表
 	if (!this->IPCer->GetFileNames(this->ToolCfgs, this->ToolPath, std::vector<std::string>{".cfg"}, false)) {
-		this->IDebugger->AddError("获取工具目录Cfg文件列表失败");
+		this->ISys().LogError("获取工具目录Cfg文件列表失败");
 		return false;
 	}
 	//对两个列表进行排序，便于查看
 	std::sort(this->GameCfgs.begin(), this->GameCfgs.end());
 	std::sort(this->ToolCfgs.begin(), this->ToolCfgs.end());
 
-	this->IDebugger->AddSucc("Cfg文件列表更新完成");
+	this->ISys().LogSucc("Cfg文件列表更新完成");
 	return true;
 }
 bool GameCfgManager::MoveToGame(const std::string& CfgName) {
     const std::filesystem::path CfgPath = this->IPCer->PathGet_Tool_Cfg() / (CfgName + ".cfg");
     const std::string FullName = CfgName + ".cfg";
     if (!this->IPCer->FileMove(FullName, this->ToolPath, this->GamePath)) {
-		this->IDebugger->AddError("从工具目录移动到游戏目录失败，文件可能不存在或移动过程中出现错误！  路径：" + CfgPath.string());
+		this->ISys().LogError("从工具目录移动到游戏目录失败，文件可能不存在或移动过程中出现错误！  路径：" + CfgPath.string());
 		return false;
 	}
 	return true;
@@ -48,18 +48,18 @@ bool GameCfgManager::MoveToGame(const std::string& CfgName) {
 bool GameCfgManager::LoadCfg(const std::string& CfgName) {
 	const std::filesystem::path CfgPath = this->IPCer->PathGet_CS_cfg() / (CfgName + ".cfg");
 	if (!std::filesystem::exists(CfgPath)) {
-		this->IDebugger->AddError("指定的配置文件不存在，无法加载配置文件！  路径：" + CfgPath.string());
+		this->ISys().LogError("指定的配置文件不存在，无法加载配置文件！  路径：" + CfgPath.string());
 		return false;
 	}
 	this->AL3D->ExecuteCommand("exec " + CfgName);
-	this->IDebugger->AddSucc("成功加载配置文件，路径：" + CfgPath.string());
+	this->ISys().LogSucc("成功加载配置文件，路径：" + CfgPath.string());
 	return true;
 }
 bool GameCfgManager::MoveToTool(const std::string& CfgName) {
     const std::filesystem::path CfgPath = this->IPCer->PathGet_CS_cfg() / (CfgName + ".cfg");
     const std::string FullName = CfgName + ".cfg";
     if (!this->IPCer->FileMove(FullName, this->GamePath, this->ToolPath)) {
-		this->IDebugger->AddError("从游戏目录移动到工具目录失败，文件可能不存在或移动过程中出现错误！  路径：" + CfgPath.string());
+		this->ISys().LogError("从游戏目录移动到工具目录失败，文件可能不存在或移动过程中出现错误！  路径：" + CfgPath.string());
 		return false;
 	}
 	return true;
@@ -68,7 +68,7 @@ bool GameCfgManager::DeleteCfg(const std::string& CfgName) {
     const std::filesystem::path CfgPath = this->IPCer->PathGet_Tool_Cfg() / (CfgName + ".cfg");
     const std::string FullName = CfgName + ".cfg";
     if (!this->IPCer->FileDelete(FullName, this->ToolPath)) {
-		this->IDebugger->AddError("从工具目录删除配置文件失败，文件可能不存在或删除过程中出现错误！  路径：" + CfgPath.string());
+		this->ISys().LogError("从工具目录删除配置文件失败，文件可能不存在或删除过程中出现错误！  路径：" + CfgPath.string());
 		return false;
 	}
 	return true;
@@ -159,7 +159,7 @@ void GameCfgManager::Windows() {
             //加载配置按钮
             if (ImGui::Button("加载", ImVec2(70, 0))) {
                 if (this->LoadCfg(cfgName)) {
-                    this->IDebugger->AddSucc("已加载配置: " + cfgName);
+                    this->ISys().LogSucc("已加载配置: " + cfgName);
                 }
             }
             ImGui::SameLine();

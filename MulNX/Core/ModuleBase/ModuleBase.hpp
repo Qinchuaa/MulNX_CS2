@@ -2,15 +2,32 @@
 
 #include"../../Base/Base.hpp"
 
+// 前向声明：MulNXController 位于 MulNXExtensions 命名空间
+namespace MulNXExtensions { class MulNXController; }
+
 namespace MulNX {
 	// 模块基类
 	class ModuleBase {
-		friend MulNX::Core::Core;
+        friend MulNX::Core::Core;
+        class C_ISys {
+            friend ModuleBase;
+            C_ISys() = delete;
+            ModuleBase* pModuleBase = nullptr;
+            C_ISys(ModuleBase* pModuleBase) {
+                this->pModuleBase = pModuleBase;
+            }
+        public:
+            void LogInfo(const std::string& Msg);
+            void LogSucc(const std::string& Msg);
+            void LogWarning(const std::string& Msg);
+            void LogError(const std::string& Msg);
+        };
+        friend C_ISys;
     protected:
-        //标记是否已经完成初始化，未完成前不允许执行主循环等操作
+        // 标记是否已经完成初始化，未完成前不允许执行主循环等操作
         bool Inited = false;
-        //模块名称，唯一标识
-        std::string Name;
+        // 模块名称，唯一标识
+        std::string ModuleName;
         // 核心管理器指针
 		MulNX::Core::Core* Core;
 		// 全局变量指针
@@ -27,22 +44,17 @@ namespace MulNX {
         bool IsInited()const {
             return this->Inited;
         }
-        bool SetName(std::string&& Name){
-            this->Name = std::move(Name);
-            return true;
-        }
-        std::string GetName()const {
-            return this->Name;
-        }
+        bool SetName(std::string&& Name);
+        std::string GetName()const;
     public:
 		// 组件句柄
 		MulNXHandle HModule;
-		// 调试器指针
-		IDebugger* IDebugger = nullptr;
 		// 3D抽象层指针
-		IAbstractLayer3D* AL3D = nullptr;
-	private:
-		// 消息管理器指针
+        IAbstractLayer3D* AL3D = nullptr;
+        // 调试器指针
+        IDebugger* IDebugger = nullptr;
+    private:
+        // 消息管理器指针
 		MulNX::IMessageManager* IMsgManager = nullptr;
 	protected:
 		// 窗口显示标志
@@ -129,8 +141,8 @@ namespace MulNX {
 		}
 
 		// 工具函数
-
-		// 自动注册
+        
+        // 自动注册
 		void IRegiste();
 		// 自动订阅消息类型
 		void ISubscribe(MulNX::MsgType MsgType);
@@ -140,7 +152,9 @@ namespace MulNX {
 		void IPublish(MulNX::MsgType Msg);
 		// 自动创建私有消息管道
 		MulNX::IMessageChannel* ICreateAndGetMessageChannel();
-	};
+    protected:
+        C_ISys ISys();
+    };
 
 	// 自动子窗口管理类，一般在Menu函数中使用
 	class AutoChild {

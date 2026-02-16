@@ -19,12 +19,13 @@ bool CoreStarterBase::SystemInit(CoreImpl* pImpl, MulNX::Core::Core* pCore) {
 	// UI模块初始化
 	pImpl->UISystem.EntryInit(pCore);
 
-	return true;
+    this->ISys().LogSucc("核心系统组件初始化完成！");
+    return true;
 }
 
 void CoreStarterBase::StartUIWith(std::string&& EntryName) {
 	// UI系统主界面初始化
-	auto StartString = MulNX::Base::make_any_unique<std::string>(std::move(EntryName));
+	auto [StartString, pStartString] = MulNX::Base::make_any_unique<std::string>(std::move(EntryName));
 	MulNXHandle hStr = this->Core->IHandleSystem().RegisteUnique(std::move(StartString));
 	MulNX::Message StartMsg(MulNX::MsgType::UISystem_Start);
 	StartMsg.Handle = hStr;
@@ -33,12 +34,11 @@ void CoreStarterBase::StartUIWith(std::string&& EntryName) {
 
 void CoreStarterBase::RegisteMainDrawWith(std::function<void(MulNXUINode*)>&& MainDrawFunc) {
 	// 注册主窗口UI上下文
-    auto SContext = MulNX::Base::make_any_unique<MulNXUINode>();
-    MulNXUINode* SContextPtr = SContext.get<MulNXUINode>();
-	SContextPtr->name = "MainDraw";
-	SContextPtr->MyMsgChannel = this->ICreateAndGetMessageChannel();
-	SContextPtr->MyFunc = MainDrawFunc;
-	MulNXHandle hContext = this->Core->IHandleSystem().RegisteUnique(std::move(SContext));
+    auto [UINode, pUINode] = MulNX::Base::make_any_unique<MulNXUINode>();
+	pUINode->name = "MainDraw";
+	pUINode->MyMsgChannel = this->ICreateAndGetMessageChannel();
+	pUINode->MyFunc = MainDrawFunc;
+	MulNXHandle hContext = this->Core->IHandleSystem().RegisteUnique(std::move(UINode));
 	MulNX::Message Msg(MulNX::MsgType::UISystem_ModulePush);
 	Msg.Handle = hContext;
 	this->IPublish(std::move(Msg));

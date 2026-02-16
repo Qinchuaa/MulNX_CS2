@@ -48,14 +48,15 @@ bool DemoHelper::Init() {
 
 	auto SingleContext = MulNXUINode::Create(this);
 	auto* SContextPtr = SingleContext.get<MulNXUINode>();	
-	SContextPtr->name = "DemoHelper";
-	SContextPtr->pBuffer = MulNX::Base::make_any_unique<MulNX::Base::TripleBuffer<DemoHelperPrivateData>>();
+    SContextPtr->name = "DemoHelper";
+    auto [Buffer, pBuffer] = MulNX::Base::make_any_unique<MulNX::Base::TripleBuffer<DemoHelperPrivateData>>();
+    SContextPtr->pBuffer = std::move(Buffer);
 	SContextPtr->MyFunc = MyDraw;
 
-	this->hContext = this->Core->IHandleSystem().RegisteUnique(std::move(SingleContext));
+	this->hUINode = this->Core->IHandleSystem().RegisteUnique(std::move(SingleContext));
 
 	MulNX::Message Msg(MulNX::MsgType::UISystem_ModulePush);
-	Msg.Handle = this->hContext;
+	Msg.Handle = this->hUINode;
 	this->IPublish(std::move(Msg));
 
 	return true;
@@ -64,7 +65,7 @@ bool DemoHelper::Init() {
 void DemoHelper::ProcessMsg(MulNX::Message* Msg) {
 	switch (Msg->Type) {
 	case MulNX::MsgType::UISystem_UICommand: {
-		this->IDebugger->AddSucc("测试成功");
+		this->ISys().LogSucc("测试成功");
 		this->HandleUICommand(Msg);
 		Msg->pMsgChannel->PushMessage(MulNX::Message(MulNX::MsgType::UISystem_ModuleResponse));
 		break;
@@ -82,7 +83,7 @@ void DemoHelper::HandleUICommand(MulNX::Message* Msg) {
 	case 0x102: {
 		float data = Msg->ParamFloat;
 		std::string str = "跳转到" + std::to_string(data);
-		this->IDebugger->AddInfo(str);
+		this->ISys().LogInfo(str);
 	}
 		
 	}
@@ -90,9 +91,9 @@ void DemoHelper::HandleUICommand(MulNX::Message* Msg) {
 
 void DemoHelper::VirtualMain() {
 	this->EntryProcessMsg();
-	auto ctx = this->Core->IUISystem().GetSingleContext(this->hContext);
-	if (!ctx) return; // 或跳过本帧处理
-	auto data = ctx->GetWrite<DemoHelperPrivateData>();
+	auto UINode = this->Core->IUISystem().GetUIContext()->GetUINode(this->hUINode);
+	if (!UINode) return; // 或跳过本帧处理
+	auto data = UINode->GetWrite<DemoHelperPrivateData>();
 	data->TimeMarks = this->Marks;
 }
 

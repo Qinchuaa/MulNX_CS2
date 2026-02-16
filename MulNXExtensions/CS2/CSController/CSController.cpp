@@ -198,7 +198,7 @@ void CSController::HandleFreeCameraPath(const CameraSystemIO* const IO) {
         static MulNX::Base::Math::Frame thisFrame;
         if (thisFrame != IO->Frame) {
             thisFrame = IO->Frame;
-            this->IDebugger->AddInfo(thisFrame.GetMsg());
+            this->ISys().LogInfo(thisFrame.GetMsg());
         }
 #endif // _DEBUG
         this->LocalPlayer.SetPosition(PosAndFOV);

@@ -25,7 +25,7 @@ void HookManager::ThreadMain() {
 	if (this->GuardPleaseAction) {
 		AllowReHook = true;
 		this->GuardPleaseAction = false;
-		this->IDebugger->AddInfo("检测到D3D11波动，等待用户手动ReHook");
+		this->ISys().LogInfo("检测到D3D11波动，等待用户手动ReHook");
 	}
 	// 检查是否超时：正在等待CheckBack且超过2秒未收到回复
 	if (AllowReHook) {

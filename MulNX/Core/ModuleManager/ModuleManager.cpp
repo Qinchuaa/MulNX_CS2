@@ -18,8 +18,7 @@ void ModuleManager::ProcessMsg(MulNX::Message* Msg) {
 	std::unique_lock lock(this->MyThreadMutex);
 	switch (Msg->Type) {
 	case MulNX::MsgType::ModuleManager_RequestModuleInfo: {
-		auto Info = MulNX::Base::make_any_unique<ModuleInfo>();
-		auto pInfo = Info.get<ModuleInfo>();
+		auto [Info, pInfo] = MulNX::Base::make_any_unique<ModuleInfo>();
 		
 		for (auto& [Name, Handle] : this->NameToHandleMap) {
 			pInfo->Info.push_back(std::make_pair(Name, Handle));

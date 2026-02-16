@@ -22,9 +22,7 @@ namespace MulNX {
 		
 		int Render()override;
 
-		MulNXUINode* GetSingleContext(const MulNXHandle& hContext)override {
-			return this->UIContext.GetSingleContext(hContext);
-		}
+		MulNXUIContext* GetUIContext() { return &this->UIContext; }
 
 		void SetFrameBefore(std::function<void(void)>Before)override;
 		void SetFrameBehind(std::function<void(void)>Behind)override;

@@ -21,11 +21,11 @@ void WorkspaceManager::VirtualMain() {
 bool WorkspaceManager::Workspace_Create(const std::string& Name) {
     std::string strResult{};
     if (this->Core->IPCer().PathCreate_Workspace(Name)) {
-        this->IDebugger->AddSucc(strResult);
+        this->ISys().LogSucc(strResult);
         return true;
     }
     else {
-        this->IDebugger->AddError(strResult);
+        this->ISys().LogError(strResult);
         return false;
     }
 }
@@ -42,7 +42,7 @@ bool WorkspaceManager::Workspace_Save() {
     if (!this->PManager->Project_Save()) {
         return false;
     }
-    this->IDebugger->AddSucc("工作区保存成功");
+    this->ISys().LogSucc("工作区保存成功");
     return true;
 }
 bool WorkspaceManager::Workspace_TrySetPath(const std::string& Name) {
@@ -102,11 +102,11 @@ bool WorkspaceManager::Workspace_ConfigSave() {
     }
     std::string strResult{};
     if (this->CurrentWorkspace->SaveConfigToXML(this->Core->IPCer().PathGet_CurrentWorkspace(), strResult)) {
-        this->IDebugger->AddSucc(strResult);
+        this->ISys().LogSucc(strResult);
         return true;
     }
     else {
-        this->IDebugger->AddError(strResult);
+        this->ISys().LogError(strResult);
         return false;
     }
 }
@@ -116,7 +116,7 @@ bool WorkspaceManager::Workspace_ConfigLoad(const std::filesystem::path& Workspa
     }
     //检查文件路径和名称存在性
     if (WorkspacePath.empty()) {
-        this->IDebugger->AddError("文件夹路径为空，无法从XML文件加载工作区配置！");
+        this->ISys().LogError("文件夹路径为空，无法从XML文件加载工作区配置！");
         return false;
     }
 
@@ -124,11 +124,11 @@ bool WorkspaceManager::Workspace_ConfigLoad(const std::filesystem::path& Workspa
     std::filesystem::path FullPath = WorkspacePath / ("WorkspaceConfig.xml");
 
     //输出调试信息
-    this->IDebugger->AddInfo("尝试从XML文件加载工作区配置，文件路径：" + FullPath.string());
+    this->ISys().LogInfo("尝试从XML文件加载工作区配置，文件路径：" + FullPath.string());
 
     //检查文件本身存在性
     if (!std::filesystem::exists(FullPath)) {
-        this->IDebugger->AddError("XML文件不存在！文件路径：" + FullPath.string());
+        this->ISys().LogError("XML文件不存在！文件路径：" + FullPath.string());
         return false;
     }
 
@@ -138,7 +138,7 @@ bool WorkspaceManager::Workspace_ConfigLoad(const std::filesystem::path& Workspa
     //打开XML文件并检验结果
     pugi::xml_parse_result result = LoadXML.load_file(FullPath.c_str());
     if (!result) {
-        this->IDebugger->AddError("尝试从XML文件加载工作区配置失败，无法加载XML文件！ 文件路径：" + FullPath.string() +
+        this->ISys().LogError("尝试从XML文件加载工作区配置失败，无法加载XML文件！ 文件路径：" + FullPath.string() +
             "\n     错误描述：" + result.description());
         return false;
     }
@@ -147,7 +147,7 @@ bool WorkspaceManager::Workspace_ConfigLoad(const std::filesystem::path& Workspa
     //获取WorkspaceConfig节点
     pugi::xml_node node_WorkspaceConfig = LoadXML.child("WorkspaceConfig");
     if (!node_WorkspaceConfig) {
-        this->IDebugger->AddError("尝试从XML文件加载工作区配置失败，XML文件格式错误，找不到根节点！ 文件路径：" + FullPath.string());
+        this->ISys().LogError("尝试从XML文件加载工作区配置失败，XML文件格式错误，找不到根节点！ 文件路径：" + FullPath.string());
         return false;
     }
     WorkspaceConfig& Config = this->CurrentWorkspace->Config;
@@ -182,10 +182,10 @@ bool WorkspaceManager::Workspace_ConfigLoad(const std::filesystem::path& Workspa
         }
     }
     catch (...) {
-        this->IDebugger->AddError("尝试从XML文件加载工作区配置失败，XML文件格式错误，读取节点时发生异常！ 文件路径：" + FullPath.string());
+        this->ISys().LogError("尝试从XML文件加载工作区配置失败，XML文件格式错误，读取节点时发生异常！ 文件路径：" + FullPath.string());
         return false;
     }
-    this->IDebugger->AddSucc("成功从XML文件加载工作区配置！ 文件路径：" + FullPath.string());
+    this->ISys().LogSucc("成功从XML文件加载工作区配置！ 文件路径：" + FullPath.string());
     return true;
 }
 bool WorkspaceManager::Workspace_ConfigApply() {

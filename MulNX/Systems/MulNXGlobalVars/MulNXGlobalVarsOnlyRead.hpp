@@ -1,6 +1,8 @@
-//MulNXiGlobalVarsOnlyRead类，只读变量存储类
-//用于存储系统信息等，可以安全跨线程读取的变量
-//不允许写操作
+#pragma once
+
+// MulNXiGlobalVarsOnlyRead类，只读变量存储类
+// 用于存储系统信息等，可以安全跨线程读取的变量
+// 不允许写操作
 class MulNXiGlobalVarsOnlyRead {
 public:
 	static constexpr const char MulNXiVersion[] = "V1.3.0";

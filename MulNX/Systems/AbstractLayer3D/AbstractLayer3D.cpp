@@ -23,7 +23,7 @@ void MulNX::AbstractLayer3D::VirtualMain() {
 void MulNX::AbstractLayer3D::ProcessMsg(MulNX::Message* Msg) {
 	switch (Msg->Type) {
 	case MulNX::MsgType::Core_ReHook: {
-		this->IDebugger->AddSucc("已完成Hook重载！");
+		this->ISys().LogSucc("已完成Hook重载！");
 		break;
 	}
 

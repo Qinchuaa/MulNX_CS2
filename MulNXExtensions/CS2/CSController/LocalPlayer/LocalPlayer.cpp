@@ -65,13 +65,13 @@ bool C_LocalPlayer::SetPosition(const DirectX::XMFLOAT4& PosAndFOV) {
         DirectX::XMFLOAT3* pPositionA = this->PositionA;
         DirectX::XMFLOAT3* pPositionB = this->PositionB;
 
-        pPositionB->x = PosAndFOV.x;
-        pPositionB->y = PosAndFOV.y;
-        pPositionB->z = PosAndFOV.z;
+        // pPositionB->x = PosAndFOV.x;
+        // pPositionB->y = PosAndFOV.y;
+        // pPositionB->z = PosAndFOV.z;
 
-        // pPositionA->x = PosAndFOV.x;
-        // pPositionA->y = PosAndFOV.y;
-        // pPositionA->z = PosAndFOV.z;
+        pPositionA->x = PosAndFOV.x;
+        pPositionA->y = PosAndFOV.y;
+        pPositionA->z = PosAndFOV.z;
 
         return true;
     }

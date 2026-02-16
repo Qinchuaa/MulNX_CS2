@@ -58,11 +58,11 @@ void SolutionManager::Refresh() {
 bool SolutionManager::Solution_Create(const std::string& Name) {
     // 检查是否已存在同名解决方案
     if (this->Solution_Get(Name)) {
-        this->IDebugger->AddError("解决方案名已占用！ 解决方案名：" + Name);
+        this->ISys().LogError("解决方案名已占用！ 解决方案名：" + Name);
         return false;
     }
     //输出成功信息
-    this->IDebugger->AddSucc("成功创建解决方案！  解决方案名：" + Name);
+    this->ISys().LogSucc("成功创建解决方案！  解决方案名：" + Name);
     //创建新解决方案
     std::unique_ptr<Solution> newSolution = std::make_unique<Solution>(Name);
     Solutions.push_back(std::move(newSolution));
@@ -71,7 +71,7 @@ bool SolutionManager::Solution_Create(const std::string& Name) {
 }
 bool SolutionManager::Solution_SaveAll() {
     if (this->Solutions.empty()) {
-        this->IDebugger->AddWarning("尝试在没有任何解决方案的情况下保存");
+        this->ISys().LogWarning("尝试在没有任何解决方案的情况下保存");
         return true;
     }
     std::filesystem::path SolutionFolderPath = this->Core->IPCer().PathGet_CurrentSolutions();
@@ -82,20 +82,20 @@ bool SolutionManager::Solution_SaveAll() {
         }
         std::string Ruselt;
         if (solution->SaveToXML(SolutionFolderPath, Ruselt)) {
-            this->IDebugger->AddSucc(Ruselt);
+            this->ISys().LogSucc(Ruselt);
         }
         else {
-            this->IDebugger->AddError(Ruselt);
+            this->ISys().LogError(Ruselt);
             return false;
         }
     }
-    this->IDebugger->AddSucc("成功保存所有解决方案到XML文件！");
+    this->ISys().LogSucc("成功保存所有解决方案到XML文件！");
     return true;
 }
 bool SolutionManager::Solution_LoadFromXML(const std::string& XMLName, const std::filesystem::path& FolderPath) {
     //检查文件路径和名称存在性
     if (FolderPath.empty() || XMLName.empty()) {
-        this->IDebugger->AddError("文件夹路径或XML文件名为空，无法从XML文件加载解决方案！");
+        this->ISys().LogError("文件夹路径或XML文件名为空，无法从XML文件加载解决方案！");
         return false;
     }
 
@@ -106,11 +106,11 @@ bool SolutionManager::Solution_LoadFromXML(const std::string& XMLName, const std
 }
 bool SolutionManager::Solution_LoadFromXML(const std::filesystem::path& FullPath) {
     //输出调试信息
-    this->IDebugger->AddInfo("尝试从XML文件加载解决方案，文件路径：" + FullPath.string());
+    this->ISys().LogInfo("尝试从XML文件加载解决方案，文件路径：" + FullPath.string());
 
     //检查文件本身存在性
     if (!std::filesystem::exists(FullPath)) {
-        this->IDebugger->AddError("XML文件不存在！文件路径：" + FullPath.string());
+        this->ISys().LogError("XML文件不存在！文件路径：" + FullPath.string());
         return false;
     }
 
@@ -120,7 +120,7 @@ bool SolutionManager::Solution_LoadFromXML(const std::filesystem::path& FullPath
     //打开XML文件并检验结果
     pugi::xml_parse_result result = NewXML.load_file(FullPath.c_str());
     if (!result) {
-        this->IDebugger->AddError("尝试从XML文件加载解决方案失败，无法加载XML文件！ 文件路径：" + FullPath.string() +
+        this->ISys().LogError("尝试从XML文件加载解决方案失败，无法加载XML文件！ 文件路径：" + FullPath.string() +
             "\n     错误描述：" + result.description());
         return false;
     }
@@ -130,39 +130,39 @@ bool SolutionManager::Solution_LoadFromXML(const std::filesystem::path& FullPath
     //获取Solution节点
     pugi::xml_node node_Solution = NewXML.child("Solution");
     if (!node_Solution) {
-        this->IDebugger->AddError("尝试从XML文件加载解决方案失败，XML文件格式错误，找不到根节点！ 文件路径：" + FullPath.string());
+        this->ISys().LogError("尝试从XML文件加载解决方案失败，XML文件格式错误，找不到根节点！ 文件路径：" + FullPath.string());
         return false;
     }
 
     //获取解决方案名称并检查是否为空
     std::string NewSolutionName = node_Solution.attribute("Name").as_string();
     if (NewSolutionName.empty()) {
-        this->IDebugger->AddError("尝试从XML文件加载解决方案失败，解决方案名称为空！");
+        this->ISys().LogError("尝试从XML文件加载解决方案失败，解决方案名称为空！");
         return false;
     }
 
     //检查是否存在同名解决方案
     if (this->Solution_Get(NewSolutionName)) {
-        this->IDebugger->AddError("解决方案名已占用，无法从XML文件加载解决方案！ 解决方案名：" + std::move(NewSolutionName));
+        this->ISys().LogError("解决方案名已占用，无法从XML文件加载解决方案！ 解决方案名：" + std::move(NewSolutionName));
         return false;
     }
 
     //获取SolutionMain节点
     pugi::xml_node node_SolutionMain = node_Solution.child("SolutionMain");
     if (!node_SolutionMain) {
-        this->IDebugger->AddError("尝试从XML文件加载解决方案失败，找不到SolutionMain节点！ 文件路径：" + FullPath.string());
+        this->ISys().LogError("尝试从XML文件加载解决方案失败，找不到SolutionMain节点！ 文件路径：" + FullPath.string());
         return false;
     }
     //获取KeyCheckPack节点
     pugi::xml_node node_KeyCheckPack = node_SolutionMain.child("KeyCheckPack");
     if (!node_KeyCheckPack) {
-        this->IDebugger->AddError("尝试从XML文件加载解决方案失败，找不到KeyCheckPack节点！ 文件路径：" + FullPath.string());
+        this->ISys().LogError("尝试从XML文件加载解决方案失败，找不到KeyCheckPack节点！ 文件路径：" + FullPath.string());
         return false;
     }
     //制作解决方案
     std::unique_ptr<Solution>NewSolution = std::make_unique<Solution>(NewSolutionName);
     if (!NewSolution->KCPack.ReadXMLNode(node_KeyCheckPack)) {
-        this->IDebugger->AddError("尝试从XML文件加载解决方案失败，在解析KeyCheckPack节点时发生了错误！ 文件路径：" + FullPath.string());
+        this->ISys().LogError("尝试从XML文件加载解决方案失败，在解析KeyCheckPack节点时发生了错误！ 文件路径：" + FullPath.string());
         return false;
     }
 
@@ -172,7 +172,7 @@ bool SolutionManager::Solution_LoadFromXML(const std::filesystem::path& FullPath
     //获取Elements节点
     pugi::xml_node node_Elements = node_SolutionMain.child("Elements");
     if (!node_Elements) {
-        this->IDebugger->AddError("找不到Elements节点！ 解决方案名：" + std::move(NewSolutionName));
+        this->ISys().LogError("找不到Elements节点！ 解决方案名：" + std::move(NewSolutionName));
         return false;
     }
 
@@ -182,7 +182,7 @@ bool SolutionManager::Solution_LoadFromXML(const std::filesystem::path& FullPath
     size_t AllCount = node_Elements.attribute("Size").as_ullong();
     //检验完整性
     if (node_Elements.select_nodes("Element").size() != AllCount) {
-        this->IDebugger->AddError("不安全的解决方案！实际元素数量与XML文件描述不符！ 解决方案名：" + std::move(NewSolutionName));
+        this->ISys().LogError("不安全的解决方案！实际元素数量与XML文件描述不符！ 解决方案名：" + std::move(NewSolutionName));
         return false;
     }
 
@@ -196,7 +196,7 @@ bool SolutionManager::Solution_LoadFromXML(const std::filesystem::path& FullPath
     //获取第一个Element节点并检验
     pugi::xml_node node_Element = node_Elements.child("Element");
     if (!node_Element) {
-        this->IDebugger->AddError("找不到Element节点！ 解决方案名：" + std::move(NewSolutionName));
+        this->ISys().LogError("找不到Element节点！ 解决方案名：" + std::move(NewSolutionName));
         return false;
     }
 
@@ -209,7 +209,7 @@ bool SolutionManager::Solution_LoadFromXML(const std::filesystem::path& FullPath
         //检验是否找到元素
         if (!element) {//未找到元素
             //输出错误信息
-            this->IDebugger->AddError("找不到目标元素   元素名：" + NewElementName);
+            this->ISys().LogError("找不到目标元素   元素名：" + NewElementName);
             //记录加载失败的元素的索引
             ErrorElementsIndexs.push_back(Index);
             //记录加载失败的元素的名称
@@ -223,7 +223,7 @@ bool SolutionManager::Solution_LoadFromXML(const std::filesystem::path& FullPath
             if (!NewSolution->AddElement(element, ElementOffset)) {
                 //如果失败
                 //输出错误信息
-                this->IDebugger->AddError("无法添加元素到解决方案，可能是元素已存在于解决方案中   元素名：" + NewElementName);
+                this->ISys().LogError("无法添加元素到解决方案，可能是元素已存在于解决方案中   元素名：" + NewElementName);
                 //记录加载失败的元素的索引
                 ErrorElementsIndexs.push_back(Index);
                 //记录加载失败的元素的名称
@@ -232,7 +232,7 @@ bool SolutionManager::Solution_LoadFromXML(const std::filesystem::path& FullPath
             }
             else {
                 //成功则输出成功信息
-                this->IDebugger->AddSucc("成功添加元素到解决方案   元素名：" + std::move(NewElementName));
+                this->ISys().LogSucc("成功添加元素到解决方案   元素名：" + std::move(NewElementName));
             }
         }
         //增加计数
@@ -245,26 +245,26 @@ bool SolutionManager::Solution_LoadFromXML(const std::filesystem::path& FullPath
     NewSolution->Dirty = false;
     //检验时间关系
     if (NewSolution->TotalDurationTime != TargetDurationTime) {
-        this->IDebugger->AddWarning("该解决方案实际持续时长与预估持续时长不同，可能出现问题");
+        this->ISys().LogWarning("该解决方案实际持续时长与预估持续时长不同，可能出现问题");
     }
 
     //复查加载个数
     if (AllCount == SuccessCount) {
-        this->IDebugger->AddSucc("成功从XML文件加载解决方案！ 解决方案名：" + std::move(NewSolutionName) + "  共包含元素个数：" + std::to_string(AllCount));
+        this->ISys().LogSucc("成功从XML文件加载解决方案！ 解决方案名：" + std::move(NewSolutionName) + "  共包含元素个数：" + std::to_string(AllCount));
     }
     else {
-        this->IDebugger->AddWarning("从XML文件加载了解决方案：" + std::move(NewSolutionName) + "  理论包含元素个数：" + std::to_string(AllCount));
+        this->ISys().LogWarning("从XML文件加载了解决方案：" + std::move(NewSolutionName) + "  理论包含元素个数：" + std::to_string(AllCount));
         size_t ErrorCount = AllCount - SuccessCount;
-        this->IDebugger->AddWarning("但实际上加载成功元素个数：" + std::to_string(SuccessCount) + " 以下是加载失败的" + std::to_string(ErrorCount) + "个元素");
+        this->ISys().LogWarning("但实际上加载成功元素个数：" + std::to_string(SuccessCount) + " 以下是加载失败的" + std::to_string(ErrorCount) + "个元素");
         for (size_t i = 0; i < ErrorCount; ++i) {
-            this->IDebugger->AddWarning("编号：" + std::to_string(ErrorElementsIndexs[i]) + "  名称：" + ErrorElementsNames[i]);
+            this->ISys().LogWarning("编号：" + std::to_string(ErrorElementsIndexs[i]) + "  名称：" + ErrorElementsNames[i]);
         }
     }
 
 
     //添加进解决方案组
     this->Solutions.push_back(std::move(NewSolution));
-    this->IDebugger->AddSucc("---------------------");
+    this->ISys().LogSucc("---------------------");
     return true;
 }
 std::vector<std::unique_ptr<Solution>>::iterator SolutionManager::Solution_GetIterator(const std::string& Name) {
@@ -300,13 +300,13 @@ bool SolutionManager::Solution_Delete(Solution* Solution) {
     auto it = this->Solution_GetIterator(Name);
     this->Solutions.erase(it);
 
-    this->IDebugger->AddSucc("成功删除解决方案：" + Name);
+    this->ISys().LogSucc("成功删除解决方案：" + Name);
     return true;
 }
 bool SolutionManager::Solution_Delete(const std::string& Name) {
     //安全检查
     if (Name.empty()) {
-        this->IDebugger->AddError("尝试删除空名称的解决方案！");
+        this->ISys().LogError("尝试删除空名称的解决方案！");
         return false;
     }
 
@@ -314,7 +314,7 @@ bool SolutionManager::Solution_Delete(const std::string& Name) {
     auto it = this->Solution_GetIterator(Name);
     //判空
     if (it == this->Solutions.end()) {
-        this->IDebugger->AddError("未找到指定名称的解决方案：" + Name);
+        this->ISys().LogError("未找到指定名称的解决方案：" + Name);
         return false;
     }
 
@@ -328,12 +328,12 @@ bool SolutionManager::Solution_ClearAll() {
     this->CurrentSolution = nullptr;
 
     if (this->Solutions.empty()) {
-        this->IDebugger->AddWarning("当前没有任何解决方案，跳过清空操作！");
+        this->ISys().LogWarning("当前没有任何解决方案，跳过清空操作！");
         return true;
     }
     //清空所有解决方案
     this->Solutions.clear();
-    this->IDebugger->AddSucc("成功删除所有解决方案！");
+    this->ISys().LogSucc("成功删除所有解决方案！");
     return true;
 }
 
@@ -342,28 +342,28 @@ bool SolutionManager::Solution_ClearAll() {
 void SolutionManager::Solution_ShowMsg(const std::string& Name) {
     Solution* solution = this->Solution_Get(Name);
     if (!solution) {
-        this->IDebugger->AddError("未找到解决方案：" + Name);
+        this->ISys().LogError("未找到解决方案：" + Name);
         return;
     }
     if (!solution->SafeUse) {
-        this->IDebugger->AddError("不安全的解决方案：" + Name);
+        this->ISys().LogError("不安全的解决方案：" + Name);
         return;
     }
-    this->IDebugger->AddInfo(Line_);
-    this->IDebugger->AddInfo(solution->GetMsg());
-    this->IDebugger->AddInfo(Line_);
+    this->ISys().LogInfo(Line_);
+    this->ISys().LogInfo(solution->GetMsg());
+    this->ISys().LogInfo(Line_);
 }
 void SolutionManager::Solution_ShowAll() {
     size_t Size = this->Solutions.size();
     if (Size) {
-        this->IDebugger->AddInfo(Line_);
+        this->ISys().LogInfo(Line_);
         for (size_t i = 0; i < Size; ++i) {
-            this->IDebugger->AddInfo(" |解决方案编号：" + std::to_string(i) + "   解决方案名称：" + this->Solutions[i]->Name);
+            this->ISys().LogInfo(" |解决方案编号：" + std::to_string(i) + "   解决方案名称：" + this->Solutions[i]->Name);
         }
-        this->IDebugger->AddInfo(Line_);
+        this->ISys().LogInfo(Line_);
     }
     else {
-        this->IDebugger->AddError("没有找到任何解决方案正存储在内存中！");
+        this->ISys().LogError("没有找到任何解决方案正存储在内存中！");
         return;
     }
 }
@@ -378,7 +378,7 @@ const std::vector<std::string> SolutionManager::Solution_GetNames()const {
 }
 void SolutionManager::Solution_ShowInLine(Solution* solution) {
     if (!solution) {
-        this->IDebugger->AddError("解决方案指针为空，无法展示信息！");
+        this->ISys().LogError("解决方案指针为空，无法展示信息！");
         return;
     }
     ImGui::Text("|解决方案名称：");
@@ -420,9 +420,9 @@ void SolutionManager::Solution_DebugWindow() {
     if (this->CurrentSolution) {
         ImGui::Text(("当前操作解决方案名称：" + this->CurrentSolution->Name + "   元素数量：" + std::to_string(this->CurrentSolution->Size_Elements) + "   总时长：" + std::to_string(this->CurrentSolution->GetMsg().empty() ? 0.0f : this->CurrentSolution->TotalDurationTime)).data());
         if (ImGui::Button("打印解决方案信息到调试窗口")) {
-            this->IDebugger->AddInfo(Line_);
-            this->IDebugger->AddInfo(this->CurrentSolution->GetMsg());
-            this->IDebugger->AddInfo(Line_);
+            this->ISys().LogInfo(Line_);
+            this->ISys().LogInfo(this->CurrentSolution->GetMsg());
+            this->ISys().LogInfo(Line_);
         }
 
         static std::string NewElementName = "";
@@ -430,14 +430,14 @@ void SolutionManager::Solution_DebugWindow() {
         if (ImGui::Button("添加元素")) {
             std::shared_ptr<ElementBase> element = this->EManager->Element_Get<ElementBase>(NewElementName);
             if (!element) {
-                this->IDebugger->AddError("找不到目标元素   元素名：" + NewElementName);
+                this->ISys().LogError("找不到目标元素   元素名：" + NewElementName);
             }
             else {
                 if (!this->CurrentSolution->AddElement(element, 0)) {
-                    this->IDebugger->AddError("无法添加元素到解决方案，可能是元素已存在于解决方案中   元素名：" + NewElementName);
+                    this->ISys().LogError("无法添加元素到解决方案，可能是元素已存在于解决方案中   元素名：" + NewElementName);
                 }
                 else {
-                    this->IDebugger->AddSucc("成功添加元素到解决方案   元素名：" + NewElementName);
+                    this->ISys().LogSucc("成功添加元素到解决方案   元素名：" + NewElementName);
                     NewElementName.clear();
                 }
             }
@@ -445,16 +445,16 @@ void SolutionManager::Solution_DebugWindow() {
 
         if (ImGui::Button("清空所有元素")) {
             this->CurrentSolution->Clear();
-            this->IDebugger->AddSucc("成功清空解决方案所有元素");
+            this->ISys().LogSucc("成功清空解决方案所有元素");
         }
 
         if (ImGui::Button("保存到XML文件")) {
             std::string SaveResult;
             if (this->CurrentSolution->SaveToXML(this->Core->IPCer().PathGet_CurrentSolutions(), SaveResult)) {
-                this->IDebugger->AddSucc(SaveResult);
+                this->ISys().LogSucc(SaveResult);
             }
             else {
-                this->IDebugger->AddError(SaveResult);
+                this->ISys().LogError(SaveResult);
             }
         }
 
@@ -662,7 +662,7 @@ void SolutionManager::Solution_Name_DebugWindow() {
 bool SolutionManager::Playing_SetSolution(Solution* const solution, const PlaybackMode Playmode) {
     //这里只需要设置，播放结束解决方案本身自动归位
     if (!solution) {
-        this->IDebugger->AddError("找不到目标解决方案，可能是空指针");
+        this->ISys().LogError("找不到目标解决方案，可能是空指针");
         return false;
     }
     this->Playing_pSolution = solution;
@@ -671,13 +671,13 @@ bool SolutionManager::Playing_SetSolution(Solution* const solution, const Playba
     switch (Playmode) {
     case PlaybackMode::Serial:
         this->Playing_SetTimeSchema(this->AL3D->GetTime());//偏移时间轴播放
-        this->IDebugger->AddInfo("偏移时间轴播放，偏移时间设置为：" + std::to_string(this->AL3D->GetTime()));
+        this->ISys().LogInfo("偏移时间轴播放，偏移时间设置为：" + std::to_string(this->AL3D->GetTime()));
         break;
     case PlaybackMode::Parallel:
         this->Playing_SetTimeSchema(0);
         break;
     }
-    this->IDebugger->AddInfo("已经切换至解决方案：" + solution->Name);
+    this->ISys().LogInfo("已经切换至解决方案：" + solution->Name);
     return true;
 }
 bool SolutionManager::Playing_SetSolution(const std::string& SolutionName, const PlaybackMode Playmode) {
@@ -693,17 +693,17 @@ bool SolutionManager::Playing_SetSolution(const std::string& SolutionName, const
 
 void SolutionManager::Playing_Enable() {
     if (!this->Playing_pSolution) {
-        this->IDebugger->AddError("无法开启播放：未设置要播放的解决方案！");
+        this->ISys().LogError("无法开启播放：未设置要播放的解决方案！");
         return;
     }
     this->Playing = true;
     this->GlobalVars->CampathPlaying = true;
-    this->IDebugger->AddInfo("已开启播放");
+    this->ISys().LogInfo("已开启播放");
 }
 void SolutionManager::Playing_Disable() {
     this->Playing = false;
     this->GlobalVars->CampathPlaying = false;
-    this->IDebugger->AddInfo("已关闭播放");
+    this->ISys().LogInfo("已关闭播放");
 }
 void SolutionManager::Playing_SetTimeSchema(const float Time) {
     this->Playing_pSolution->SetSolutionOffset(Time);

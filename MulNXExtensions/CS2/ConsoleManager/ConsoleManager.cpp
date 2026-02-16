@@ -31,26 +31,26 @@ void ConsoleManager::Menu() {
 		if (ImGui::Button("解限所有CS2控制台变量")) {
 			int Count = 0;
 			this->Core->ModuleManager()->FindModule<CSController>("CSController")->GetCvarSystem().UnlockHiddenCVars(Count);
-			this->IDebugger->AddSucc("成功解限" + std::to_string(Count) + "个控制台命令！");
+			this->ISys().LogSucc("成功解限" + std::to_string(Count) + "个控制台命令！");
 		}
 		if (ImGui::Button("限住所有CS2控制台变量")) {
 			int Count = 0;
 			this->Core->ModuleManager()->FindModule<CSController>("CSController")->GetCvarSystem().LockAllCvars(Count);
-			this->IDebugger->AddSucc("成功限住" + std::to_string(Count) + "个控制台命令！");
+			this->ISys().LogSucc("成功限住" + std::to_string(Count) + "个控制台命令！");
 		}
 		if(ImGui::Button("列出所有CS2控制台变量")) {
-			this->IDebugger->AddInfo("---------------------------------------------------------------------------------");
+			this->ISys().LogInfo("---------------------------------------------------------------------------------");
 			uint64_t idx = 0;
 			this->Core->ModuleManager()->FindModule<CSController>("CSController")->GetCvarSystem().GetFirstCvarIterator(idx);
 			while (idx!=0xFFFFFFFF) {
 				C_ConVar* var = this->Core->ModuleManager()->FindModule<CSController>("CSController")->GetCvarSystem().GetCVarByIndex(idx);
 				if (var) {
 					std::string Name = var->szName ? var->szName : "未知";
-					this->IDebugger->AddInfo("控制台命令：" + Name);
+					this->ISys().LogInfo("控制台命令：" + Name);
 				}
 				this->Core->ModuleManager()->FindModule<CSController>("CSController")->GetCvarSystem().GetNextCvarIterator(idx);
 			}
-			this->IDebugger->AddInfo("---------------------------------------------------------------------------------");
+			this->ISys().LogInfo("---------------------------------------------------------------------------------");
 		}
 	}
 
