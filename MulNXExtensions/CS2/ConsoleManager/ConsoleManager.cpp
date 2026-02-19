@@ -10,21 +10,11 @@
 #include <MulNXThirdParty/All_ImGui.hpp>
 
 bool ConsoleManager::Init() {
-    auto SingleContext = MulNXUINode::Create(this);
-    auto* SContextPtr = SingleContext.get<MulNXUINode>();
-    SContextPtr->name = "ConsoleManager";
-    SContextPtr->MyFunc = [this](MulNXUINode* This)->void {
-        this->Menu();
-    };
-
-    MulNX::Message Msg(MulNX::MsgType::UISystem_ModulePush);
-    Msg.Handle = this->Core->IHandleSystem().RegisteUnique(std::move(SingleContext));
-    this->IPublish(std::move(Msg));
-    
+    this->NeedUINode = true;
     return true;
 }
 
-void ConsoleManager::Menu() {
+bool ConsoleManager::UINodeFunc(MulNXUINode* ThisNode) {
 	MulNX::AutoChild Child(this,"ConsoleManager", 0.5f);// 占据半个窗口高度，另一半给VirtualUser
 
 	if (ImGui::CollapsingHeader("调试器控制")) {
@@ -74,7 +64,7 @@ void ConsoleManager::Menu() {
 		}
 	}
 
-	return;
+	return true;
 }
 
 void ConsoleManager::VirtualMain() {

@@ -239,7 +239,7 @@ std::string MulNX::IPCer::GetAllPathMsg() {
 		<< "\n                          当前Projects文件夹路径：" << this->PathGet_CurrentProject()
 		<< "\n                              当前Solutions文件夹路径：" << this->PathGet_CurrentSolutions()
 		<< "\n                              当前Elements文件夹路径：" << this->PathGet_CurrentElements()
-		<< "\n  MulNX.exe路径：" << this->PathGet_MulNX_exe();
+        << "\n  CS2Injector.exe路径：" << this->PathGet_MulNX_exe();
 
 	return oss.str();
 }

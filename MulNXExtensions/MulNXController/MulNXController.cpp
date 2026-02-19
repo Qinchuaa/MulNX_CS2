@@ -5,66 +5,62 @@
 #include <MulNX/Systems/Debugger/Debugger.hpp>
 #include <MulNXThirdParty/All_ImGui.hpp>
 
+bool MulNXController::UINodeFunc(MulNXUINode* ThisNode) {
+    static bool debugMode = this->GlobalVars->DebugMode;
+    if (ImGui::Checkbox("调试模式（Debug Mode），提供更多功能，但可能影响性能和稳定性", &debugMode)) {
+        this->GlobalVars->DebugMode = debugMode;
+    }
+    if (ImGui::Button("打开调试器")) {
+        this->IDebugger->OpenWindow();
+    }
+    ImGui::SameLine();
+    if (ImGui::Button("关闭调试器")) {
+        this->IDebugger->CloseWindow();
+    }
+    if (ImGui::Button("保存调试日志到文件")) {
+        MulNX::Message Msg(MulNX::MsgType::Debugger_SaveToFile);
+        this->IPublish(std::move(Msg));
+    }
+    ImGui::Checkbox("当有错误信息时弹出调试器", &this->IDebugger->ShowWhenError);
+    ImGui::Checkbox("自动滚动到最新消息", &this->IDebugger->AutoScroll);
+    static int MaxDebugMsgs = 1000;
+    ImGui::Text("设置最大消息数量（至少100）:");
+    ImGui::SameLine();
+    ImGui::InputInt("##最大消息数量", &MaxDebugMsgs);
+    ImGui::SameLine();
+    if (ImGui::Button("应用")) {
+        MulNX::Message Msg(MulNX::MsgType::Debugger_SetMaxInfoCount);
+        Msg.ParamInt = MaxDebugMsgs;
+        this->IPublish(std::move(Msg));
+    }
+    if (ImGui::Button("尝试拉取所有模块信息")) {
+        MulNX::Message Msg(MulNX::MsgType::ModuleManager_RequestModuleInfo);
+        Msg.pMsgChannel = this->MainMsgChannel;
+        this->IPublish(std::move(Msg));
+    }
+    if (ImGui::CollapsingHeader("初始化控制")) {
+        if (ImGui::Button("初始化IPCer")) {
+            this->ISys().LogInfo("正在尝试初始化IPCer");
+            this->Core->IPCer().Init();
+        }
+        ImGui::SameLine();
+        if (ImGui::Button("查看IPCer结果")) {
+            if (this->Core->IPCer().IsInited()) {
+                this->ISys().LogInfo("---------------------------------------------------------------------------------");
+                this->ISys().LogInfo(this->Core->IPCer().GetAllPathMsg());
+                this->ISys().LogInfo("---------------------------------------------------------------------------------");
+            }
+            else {
+                this->ISys().LogError("IPCer尚未初始化成功！");
+            }
+        }
+    }
+    return true;
+}
+
 bool MulNXController::Init() {
     this->MainMsgChannel = this->ICreateAndGetMessageChannel();
-
-    auto UINode = MulNXUINode::Create(this);
-    auto* pUINode = UINode.get<MulNXUINode>();
-    pUINode->name = "MulNXController";
-    pUINode->MyFunc = [this](MulNXUINode* This)->void {
-        static bool debugMode = this->GlobalVars->DebugMode;
-        if (ImGui::Checkbox("调试模式（Debug Mode），提供更多功能，但可能影响性能和稳定性", &debugMode)) {
-            this->GlobalVars->DebugMode = debugMode;
-        }
-        if (ImGui::Button("打开调试器")) {
-            this->IDebugger->OpenWindow();
-        }
-        ImGui::SameLine();
-        if (ImGui::Button("关闭调试器")) {
-            this->IDebugger->CloseWindow();
-        }
-        if(ImGui::Button("保存调试日志到文件")){
-            MulNX::Message Msg(MulNX::MsgType::Debugger_SaveToFile);
-            this->IPublish(std::move(Msg));
-        }
-        ImGui::Checkbox("当有错误信息时弹出调试器", &this->IDebugger->ShowWhenError);
-        ImGui::Checkbox("自动滚动到最新消息", &this->IDebugger->AutoScroll);
-        static int MaxDebugMsgs = 1000;
-        ImGui::Text("设置最大消息数量（至少100）:");
-        ImGui::SameLine();
-        ImGui::InputInt("##最大消息数量", &MaxDebugMsgs);
-        ImGui::SameLine();
-        if (ImGui::Button("应用")) {
-            MulNX::Message Msg(MulNX::MsgType::Debugger_SetMaxInfoCount);
-            Msg.ParamInt = MaxDebugMsgs;
-            this->IPublish(std::move(Msg));
-        }
-        if (ImGui::Button("尝试拉取所有模块信息")) {
-            MulNX::Message Msg(MulNX::MsgType::ModuleManager_RequestModuleInfo);
-            Msg.pMsgChannel = this->MainMsgChannel;
-            this->IPublish(std::move(Msg));
-        }
-        if (ImGui::CollapsingHeader("初始化控制")) {
-            if (ImGui::Button("初始化IPCer")) {
-                this->ISys().LogInfo("正在尝试初始化IPCer");
-                this->Core->IPCer().Init();
-            }
-            ImGui::SameLine();
-            if (ImGui::Button("查看IPCer结果")) {
-                if (this->Core->IPCer().IsInited()) {
-                    this->ISys().LogInfo("---------------------------------------------------------------------------------");
-                    this->ISys().LogInfo(this->Core->IPCer().GetAllPathMsg());
-                    this->ISys().LogInfo("---------------------------------------------------------------------------------");
-                }
-                else {
-                    this->ISys().LogError("IPCer尚未初始化成功！");
-                }
-            }
-        }
-        };
-    MulNX::Message Msg(MulNX::MsgType::UISystem_ModulePush);
-    Msg.Handle = this->Core->IHandleSystem().RegisteUnique(std::move(UINode));
-    this->IPublish(std::move(Msg));
+    this->NeedUINode = true;
 
     this->IDebugger->SetShowFunc([](MulNX::Debugger* This)->void {
         ImGui::Begin("调试器");

@@ -12,6 +12,5 @@ public:
 
     bool Init()override;
     void VirtualMain()override;
-
-    void Menu();
+    bool UINodeFunc(MulNXUINode* ThisNode)override;
 };
