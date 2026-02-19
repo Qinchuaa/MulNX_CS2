@@ -2,6 +2,7 @@
 
 #include "../Core.hpp"
 #include "../CoreImpl.hpp"
+#include "../Core/ModuleManager/ModuleManager.hpp"
 
 #include "../../Systems/MessageManager/IMessageManager.hpp"
 #include "../../Systems/HandleSystem/IHandleSystem.hpp"
@@ -37,22 +38,6 @@ void MulNX::ModuleBase::SetMyThreadDelta(int Delta) {
     this->MyThreadDelta = Delta;
 }
 
-//默认虚函数实现
-
-void MulNX::ModuleBase::VirtualMain() {
-    return;
-}
-void MulNX::ModuleBase::ThreadMain() {
-    return;
-}
-void MulNX::ModuleBase::ProcessMsg(MulNX::Message* Msg) {
-    return;
-}
-void MulNX::ModuleBase::Windows() {
-    return;
-}
-
-
 //窗口控制
 
 void MulNX::ModuleBase::OpenWindow() {
@@ -65,14 +50,14 @@ bool MulNX::ModuleBase::IsWindowOpen()const {
     return this->ShowWindow;
 }
 
-//基本函数
+// 初始化
 bool MulNX::ModuleBase::BaseInit() {
     try {
-        this->IMsgManager = &this->Core->pImpl->MessageManager;
-        this->IDebugger = &this->Core->pImpl->Debugger;
-        this->GlobalVars = &this->Core->pImpl->GlobalVars;
-        this->AL3D = &this->Core->pImpl->AL3D;
-        this->KT = &this->Core->pImpl->KT;
+        this->IMsgManager = this->Core->ModuleManager()->FindModule<MulNX::IMessageManager>("MessageManager");
+        this->IDebugger = this->Core->ModuleManager()->FindModule<MulNX::IDebugger>("Debugger");
+        this->GlobalVars = this->Core->ModuleManager()->FindModule<MulNX::GlobalVars>("GlobalVars");
+        this->AL3D = this->Core->ModuleManager()->FindModule<MulNX::AbstractLayer3D>("AbstractLayer3D");
+        this->KT = this->Core->ModuleManager()->FindModule<MulNX::KeyTracker>("KeyTracker");
 
         if (!this->HModule.IsValid()) {
             this->HModule = MulNXHandle::CreateHandle();
@@ -85,25 +70,6 @@ bool MulNX::ModuleBase::BaseInit() {
 
     return true;
 }
-void MulNX::ModuleBase::BaseVirtualMain() {
-    return;
-}
-void MulNX::ModuleBase::BaseProcessMsg() {
-    MulNX::IMessageChannel* Channel = this->MainMsgChannel;
-    if (Channel != nullptr) {
-        MulNX::Message Msg{ MulNX::MsgType::Null };
-        while (Channel->PullMessage(Msg)) {
-            this->ProcessMsg(&Msg);
-        }
-    }
-    return;
-}
-void MulNX::ModuleBase::BaseWindows() {
-    return;
-}
-
-
-//各类入口点函数
 bool MulNX::ModuleBase::EntryInit(MulNX::Core::Core* Core) {
     this->Core = Core;
     if (!this->BaseInit()) {
@@ -112,12 +78,19 @@ bool MulNX::ModuleBase::EntryInit(MulNX::Core::Core* Core) {
     if (!this->Init()) {
         return false;
     }
+    this->ISys().LogSucc("初始化成功!");
+    this->Inited = true;
     return true;
+}
+// 主循环
+void MulNX::ModuleBase::BaseVirtualMain() {
+    return;
 }
 void MulNX::ModuleBase::EntryVirtualMain() {
     this->BaseVirtualMain();
     this->VirtualMain();
 }
+// 线程创建
 bool MulNX::ModuleBase::EntryCreateThread() {
     for (;;) {
         //如果线程已经创建，则立即返回
@@ -145,6 +118,17 @@ bool MulNX::ModuleBase::EntryCreateThread() {
         }
     }
 }
+// 消息处理
+void MulNX::ModuleBase::BaseProcessMsg() {
+    MulNX::IMessageChannel* Channel = this->MainMsgChannel;
+    if (Channel != nullptr) {
+        MulNX::Message Msg{ MulNX::MsgType::Null };
+        while (Channel->PullMessage(Msg)) {
+            this->ProcessMsg(&Msg);
+        }
+    }
+    return;
+}
 void MulNX::ModuleBase::EntryProcessMsg() {
     this->BaseProcessMsg();
     auto pMsg = this->CurrentMsg.load();
@@ -154,10 +138,15 @@ void MulNX::ModuleBase::EntryProcessMsg() {
         this->IMsgManager->Release();
     }
 }
+// 窗口
+void MulNX::ModuleBase::BaseWindows() {
+    return;
+}
 void MulNX::ModuleBase::EntryWindows() {
     this->BaseWindows();
     this->Windows();
 }
+
 
 void MulNX::ModuleBase::IRegiste() {
     this->IMsgManager->Registe(this);

@@ -37,7 +37,8 @@ namespace MulNX {
                 this->RegisteModule(std::move(Module), std::move(Name), Priority);
                 return *this;
             }
-            
+            ModuleManager& CreateSystemModules();
+
             // 根据名称获取模块指针
 			MulNX::ModuleBase* FindModule(const std::string& Name);
 			// 按类型查找模块

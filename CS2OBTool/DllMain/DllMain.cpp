@@ -11,30 +11,33 @@
 
 #include <Windows.h>
 
+// 这是MulNX_CS2项目的入口文件，也是MulNX项目的示例模块
+// 本文件展示了如何使用MulNX核心系统创建一个功能完整的注入式DLL工具。
+
 static void MainDraw(MulNXUINode* ThisNode) {
     ImGui::Begin("主窗口");
     if (ImGui::BeginTabBar("主标签页集")) {
-        if (ImGui::BeginTabItem("Demo助手")) {
-            ThisNode->CallUINode("DemoHelper");
+        if (ImGui::BeginTabItem("摄像机系统")) {
+            ThisNode->CallUINode("CameraSystem");
             ImGui::EndTabItem();
         }
         if (ImGui::BeginTabItem("游戏设置")) {
             ThisNode->CallUINode("GameSettings");
             ImGui::EndTabItem();
         }
-        if (ImGui::BeginTabItem("总控台")) {
+        if (ImGui::BeginTabItem("控制台")) {
             ThisNode->CallUINode("ConsoleManager");
+            ImGui::EndTabItem();
+        }
+        if (ImGui::BeginTabItem("Demo助手")) {
+            ThisNode->CallUINode("DemoHelper");
             ImGui::EndTabItem();
         }
         if (ImGui::BeginTabItem("调试")) {
             ThisNode->CallUINode("Debug");
             ImGui::EndTabItem();
         }
-        if (ImGui::BeginTabItem("摄像机系统")) {
-            ThisNode->CallUINode("CameraSystem");
-            ImGui::EndTabItem();
-        }
-        if (ImGui::BeginTabItem("MulNXController")) {
+        if (ImGui::BeginTabItem("MulNX框架控制器")) {
             ThisNode->CallUINode("MulNXController");
             ImGui::EndTabItem();
         }
@@ -76,9 +79,9 @@ DWORD MulNX_CS2_Start(void*) {
     Starter->InitEndCall = [Core]() {
         MulNX::Core::CoreStarterBase* starter = Core->GetStarter();
         // 初始化额外任务（对系统无影响）
-        starter->IDebugger->AddSucc("注入成功！");
-        starter->IDebugger->AddSucc("各模块初始化完成！");
-        starter->IDebugger->AddWarning("您正在使用测试版本！！");
+        starter->ISys().LogSucc("注入成功！");
+        starter->ISys().LogInfo("各模块初始化完成！");
+        starter->ISys().LogWarning("您正在使用测试版本！！");
         starter->AL3D->ExecuteCommand("playdemo 111");
         std::thread([]() {
             MessageBoxW(NULL, L"MulNXDLL 注入成功！", L"MulNX", MB_OK | MB_ICONINFORMATION);
@@ -93,6 +96,7 @@ DWORD MulNX_CS2_Start(void*) {
 
     // 注册所有模块
     (*Core->ModuleManager())
+        .CreateSystemModules()// 创建所有系统模块，这是框架运行的基础
         .CreateModule<CameraSystem>("CameraSystem", 101)// 摄像机系统模块
         .CreateModule<MiniMap>("MiniMap", 103)// 小地图模块
         .CreateModule<VirtualUser>("VirtualUser", 104)// 虚拟用户模块

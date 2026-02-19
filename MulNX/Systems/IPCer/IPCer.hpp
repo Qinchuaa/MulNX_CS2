@@ -98,8 +98,6 @@ namespace MulNX {
             //this->Type = MulNX::ModuleType::IPCer;
         }
 
-        bool Inited = false;
-
         bool Init()override;
 
         bool GetWindowPathByName(const LPCWSTR& WindowName, std::filesystem::path& Output);

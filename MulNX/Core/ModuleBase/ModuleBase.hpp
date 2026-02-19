@@ -1,27 +1,27 @@
 #pragma once
 
-#include"../../Base/Base.hpp"
+#include "../../Base/Base.hpp"
 
 // 前向声明：MulNXController 位于 MulNXExtensions 命名空间
 namespace MulNXExtensions { class MulNXController; }
 
 namespace MulNX {
-	// 模块基类
+    class C_ISys {
+        friend ModuleBase;
+        C_ISys() = delete;
+        ModuleBase* pModuleBase = nullptr;
+        C_ISys(ModuleBase* pModuleBase) {
+            this->pModuleBase = pModuleBase;
+        }
+    public:
+        void LogInfo(const std::string& Msg);
+        void LogSucc(const std::string& Msg);
+        void LogWarning(const std::string& Msg);
+        void LogError(const std::string& Msg);
+    };
+    // 模块基类
 	class ModuleBase {
         friend MulNX::Core::Core;
-        class C_ISys {
-            friend ModuleBase;
-            C_ISys() = delete;
-            ModuleBase* pModuleBase = nullptr;
-            C_ISys(ModuleBase* pModuleBase) {
-                this->pModuleBase = pModuleBase;
-            }
-        public:
-            void LogInfo(const std::string& Msg);
-            void LogSucc(const std::string& Msg);
-            void LogWarning(const std::string& Msg);
-            void LogError(const std::string& Msg);
-        };
         friend C_ISys;
     protected:
         // 标记是否已经完成初始化，未完成前不允许执行主循环等操作
@@ -77,7 +77,10 @@ namespace MulNX {
 		ModuleBase(ModuleBase&&) = delete;
 		ModuleBase& operator=(const ModuleBase&) = delete;
 		ModuleBase& operator=(ModuleBase&&) = delete;
-		// 提供输入核心管理器指针的构造函数，进行绑定
+		// 提供输入名称的构造函数，方便创建时直接命名
+        ModuleBase(std::string&& Name) {
+            this->SetName(std::move(Name));
+        }
 		ModuleBase();
 		// 虚析构函数确保正确调用析构函数
 		virtual ~ModuleBase();
@@ -96,14 +99,14 @@ namespace MulNX {
 		virtual bool Init() = 0;
 
 		// 虚拟主循环，执行组件逻辑
-		virtual void VirtualMain();
+        virtual void VirtualMain() {};
 		// 线程主循环，执行组件线程逻辑
-		virtual void ThreadMain();
+        virtual void ThreadMain() {};
 		// 消息处理函数，只需处理即可，消息会由入口点释放
-		virtual void ProcessMsg(MulNX::Message* Msg);
+        virtual void ProcessMsg(MulNX::Message* Msg) {};
 
 		// 窗口绘制
-		virtual void Windows();
+        virtual void Windows() {};
 
 
 		// 基本函数
@@ -152,7 +155,7 @@ namespace MulNX {
 		void IPublish(MulNX::MsgType Msg);
 		// 自动创建私有消息管道
 		MulNX::IMessageChannel* ICreateAndGetMessageChannel();
-    protected:
+    public:
         C_ISys ISys();
     };
 

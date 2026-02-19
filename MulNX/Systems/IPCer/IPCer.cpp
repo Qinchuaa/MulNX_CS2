@@ -74,7 +74,6 @@ bool MulNX::IPCer::Init() {
     this->Paths.Counter_Strike_Global_Offensive.game.csgo.Path = this->Paths.Counter_Strike_Global_Offensive.game.Path / "csgo";
     this->Paths.Counter_Strike_Global_Offensive.game.csgo.cfg.Path = this->Paths.Counter_Strike_Global_Offensive.game.csgo.Path / "cfg";
 
-    this->ISys().LogSucc("IPCer初始化成功!");
     this->Inited = true;
 	return true;
 }

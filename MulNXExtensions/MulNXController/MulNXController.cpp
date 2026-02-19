@@ -46,7 +46,7 @@ bool MulNXController::Init() {
             }
             ImGui::SameLine();
             if (ImGui::Button("查看IPCer结果")) {
-                if (this->Core->IPCer().Inited) {
+                if (this->Core->IPCer().IsInited()) {
                     this->ISys().LogInfo("---------------------------------------------------------------------------------");
                     this->ISys().LogInfo(this->Core->IPCer().GetAllPathMsg());
                     this->ISys().LogInfo("---------------------------------------------------------------------------------");

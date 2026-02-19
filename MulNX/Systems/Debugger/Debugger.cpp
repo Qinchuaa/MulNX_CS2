@@ -49,43 +49,43 @@ void MulNX::Debugger::ResetMaxMsgCount(const int Max) {
 }
 
 void MulNX::Debugger::PushBack(const std::string& NewMsg, const std::string& prefix) {
-    //这里不需要锁，因为调用此函数的上层函数已经加锁
-    //检查字符串是否包含换行符
+    // 这里不需要锁，因为调用此函数的上层函数已经加锁
+    // 检查字符串是否包含换行符
     if (NewMsg.find('\n') == std::string::npos && NewMsg.find('\r') == std::string::npos) {
-        //没有换行符，直接添加（注意：这里需要加上前缀）
+        // 没有换行符，直接添加（注意：这里需要加上前缀）
         if (this->DebugMsg.size() == this->MaxMsgCount) {
             this->DebugMsg.pop_front();
         }
         this->DebugMsg.push_back(prefix + NewMsg);
     }
     else {
-        //有换行符，分割字符串并为每一行添加前缀
+        // 有换行符，分割字符串并为每一行添加前缀
         std::istringstream iss(NewMsg);
         std::string line;
         bool firstLine = true;
         int lineCount = 0;
 
         while (std::getline(iss, line)) {
-            //清理回车符
+            // 清理回车符
             if (!line.empty() && line.back() == '\r') {
                 line.pop_back();
             }
 
-            //跳过空行
+            // 跳过空行
             if (line.empty()) continue;
 
             std::string formattedLine;
             if (firstLine) {
-                //第一行直接添加前缀
+                // 第一行直接添加前缀
                 formattedLine = prefix + line;
                 firstLine = false;
             }
             else {
-                //后续行添加前缀//和缩进
+                // 后续行添加前缀//和缩进
                 formattedLine = prefix + line;
             }
 
-            //添加到消息队列
+            // 添加到消息队列
             if (this->DebugMsg.size() == this->MaxMsgCount) {
                 this->DebugMsg.pop_front();
             }

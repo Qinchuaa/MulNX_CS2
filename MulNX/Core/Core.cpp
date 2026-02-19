@@ -2,16 +2,16 @@
 #include "CoreStarterBase/CoreStarterBase.hpp"
 
 // 构造函数和析构函数需要管理pImpl的生命周期
-Core::Core() {
+MulNX::Core::Core::Core() {
 	// 创建Impl实例
-	this->pImpl = std::make_unique<CoreImpl>();
+    this->pImpl = std::make_unique<CoreImpl>();
 }
 
-Core::~Core() {
+MulNX::Core::Core::~Core() {
 	return;
 }
 
-bool Core::SetCoreStarter(std::unique_ptr<CoreStarterBase> Starter) {
+bool MulNX::Core::Core::SetCoreStarter(std::unique_ptr<CoreStarterBase> Starter) {
 	if (!Starter) {
 		return false;
 	}
@@ -19,28 +19,49 @@ bool Core::SetCoreStarter(std::unique_ptr<CoreStarterBase> Starter) {
 	return true;
 }
 
-ModuleManager* Core::ModuleManager() {
+MulNX::Core::ModuleManager* MulNX::Core::Core::ModuleManager() {
 	return &this->pImpl->ModuleManager;
 }
 
 // 获取子模块的接口实现
 
-MulNX::IHandleSystem&	Core::IHandleSystem() { return this->pImpl->HandleSystem; }
-MulNX::IUISystem&		Core::IUISystem() { return this->pImpl->UISystem; }
-MulNX::IPCer&			Core::IPCer() { return this->pImpl->IPCer; }
-MulNX::IMessageManager& Core::IMessageManager() { return this->pImpl->MessageManager; }
+MulNX::IHandleSystem& MulNX::Core::Core::IHandleSystem() {
+    static MulNX::IHandleSystem* pIHandleSystem = nullptr;
+    if (!pIHandleSystem) {
+        pIHandleSystem = this->ModuleManager()->FindModule<MulNX::IHandleSystem>("HandleSystem");
+    }
+    return *pIHandleSystem;
+}
+MulNX::IUISystem& MulNX::Core::Core::IUISystem() {
+    static MulNX::IUISystem* pIUISystem = nullptr;
+    if (!pIUISystem) {
+        pIUISystem = this->ModuleManager()->FindModule<MulNX::IUISystem>("UISystem");
+    }
+    return *pIUISystem;
+}
+MulNX::IPCer& MulNX::Core::Core::IPCer() {
+    static MulNX::IPCer* pIPCer = nullptr;
+    if (!pIPCer) {
+        pIPCer = this->ModuleManager()->FindModule<MulNX::IPCer>("IPCer");
+    }
+    return *pIPCer;
+}
+MulNX::IMessageManager& MulNX::Core::Core::IMessageManager() {
+    static MulNX::IMessageManager* pIMessageManager = nullptr;
+    if (!pIMessageManager) {
+        pIMessageManager = this->ModuleManager()->FindModule<MulNX::IMessageManager>("MessageManager");
+    }
+    return *pIMessageManager;
+}
 
 // 专用初始化函数
-void Core::Init() {
+void MulNX::Core::Core::Init() {
 	// 核心启动器初始化
 	this->pCoreStarter->EntryInit(this);
 	// 通过核心启动器进行系统初始化
 	this->pCoreStarter->SystemInit(this->pImpl.get(), this);
 
-	// 3D抽象层初始化
-	this->pImpl->AL3D.EntryInit(this);
-
-	this->pImpl->GlobalVars.SystemReady = true;
+	this->ModuleManager()->FindModule<MulNX::GlobalVars>("GlobalVars")->SystemReady = true;
 
 	// 初始化注册模块
 	this->pImpl->ModuleManager.PackedInit();
@@ -52,15 +73,10 @@ void Core::Init() {
 }
 
 // 主逻辑
-void Core::VirtualMain() {
-	this->pImpl->GlobalVars.EntryVirtualMain();
-	this->pImpl->AL3D.EntryVirtualMain();
-	this->pImpl->Debugger.EntryVirtualMain();
+void MulNX::Core::Core::VirtualMain() {
 	// 包装的，所有的模块的VirtualMain
 	this->pImpl->ModuleManager.EntryVirtualMain();
     // 包装的，所有模块的窗口逻辑
-    this->pImpl->Debugger.EntryWindows();
     this->pImpl->ModuleManager.EntryWindows();
-
 	return;
 }

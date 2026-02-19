@@ -1,8 +1,13 @@
 #include "ModuleManager.hpp"
 #include "../Core.hpp"
-#include "../../Systems/HandleSystem/IHandleSystem.hpp"
-#include "../../Systems/MessageManager/IMessageManager.hpp"
-
+#include "../../Systems/HandleSystem/HandleSystem.hpp"
+#include "../../Systems/MessageManager/MessageManager.hpp"
+#include "../../Systems/Debugger/Debugger.hpp"
+#include "../../Systems/KeyTracker/KeyTracker.hpp"
+#include "../../Systems/MulNXGlobalVars/MulNXGlobalVars.hpp"
+#include "../../Systems/AbstractLayer3D/AbstractLayer3D.hpp"
+#include "../../Systems/IPCer/IPCer.hpp"
+#include "../../Systems/MulNXUISystem/MulNXUISystem.hpp"
 #include <deque>
 
 using namespace MulNX::Core;
@@ -56,6 +61,20 @@ bool ModuleManager::RegisteModule(std::unique_ptr<MulNX::ModuleBase>&& Module, s
     // 同时记录优先级
     this->PriorityToHandleMap[Priority] = hModule;
 	return true;
+}
+ModuleManager& ModuleManager::CreateSystemModules() {
+    (*this)
+        .CreateModule<MulNX::MessageManager>("MessageManager", 5)// 消息管理器模块
+        .CreateModule<MulNX::Debugger>("Debugger", 10)// 调试器模块
+        .CreateModule<MulNX::HandleSystem>("HandleSystem", 20)// 句柄系统模块
+        .CreateModule<MulNX::IPCer>("IPCer", 30)// IPC模块
+        .CreateModule<MulNX::KeyTracker>("KeyTracker", 50)// 按键追踪器模块
+        .CreateModule<MulNX::GlobalVars>("GlobalVars", 70)// 全局变量模块
+        .CreateModule<MulNX::AbstractLayer3D>("AbstractLayer3D", 90)// 3D抽象层模块
+        .CreateModule<MulNX::UISystem>("UISystem", 95);// UI系统模块
+        ;
+
+    return *this;
 }
 MulNX::ModuleBase* ModuleManager::FindModule(const std::string& Name) {
 	std::shared_lock lock(this->MyThreadMutex);
