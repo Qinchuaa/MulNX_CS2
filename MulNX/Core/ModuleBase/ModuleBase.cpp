@@ -2,14 +2,13 @@
 
 #include "../Core.hpp"
 #include "../CoreImpl.hpp"
-#include "../Core/ModuleManager/ModuleManager.hpp"
+#include "../ModuleManager/ModuleManager.hpp"
 
-#include "../../Systems/MessageManager/IMessageManager.hpp"
-#include "../../Systems/HandleSystem/IHandleSystem.hpp"
+#include "../../Systems/Systems.hpp"
 
-#include "../../ThirdParty/All_ImGui.hpp"
+#include <MulNXThirdParty/All_ImGui.hpp>
 
-//构造与析构函数，线程自动析构
+// 构造与析构函数，线程自动析构
 MulNX::ModuleBase::ModuleBase() {
 
 }
@@ -33,12 +32,12 @@ std::string MulNX::ModuleBase::GetName()const {
     return this->ModuleName;
 }
 
-//模块自用
+// 模块自用
 void MulNX::ModuleBase::SetMyThreadDelta(int Delta) {
     this->MyThreadDelta = Delta;
 }
 
-//窗口控制
+// 窗口控制
 
 void MulNX::ModuleBase::OpenWindow() {
     this->ShowWindow = true;
@@ -56,7 +55,7 @@ bool MulNX::ModuleBase::BaseInit() {
         this->IMsgManager = this->Core->ModuleManager()->FindModule<MulNX::IMessageManager>("MessageManager");
         this->IDebugger = this->Core->ModuleManager()->FindModule<MulNX::IDebugger>("Debugger");
         this->GlobalVars = this->Core->ModuleManager()->FindModule<MulNX::GlobalVars>("GlobalVars");
-        this->AL3D = this->Core->ModuleManager()->FindModule<MulNX::AbstractLayer3D>("AbstractLayer3D");
+        this->AL3D = this->Core->ModuleManager()->FindModule<MulNX::IAbstractLayer3D>("AbstractLayer3D");
         this->KT = this->Core->ModuleManager()->FindModule<MulNX::KeyTracker>("KeyTracker");
 
         if (!this->HModule.IsValid()) {
@@ -70,6 +69,30 @@ bool MulNX::ModuleBase::BaseInit() {
 
     return true;
 }
+bool MulNX::ModuleBase::CreateUINode() {
+    try {
+        // 创建UI节点
+        auto UINode = MulNXUINode::Create(this);
+        auto* pUINode = UINode.get<MulNXUINode>();
+        // 设置UI节点属性
+        pUINode->name = this->GetName();
+        pUINode->MyFunc = [this](MulNXUINode* ThisNode) {
+            return this->UINodeFunc(ThisNode);
+            };
+        // 注册UI句柄
+        MulNXHandle hUINode = this->Core->IHandleSystem().RegisteUnique(std::move(UINode));
+        // 创建UI消息并设置句柄
+        MulNX::Message Msg(MulNX::MsgType::UISystem_ModulePush);
+        Msg.Handle = hUINode;
+        // 发送UI消息
+        this->IPublish(std::move(Msg));
+        this->ISys().LogInfo("推送了UI节点到UI系统");
+    }
+    catch (...) {
+        return false;
+    }
+    return true;
+}
 bool MulNX::ModuleBase::EntryInit(MulNX::Core::Core* Core) {
     this->Core = Core;
     if (!this->BaseInit()) {
@@ -77,6 +100,11 @@ bool MulNX::ModuleBase::EntryInit(MulNX::Core::Core* Core) {
     }
     if (!this->Init()) {
         return false;
+    }
+    if(this->NeedUINode) {
+        if (!this->CreateUINode()) {
+            return false;
+        }
     }
     this->ISys().LogSucc("初始化成功!");
     this->Inited = true;

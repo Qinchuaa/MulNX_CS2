@@ -8,13 +8,13 @@
 
 #include "../../Core/Core.hpp"
 
-#include "../../ThirdParty/All_ImGui.hpp"
+#include <MulNXThirdParty/All_ImGui.hpp>
 
 bool MulNX::UISystem::Init() {
     this->MainMsgChannel = this->ICreateAndGetMessageChannel();
-    (*this->MainMsgChannel)
-        .Subscribe(MulNX::MsgType::UISystem_Start)
-        .Subscribe(MulNX::MsgType::UISystem_ModulePush);
+    this->ISys()
+        .SubscribeAsync(MulNX::MsgType::UISystem_Start)
+        .SubscribeAsync(MulNX::MsgType::UISystem_ModulePush);
     this->UIContext.Core = this->Core;
     return true;
 }

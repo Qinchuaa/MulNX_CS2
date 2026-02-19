@@ -4,7 +4,7 @@
 
 #include "../CameraSystem/ICameraSystem.hpp"
 
-#include <MulNX/ThirdParty/All_ImGui.hpp>
+#include <MulNXThirdParty/All_ImGui.hpp>
 
 bool VirtualUser::Init() {
     this->CameraSystem = this->Core->ModuleManager()->FindModule<ICameraSystem>("CameraSystem");
@@ -16,10 +16,10 @@ bool VirtualUser::Init() {
     this->ISubscribe(MulNX::MsgType::Core_Tick30min);
 #endif // _DEBUG
     this->MainMsgChannel = this->ICreateAndGetMessageChannel();
-    (*this->MainMsgChannel)
-        .Subscribe(MulNX::MsgType::CameraSystem_PlayingShutdown)
-        .Subscribe(MulNX::MsgType::Command_SpecPlayer)
-        .Subscribe(MulNX::MsgType::Game_NewRound);
+    this->ISys()
+        .SubscribeAsync(MulNX::MsgType::CameraSystem_PlayingShutdown)
+        .SubscribeAsync(MulNX::MsgType::Command_SpecPlayer)
+        .SubscribeAsync(MulNX::MsgType::Game_NewRound);
 
     return true;
 }

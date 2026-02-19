@@ -1,6 +1,6 @@
 #include "PlantedC4.hpp"
 
-#include <MulNX/ThirdParty/All_cs2_dumper.hpp>
+#include <MulNXThirdParty/All_cs2_dumper.hpp>
 #include <MulNXExtensions/WinExt/WinExt.hpp>
 
 void C_PlantedC4::Update() {

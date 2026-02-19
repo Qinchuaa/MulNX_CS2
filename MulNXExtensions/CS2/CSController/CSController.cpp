@@ -4,7 +4,7 @@
 
 #include <MulNX/MulNX.hpp>
 #include <MulNXExtensions/WinExt/WinExt.hpp>
-#include <MulNX/ThirdParty/All_cs2_dumper.hpp>
+#include <MulNXThirdParty/All_cs2_dumper.hpp>
 
 int CSController::GetIndexInEntityListFromIndexInMap(int IndexInMap) {
     std::shared_lock lock(this->IndexMapMtx);

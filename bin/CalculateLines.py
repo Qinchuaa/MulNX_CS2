@@ -11,7 +11,7 @@ def count_cpp_lines():
     parent_dir = current_dir.parent
     
     extensions = ('.cpp', '.hpp')
-    excluded_keyword = 'ThirdParty'
+    excluded_keyword = 'MulNXThirdParty'
     total_lines = 0
     total_files = 0
     processed_files = []

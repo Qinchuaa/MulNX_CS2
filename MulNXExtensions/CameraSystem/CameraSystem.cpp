@@ -9,25 +9,27 @@ bool CameraSystem::Init() {
     // 注意，本模块所有级别的管理器相互显示注入，其它服务借助Core隐式注入
     // 高频服务隐式注入，指针直调提升性能
     this->CamDrawer.Init(20.0, 30.0, 15.0, 10.0, IM_COL32(255, 0, 255, 255));
+
+    this->EManager.SetName("ElementManager");
     this->EManager.EntryInit(this->Core);
     this->EManager.InjectDependence(&this->CamDrawer, &this->SManager, &this->PManager);
 
+    this->SManager.SetName("SolutionManager");
     this->SManager.EntryInit(this->Core);
     this->SManager.InjectDependence(&this->CamDrawer, &this->EManager, &this->PManager);
 
+    this->PManager.SetName("ProjectManager");
     this->PManager.EntryInit(this->Core);
     this->PManager.InjectDependence(&this->EManager, &this->SManager);
 
+    this->WManager.SetName("WorkspaceManager");
     this->WManager.EntryInit(this->Core);
     this->WManager.InjectDependence(&this->EManager, &this->SManager, &this->PManager);
 
-    MulNXUINode::CreateAndRegiste(this, "CameraSystem", [this](MulNXUINode* This)->void {
-        this->Menu();
-        });
-
+    this->NeedUINode = true;
     return true;
 }
-void CameraSystem::Menu() {
+bool CameraSystem::UINodeFunc(MulNXUINode* ThisNode) {
     // 顶部：工作区信息（始终显示）
     ImGui::BeginChild("工作区面板", ImVec2(0, 150), true); {
         // 工作区状态
@@ -65,7 +67,7 @@ void CameraSystem::Menu() {
         ImGui::Text("在上方的工作区面板中加载（或创建并加载）一个工作区");
         ImGui::Text("工作区是管理项目、解决方案和元素的基础");
         ImGui::EndChild();
-        return;
+        return false;
     }
 
     // 进入工作区，显示工作区内容
@@ -116,7 +118,7 @@ void CameraSystem::Menu() {
     }
 
     ImGui::EndChild();
-    return;
+    return true;
 }
 
 // 各个小菜单

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../../../MulNX/ThirdParty/All_MinHook.hpp"
+#include <MulNXThirdParty/All_MinHook.hpp>
 
 #include <memory>
 #include <functional>

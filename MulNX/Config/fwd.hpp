@@ -43,3 +43,4 @@ namespace MulNX {
     //消息管道
     class IMessageChannel;
 }
+class MulNXUINode;

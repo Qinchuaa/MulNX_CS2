@@ -23,8 +23,9 @@ namespace MulNX {
 		Core_ReHook,
 
 		Debugger_SetMaxInfoCount,// 调试系统，设置记录的最多的信息数量
-
-		ModuleManager_RequestModuleInfo,// 模块管理器，组件向模块管理器请求目前加载的所有模块的信息
+        Debugger_SaveToFile,// 调试系统，保存日志到文件
+        
+        ModuleManager_RequestModuleInfo,// 模块管理器，组件向模块管理器请求目前加载的所有模块的信息
 		ModuleManager_ResponseModuleInfo,// 模块管理器，模块管理器向请求者回应信息
 
 		UISystem_Start,// 由核心向UI系统发送，启动UI系统

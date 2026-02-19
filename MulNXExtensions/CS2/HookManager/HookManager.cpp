@@ -2,7 +2,7 @@
 
 #include <MulNX/MulNX.hpp>
 
-#include <MulNX/ThirdParty/All_ImGui.hpp>
+#include <MulNXThirdParty/All_ImGui.hpp>
 
 #include <chrono>
 

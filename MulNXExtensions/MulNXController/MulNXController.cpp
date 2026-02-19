@@ -2,7 +2,8 @@
 
 #include <MulNX/MulNX.hpp>
 #include <MulNX/Systems/Systems.hpp>
-#include <MulNX/ThirdParty/All_ImGui.hpp>
+#include <MulNX/Systems/Debugger/Debugger.hpp>
+#include <MulNXThirdParty/All_ImGui.hpp>
 
 bool MulNXController::Init() {
     this->MainMsgChannel = this->ICreateAndGetMessageChannel();
@@ -21,6 +22,10 @@ bool MulNXController::Init() {
         ImGui::SameLine();
         if (ImGui::Button("关闭调试器")) {
             this->IDebugger->CloseWindow();
+        }
+        if(ImGui::Button("保存调试日志到文件")){
+            MulNX::Message Msg(MulNX::MsgType::Debugger_SaveToFile);
+            this->IPublish(std::move(Msg));
         }
         ImGui::Checkbox("当有错误信息时弹出调试器", &this->IDebugger->ShowWhenError);
         ImGui::Checkbox("自动滚动到最新消息", &this->IDebugger->AutoScroll);

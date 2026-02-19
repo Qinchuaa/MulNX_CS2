@@ -6,7 +6,7 @@
 #include "../MessageManager/IMessageManager.hpp"
 #include "../Debugger/IDebugger.hpp"
 #include "../MulNXUISystem/IMulNXUISystem.hpp"
-#include "../../MulNXExtensions/WinExt/WinExt.hpp"
+#include <MulNXExtensions/WinExt/WinExt.hpp>
 
 bool MulNX::AbstractLayer3D::Init() {
 	this->ISubscribe(MulNX::MsgType::Core_ReHook);

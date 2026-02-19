@@ -4,9 +4,9 @@
 
 #include <MulNX/MulNX.hpp>
 
-#include <MulNX/ThirdParty/All_ImGui.hpp>
+#include <MulNXThirdParty/All_ImGui.hpp>
 
-void GameSettingsManager::Menu() {
+bool GameSettingsManager::UINodeFunc(MulNXUINode* ThisNode) {
     MulNX::AutoChild Child(this, "GameSettingsManager");
     if (ImGui::Button("一键修复数字切人bug")) {
         this->AL3D->ExecuteCommand("unbind 1");
@@ -71,10 +71,10 @@ void GameSettingsManager::Menu() {
                     MulNX::Base::Math::DOFParam Param;
                     MulNX::Base::Math::CalculateDOFParameters(this->dof.FocusDistance, this->dof.CrispRadius, this->dof.BlurDistance, Param);
 
-                    *this->dof.r_dof_override_near_blurry = Param.NearBlurry;//近模糊
-                    *this->dof.r_dof_override_near_crisp = Param.NearCrisp;//近清晰
-                    *this->dof.r_dof_override_far_crisp = Param.FarCrisp;//远清晰
-                    *this->dof.r_dof_override_far_blurry = Param.FarBlurry;//远模糊
+                    *this->dof.r_dof_override_near_blurry = Param.NearBlurry;// 近模糊
+                    *this->dof.r_dof_override_near_crisp = Param.NearCrisp;// 近清晰
+                    *this->dof.r_dof_override_far_crisp = Param.FarCrisp;// 远清晰
+                    *this->dof.r_dof_override_far_blurry = Param.FarBlurry;// 远模糊
                 }
 
                 ImGui::Separator();
@@ -114,7 +114,7 @@ void GameSettingsManager::Menu() {
         }
     }
 
-    return;
+    return true;
 }
 
 bool GameSettingsManager::Init() {
@@ -152,10 +152,7 @@ bool GameSettingsManager::Init() {
     this->GameSettings.SoundSettings.snd_deathcamera_volume = CVarSystem.GetCvar("snd_deathcamera_volume")->GetPtr<float>();
     this->GameSettings.SoundSettings.snd_mute_mvp_music_live_players = CVarSystem.GetCvar("snd_mute_mvp_music_live_players")->GetPtr<bool>();
 
-    MulNXUINode::CreateAndRegiste(this, "GameSettings", [this](MulNXUINode* Node)->void {
-        this->Menu();
-        });
-    
+    this->NeedUINode = true;
     return true;
 }
 

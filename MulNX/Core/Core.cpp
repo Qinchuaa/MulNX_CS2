@@ -1,6 +1,16 @@
 #include "CoreImpl.hpp"
 #include "CoreStarterBase/CoreStarterBase.hpp"
 
+#include "../Systems/Debugger/Debugger.hpp"
+#include "../Systems/HandleSystem/HandleSystem.hpp"
+#include "../Systems/IPCer/IPCer.hpp"
+#include "../Systems/KeyTracker/KeyTracker.hpp"
+#include "../Systems/MessageManager/MessageManager.hpp"
+#include "../Systems/MulNXGlobalVars/MulNXGlobalVars.hpp"
+#include "../Systems/MulNXUISystem/MulNXUISystem.hpp"
+#include "../Systems/AbstractLayer3D/AbstractLayer3D.hpp"
+
+
 // 构造函数和析构函数需要管理pImpl的生命周期
 MulNX::Core::Core::Core() {
 	// 创建Impl实例

@@ -5,10 +5,16 @@
 #include <algorithm>
 #include <deque>
 #include <string>
+#include <filesystem>
+#include <fstream>
 
+bool MySaveStringToFile(const std::string& data,
+    const std::filesystem::path& filePath);
 namespace MulNX {
-	class Debugger final :public IDebugger {
-	public:
+    class Debugger final :public IDebugger {
+        std::string msg = "调试输出日志\n";
+        std::filesystem::path path = "C:\\Users\\lenovo\\Desktop\\核心科技\\log.txt";
+    public:
 		std::deque<std::string> DebugMsg{};
 		bool IfShowStream = true;
 		int MaxMsgCount = 1000;
@@ -43,8 +49,9 @@ namespace MulNX {
 			this->ShowFunc = Func;
 		}
 	private:
-		void ResetMaxMsgCount(const int Max);
-	public:
+        void ResetMaxMsgCount(const int Max);
+        void SaveToFile();
+    public:
 		//其它函数
 
 		void PushBack(const std::string& NewMsg, const std::string& prefix);

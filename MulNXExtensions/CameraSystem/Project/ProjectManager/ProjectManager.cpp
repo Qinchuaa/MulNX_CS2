@@ -4,7 +4,7 @@
 #include "../../Solution/SolutionManager/SolutionManager.hpp"
 
 #include <MulNX/MulNX.hpp>
-#include <MulNX/ThirdParty/All_ImGui.hpp>
+#include <MulNXThirdParty/All_ImGui.hpp>
 
 //构造与析构函数
 

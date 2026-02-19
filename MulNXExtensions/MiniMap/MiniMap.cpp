@@ -4,7 +4,7 @@
 
 #include <MulNXExtensions/CS2/MulNXCS2Ext.hpp>
 
-#include <MulNX/ThirdParty/All_ImGui.hpp>
+#include <MulNXThirdParty/All_ImGui.hpp>
 #include <algorithm>
 #include <string>
 #include <sstream>

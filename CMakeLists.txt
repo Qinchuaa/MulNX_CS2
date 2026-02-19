@@ -21,6 +21,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 
 project("MulNX")
 
+add_subdirectory("MulNXThirdParty")
 add_subdirectory("MulNX")
 add_subdirectory("MulNXExtensions")
 add_subdirectory("CS2OBTool")

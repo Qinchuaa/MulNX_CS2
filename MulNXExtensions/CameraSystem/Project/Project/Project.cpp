@@ -1,6 +1,6 @@
 #include "Project.hpp"
 
-#include <MulNX/ThirdParty/All_pugixml.hpp>
+#include <MulNXThirdParty/All_pugixml.hpp>
 
 #include <strstream>
 

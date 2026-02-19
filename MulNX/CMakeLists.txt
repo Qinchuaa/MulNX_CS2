@@ -34,10 +34,6 @@ add_library(MulNX
 
     "MulNX.cpp"
 )
-add_subdirectory(ThirdParty)
+target_link_libraries(MulNX PUBLIC MulNXThirdParty)
 
-# Link the ThirdParty library (ImGui sources) so the executable builds with those sources
-target_link_libraries(MulNX PUBLIC ThirdParty)
-
-# Allow including headers with the project-relative path, e.g. "ThirdParty/imgui_d11/imgui.h"
 target_include_directories(MulNX PUBLIC ${CMAKE_SOURCE_DIR})

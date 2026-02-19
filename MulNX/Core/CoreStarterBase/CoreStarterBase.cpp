@@ -2,11 +2,22 @@
 
 #include "../CoreImpl.hpp"
 
+#include "../../Systems/Debugger/Debugger.hpp"
+#include "../../Systems/HandleSystem/HandleSystem.hpp"
+#include "../../Systems/IPCer/IPCer.hpp"
+#include "../../Systems/KeyTracker/KeyTracker.hpp"
+#include "../../Systems/MessageManager/MessageManager.hpp"
+#include "../../Systems/MulNXGlobalVars/MulNXGlobalVars.hpp"
+#include "../../Systems/MulNXUISystem/MulNXUISystem.hpp"
+#include "../../Systems/AbstractLayer3D/AbstractLayer3D.hpp"
+
+
 using namespace MulNX::Core;
 
 bool CoreStarterBase::SystemInit(CoreImpl* pImpl, MulNX::Core::Core* pCore) {
-	// 无依赖核心基础模块初始化
-	pImpl->ModuleManager.EntryInit(pCore);
+    // 无依赖核心基础模块初始化
+    pImpl->ModuleManager.SetName("ModuleManager");
+    pImpl->ModuleManager.EntryInit(pCore);
     this->Core->ModuleManager()->FindModule<MulNX::MessageManager>("MessageManager")->EntryCreateThread();// 包含线程创建
 	this->Core->ModuleManager()->FindModule<MulNX::MessageManager>("MessageManager")->SetMyThreadDelta(10);// 注意，此模块内部动态调整频率
 	this->Core->ModuleManager()->FindModule<MulNX::KeyTracker>("KeyTracker")->EntryCreateThread();// 包含线程创建

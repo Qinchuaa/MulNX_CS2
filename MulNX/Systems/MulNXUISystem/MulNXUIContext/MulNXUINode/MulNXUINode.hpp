@@ -1,8 +1,8 @@
 #pragma once
 
-#include"../../../../Base/Base.hpp"
+#include "../../../../Base/Base.hpp"
 
-#include"../../../HandleSystem/HandleSystem.hpp"
+#include "../../../HandleSystem/HandleSystem.hpp"
 
 
 class MulNXUIContext;
@@ -24,14 +24,14 @@ public:
 		return MulNX::Base::DataWrite<T>(static_cast<MulNX::Base::TripleBufferBase*>(buf));
 	}
 
-	//按照线程管理进行成员分类
+	// 按照线程管理进行成员分类
 
-	//初始化即可
+	// 初始化即可
 	MulNXHandle HModule{};
 	MulNX::IMessageChannel* OwnerMsgChannel = nullptr;
 	MulNX::IMessageChannel* MyMsgChannel = nullptr;
 
-	//跨线程数据
+	// 跨线程数据
 
 	std::atomic<bool>Active = true;
 	std::atomic<bool>WaitingResponse = false;
@@ -52,6 +52,6 @@ public:
     static bool CreateAndRegiste(MulNX::ModuleBase* const MB, std::string&& Name, std::function<void(MulNXUINode*)>MyFunc);
 
 	MulNXUINode() = default;
-	//禁止拷贝
+	// 禁止拷贝
 	MulNXUINode(const MulNXUINode& Other) = delete;
 };

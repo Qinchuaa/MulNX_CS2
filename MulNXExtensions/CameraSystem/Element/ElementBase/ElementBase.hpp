@@ -1,11 +1,11 @@
 #pragma once
 
 #include <MulNX/MulNX.hpp>
-#include <MulNX/ThirdParty/All_pugixml.hpp>
+#include <MulNXThirdParty/All_pugixml.hpp>
 
 #include "../../CameraSystemIO/CameraSystemIO.hpp"
 
-#include <MulNX/ThirdParty/All_ImGui.hpp>
+#include <MulNXThirdParty/All_ImGui.hpp>
 
 #include <string>
 #include <filesystem>

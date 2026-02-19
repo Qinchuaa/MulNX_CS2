@@ -14,8 +14,8 @@ using namespace MulNX::Core;
 
 bool ModuleManager::Init() {
 	this->MainMsgChannel = this->ICreateAndGetMessageChannel();
-	(*this->MainMsgChannel)
-		.Subscribe(MulNX::MsgType::ModuleManager_RequestModuleInfo);
+	this->ISys()
+		.SubscribeAsync(MulNX::MsgType::ModuleManager_RequestModuleInfo);
 
 	return true;
 }

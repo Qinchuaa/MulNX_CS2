@@ -7,7 +7,7 @@
 
 #include <MulNXExtensions/MiniMap/MiniMap.hpp>
 
-#include <MulNX/ThirdParty/All_ImGui.hpp>
+#include <MulNXThirdParty/All_ImGui.hpp>
 
 bool ConsoleManager::Init() {
     auto SingleContext = MulNXUINode::Create(this);

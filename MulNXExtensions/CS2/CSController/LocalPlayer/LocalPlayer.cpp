@@ -1,7 +1,7 @@
 #include "LocalPlayer.hpp"
 
 #include <MulNXExtensions/WinExt/WinExt.hpp>
-#include <MulNX/ThirdParty/All_cs2_dumper.hpp>
+#include <MulNXThirdParty/All_cs2_dumper.hpp>
 
 std::ostringstream C_LocalPlayer::GetMsg() {
     std::shared_lock lock(this->LocalPlayerMutex);

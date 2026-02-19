@@ -1,5 +1,5 @@
 #include"Pawn.hpp"
-#include <MulNX/ThirdParty/All_cs2_dumper.hpp>
+#include <MulNXThirdParty/All_cs2_dumper.hpp>
 #include <MulNXExtensions/WinExt/WinExt.hpp>
 
 std::ostringstream C_Pawn::GetMsg()const {

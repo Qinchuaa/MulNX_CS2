@@ -80,7 +80,7 @@ public:
     //基类接口实现
 
     bool Init()override;
-    void Menu();
+    bool UINodeFunc(MulNXUINode* ThisNode)override;
     void VirtualMain()override;
 
     void SettingGraphFloat(const char* Label, float* V, const float& min, const float& max);

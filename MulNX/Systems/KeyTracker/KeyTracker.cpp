@@ -1,6 +1,6 @@
 #include "KeyTracker.hpp"
 
-#include "../../ThirdParty/All_pugixml.hpp"
+#include <MulNXThirdParty/All_pugixml.hpp>
 
 #include <unordered_map>
 #include <Windows.h>

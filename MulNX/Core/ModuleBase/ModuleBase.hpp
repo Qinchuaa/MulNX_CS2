@@ -1,24 +1,11 @@
 #pragma once
 
 #include "../../Base/Base.hpp"
-
+#include "ISys.hpp"
 // 前向声明：MulNXController 位于 MulNXExtensions 命名空间
 namespace MulNXExtensions { class MulNXController; }
 
 namespace MulNX {
-    class C_ISys {
-        friend ModuleBase;
-        C_ISys() = delete;
-        ModuleBase* pModuleBase = nullptr;
-        C_ISys(ModuleBase* pModuleBase) {
-            this->pModuleBase = pModuleBase;
-        }
-    public:
-        void LogInfo(const std::string& Msg);
-        void LogSucc(const std::string& Msg);
-        void LogWarning(const std::string& Msg);
-        void LogError(const std::string& Msg);
-    };
     // 模块基类
 	class ModuleBase {
         friend MulNX::Core::Core;
@@ -112,8 +99,8 @@ namespace MulNX {
 		// 基本函数
 	protected:
 		// 基础初始化
-		bool BaseInit();
-		// 基础主循环
+        bool BaseInit();
+        // 基础主循环
 		void BaseVirtualMain();
 		// 基础消息处理
 		void BaseProcessMsg();
@@ -137,9 +124,17 @@ namespace MulNX {
 		// 窗口控制
 		void OpenWindow();
 		void CloseWindow();
-		bool IsWindowOpen()const;
-
-		MulNX::Core::Core* GetCore()const {
+        bool IsWindowOpen()const;
+    protected:
+        // 是否需要UI节点，默认不需要
+        bool NeedUINode = false;
+    private:
+        // 自动创建UI节点
+        bool CreateUINode();
+        // UI节点函数，默认空实现
+        virtual bool UINodeFunc(MulNXUINode* ThisNode) { return true; }
+    public:
+        MulNX::Core::Core* GetCore()const {
 			return this->Core;
 		}
 

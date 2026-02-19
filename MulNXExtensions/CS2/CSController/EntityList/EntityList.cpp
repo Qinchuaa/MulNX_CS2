@@ -1,7 +1,7 @@
 #include "EntityList.hpp"
 
 #include <MulNXExtensions/WinExt/WinExt.hpp>
-#include <MulNX/ThirdParty/All_cs2_dumper.hpp>
+#include <MulNXThirdParty/All_cs2_dumper.hpp>
 
 uintptr_t C_EntityList::Address = 0;
 

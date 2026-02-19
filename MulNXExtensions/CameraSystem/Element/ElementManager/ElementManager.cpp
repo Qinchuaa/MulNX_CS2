@@ -16,6 +16,7 @@ ElementManager::~ElementManager() {
 
 //元素管理器基本函数
 bool ElementManager::Init() {
+    this->ElementDebugger->SetName("ElementDebugger");
     this->ElementDebugger->EntryInit(this->Core);
 
     return true;

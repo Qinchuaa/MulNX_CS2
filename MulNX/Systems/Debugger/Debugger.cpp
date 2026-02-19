@@ -7,17 +7,31 @@
 #include "../../Systems/Systems.hpp"
 
 #include <bitset>
+bool MySaveStringToFile(const std::string& data,
+    const std::filesystem::path& filePath) {
+    // 强制按二进制打开可避免换行转换
+    std::ofstream out(filePath, std::ios::binary);
+    if (!out) {
+        return false;
+    }
 
+    out.write(data.data(), static_cast<std::streamsize>(data.size()));
+    return out.good();
+}
 bool MulNX::Debugger::Init() {
     this->MainMsgChannel = this->ICreateAndGetMessageChannel();
-    (*this->MainMsgChannel)
-        .Subscribe(MulNX::MsgType::Debugger_SetMaxInfoCount);
+    this->ISys()
+        .SubscribeAsync(MulNX::MsgType::Debugger_SetMaxInfoCount)
+        .SubscribeAsync(MulNX::MsgType::Debugger_SaveToFile);
     return true;
 }
 void MulNX::Debugger::ProcessMsg(MulNX::Message* Msg) {
     switch (Msg->Type) {
     case MulNX::MsgType::Debugger_SetMaxInfoCount: {
         this->ResetMaxMsgCount(Msg->ParamInt);
+    }
+    case MulNX::MsgType::Debugger_SaveToFile: {
+        this->SaveToFile();
     }
     }
 }
@@ -46,6 +60,20 @@ void MulNX::Debugger::ResetMaxMsgCount(const int Max) {
     this->AddInfo("已重置最大信息条数为 " + std::to_string(Max) + " 条");
 
     return;
+}
+void MulNX::Debugger::SaveToFile() {
+    std::shared_lock lock(this->MyThreadMutex);
+    std::string data;
+    for (const auto& msg : this->DebugMsg) {
+        data += msg + "\n";
+    }
+    
+
+    if (!MySaveStringToFile(data, path)) {
+        // 处理错误
+        throw std::runtime_error("无法保存调试日志到文件: " + path.string());
+    }
+
 }
 
 void MulNX::Debugger::PushBack(const std::string& NewMsg, const std::string& prefix) {

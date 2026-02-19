@@ -2,7 +2,7 @@
 
 #include <MulNX/MulNX.hpp>
 
-#include <MulNX/ThirdParty/All_ImGui.hpp>
+#include <MulNXThirdParty/All_ImGui.hpp>
 
 // 具体数据类型都隐藏在CPP文件
 struct DemoHelperPrivateData {
@@ -43,8 +43,8 @@ static void MyDraw(MulNXUINode* This) {
 
 bool DemoHelper::Init() {
 	this->MainMsgChannel = this->ICreateAndGetMessageChannel();
-	(*this->MainMsgChannel)
-		.Subscribe(MulNX::MsgType::UISystem_UICommand);
+	this->ISys()
+		.SubscribeAsync(MulNX::MsgType::UISystem_UICommand);
 
 	auto SingleContext = MulNXUINode::Create(this);
 	auto* SContextPtr = SingleContext.get<MulNXUINode>();	

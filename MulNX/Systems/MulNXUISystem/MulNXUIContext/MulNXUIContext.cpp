@@ -1,6 +1,6 @@
 #include "MulNXUIContext.hpp"
 
-#include "../../../ThirdParty/All_ImGui.hpp"
+#include <MulNXThirdParty/All_ImGui.hpp>
 
 bool MulNXUIContext::CallUINode(const std::string& Name) {
     auto ItEntry = this->CallMap.find(Name);

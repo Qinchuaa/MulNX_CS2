@@ -64,7 +64,7 @@ public:
     // 初始化
     bool Init()override;
     // 菜单
-    void Menu();
+    bool UINodeFunc(MulNXUINode* ThisNode)override;
     // 逻辑主函数
     void VirtualMain()override;
     // 窗口函数

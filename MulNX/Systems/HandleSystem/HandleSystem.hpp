@@ -1,9 +1,9 @@
 #pragma once
 
-#include"IHandleSystem.hpp"
+#include "IHandleSystem.hpp"
 
 namespace MulNX {
-	//句柄系统用于全局提供句柄标识，中转any_unique_ptr资源
+	// 句柄系统用于全局提供句柄标识，中转any_unique_ptr资源
 	class HandleSystem final :public IHandleSystem {
 	private:
 		std::shared_mutex MapMutex{};
