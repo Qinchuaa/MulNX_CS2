@@ -1,5 +1,5 @@
-//ICameraSystem.hpp
-//任何使用摄像机系统的组件应当包含该头文件
+// ICameraSystem.hpp
+// 任何使用摄像机系统的组件应当包含该头文件
 
 #pragma once
 

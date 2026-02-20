@@ -725,11 +725,17 @@ void SolutionManager::Playing_Call() {
     IO->FrameGameTime = this->AL3D->GetTime();
     IO->PlaybackMode = this->Playmode;
     IO->PlayBackRate = this->PlaybackRate;
-    IO->isPlaying = &this->Playing;//这里让解决方案拿到关闭播放控制权
+    bool bPlaying = this->Playing;
+    IO->isPlaying = &bPlaying;// 这里让解决方案拿到关闭播放控制权
 
     if (!this->Playing_pSolution->Call(IO.get())) {
-        //这里不关闭播放，因为解决方案可能还有内容
-        //不应该由管理器因为仅仅没有结果就关闭
+        // 这里不关闭播放，因为解决方案可能还有内容
+        // 不应该由管理器因为仅仅没有结果就关闭
+        if (bPlaying == false) {
+            // 如果解决方案自己关闭了播放
+            this->Playing_Disable();
+            return;
+        }
         return;
     }
     if (this->Config.PlayingOverride) {

@@ -2,9 +2,9 @@
 #include <MulNXExtensions/WinExt/WinExt.hpp>
 
 void C_GlobalVars::Update() {
-    MulNX::Base::Memory::Read(this->Address + 0x00, this->RealTime);
-    MulNX::Base::Memory::Read(this->Address + 0x30, this->CurrentTime);
-    MulNX::Base::Memory::Read(this->Address + 0x44, this->TickCount);
+    MulNX::Memory::Read(this->Address + 0x00, this->RealTime);
+    MulNX::Memory::Read(this->Address + 0x30, this->CurrentTime);
+    MulNX::Memory::Read(this->Address + 0x44, this->TickCount);
 
     return;
 }

@@ -6,6 +6,38 @@
 #include <MulNXExtensions/WinExt/WinExt.hpp>
 #include <MulNXThirdParty/All_cs2_dumper.hpp>
 
+std::atomic<bool> IsInCameraSystemOverride = false;
+std::atomic<float> OriginX = 0;
+std::atomic<float> OriginY = 0;
+std::atomic<float> OriginZ = 0;
+std::atomic<float> AnglesX = 0;
+std::atomic<float> AnglesY = 0;
+std::atomic<float> AnglesZ = 0;
+std::atomic<float> FOV = 90.0f;
+
+void HandleOverrideView(void* ThisCViewSetup) {
+
+    int* pWidth = (int*)((unsigned char*)ThisCViewSetup + 0x434);
+    int* pHeight = (int*)((unsigned char*)ThisCViewSetup + 0x43C);
+
+    float* pFov = (float*)((unsigned char*)ThisCViewSetup + 0x498);
+    float* pViewOrigin = (float*)((unsigned char*)ThisCViewSetup + 0x4a0);
+    float* pViewAngles = (float*)((unsigned char*)ThisCViewSetup + 0x4b8);
+
+    if (IsInCameraSystemOverride.load()) {
+        pViewOrigin[0] = OriginX.load();
+        pViewOrigin[1] = OriginY.load();
+        pViewOrigin[2] = OriginZ.load();
+
+        pViewAngles[0] = AnglesX.load();
+        pViewAngles[1] = AnglesY.load();
+        pViewAngles[2] = AnglesZ.load();
+
+        *pFov = FOV.load();
+    }
+    return;
+}
+
 int CSController::GetIndexInEntityListFromIndexInMap(int IndexInMap) {
     std::shared_lock lock(this->IndexMapMtx);
     auto it = this->IndexInMap_To_IndexInEntityList_Map.find(IndexInMap);
@@ -49,6 +81,35 @@ bool CSController::Init() {
     this->AL3D->SetGetSpatialStateFunc([this]() {
         return this->LocalPlayer.GetSpatialState();
         });
+
+    uintptr_t clientBase = 0;
+    size_t clientSize = 0;
+    if (MulNX::Memory::GetModuleInfo(L"client.dll", clientBase, clientSize)) {
+        // 搜索 .text 段
+        uintptr_t textBase = 0;
+        size_t textSize = 0;
+        if (MulNX::Memory::GetTextSectionRange(clientBase, textBase, textSize)) {
+            MulNX::Memory::Region textRegion(textBase, textSize);
+            // 搜索特征码
+            MulNX::Memory::Pattern pattern("48 8b 0d ?? ?? ?? ?? 48 8b 01 ff 90 48 01 00 00 0f 57 ff 84 c0 74 63 ba ff ff ff ff");
+            auto Target = MulNX::Memory::Accessor::FindRegion(textRegion, pattern);
+            if (Target.IsValid()) {
+                MulNX::Memory::Region::ProtectionGuard Guard = Target.ExchangeProtection(PAGE_EXECUTE_READWRITE);
+                unsigned char asmCode[16] = {
+                    0x48, 0x89, 0xf1,
+                    0x48, 0xb8, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
+                    0xff, 0x10,
+                    0x90
+                };
+                static LPVOID ptr = HandleOverrideView;
+                LPVOID ptrPtr = &ptr;
+
+                memcpy(&asmCode[5], &ptrPtr, sizeof(LPVOID));
+                memcpy((LPVOID)Target.begin(), asmCode, 16);
+            }
+        }
+    }
+
     return true;
 }
 
@@ -77,15 +138,15 @@ void CSController::Catch() {
 }
 int CSController::BasicUpdate() {
     // 获取EntityList
-    if (!MulNX::Base::Memory::Read(this->Modules.client + cs2_dumper::offsets::client_dll::dwEntityList, this->EntityList.Address)) {
+    if (!MulNX::Memory::Read(this->Modules.client + cs2_dumper::offsets::client_dll::dwEntityList, this->EntityList.Address)) {
         return -1;
     }
     // 获取CS2全局变量
-    if (!MulNX::Base::Memory::Read(this->Modules.client + cs2_dumper::offsets::client_dll::dwGlobalVars, this->CSGlobalVars.Address)) {
+    if (!MulNX::Memory::Read(this->Modules.client + cs2_dumper::offsets::client_dll::dwGlobalVars, this->CSGlobalVars.Address)) {
         return -2;
     }
     //获取本地控制器
-    if (!MulNX::Base::Memory::Read(this->Modules.client + cs2_dumper::offsets::client_dll::dwLocalPlayerController, this->LocalPlayer.Entity.Controller.Address)) {
+    if (!MulNX::Memory::Read(this->Modules.client + cs2_dumper::offsets::client_dll::dwLocalPlayerController, this->LocalPlayer.Entity.Controller.Address)) {
         return -1001;
     }
     if (int result = this->LocalPlayer.Update()) {
@@ -134,13 +195,14 @@ int CSController::EntityListUpdate() {
     return 0;
 }
 int CSController::GameRulesUpdate() {
-    MulNX::Base::Memory::Read(this->Modules.client + cs2_dumper::offsets::client_dll::dwGameRules, this->CSGameRules.Address);
+    MulNX::Memory::Read(this->Modules.client + cs2_dumper::offsets::client_dll::dwGameRules, this->CSGameRules.Address);
     this->CSGameRules.Update();
     return 0;
 }
 
 void CSController::ThreadMain() {
     this->GetMsgResult = this->TryGetMsg();
+    IsInCameraSystemOverride.store(this->GlobalVars->CampathPlaying);
     return;
 }
 int CSController::TryGetMsg() {
@@ -160,9 +222,9 @@ int CSController::TryGetMsg() {
     }
 
     uintptr_t ppPlantedC4;
-    MulNX::Base::Memory::Read(this->Modules.client + cs2_dumper::offsets::client_dll::dwPlantedC4, ppPlantedC4);
+    MulNX::Memory::Read(this->Modules.client + cs2_dumper::offsets::client_dll::dwPlantedC4, ppPlantedC4);
     if (ppPlantedC4) {
-        MulNX::Base::Memory::Read(ppPlantedC4, this->PlantedC4.Address);
+        MulNX::Memory::Read(ppPlantedC4, this->PlantedC4.Address);
         this->PlantedC4.Update();
     }
 
@@ -201,9 +263,16 @@ void CSController::HandleFreeCameraPath(const CameraSystemIO* const IO) {
             this->ISys().LogInfo(thisFrame.GetMsg());
         }
 #endif // _DEBUG
-        this->LocalPlayer.SetPosition(PosAndFOV);
-        this->LocalPlayer.SetFOV(PosAndFOV.w);
-        this->LocalPlayer.SetViewAngle(RotEuler);
+        //this->LocalPlayer.SetPosition(PosAndFOV);
+        OriginX = PosAndFOV.x;
+        OriginY = PosAndFOV.y;
+        OriginZ = PosAndFOV.z;
+        //this->LocalPlayer.SetFOV(PosAndFOV.w);
+        FOV = PosAndFOV.w;
+        //this->LocalPlayer.SetViewAngle(RotEuler);
+        AnglesX = RotEuler.x;
+        AnglesY = RotEuler.y;
+        AnglesZ = RotEuler.z;
     }
     else {
         this->Execute("spec_mode 4");

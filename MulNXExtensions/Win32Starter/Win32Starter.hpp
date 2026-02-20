@@ -10,7 +10,7 @@ class Win32Starter final :public MulNX::Core::CoreStarterBase {
 public:
     inline static Win32Starter* pInstance = nullptr;
 private:
-    //D3D11指针组
+    // D3D11指针组
 public:
     ID3D11Device* pd3dDevice = nullptr;
     IDXGISwapChain* pSwapChain = nullptr;

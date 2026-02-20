@@ -7,7 +7,6 @@
 bool CameraSystem::Init() {
     // 传递指针，注入依赖，提升性能，直接调用
     // 注意，本模块所有级别的管理器相互显示注入，其它服务借助Core隐式注入
-    // 高频服务隐式注入，指针直调提升性能
     this->CamDrawer.Init(20.0, 30.0, 15.0, 10.0, IM_COL32(255, 0, 255, 255));
 
     this->EManager.SetName("ElementManager");
