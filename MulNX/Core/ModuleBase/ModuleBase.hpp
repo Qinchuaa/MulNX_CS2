@@ -144,10 +144,6 @@ namespace MulNX {
 		void IRegiste();
 		// 自动订阅消息类型
 		void ISubscribe(MulNX::MsgType MsgType);
-		// 自动发送消息
-		void IPublish(MulNX::Message&& Msg);
-		// 根据类型自动构建消息并发送
-		void IPublish(MulNX::MsgType Msg);
 		// 自动创建私有消息管道
 		MulNX::IMessageChannel* ICreateAndGetMessageChannel();
     public:

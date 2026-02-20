@@ -33,7 +33,7 @@ void CoreStarterBase::StartUIWith(std::string&& EntryName) {
 	MulNXHandle hStr = this->Core->IHandleSystem().RegisteUnique(std::move(StartString));
 	MulNX::Message StartMsg(MulNX::MsgType::UISystem_Start);
 	StartMsg.Handle = hStr;
-	this->IPublish(std::move(StartMsg));
+	this->ISys().PublishAsync(std::move(StartMsg));
 }
 
 void CoreStarterBase::RegisteMainDrawWith(std::function<void(MulNXUINode*)>&& MainDrawFunc) {
@@ -45,5 +45,5 @@ void CoreStarterBase::RegisteMainDrawWith(std::function<void(MulNXUINode*)>&& Ma
 	MulNXHandle hContext = this->Core->IHandleSystem().RegisteUnique(std::move(UINode));
 	MulNX::Message Msg(MulNX::MsgType::UISystem_ModulePush);
 	Msg.Handle = hContext;
-	this->IPublish(std::move(Msg));
+	this->ISys().PublishAsync(std::move(Msg));
 }

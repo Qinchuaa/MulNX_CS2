@@ -120,7 +120,7 @@ void MiniMap::Windows() {
                 this->ISys().LogInfo(oss.str().c_str());
                 MulNX::Message ClickMsg(MulNX::MsgType::Command_SpecPlayer);
                 ClickMsg.ParamInt = i;
-                this->IPublish(std::move(ClickMsg));
+                this->ISys().PublishAsync(std::move(ClickMsg));
             }
         }
     }

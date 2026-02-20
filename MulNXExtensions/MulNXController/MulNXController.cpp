@@ -19,7 +19,7 @@ bool MulNXController::UINodeFunc(MulNXUINode* ThisNode) {
     }
     if (ImGui::Button("保存调试日志到文件")) {
         MulNX::Message Msg(MulNX::MsgType::Debugger_SaveToFile);
-        this->IPublish(std::move(Msg));
+        this->ISys().PublishAsync(std::move(Msg));
     }
     ImGui::Checkbox("当有错误信息时弹出调试器", &this->IDebugger->ShowWhenError);
     ImGui::Checkbox("自动滚动到最新消息", &this->IDebugger->AutoScroll);
@@ -31,12 +31,12 @@ bool MulNXController::UINodeFunc(MulNXUINode* ThisNode) {
     if (ImGui::Button("应用")) {
         MulNX::Message Msg(MulNX::MsgType::Debugger_SetMaxInfoCount);
         Msg.ParamInt = MaxDebugMsgs;
-        this->IPublish(std::move(Msg));
+        this->ISys().PublishAsync(std::move(Msg));
     }
     if (ImGui::Button("尝试拉取所有模块信息")) {
         MulNX::Message Msg(MulNX::MsgType::ModuleManager_RequestModuleInfo);
         Msg.pMsgChannel = this->MainMsgChannel;
-        this->IPublish(std::move(Msg));
+        this->ISys().PublishAsync(std::move(Msg));
     }
     if (ImGui::CollapsingHeader("初始化控制")) {
         if (ImGui::Button("初始化IPCer")) {

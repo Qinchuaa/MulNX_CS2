@@ -57,7 +57,7 @@ bool DemoHelper::Init() {
 
 	MulNX::Message Msg(MulNX::MsgType::UISystem_ModulePush);
 	Msg.Handle = this->hUINode;
-	this->IPublish(std::move(Msg));
+	this->ISys().PublishAsync(std::move(Msg));
 
 	return true;
 }

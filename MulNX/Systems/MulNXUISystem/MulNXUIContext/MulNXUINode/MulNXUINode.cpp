@@ -64,6 +64,6 @@ bool MulNXUINode::CreateAndRegiste(MulNX::ModuleBase* const MB, std::string&& Na
     MulNXHandle hContext = pCore->IHandleSystem().RegisteUnique(std::move(Node));
     MulNX::Message Msg(MulNX::MsgType::UISystem_ModulePush);
     Msg.Handle = hContext;
-    MB->IPublish(std::move(Msg));
+    MB->ISys().PublishAsync(std::move(Msg));
     return true;
 }

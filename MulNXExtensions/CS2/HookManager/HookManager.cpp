@@ -52,7 +52,7 @@ void HookManager::ThreadMain() {
 
 		//发送重新Hook消息
 		MulNX::Message Msg(MulNX::MsgType::Core_ReHook);
-		this->IPublish(std::move(Msg));
+		this->ISys().PublishAsync(std::move(Msg));
 
 		ReHook = false;
 

@@ -85,7 +85,7 @@ bool MulNX::ModuleBase::CreateUINode() {
         MulNX::Message Msg(MulNX::MsgType::UISystem_ModulePush);
         Msg.Handle = hUINode;
         // 发送UI消息
-        this->IPublish(std::move(Msg));
+        this->ISys().PublishAsync(std::move(Msg));
         this->ISys().LogInfo("推送了UI节点到UI系统");
     }
     catch (...) {
@@ -181,14 +181,6 @@ void MulNX::ModuleBase::IRegiste() {
 }
 void MulNX::ModuleBase::ISubscribe(MulNX::MsgType MsgType) {
     this->IMsgManager->Subscribe(MsgType, this);
-}
-void MulNX::ModuleBase::IPublish(MulNX::Message&& Msg) {
-    this->IMsgManager->Publish(std::move(Msg));
-}
-void MulNX::ModuleBase::IPublish(MulNX::MsgType Type) {
-    //消息管理器会负责消息生命周期
-    MulNX::Message Msg(Type);
-    this->IMsgManager->Publish(std::move(Msg));
 }
 MulNX::IMessageChannel* MulNX::ModuleBase::ICreateAndGetMessageChannel() {
     return this->IMsgManager->GetMessageChannel(this->IMsgManager->CreateMessageChannel());

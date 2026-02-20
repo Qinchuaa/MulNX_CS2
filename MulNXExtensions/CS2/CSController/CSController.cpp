@@ -95,7 +95,7 @@ int CSController::BasicUpdate() {
     static int OldRoundStartCount = this->CSGameRules.m_nRoundStartCount;
     if (OldRoundStartCount != this->CSGameRules.m_nRoundStartCount) {
         MulNX::Message Msg(MulNX::MsgType::Game_NewRound);
-        this->IPublish(std::move(Msg));
+        this->ISys().PublishAsync(std::move(Msg));
         OldRoundStartCount = this->CSGameRules.m_nRoundStartCount;
     }
 
