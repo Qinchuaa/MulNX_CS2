@@ -12,6 +12,8 @@ def count_cpp_lines():
     
     extensions = ('.cpp', '.hpp')
     excluded_keyword = 'MulNXThirdParty'
+    excluded_keyword2 = 'ThirdParty'
+    excluded_keyword3 = 'build'
     total_lines = 0
     total_files = 0
     processed_files = []
@@ -34,7 +36,7 @@ def count_cpp_lines():
         relative_root = Path(root).relative_to(parent_dir) if Path(root) != parent_dir else Path('.')
         
         # 跳过包含排除关键字的目录
-        if excluded_keyword in root:
+        if excluded_keyword in root or excluded_keyword2 in root or excluded_keyword3 in root:
             print(f"[跳过目录] {relative_root} (包含排除关键字)")
             continue
             

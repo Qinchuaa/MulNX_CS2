@@ -1,8 +1,5 @@
 #pragma once
 
-#define WIN32_LEAN_AND_MEAN
-#define NOMINMAX
-
 #include "Math/Math.hpp"
 #include "any_smart_ptr/any_smart_ptr.hpp"
 #include "vmt/vmt.hpp"

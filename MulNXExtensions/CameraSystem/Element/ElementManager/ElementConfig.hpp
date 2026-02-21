@@ -2,8 +2,8 @@
 
 class ElementConfig {
 public:
-	//ÊÇ·ñ»æÖÆÔ¤ÀÀÉãÏñ»ú
+	// æ˜¯å¦ç»˜åˆ¶é¢„è§ˆæ‘„åƒæœº
 	bool PreviewDraw = false;
-	//ÊÇ·ñÆôÓÃÔ¤ÀÀÉãÏñ»ú¸²¸Ç
+	// æ˜¯å¦å¯ç”¨é¢„è§ˆæ‘„åƒæœºè¦†ç›–
 	bool PreviewOverride = false;
 };
