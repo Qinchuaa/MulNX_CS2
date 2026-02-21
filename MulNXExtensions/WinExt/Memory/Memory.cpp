@@ -78,39 +78,3 @@ bool MulNX::Memory::GetTextSectionRange(uintptr_t moduleBase, uintptr_t& textSta
     }
     return false;
 }
-
-
-
-std::optional<uint8_t*> MulNX::Memory::Accessor::FindHead(const uint8_t* Begin, const uint8_t* End, const uint8_t Byte) {
-    for (const uint8_t* Current = Begin; Current < End; ++Current) {
-        if (*Current == Byte) {
-            return const_cast<uint8_t*>(Current);
-        }
-    }
-    return std::nullopt;
-}
-
-bool MulNX::Memory::Accessor::MatchPattern(const uint8_t* Address, const Pattern& Pattern) {
-    for (size_t i = 0; i < Pattern.size(); ++i) {
-        if (Pattern[i].has_value() && Address[i] != Pattern[i].value()) {
-            return false;//当前字节不匹配
-        }
-    }
-    return true;//完全匹配
-}
-
-MulNX::Memory::Region MulNX::Memory::Accessor::FindRegion(const Region& Region, const Pattern& Pattern) {
-    for (const uint8_t* Current = Region.begin(); Current < Region.end();) {
-        auto FoundHead = MulNX::Memory::Accessor::FindHead(Current, Region.end(), *Pattern.begin());
-        if (!FoundHead.has_value()) {
-            break;//未找到更多匹配
-        }
-        if (MulNX::Memory::Accessor::MatchPattern(FoundHead.value(), Pattern)) {
-            //找到匹配，返回对应内存区域
-            return MulNX::Memory::Region(reinterpret_cast<uintptr_t>(FoundHead.value()), Pattern.size());
-        }
-        //继续寻找下一个匹配头
-        Current = FoundHead.value() + 1;
-    }
-    return Region::InValid();//未找到匹配
-}

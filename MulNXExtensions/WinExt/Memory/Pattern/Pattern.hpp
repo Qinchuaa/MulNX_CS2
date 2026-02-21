@@ -8,12 +8,10 @@ namespace MulNX {
     namespace Memory {
         // 内存模式类，表示一个特定的字节模式，包含通配符为?，提供匹配功能
         class Pattern {
-            std::string Raw;// 模式字符串，格式如 "48 8B ?? ?? ?? 48 85 C0"
             std::vector<std::optional<uint8_t>> Bytes;// 解析后的字节数组，其中std::nullopt表示通配符
         public:
             Pattern(std::string&& Raw);
-            const uint8_t* begin() const { return reinterpret_cast<const uint8_t*>(Bytes.data()); }
-            const uint8_t* end() const { return reinterpret_cast<const uint8_t*>(Bytes.data() + Bytes.size()); }
+            const uint8_t* First() const { return &Bytes[0].value(); }
             size_t size() const { return Bytes.size(); }
             std::optional<uint8_t> operator[](size_t index) const { return Bytes[index]; }
         };

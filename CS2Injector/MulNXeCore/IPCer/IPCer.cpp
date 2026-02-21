@@ -1,11 +1,12 @@
-#include"IPCer.hpp"
+#include "IPCer.hpp"
 
-#include"../MulNXeCore.hpp"
-#include"../ConfigManager/ConfigManager.hpp"
+#include "../MulNXeCore.hpp"
+#include "../ConfigManager/ConfigManager.hpp"
 
-#include<Windows.h>
-#include<ShObjIdl_core.h>
-#include<chrono>
+#include <Windows.h>
+#include <ShObjIdl_core.h>
+#include <shellapi.h>
+#include <chrono>
 
 bool IPCer::Init(MulNXeCore* Core) {
     this->Core = Core;

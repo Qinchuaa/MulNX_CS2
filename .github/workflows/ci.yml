@@ -1,0 +1,62 @@
+name: CI and Release
+
+# 触发条件：任何推送（包括分支和标签）
+on: [push]
+
+jobs:
+  build-and-maybe-release:
+    runs-on: windows-latest
+
+    # 设置必要的权限，用于创建 Release
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # 配置 CMake（强制 UTF-8 编码）
+      - name: Configure CMake
+        run: cmake -B build -A x64 -DCMAKE_CXX_FLAGS="/utf-8"
+
+      # 构建 Release 版本
+      - name: Build
+        run: cmake --build build --config Release --parallel
+
+      # 运行你的 Python 辅助脚本（可选）
+      - name: Run Python helper scripts
+        run: |
+          python bin/CalculateLines.py
+          python bin/Pack.py
+        continue-on-error: true
+
+      # 上传构建产物到 GitHub Actions 的 Artifacts（方便后续下载）
+      - name: Upload artifacts (always)
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-outputs-${{ github.sha }}
+          path: |
+            bin/Output/
+            bin/MulNX.zip
+            bin/MulNX/
+          if-no-files-found: warn
+
+      # 如果是标签推送，则创建 GitHub Release 并上传文件
+      - name: Create GitHub Release (only for tags)
+        if: github.ref_type == 'tag'
+        uses: softprops/action-gh-release@v2
+        with:
+          # 使用标签名作为 Release 标题
+          name: Release ${{ github.ref_name }}
+          # 可以在此处写静态说明，或通过 body_path 从文件读取（如 CHANGELOG.md）
+          body: "自动构建的 Release，版本：${{ github.ref_name }}"
+          # 要上传的文件列表（支持通配符）
+          files: |
+            bin/MulNX.zip
+            bin/Output/**
+          # 是否为预发布版本（根据需要调整）
+          prerelease: false
+          # 是否为草稿
+          draft: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

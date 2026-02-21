@@ -85,14 +85,5 @@ namespace MulNX {
 
         bool GetModuleInfo(const wchar_t* moduleName, uintptr_t& baseAddr, size_t& moduleSize);
         bool GetTextSectionRange(uintptr_t moduleBase, uintptr_t& textStart, size_t& textSize);
-
-        
-        class Accessor {
-        private:
-            static std::optional<uint8_t*> FindHead(const uint8_t* Begin, const uint8_t* End, const uint8_t Byte);
-            static bool MatchPattern(const uint8_t* Address, const Pattern& Pattern);
-        public:
-            static Region FindRegion(const Region& Region, const Pattern& Pattern);
-        };
     }
 }

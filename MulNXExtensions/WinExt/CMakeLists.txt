@@ -5,6 +5,7 @@ add_library(WinExt STATIC
 
     "Memory/Pattern/Pattern.cpp"
     "Memory/Region/Region.cpp"
+    "Memory/Region/ProtectionGuard.cpp"
     "Memory/Memory.cpp"
 )
 

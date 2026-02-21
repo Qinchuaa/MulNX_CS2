@@ -1,6 +1,7 @@
 #include "CSController.hpp"
 
 #include "../../CameraSystem/CameraSystemIO/CameraSystemIO.hpp"
+#include "../Signatures.hpp"
 
 #include <MulNX/MulNX.hpp>
 #include <MulNXExtensions/WinExt/WinExt.hpp>
@@ -91,10 +92,10 @@ bool CSController::Init() {
         if (MulNX::Memory::GetTextSectionRange(clientBase, textBase, textSize)) {
             MulNX::Memory::Region textRegion(textBase, textSize);
             // 搜索特征码
-            MulNX::Memory::Pattern pattern("48 8b 0d ?? ?? ?? ?? 48 8b 01 ff 90 48 01 00 00 0f 57 ff 84 c0 74 63 ba ff ff ff ff");
-            auto Target = MulNX::Memory::Accessor::FindRegion(textRegion, pattern);
+            const auto& pattern = MulNX::CS2::Signatures::CallIsPlayingDemo;
+            auto Target = textRegion.FindRegion(pattern);
             if (Target.IsValid()) {
-                MulNX::Memory::Region::ProtectionGuard Guard = Target.ExchangeProtection(PAGE_EXECUTE_READWRITE);
+                auto Guard = Target.ExchangeProtection(PAGE_EXECUTE_READWRITE);
                 unsigned char asmCode[16] = {
                     0x48, 0x89, 0xf1,
                     0x48, 0xb8, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
