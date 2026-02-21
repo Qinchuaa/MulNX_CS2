@@ -12,8 +12,10 @@ import os
 import shutil
 import zipfile
 import sys
+import io
 from pathlib import Path
 import time
+sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
 
 def clear_output_folder(output_path):
     """清空Output文件夹"""
