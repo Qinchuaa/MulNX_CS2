@@ -52,7 +52,6 @@ jobs:
           # 要上传的文件列表（支持通配符）
           files: |
             bin/MulNX.zip
-            bin/Output/**
           # 是否为预发布版本（根据需要调整）
           prerelease: false
           # 是否为草稿
