@@ -26,7 +26,6 @@ jobs:
       # 运行你的 Python 辅助脚本（可选）
       - name: Run Python helper scripts
         run: |
-          python bin/CalculateLines.py
           python bin/Pack.py
         continue-on-error: true
 

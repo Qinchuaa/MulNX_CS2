@@ -180,16 +180,6 @@ def main():
         print(f"错误: MulNX文件夹不存在: {MulNX_output_dir}")
         return False
     
-    # 如果已存在MulNX.zip，询问是否覆盖
-    if MulNX_zip_path.exists():
-        print(f"警告: {MulNX_zip_path.name} 已存在")
-        response = input("是否覆盖? (y/N): ")
-        if response.lower() != 'y':
-            # 生成带时间戳的新文件名
-            timestamp = time.strftime("%Y%m%d_%H%M%S")
-            MulNX_zip_path = current_dir / f"MulNX_{timestamp}.zip"
-            print(f"将创建新文件: {MulNX_zip_path.name}")
-    
     zip_result = zip_MulNX_folder(MulNX_output_dir, MulNX_zip_path)
     
     print("\n" + "=" * 60)
@@ -227,11 +217,6 @@ def main():
         
         if len(files) > 20:
             print(f"  ... 和 {len(files) - 20} 个其他文件")
-    
-    # 可选: 询问是否打开Output文件夹
-    response = input("\n是否打开Output文件夹? (y/N): ")
-    if response.lower() == 'y':
-        os.startfile(output_path)  # Windows
     
     return True
 
