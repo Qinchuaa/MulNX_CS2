@@ -1,10 +1,10 @@
 #include "CSController.hpp"
 
-#include "../../CameraSystem/CameraSystemIO/CameraSystemIO.hpp"
 #include "../Signatures.hpp"
 
 #include <MulNX/MulNX.hpp>
 #include <MulNXExtensions/WinExt/WinExt.hpp>
+#include <MulNXExtensions/CameraSystem/CameraSystemIO/CameraSystemIO.hpp>
 #include <MulNXThirdParty/All_cs2_dumper.hpp>
 
 std::atomic<bool> IsInCameraSystemOverride = false;
@@ -82,15 +82,12 @@ bool CSController::Init() {
     this->AL3D->SetGetSpatialStateFunc([this]() {
         return this->LocalPlayer.GetSpatialState();
         });
-
-    uintptr_t clientBase = 0;
-    size_t clientSize = 0;
-    if (MulNX::Memory::GetModuleInfo(L"client.dll", clientBase, clientSize)) {
+    
+    MulNX::Memory::DllModule clientModule(L"client.dll");
+    if (clientModule.IsValid()) {
         // 搜索 .text 段
-        uintptr_t textBase = 0;
-        size_t textSize = 0;
-        if (MulNX::Memory::GetTextSectionRange(clientBase, textBase, textSize)) {
-            MulNX::Memory::Region textRegion(textBase, textSize);
+        auto textRegion = clientModule.GetTextRegion();
+        if (textRegion.IsValid()) {
             // 搜索特征码
             const auto& pattern = MulNX::CS2::Signatures::CallIsPlayingDemo;
             auto Target = textRegion.FindRegion(pattern);

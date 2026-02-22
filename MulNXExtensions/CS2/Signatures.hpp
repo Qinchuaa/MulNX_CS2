@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../WinExt/WinExt.hpp"
+#include <MulNXExtensions/WinExt/WinExt.hpp>
 
 namespace MulNX {
     namespace CS2 {

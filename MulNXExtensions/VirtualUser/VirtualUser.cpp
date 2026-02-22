@@ -2,7 +2,7 @@
 
 #include <MulNX/MulNX.hpp>
 
-#include "../CameraSystem/ICameraSystem.hpp"
+#include <MulNXExtensions/CameraSystem/ICameraSystem.hpp>
 
 #include <MulNXThirdParty/All_ImGui.hpp>
 
@@ -24,8 +24,6 @@ bool VirtualUser::Init() {
     return true;
 }
 void VirtualUser::Menu() {
-    MulNX::AutoChild Child(this, "VirtualUser");
-
     bool temp = this->Running.load();
     if (ImGui::Checkbox("启动自动化控制", &temp)) {
         this->Running.store(temp);

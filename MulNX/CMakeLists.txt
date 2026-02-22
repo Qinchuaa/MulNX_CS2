@@ -8,14 +8,15 @@ add_library(MulNX
 
     "Base/Base.cpp"
 
+
     "Core/Core.cpp"
     "Core/CoreStarterBase/CoreStarterBase.cpp"
     "Core/ModuleBase/ModuleBase.cpp"
-    "Core/ModuleBase/ISys.cpp"
+    "Core/ModuleBase/ISys/ISys.cpp"
     "Core/ModuleManager/ModuleManager.cpp"
 
-
     "Core/Cores.hpp"
+
 
     "Systems/AbstractLayer3D/AbstractLayer3D.cpp"
     "Systems/Debugger/Debugger.cpp"
@@ -32,6 +33,7 @@ add_library(MulNX
 
     "Systems/Systems.cpp"
 
+    
     "MulNX.cpp"
 )
 target_link_libraries(MulNX PUBLIC MulNXThirdParty)

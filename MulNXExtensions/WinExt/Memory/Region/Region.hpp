@@ -31,6 +31,7 @@ namespace MulNX {
             std::optional<uint8_t*> FindHead(const uint8_t* Begin, const uint8_t Byte)const;
             bool MatchPattern(const uint8_t* Address, const Pattern& Pattern)const;
         public:
+            Region() = delete;
             Region(uintptr_t Base, size_t Size);
             static Region InValid() { return Region(0, 0); }
             // 迭代器支持

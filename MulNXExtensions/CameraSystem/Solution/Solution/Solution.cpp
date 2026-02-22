@@ -1,4 +1,4 @@
-#include"Solution.hpp"
+#include "Solution.hpp"
 
 bool Solution::AddElement(const std::shared_ptr<ElementBase> element, const float Offset) {
     //检查重复

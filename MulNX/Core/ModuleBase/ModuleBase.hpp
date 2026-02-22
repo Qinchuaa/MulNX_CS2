@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../../Base/Base.hpp"
-#include "ISys.hpp"
+#include "ISys/ISys.hpp"
 // 前向声明：MulNXController 位于 MulNXExtensions 命名空间
 namespace MulNXExtensions { class MulNXController; }
 
@@ -149,18 +149,4 @@ namespace MulNX {
     public:
         C_ISys ISys();
     };
-
-	// 自动子窗口管理类，一般在Menu函数中使用
-	class AutoChild {
-	private:
-		const ModuleBase* Module = nullptr;
-	public:
-		// 构造时开始子窗口
-		AutoChild(const ModuleBase* Module, const std::string& Name, const float HeightRatio = 1.0f, const float WidthRatio = 1.0f);
-		// 析构时结束子窗口
-		~AutoChild();
-		// 禁止拷贝
-		AutoChild(const AutoChild&) = delete;
-		AutoChild& operator=(const AutoChild&) = delete;
-	};
 }

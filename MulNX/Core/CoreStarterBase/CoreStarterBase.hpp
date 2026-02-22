@@ -16,7 +16,7 @@ namespace MulNX {
                 return true;
             }
             // 初始化Core的所有系统组件
-            bool SystemInit(CoreImpl* pImpl, MulNX::Core::Core* pCore);
+            bool SystemInit(MulNX::Core::Core* pCore);
 
             // UI系统启动辅助函数
             void StartUIWith(std::string&& EntryName);

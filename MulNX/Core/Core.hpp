@@ -3,9 +3,6 @@
 // 同时提供各子模块的接口访问
 #include "../Base/Base.hpp"
 
-// 前向声明实现类
-class CoreImpl;
-
 namespace MulNX {
     namespace Core {
         class Core {
@@ -13,8 +10,8 @@ namespace MulNX {
         private:
             // 数据存储：
 
-            // Impl的指针
-            std::unique_ptr<CoreImpl> pImpl;
+            // 模块管理器指针
+            std::unique_ptr<ModuleManager> pModuleManager;
 
 			// 核心启动器指针
             std::unique_ptr<MulNX::Core::CoreStarterBase> pCoreStarter = nullptr;
@@ -39,7 +36,7 @@ namespace MulNX {
             MulNX::IPCer& IPCer();
             MulNX::IHandleSystem& IHandleSystem();
 
-            // 获取实现
+            // 获取启动器
             MulNX::Core::CoreStarterBase* GetStarter() { return this->pCoreStarter.get(); }
 
             // 设置启动器

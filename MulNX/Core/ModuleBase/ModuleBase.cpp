@@ -1,7 +1,6 @@
 #include "ModuleBase.hpp"
 
 #include "../Core.hpp"
-#include "../CoreImpl.hpp"
 #include "../ModuleManager/ModuleManager.hpp"
 
 #include "../../Systems/Systems.hpp"
@@ -184,13 +183,4 @@ void MulNX::ModuleBase::ISubscribe(MulNX::MsgType MsgType) {
 }
 MulNX::IMessageChannel* MulNX::ModuleBase::ICreateAndGetMessageChannel() {
     return this->IMsgManager->GetMessageChannel(this->IMsgManager->CreateMessageChannel());
-}
-
-MulNX::AutoChild::AutoChild(const ModuleBase* Module, const std::string& Name, const float HeightRatio, const float WidthRatio)
-    :Module(Module) {
-    ImVec2 Available = ImGui::GetContentRegionAvail();
-    ImGui::BeginChild(Name.c_str(), ImVec2(Available.x * WidthRatio, Available.y * HeightRatio), true);
-}
-MulNX::AutoChild::~AutoChild() {
-    ImGui::EndChild();
 }

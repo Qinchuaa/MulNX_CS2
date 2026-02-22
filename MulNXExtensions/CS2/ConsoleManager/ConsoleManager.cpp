@@ -15,7 +15,6 @@ bool ConsoleManager::Init() {
 }
 
 bool ConsoleManager::UINodeFunc(MulNXUINode* ThisNode) {
-	MulNX::AutoChild Child(this,"ConsoleManager", 0.5f);// 占据半个窗口高度，另一半给VirtualUser
 
 	if (ImGui::CollapsingHeader("调试器控制")) {
 		if (ImGui::Button("解限所有CS2控制台变量")) {

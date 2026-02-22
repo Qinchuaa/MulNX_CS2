@@ -4,7 +4,6 @@
 #include "../../Element/ElementManager/ElementManager.hpp"
 #include "../../Project/ProjectManager/ProjectManager.hpp"
 
-
 #include <MulNX/MulNX.hpp>
 
 //解决方案管理器

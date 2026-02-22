@@ -1,6 +1,7 @@
 #include "CoreStarterBase.hpp"
 
-#include "../CoreImpl.hpp"
+#include "../Core.hpp"
+#include "../ModuleManager/ModuleManager.hpp"
 
 #include "../../Systems/Debugger/Debugger.hpp"
 #include "../../Systems/HandleSystem/HandleSystem.hpp"
@@ -14,10 +15,10 @@
 
 using namespace MulNX::Core;
 
-bool CoreStarterBase::SystemInit(CoreImpl* pImpl, MulNX::Core::Core* pCore) {
+bool CoreStarterBase::SystemInit(MulNX::Core::Core* pCore) {
     // 无依赖核心基础模块初始化
-    pImpl->ModuleManager.SetName("ModuleManager");
-    pImpl->ModuleManager.EntryInit(pCore);
+    this->Core->ModuleManager()->SetName("ModuleManager");
+    this->Core->ModuleManager()->EntryInit(pCore);
     this->Core->ModuleManager()->FindModule<MulNX::MessageManager>("MessageManager")->EntryCreateThread();// 包含线程创建
 	this->Core->ModuleManager()->FindModule<MulNX::MessageManager>("MessageManager")->SetMyThreadDelta(10);// 注意，此模块内部动态调整频率
 	this->Core->ModuleManager()->FindModule<MulNX::KeyTracker>("KeyTracker")->EntryCreateThread();// 包含线程创建

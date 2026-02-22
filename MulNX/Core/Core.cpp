@@ -1,5 +1,6 @@
-#include "CoreImpl.hpp"
+#include "Core.hpp"
 #include "CoreStarterBase/CoreStarterBase.hpp"
+#include "ModuleManager/ModuleManager.hpp"
 
 #include "../Systems/Debugger/Debugger.hpp"
 #include "../Systems/HandleSystem/HandleSystem.hpp"
@@ -14,7 +15,7 @@
 // 构造函数和析构函数需要管理pImpl的生命周期
 MulNX::Core::Core::Core() {
 	// 创建Impl实例
-    this->pImpl = std::make_unique<CoreImpl>();
+    this->pModuleManager = std::make_unique<MulNX::Core::ModuleManager>();
 }
 
 MulNX::Core::Core::~Core() {
@@ -30,7 +31,7 @@ bool MulNX::Core::Core::SetCoreStarter(std::unique_ptr<CoreStarterBase> Starter)
 }
 
 MulNX::Core::ModuleManager* MulNX::Core::Core::ModuleManager() {
-	return &this->pImpl->ModuleManager;
+    return this->pModuleManager.get();
 }
 
 // 获取子模块的接口实现
@@ -69,12 +70,12 @@ void MulNX::Core::Core::Init() {
 	// 核心启动器初始化
 	this->pCoreStarter->EntryInit(this);
 	// 通过核心启动器进行系统初始化
-	this->pCoreStarter->SystemInit(this->pImpl.get(), this);
+	this->pCoreStarter->SystemInit(this);
 
 	this->ModuleManager()->FindModule<MulNX::GlobalVars>("GlobalVars")->SystemReady = true;
 
 	// 初始化注册模块
-	this->pImpl->ModuleManager.PackedInit();
+	this->pModuleManager->PackedInit();
 
 	this->pCoreStarter->StartAll();
 	this->pCoreStarter->InitEndCall();
@@ -85,8 +86,8 @@ void MulNX::Core::Core::Init() {
 // 主逻辑
 void MulNX::Core::Core::VirtualMain() {
 	// 包装的，所有的模块的VirtualMain
-	this->pImpl->ModuleManager.EntryVirtualMain();
+	this->pModuleManager->EntryVirtualMain();
     // 包装的，所有模块的窗口逻辑
-    this->pImpl->ModuleManager.EntryWindows();
+    this->pModuleManager->EntryWindows();
 	return;
 }

@@ -7,7 +7,6 @@
 #include <MulNXThirdParty/All_ImGui.hpp>
 
 bool GameSettingsManager::UINodeFunc(MulNXUINode* ThisNode) {
-    MulNX::AutoChild Child(this, "GameSettingsManager");
     if (ImGui::Button("一键修复数字切人bug")) {
         this->AL3D->ExecuteCommand("unbind 1");
         this->AL3D->ExecuteCommand("unbind 2");

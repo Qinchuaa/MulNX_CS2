@@ -1,5 +1,6 @@
 #pragma once
 
+#include "DllModule/DllModule.hpp"
 #include "Pattern/Pattern.hpp"
 #include "Region/Region.hpp"
 
@@ -8,8 +9,6 @@
 #include <vector>
 #include <optional>
 #include <Windows.h>
-#include <Psapi.h>
-#pragma comment(lib, "Psapi.lib")
 
 namespace MulNX {
     namespace Memory {
@@ -82,8 +81,5 @@ namespace MulNX {
         bool ReadString(const uintptr_t Address, char* Buffer, size_t BufferSize);
         // 安全读取宽字符串（UTF-16），逐字符读取直到遇到空字符或达到缓冲字符数
         bool ReadWString(const uintptr_t Address, wchar_t* Buffer, size_t BufferCount);
-
-        bool GetModuleInfo(const wchar_t* moduleName, uintptr_t& baseAddr, size_t& moduleSize);
-        bool GetTextSectionRange(uintptr_t moduleBase, uintptr_t& textStart, size_t& textSize);
     }
 }
