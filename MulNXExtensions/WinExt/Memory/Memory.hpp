@@ -3,6 +3,7 @@
 #include "DllModule/DllModule.hpp"
 #include "Pattern/Pattern.hpp"
 #include "Region/Region.hpp"
+#include "Assembler/Assembler.hpp"
 
 #include <atomic>
 #include <string>

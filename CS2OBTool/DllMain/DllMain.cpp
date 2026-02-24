@@ -106,7 +106,7 @@ DWORD MulNX_CS2_Start(void*) {
         .CreateModule<GameSettingsManager>("GameSettingsManager", 208)// 游戏设置管理模块
         .CreateModule<ConsoleManager>("ConsoleManager", 209)// 控制台管理模块
         .CreateModule<MulNXController>("MulNXController", 210);// MulNX控制器模块
-
+    
     // 启动核心
     Core->Init();
 

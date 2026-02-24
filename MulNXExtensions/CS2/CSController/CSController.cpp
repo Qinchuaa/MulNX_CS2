@@ -93,17 +93,22 @@ bool CSController::Init() {
             auto Target = textRegion.FindRegion(pattern);
             if (Target.IsValid()) {
                 auto Guard = Target.ExchangeProtection(PAGE_EXECUTE_READWRITE);
-                unsigned char asmCode[16] = {
-                    0x48, 0x89, 0xf1,
-                    0x48, 0xb8, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
-                    0xff, 0x10,
-                    0x90
-                };
                 static LPVOID ptr = HandleOverrideView;
-                LPVOID ptrPtr = &ptr;
+                MulNX::Memory::Asm::Code Code{};
+                {
+                    using enum MulNX::Memory::Asm::Reg;
+                    using namespace MulNX::Memory::Asm;
+                    Assembler Asm{};
+                    Asm
+                        .mov(RCX, RSI)
+                        .mov(RAX, (uintptr_t)&ptr)
+                        .call(Mem(RAX))
+                        .nop();
 
-                memcpy(&asmCode[5], &ptrPtr, sizeof(LPVOID));
-                memcpy((LPVOID)Target.begin(), asmCode, 16);
+                    Code = Asm.Release();
+                }
+                assert(Code.Size() == 16);
+                Target.DataOverride(Code);
             }
         }
     }

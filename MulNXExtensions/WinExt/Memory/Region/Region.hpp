@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../Pattern/Pattern.hpp"
+#include "../Assembler/Assembler.hpp"
 
 #include <Windows.h>
 
@@ -35,14 +36,16 @@ namespace MulNX {
             Region(uintptr_t Base, size_t Size);
             static Region InValid() { return Region(0, 0); }
             // 迭代器支持
-            const uint8_t* begin() const { return reinterpret_cast<const uint8_t*>(Base); }
-            const uint8_t* end() const { return reinterpret_cast<const uint8_t*>(Base + Size); }
-            size_t size() const { return Size; }
+            const uint8_t* Begin()const { return reinterpret_cast<const uint8_t*>(Base); }
+            const uint8_t* End()const { return reinterpret_cast<const uint8_t*>(Base + Size); }
+            size_t GetSize() const { return this->Size; }
+            uint8_t* Data() { return reinterpret_cast<uint8_t*>(Base); }
             bool IsValid() const { return Base != 0 && Size != 0; }
             DWORD protection() const { return Protection; }
             ProtectionGuard ExchangeProtection(DWORD NewProtect);
 
             Region FindRegion(const Pattern& pattern)const;
+            bool DataOverride(const Asm::Code& AsmCode);
         };
     }
 }

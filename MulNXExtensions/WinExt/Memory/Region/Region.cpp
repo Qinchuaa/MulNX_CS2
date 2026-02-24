@@ -21,7 +21,7 @@ MulNX::Memory::Region::ProtectionGuard MulNX::Memory::Region::ExchangeProtection
 }
 
 std::optional<uint8_t*> MulNX::Memory::Region::FindHead(const uint8_t* Begin, const uint8_t Byte)const {
-    for (const uint8_t* Current = Begin; Current < this->end(); ++Current) {
+    for (const uint8_t* Current = Begin; Current < this->End(); ++Current) {
         if (*Current == Byte) {
             return const_cast<uint8_t*>(Current);
         }
@@ -39,7 +39,7 @@ bool MulNX::Memory::Region::MatchPattern(const uint8_t* Address, const Pattern& 
 }
 
 MulNX::Memory::Region MulNX::Memory::Region::FindRegion(const Pattern& pattern) const {
-    for (const uint8_t* Current = this->begin(); Current < this->end();) {
+    for (const uint8_t* Current = this->Begin(); Current < this->End();) {
         auto FoundHead = this->FindHead(Current, *pattern.First());
         if (!FoundHead.has_value()) {
             break;//未找到更多匹配
@@ -52,4 +52,13 @@ MulNX::Memory::Region MulNX::Memory::Region::FindRegion(const Pattern& pattern) 
         Current = FoundHead.value() + 1;
     }
     return Region::InValid();//未找到匹配
+}
+
+bool MulNX::Memory::Region::DataOverride(const Asm::Code& Source) {
+    if (this->GetSize() < Source.Size()) {
+        return false;
+    }
+    auto data = Source.Data();
+    memcpy(static_cast<void*>(this->Data()), data, Source.Size());
+    return true;
 }

@@ -1,7 +1,19 @@
-cmake_minimum_required(VERSION 3.20)
+cmake_minimum_required(VERSION 3.31.11)
 
 # 项目定义
 project("MulNX")
+
+# 启用 LTO（仅 Release 配置）
+include(CheckIPOSupported)
+check_ipo_supported(RESULT ipo_supported)
+
+if(ipo_supported)
+    set(CMAKE_INTERPROCEDURAL_OPTIMIZATION_CONFIG Release)
+    set(CMAKE_INTERPROCED URAL_OPTIMIZATION TRUE)
+    message(STATUS "IPO/LTO enabled for Release builds")
+else()
+    message(WARNING "IPO/LTO is not supported by the compiler. Skipping.")
+endif()
 
 # C++ 标准设置
 set(CMAKE_CXX_STANDARD 23)
@@ -10,12 +22,8 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 
 # MSVC 专用设置
 if(MSVC)
-    # 统一设置源文件字符集和执行字符集为 UTF-8
     add_compile_options(/utf-8)
-
-    # 防止 windows.h 定义 min/max 宏
     add_compile_definitions(NOMINMAX)
-    # 定义 WIN32_LEAN_AND_MEAN 以减少 windows.h 包含的内容
     add_compile_definitions(WIN32_LEAN_AND_MEAN)
 endif()
 
