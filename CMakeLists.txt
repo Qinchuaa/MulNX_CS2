@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.31.11)
+cmake_minimum_required(VERSION 3.31)
 
 # 项目定义
 project("MulNX")
