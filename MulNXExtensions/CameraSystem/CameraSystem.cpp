@@ -25,6 +25,12 @@ bool CameraSystem::Init() {
     this->WManager.EntryInit(this->Core);
     this->WManager.InjectDependence(&this->EManager, &this->SManager, &this->PManager);
 
+    std::filesystem::path paConfig = this->ISys().PathGetShared("Config");
+    bool temp = std::filesystem::exists(paConfig);
+
+    std::filesystem::path paConfig2 = this->ISys().PathGet("Config");
+    bool temp2 = std::filesystem::exists(paConfig2);
+
     this->NeedUINode = true;
     return true;
 }

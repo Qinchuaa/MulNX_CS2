@@ -16,6 +16,8 @@ std::atomic<float> AnglesY = 0;
 std::atomic<float> AnglesZ = 0;
 std::atomic<float> FOV = 90.0f;
 
+constexpr float M_PI = 3.1415926535;
+
 void HandleOverrideView(void* ThisCViewSetup) {
 
     int* pWidth = (int*)((unsigned char*)ThisCViewSetup + 0x434);
@@ -25,6 +27,46 @@ void HandleOverrideView(void* ThisCViewSetup) {
     float* pViewOrigin = (float*)((unsigned char*)ThisCViewSetup + 0x4a0);
     float* pViewAngles = (float*)((unsigned char*)ThisCViewSetup + 0x4b8);
 
+    // using namespace DirectX;
+    // using namespace MulNX::Base::Math;
+
+    // // 1. 读取当前位置和角度
+    // XMFLOAT3 pos_old(pViewOrigin[0], pViewOrigin[1], pViewOrigin[2]);
+    // XMFLOAT3 ang_old(pViewAngles[0], pViewAngles[1], pViewAngles[2]);
+
+    // // 2. 计算当前前方向（默认前向为 +X）
+    // XMVECTOR quat = CSEulerToQuatVec(ang_old);
+    // XMVECTOR defaultForward = XMVectorSet(1.0f, 0.0f, 0.0f, 0.0f);
+    // XMVECTOR forwardVec = XMVector3Rotate(defaultForward, quat);
+    // XMFLOAT3 forward;
+    // XMStoreFloat3(&forward, forwardVec);
+
+    // float distance = 70.0f;
+
+    // // 3. 计算新位置
+    // XMFLOAT3 pos_new;
+    // pos_new.x = pos_old.x + forward.x * distance;
+    // pos_new.y = pos_old.y + forward.y * distance;
+    // pos_new.z = pos_old.z + forward.z * distance;
+
+    // // 4. 计算新方向（指向原位置）
+    // XMFLOAT3 dir_new;
+    // dir_new.x = pos_old.x - pos_new.x;  // 等价于 -forward.x * distance
+    // dir_new.y = pos_old.y - pos_new.y;
+    // dir_new.z = pos_old.z - pos_new.z;
+
+    // // 5. 方向向量转欧拉角
+    // XMFLOAT3 ang_new;
+    // CSDirToEuler(dir_new, ang_new);  // 输出：pitch, yaw, roll=0
+
+    // // 6. 写回内存
+    // pViewOrigin[0] = pos_new.x;
+    // pViewOrigin[1] = pos_new.y;
+    // pViewOrigin[2] = pos_new.z;
+    // pViewAngles[0] = ang_new.x;
+    // pViewAngles[1] = ang_new.y;
+    // pViewAngles[2] = 0;  // 滚转置0
+    
     if (IsInCameraSystemOverride.load()) {
         pViewOrigin[0] = OriginX.load();
         pViewOrigin[1] = OriginY.load();
@@ -107,8 +149,13 @@ bool CSController::Init() {
 
                     Code = Asm.Release();
                 }
-                assert(Code.Size() == 16);
-                Target.DataOverride(Code);
+                try {
+                    Target.TryResize(16);
+                    Target.SameSizeSwap(Code);
+                }
+                catch (...) {
+                    this->ISys().LogError("汇编代码与目标大小不匹配！");
+                }
             }
         }
     }

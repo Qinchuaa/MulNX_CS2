@@ -36,18 +36,6 @@ void MulNX::ModuleBase::SetMyThreadDelta(int Delta) {
     this->MyThreadDelta = Delta;
 }
 
-// 窗口控制
-
-void MulNX::ModuleBase::OpenWindow() {
-    this->ShowWindow = true;
-}
-void MulNX::ModuleBase::CloseWindow() {
-    this->ShowWindow = false;
-}
-bool MulNX::ModuleBase::IsWindowOpen()const {
-    return this->ShowWindow;
-}
-
 // 初始化
 bool MulNX::ModuleBase::BaseInit() {
     try {
@@ -56,6 +44,7 @@ bool MulNX::ModuleBase::BaseInit() {
         this->GlobalVars = this->Core->ModuleManager()->FindModule<MulNX::GlobalVars>("GlobalVars");
         this->AL3D = this->Core->ModuleManager()->FindModule<MulNX::IAbstractLayer3D>("AbstractLayer3D");
         this->KT = this->Core->ModuleManager()->FindModule<MulNX::KeyTracker>("KeyTracker");
+        this->pPathManager = this->Core->ModuleManager()->FindModule<MulNX::PathManager>("PathManager");
 
         if (!this->HModule.IsValid()) {
             this->HModule = MulNXHandle::CreateHandle();
@@ -165,14 +154,6 @@ void MulNX::ModuleBase::EntryProcessMsg() {
         this->IMsgManager->Release();
     }
 }
-// 窗口
-void MulNX::ModuleBase::BaseWindows() {
-    return;
-}
-void MulNX::ModuleBase::EntryWindows() {
-    this->BaseWindows();
-    this->Windows();
-}
 
 
 void MulNX::ModuleBase::IRegiste() {
@@ -183,4 +164,11 @@ void MulNX::ModuleBase::ISubscribe(MulNX::MsgType MsgType) {
 }
 MulNX::IMessageChannel* MulNX::ModuleBase::ICreateAndGetMessageChannel() {
     return this->IMsgManager->GetMessageChannel(this->IMsgManager->CreateMessageChannel());
+}
+
+void MulNX::ModuleBase::SetParent(MulNXHandle hModule) {
+    this->hParent = hModule;
+}
+bool MulNX::ModuleBase::HasParent() {
+    return this->hParent.IsValid();
 }

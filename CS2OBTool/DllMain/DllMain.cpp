@@ -69,11 +69,14 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserv
 }
 
 DWORD MulNX_CS2_Start(void*) {
-    // 创建核心实例
-    MulNX::Core::Core* Core = new MulNX::Core::Core();
+    // 得到唯一核心
+    auto* Core = MulNX::Core::Core::Get();
+    // 必须设置核心名称，路径管理依赖核心名
+    Core->SetName("CS2OBTool");
 
     // 创建核心启动器实例
     std::unique_ptr<MulNX::Core::CoreStarterBase> Starter = std::make_unique<HookManager>();
+    // 手动创建的模块需要手动设置名称
     Starter->SetName("HookManager");
     // 设置初始化完成回调
     Starter->InitEndCall = [Core]() {
@@ -82,10 +85,12 @@ DWORD MulNX_CS2_Start(void*) {
         starter->ISys().LogSucc("注入成功！");
         starter->ISys().LogInfo("各模块初始化完成！");
         starter->ISys().LogWarning("您正在使用测试版本！！");
+#ifdef _DEBUG
         starter->AL3D->ExecuteCommand("playdemo 111");
         std::thread([]() {
             MessageBoxW(NULL, L"MulNXDLL 注入成功！", L"MulNX", MB_OK | MB_ICONINFORMATION);
             }).detach();
+#endif
         // 注册主窗口UI上下文
         starter->RegisteMainDrawWith(MainDraw);
         // UI系统的启动由HookManager在Hook完成后自主启动

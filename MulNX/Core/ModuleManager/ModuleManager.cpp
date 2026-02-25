@@ -8,6 +8,7 @@
 #include "../../Systems/AbstractLayer3D/AbstractLayer3D.hpp"
 #include "../../Systems/IPCer/IPCer.hpp"
 #include "../../Systems/MulNXUISystem/MulNXUISystem.hpp"
+#include "../../Systems/PathManager/PathManager.hpp"
 #include <deque>
 
 using namespace MulNX::Core;
@@ -64,10 +65,11 @@ bool ModuleManager::RegisteModule(std::unique_ptr<MulNX::ModuleBase>&& Module, s
 }
 ModuleManager& ModuleManager::CreateSystemModules() {
     (*this)
+        .CreateModule<MulNX::IPCer>("IPCer", 3)// IPC模块
+        .CreateModule<MulNX::PathManager>("PathManager", 4)// 路径管理器模块
         .CreateModule<MulNX::MessageManager>("MessageManager", 5)// 消息管理器模块
         .CreateModule<MulNX::Debugger>("Debugger", 10)// 调试器模块
         .CreateModule<MulNX::HandleSystem>("HandleSystem", 20)// 句柄系统模块
-        .CreateModule<MulNX::IPCer>("IPCer", 30)// IPC模块
         .CreateModule<MulNX::KeyTracker>("KeyTracker", 50)// 按键追踪器模块
         .CreateModule<MulNX::GlobalVars>("GlobalVars", 70)// 全局变量模块
         .CreateModule<MulNX::AbstractLayer3D>("AbstractLayer3D", 90)// 3D抽象层模块
@@ -105,12 +107,15 @@ bool ModuleManager::PackedInit() {
 void ModuleManager::PackedVirtualMain() {
 	std::shared_lock lock(this->MyThreadMutex);
     for (auto& [Priority, hModule] : this->PriorityToHandleMap) {
-		this->Modules[hModule]->EntryVirtualMain();
-	}
+        auto* pModule = this->Modules[hModule].get();
+        if (!pModule->HasParent()) {
+            pModule->EntryVirtualMain();
+        }
+    }
 }
 void ModuleManager::PackedWindows() {
 	std::shared_lock lock(this->MyThreadMutex);
     for (auto& [Priority, hModule] : this->PriorityToHandleMap) {
-        this->Modules[hModule]->EntryWindows();
+        this->Modules[hModule]->Windows();
     }
 }

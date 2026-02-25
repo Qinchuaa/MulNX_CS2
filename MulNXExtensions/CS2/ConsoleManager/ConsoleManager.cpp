@@ -45,21 +45,21 @@ bool ConsoleManager::UINodeFunc(MulNXUINode* ThisNode) {
 
 	if (ImGui::CollapsingHeader("游戏配置管理器控制")) {
 		if (ImGui::Button("打开游戏配置管理器")) {
-			this->Core->ModuleManager()->FindModule("GameCfgManager")->OpenWindow();
+            this->Core->ModuleManager()->FindModule("GameCfgManager")->ShowWindow = true;
 		}
 		ImGui::SameLine();
 		if (ImGui::Button("关闭游戏配置管理器")) {
-			this->Core->ModuleManager()->FindModule("GameCfgManager")->CloseWindow();
+            this->Core->ModuleManager()->FindModule("GameCfgManager")->ShowWindow = false;
 		}
 	}
 
 	if (ImGui::CollapsingHeader("小地图控制")) {
 		if (ImGui::Button("打开小地图")) {
-			this->Core->ModuleManager()->FindModule("MiniMap")->OpenWindow();
+            this->Core->ModuleManager()->FindModule("MiniMap")->ShowWindow = true;
 		}
 		ImGui::SameLine();
 		if (ImGui::Button("关闭小地图")) {
-			this->Core->ModuleManager()->FindModule("MiniMap")->CloseWindow();
+            this->Core->ModuleManager()->FindModule("MiniMap")->ShowWindow = false;
 		}
 	}
 

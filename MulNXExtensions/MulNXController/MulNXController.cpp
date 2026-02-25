@@ -11,11 +11,11 @@ bool MulNXController::UINodeFunc(MulNXUINode* ThisNode) {
         this->GlobalVars->DebugMode = debugMode;
     }
     if (ImGui::Button("打开调试器")) {
-        this->IDebugger->OpenWindow();
+        this->IDebugger->ShowWindow = true;
     }
     ImGui::SameLine();
     if (ImGui::Button("关闭调试器")) {
-        this->IDebugger->CloseWindow();
+        this->IDebugger->ShowWindow = false;
     }
     if (ImGui::Button("保存调试日志到文件")) {
         MulNX::Message Msg(MulNX::MsgType::Debugger_SaveToFile);

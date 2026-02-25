@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Path>
+    <Template>
+        <Path Name="Saves"/>
+        <Path Name="Config"/>
+    </Template>
+
+    <Shared>
+        <Path Name="Saves"/>
+        <Path Name="Config"/>
+        <Path Name="Dlls"/>
+        <Path Name="Resource"/>
+    </Shared>
+
+    <Subdirectory>
+        <Directory Name="CS2Injector"/>
+        <Directory Name="CS2OBTool"/>
+    </Subdirectory>
+</Path>

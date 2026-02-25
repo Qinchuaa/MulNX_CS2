@@ -43,9 +43,10 @@ namespace MulNX {
             bool IsValid() const { return Base != 0 && Size != 0; }
             DWORD protection() const { return Protection; }
             ProtectionGuard ExchangeProtection(DWORD NewProtect);
+            bool TryResize(size_t NewSize);
 
             Region FindRegion(const Pattern& pattern)const;
-            bool DataOverride(const Asm::Code& AsmCode);
+            bool SameSizeSwap(const Asm::Code& AsmCode);
         };
     }
 }

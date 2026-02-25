@@ -11,15 +11,9 @@
 #include "../Systems/MulNXUISystem/MulNXUISystem.hpp"
 #include "../Systems/AbstractLayer3D/AbstractLayer3D.hpp"
 
-
-// 构造函数和析构函数需要管理pImpl的生命周期
 MulNX::Core::Core::Core() {
-	// 创建Impl实例
+	// 创建核心模块示例
     this->pModuleManager = std::make_unique<MulNX::Core::ModuleManager>();
-}
-
-MulNX::Core::Core::~Core() {
-	return;
 }
 
 bool MulNX::Core::Core::SetCoreStarter(std::unique_ptr<CoreStarterBase> Starter) {
@@ -28,6 +22,11 @@ bool MulNX::Core::Core::SetCoreStarter(std::unique_ptr<CoreStarterBase> Starter)
 	}
 	this->pCoreStarter = std::move(Starter);
 	return true;
+}
+
+MulNX::Core::Core* MulNX::Core::Core::Get() {
+    static MulNX::Core::Core CoreInstance{};
+    return &CoreInstance;
 }
 
 MulNX::Core::ModuleManager* MulNX::Core::Core::ModuleManager() {
@@ -88,6 +87,13 @@ void MulNX::Core::Core::VirtualMain() {
 	// 包装的，所有的模块的VirtualMain
 	this->pModuleManager->EntryVirtualMain();
     // 包装的，所有模块的窗口逻辑
-    this->pModuleManager->EntryWindows();
+    this->pModuleManager->Windows();
 	return;
+}
+
+void MulNX::Core::Core::SetName(std::string&& Name) {
+    this->CoreName = std::move(Name);
+}
+std::string MulNX::Core::Core::GetName() {
+    return this->CoreName;
 }

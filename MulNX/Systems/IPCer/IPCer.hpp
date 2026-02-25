@@ -1,10 +1,8 @@
 #pragma once
 
-#include"../../Core/ModuleBase/ModuleBase.hpp"
+#include "../../Core/ModuleBase/ModuleBase.hpp"
 
-#include<filesystem>
-#include<string>
-#include<Windows.h>
+#include <Windows.h>
 
 class Paths {
 public:
@@ -136,6 +134,9 @@ namespace MulNX {
 
         bool GetFileNames(std::vector<std::string>& FileNames, const std::filesystem::path& FolderPath, const std::vector<std::string>& Filter, const bool Extension = false);
         bool FileDelete(const std::string& FileName, const std::filesystem::path& FolderPath);
-        bool FileMove(const std::string& FileName, const std::filesystem::path& Resource, const std::filesystem::path& Target);
+        bool FileMove(const std::string& FileName,
+            const std::filesystem::path& Resource, const std::filesystem::path& Target);
+
+        std::filesystem::path GetRoot();
     };
 }

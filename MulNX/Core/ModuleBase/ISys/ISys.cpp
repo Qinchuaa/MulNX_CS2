@@ -31,3 +31,11 @@ void MulNX::C_ISys::PublishAsync(MulNX::Message&& Msg) {
 void MulNX::C_ISys::PublishAsync(MulNX::MsgType Msg) {
     this->pModuleBase->IMsgManager->Publish(MulNX::Message(Msg));
 }
+
+std::filesystem::path MulNX::C_ISys::PathGet(const std::string& Target) {
+    return this->pModuleBase->pPathManager->PathGetForModule(this->pModuleBase->GetName(), Target);
+}
+
+std::filesystem::path MulNX::C_ISys::PathGetShared(const std::string& Target) {
+    return this->pModuleBase->pPathManager->PathGetForShared(Target);
+}

@@ -1,10 +1,11 @@
-#include"IPCer.hpp"
+#include "IPCer.hpp"
 
-#include"../Debugger/IDebugger.hpp"
+#include "../Debugger/IDebugger.hpp"
 
-#include"../../Core/Core.hpp"
+#include "../../Core/Core.hpp"
 
-#include<strstream>
+#include <strstream>
+#include <Windows.h>
 
 bool MulNX::IPCer::GetWindowPathByName(const LPCWSTR& WindowName, std::filesystem::path& Output) {
     HWND hwnd = FindWindowW(NULL, WindowName);
@@ -39,6 +40,10 @@ bool MulNX::IPCer::GetWindowPathByName(const LPCWSTR& WindowName, std::filesyste
 
     Output = exePath;
     return true;
+}
+
+std::filesystem::path MulNX::IPCer::GetRoot() {
+    return this->Paths.MulNX.Path;
 }
 
 bool MulNX::IPCer::Init() {

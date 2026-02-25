@@ -13,6 +13,8 @@ namespace MulNX {
     protected:
         // 标记是否已经完成初始化，未完成前不允许执行主循环等操作
         bool Inited = false;
+        // 父模块句柄
+        MulNXHandle hParent{};
         // 模块名称，唯一标识
         std::string ModuleName;
         // 核心管理器指针
@@ -42,10 +44,10 @@ namespace MulNX {
         IDebugger* IDebugger = nullptr;
     private:
         // 消息管理器指针
-		MulNX::IMessageManager* IMsgManager = nullptr;
-	protected:
-		// 窗口显示标志
-		std::atomic<bool> ShowWindow = false;
+        MulNX::IMessageManager* IMsgManager = nullptr;
+        // 路径管理器指针
+        MulNX::PathManager* pPathManager = nullptr;
+    protected:
 		// 运行标志
 		std::atomic<bool> Running = false;
 		// 线程对象成员
@@ -92,10 +94,6 @@ namespace MulNX {
 		// 消息处理函数，只需处理即可，消息会由入口点释放
         virtual void ProcessMsg(MulNX::Message* Msg) {};
 
-		// 窗口绘制
-        virtual void Windows() {};
-
-
 		// 基本函数
 	protected:
 		// 基础初始化
@@ -104,8 +102,6 @@ namespace MulNX {
 		void BaseVirtualMain();
 		// 基础消息处理
 		void BaseProcessMsg();
-		// 基础窗口
-		void BaseWindows();
 
 		// 入口点
 	public:
@@ -118,13 +114,12 @@ namespace MulNX {
 	protected:
 		// 消息处理入口
 		void EntryProcessMsg();
-	public:
-		// 窗口入口
-		void EntryWindows();
-		// 窗口控制
-		void OpenWindow();
-		void CloseWindow();
-        bool IsWindowOpen()const;
+    public:
+        // 窗口绘制
+        virtual void Windows() {};
+        // 窗口控制
+        // 窗口显示标志
+        std::atomic<bool> ShowWindow = false;
     protected:
         // 是否需要UI节点，默认不需要
         bool NeedUINode = false;
@@ -138,7 +133,10 @@ namespace MulNX {
 			return this->Core;
 		}
 
-		// 工具函数
+        void SetParent(MulNXHandle hModule);
+        bool HasParent();
+        
+        // 工具函数
         
         // 自动注册
 		void IRegiste();

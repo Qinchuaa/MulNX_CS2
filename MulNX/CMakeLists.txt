@@ -30,6 +30,7 @@ add_library(MulNX
     "Systems/MulNXUISystem/MulNXUISystem.cpp"
     "Systems/MulNXUISystem/MulNXUIContext/MulNXUIContext.cpp"
     "Systems/MulNXUISystem/MulNXUIContext/MulNXUINode/MulNXUINode.cpp"
+    "Systems/PathManager/PathManager.cpp"
 
     "Systems/Systems.cpp"
 

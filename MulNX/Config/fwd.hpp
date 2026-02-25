@@ -30,17 +30,19 @@ namespace MulNX {
     class KeyTracker;
     // 全局变量
     class GlobalVars;
-    //3D抽象层
+    // 3D抽象层
     class IAbstractLayer3D;
     // MulNX UI系统
     class IUISystem;
-    //MulNX消息
+    // MulNX消息
     class Message;
-    //MulNX消息类型
+    // MulNX消息类型
     enum class MsgType :uint32_t;
-    //消息管理器
+    // 消息管理器
     class IMessageManager;
-    //消息管道
+    // 消息管道
     class IMessageChannel;
+    // 路径管理器
+    class PathManager;
 }
 class MulNXUINode;
