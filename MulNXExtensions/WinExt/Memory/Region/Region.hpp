@@ -13,6 +13,7 @@ namespace MulNX {
         private:
             uintptr_t Base = 0;
             size_t Size = 0;
+            const size_t RawSize;
             DWORD Protection = 0;// 当前保护属性
             DWORD OldProtection = 0;// 交换保护时保存旧属性
         public:

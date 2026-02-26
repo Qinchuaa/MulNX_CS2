@@ -23,6 +23,7 @@ bool MulNX::Debugger::Init() {
     this->ISys()
         .SubscribeAsync(MulNX::MsgType::Debugger_SetMaxInfoCount)
         .SubscribeAsync(MulNX::MsgType::Debugger_SaveToFile);
+    this->NeedUINode = true;
     return true;
 }
 void MulNX::Debugger::ProcessMsg(MulNX::Message* Msg) {
@@ -38,13 +39,6 @@ void MulNX::Debugger::ProcessMsg(MulNX::Message* Msg) {
 void MulNX::Debugger::VirtualMain() {
     this->EntryProcessMsg();
 }
-
-void MulNX::Debugger::Menu() {
-
-    return;
-}
-
-
 
 void MulNX::Debugger::ResetMaxMsgCount(const int Max) {
     std::unique_lock lock(this->MyThreadMutex);
@@ -68,7 +62,7 @@ void MulNX::Debugger::SaveToFile() {
         data += msg + "\n";
     }
     
-
+    auto path = this->ISys().PathGetShared("Log") / ("Log_" + this->Core->GetName() + ".txt");
     if (!MySaveStringToFile(data, path)) {
         // 处理错误
         throw std::runtime_error("无法保存调试日志到文件: " + path.string());
@@ -122,7 +116,7 @@ void MulNX::Debugger::PushBack(const std::string& NewMsg, const std::string& pre
         }
     }
 
-    if (AutoScroll) {
+    if (this->AutoScroll) {
         this->NeedAutoScroll = true;
     }
     return;
@@ -152,10 +146,11 @@ void MulNX::Debugger::AddError(const std::string& NewMsg) {
     }
 }
 
-void MulNX::Debugger::Windows() {
-    if (!this->ShowWindow)return;
+bool MulNX::Debugger::UINodeFunc(MulNXUINode* ThisNode) {
+    if (!this->ShowWindow)return true;
     std::shared_lock lock(this->MyThreadMutex);
     this->ShowFunc(this);
+    return true;
 }
 void MulNX::Debugger::ShowStream() {
     this->IfShowStream = true;

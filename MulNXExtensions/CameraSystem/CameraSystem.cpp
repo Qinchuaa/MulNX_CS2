@@ -35,6 +35,9 @@ bool CameraSystem::Init() {
     return true;
 }
 bool CameraSystem::UINodeFunc(MulNXUINode* ThisNode) {
+    this->EManager.Windows();
+    this->SManager.Windows();
+    this->PManager.Windows();
     // 顶部：工作区信息（始终显示）
     ImGui::BeginChild("工作区面板", ImVec2(0, 150), true); {
         // 工作区状态
@@ -321,11 +324,6 @@ void CameraSystem::VirtualMain() {
     this->PManager.VirtualMain();
     this->WManager.VirtualMain();
     return;
-}
-void CameraSystem::Windows() {
-    this->EManager.Windows();
-    this->SManager.Windows();
-    this->PManager.Windows();
 }
 void CameraSystem::MemoryClear() {
     this->EManager.Element_ClearAll();

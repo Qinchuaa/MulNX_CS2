@@ -8,8 +8,8 @@
     <Shared>
         <Path Name="Saves"/>
         <Path Name="Config"/>
-        <Path Name="Dlls"/>
         <Path Name="Resource"/>
+        <Path Name="Log"/>
     </Shared>
 
     <Subdirectory>

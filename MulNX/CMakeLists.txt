@@ -5,16 +5,15 @@ add_library(MulNX
     "Base/TripleBuffer/TripleBuffer.cpp"
     "Base/vmt/vmt.hpp"
     "Base/MulNXHandle/MulNXHandle.cpp"
-
     "Base/Base.cpp"
 
+    "Config/Config.cpp"
 
     "Core/Core.cpp"
     "Core/CoreStarterBase/CoreStarterBase.cpp"
     "Core/ModuleBase/ModuleBase.cpp"
     "Core/ModuleBase/ISys/ISys.cpp"
     "Core/ModuleManager/ModuleManager.cpp"
-
     "Core/Cores.hpp"
 
 
@@ -31,10 +30,8 @@ add_library(MulNX
     "Systems/MulNXUISystem/MulNXUIContext/MulNXUIContext.cpp"
     "Systems/MulNXUISystem/MulNXUIContext/MulNXUINode/MulNXUINode.cpp"
     "Systems/PathManager/PathManager.cpp"
-
     "Systems/Systems.cpp"
 
-    
     "MulNX.cpp"
 )
 target_link_libraries(MulNX PUBLIC MulNXThirdParty)

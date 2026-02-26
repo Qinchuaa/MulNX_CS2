@@ -11,25 +11,26 @@ namespace MulNX {
             // 数据存储：
 
             // 核心名称（文件系统路径管理需要用）
-            std::string CoreName{};
+            std::string CoreName;
             // 模块管理器指针
             std::unique_ptr<ModuleManager> pModuleManager;
 
 			// 核心启动器指针
             std::unique_ptr<MulNX::Core::CoreStarterBase> pCoreStarter = nullptr;
 
+            Core() = delete;
             // 构造函数
-            Core();
-        public:
-            // 析构函数
-            ~Core() = default;
+            Core(std::string&& CoreName);
             // 删除拷贝构造
             Core(const Core&) = delete;
             // 删除拷贝赋值
             Core& operator=(const Core&) = delete;
-
-            // 得到唯一核心实例的指针
-            static Core* Get();
+        public:
+            // 析构函数
+            ~Core() = default;
+            
+            // 只允许被调用一次
+            static Core* Create(std::string&& CoreName);
 
             // 初始化
             void Init();
@@ -49,9 +50,6 @@ namespace MulNX {
 
             // 设置启动器
 			bool SetCoreStarter(std::unique_ptr<CoreStarterBase> Starter);
-
-            // 设置核心名
-            void SetName(std::string&& Name);
 
             // 获取核心名
             std::string GetName();

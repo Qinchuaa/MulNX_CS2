@@ -31,6 +31,7 @@ void MulNX::UISystem::ProcessMsg(MulNX::Message* Msg) {
     case MulNX::MsgType::UISystem_ModulePush: {
         MulNX::Base::any_unique_ptr UINode = this->Core->IHandleSystem().ReleaseUnique(Msg->Handle);
         this->UIContext.AddUINode(Msg->Handle, std::move(UINode));
+        this->ISys().LogSucc("接收到一个UI节点");
         break;
     }
     }

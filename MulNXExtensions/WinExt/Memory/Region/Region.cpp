@@ -1,6 +1,8 @@
 #include "Region.hpp"
 
-MulNX::Memory::Region::Region(uintptr_t Base, size_t Size) : Base(Base), Size(Size) {
+MulNX::Memory::Region::Region(uintptr_t Base, size_t Size) :
+    Base(Base), Size(Size),
+    RawSize(Size) {
     this->Protection = 0;
     if (!this->IsValid()) return;
     MEMORY_BASIC_INFORMATION mbi;
@@ -13,7 +15,7 @@ MulNX::Memory::Region::Region(uintptr_t Base, size_t Size) : Base(Base), Size(Si
 }
 MulNX::Memory::Region::ProtectionGuard MulNX::Memory::Region::ExchangeProtection(DWORD NewProtect) {
     if (!this->IsValid()) return ProtectionGuard::Invalid();
-    if (!VirtualProtect(reinterpret_cast<LPVOID>(this->Base), this->Size, NewProtect, &this->OldProtection))
+    if (!VirtualProtect(reinterpret_cast<LPVOID>(this->Base), this->RawSize, NewProtect, &this->OldProtection))
         return ProtectionGuard::Invalid();
 
     this->Protection = NewProtect;

@@ -44,8 +44,6 @@
 #include <unordered_map>
 #include <filesystem>
 
-
-
 // 摄像机系统
 class CameraSystem final :public ICameraSystem {
 private:
@@ -67,8 +65,6 @@ public:
     bool UINodeFunc(MulNXUINode* ThisNode)override;
     // 逻辑主函数
     void VirtualMain()override;
-    // 窗口函数
-    void Windows()override;
 private:
     // 摄像机系统大菜单元素菜单
     void MenuElement();

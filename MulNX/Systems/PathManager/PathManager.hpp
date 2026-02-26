@@ -24,16 +24,17 @@ namespace MulNX {
         std::filesystem::path CoreRoot;
         // 路径缓存
         std::unordered_map<std::string, std::filesystem::path>Cache;
+
+        std::vector<std::string>Shareds;
     public:
         bool Init()override;
-        
+
+        bool LoadPathLists(const std::filesystem::path& xmlPath);
+        bool CheckShared();
+
         // 通过模块名，将目标（如Saves）映射到该模块的对应的目录（如ModuleA/Saves）
         std::filesystem::path PathGetForModule(const std::string& ModuleName, const std::string& Target);
-        bool PathCreateForModule(const std::string& ModuleName, const std::string& Target);
-        bool PathExistForModule(const std::string& ModuleName, const std::string& Target);
         // 将目标映射到共享的目录
         std::filesystem::path PathGetForShared(const std::string& Target);
-        bool PathCreateForShared(const std::string& Target);
-        bool PathExistForShared(const std::string& Target);
     };
 }

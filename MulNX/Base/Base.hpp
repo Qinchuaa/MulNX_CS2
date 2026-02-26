@@ -7,7 +7,7 @@
 #include "CharUtility/CharUtility.hpp"
 #include "MulNXHandle/MulNXHandle.hpp"
 
-#include "../Config/fwd.hpp"
+#include "../Config/Config.hpp"
 
 #include <algorithm>
 #include <cmath>

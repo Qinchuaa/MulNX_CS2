@@ -12,8 +12,6 @@ bool MySaveStringToFile(const std::string& data,
     const std::filesystem::path& filePath);
 namespace MulNX {
     class Debugger final :public IDebugger {
-        std::string msg = "调试输出日志\n";
-        std::filesystem::path path = "C:\\Users\\lenovo\\Desktop\\核心科技\\log.txt";
     public:
 		std::deque<std::string> DebugMsg{};
 		bool IfShowStream = true;
@@ -35,8 +33,7 @@ namespace MulNX {
 		bool Init()override;
 		void VirtualMain()override;
 		void ProcessMsg(MulNX::Message* Msg)override;
-		void Menu();
-		void Windows()override;
+		bool UINodeFunc(MulNXUINode* ThisNode);
 
 		//调试器接口实现
 

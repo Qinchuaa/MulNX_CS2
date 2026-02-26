@@ -115,8 +115,6 @@ namespace MulNX {
 		// 消息处理入口
 		void EntryProcessMsg();
     public:
-        // 窗口绘制
-        virtual void Windows() {};
         // 窗口控制
         // 窗口显示标志
         std::atomic<bool> ShowWindow = false;

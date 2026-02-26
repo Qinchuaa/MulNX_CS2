@@ -37,7 +37,7 @@ void CoreStarterBase::StartUIWith(std::string&& EntryName) {
 	this->ISys().PublishAsync(std::move(StartMsg));
 }
 
-void CoreStarterBase::RegisteMainDrawWith(std::function<void(MulNXUINode*)>&& MainDrawFunc) {
+void CoreStarterBase::RegisterMainDrawWith(std::function<void(MulNXUINode*)>&& MainDrawFunc) {
 	// 注册主窗口UI上下文
     auto [UINode, pUINode] = MulNX::Base::make_any_unique<MulNXUINode>();
 	pUINode->name = "MainDraw";

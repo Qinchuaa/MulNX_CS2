@@ -21,7 +21,7 @@ namespace MulNX {
             // UI系统启动辅助函数
             void StartUIWith(std::string&& EntryName);
             // 注册主绘制函数
-            void RegisteMainDrawWith(std::function<void(MulNXUINode*)>&& MainDrawFunc);
+            void RegisterMainDrawWith(std::function<void(MulNXUINode*)>&& MainDrawFunc);
 
             // 核心完全初始化后回调
             std::function<void()>InitEndCall = nullptr;

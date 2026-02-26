@@ -33,10 +33,6 @@ static void MainDraw(MulNXUINode* ThisNode) {
             ThisNode->CallUINode("DemoHelper");
             ImGui::EndTabItem();
         }
-        if (ImGui::BeginTabItem("调试")) {
-            ThisNode->CallUINode("Debug");
-            ImGui::EndTabItem();
-        }
         if (ImGui::BeginTabItem("MulNX框架控制器")) {
             ThisNode->CallUINode("MulNXController");
             ImGui::EndTabItem();
@@ -44,6 +40,9 @@ static void MainDraw(MulNXUINode* ThisNode) {
         ImGui::EndTabBar();
     }
     ImGui::End();
+    ThisNode->CallUINode("Debugger");
+    ThisNode->CallUINode("GameCfgManager");
+    ThisNode->CallUINode("MiniMap");
 }
 
 BOOL APIENTRY DllMain(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserved) {
@@ -69,10 +68,8 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserv
 }
 
 DWORD MulNX_CS2_Start(void*) {
-    // 得到唯一核心
-    auto* Core = MulNX::Core::Core::Get();
-    // 必须设置核心名称，路径管理依赖核心名
-    Core->SetName("CS2OBTool");
+    // 得到唯一核心，必须设置核心名称，路径管理依赖核心名
+    auto* Core = MulNX::Core::Core::Create("CS2OBTool");// 注意此函数只允许被调用一次，除此之外会报错
 
     // 创建核心启动器实例
     std::unique_ptr<MulNX::Core::CoreStarterBase> Starter = std::make_unique<HookManager>();
@@ -92,7 +89,7 @@ DWORD MulNX_CS2_Start(void*) {
             }).detach();
 #endif
         // 注册主窗口UI上下文
-        starter->RegisteMainDrawWith(MainDraw);
+        starter->RegisterMainDrawWith(MainDraw);
         // UI系统的启动由HookManager在Hook完成后自主启动
         };
 

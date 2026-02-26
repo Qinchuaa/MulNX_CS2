@@ -11,8 +11,9 @@
 #include "../Systems/MulNXUISystem/MulNXUISystem.hpp"
 #include "../Systems/AbstractLayer3D/AbstractLayer3D.hpp"
 
-MulNX::Core::Core::Core() {
-	// 创建核心模块示例
+MulNX::Core::Core::Core(std::string&& Name) :
+    CoreName(Name) {
+    // 创建模块管理器
     this->pModuleManager = std::make_unique<MulNX::Core::ModuleManager>();
 }
 
@@ -24,9 +25,13 @@ bool MulNX::Core::Core::SetCoreStarter(std::unique_ptr<CoreStarterBase> Starter)
 	return true;
 }
 
-MulNX::Core::Core* MulNX::Core::Core::Get() {
-    static MulNX::Core::Core CoreInstance{};
-    return &CoreInstance;
+MulNX::Core::Core* MulNX::Core::Core::Create(std::string&& CoreName) {
+    static MulNX::Core::Core* pCore = nullptr;
+    if (pCore) {
+        MulNX::ErrorTerminate("核心创建函数只允许被调用一次！");
+    }
+    pCore = new MulNX::Core::Core(std::move(CoreName));
+    return pCore;
 }
 
 MulNX::Core::ModuleManager* MulNX::Core::Core::ModuleManager() {
@@ -66,7 +71,7 @@ MulNX::IMessageManager& MulNX::Core::Core::IMessageManager() {
 
 // 专用初始化函数
 void MulNX::Core::Core::Init() {
-	// 核心启动器初始化
+    // 核心启动器初始化
 	this->pCoreStarter->EntryInit(this);
 	// 通过核心启动器进行系统初始化
 	this->pCoreStarter->SystemInit(this);
@@ -86,14 +91,9 @@ void MulNX::Core::Core::Init() {
 void MulNX::Core::Core::VirtualMain() {
 	// 包装的，所有的模块的VirtualMain
 	this->pModuleManager->EntryVirtualMain();
-    // 包装的，所有模块的窗口逻辑
-    this->pModuleManager->Windows();
 	return;
 }
 
-void MulNX::Core::Core::SetName(std::string&& Name) {
-    this->CoreName = std::move(Name);
-}
 std::string MulNX::Core::Core::GetName() {
     return this->CoreName;
 }

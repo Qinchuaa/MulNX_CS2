@@ -13,6 +13,7 @@
 #include <Windows.h>
 
 bool MiniMap::Init() {
+    this->NeedUINode = true;
     return true;
 }
 
@@ -24,8 +25,8 @@ void MiniMap::VirtualMain() {
     return;
 }
 
-void MiniMap::Windows() {
-    if (!this->ShowWindow) return;
+bool MiniMap::UINodeFunc(MulNXUINode* ThisNode) {
+    if (!this->ShowWindow) return true;
 
     // 保存当前样式
     ImGuiStyle& style = ImGui::GetStyle();
@@ -49,7 +50,7 @@ void MiniMap::Windows() {
         style.Colors[ImGuiCol_ChildBg] = oldChildBg;
         style.Colors[ImGuiCol_Border] = oldBorder;
         ImGui::End();
-        return;
+        return true;
     }
     // 计算地图绘制区域：如果随窗口联动则使用剩余内容区域的正方形
     ImVec2 mapSizeVec;
@@ -142,5 +143,5 @@ void MiniMap::Windows() {
     style.Colors[ImGuiCol_WindowBg] = oldWindowBg;
     style.Colors[ImGuiCol_ChildBg] = oldChildBg;
     style.Colors[ImGuiCol_Border] = oldBorder;
-    return;
+    return true;
 }

@@ -25,7 +25,6 @@ namespace MulNX {
 			bool Init()override;
 			void ProcessMsg(MulNX::Message* Msg)override;
 			void VirtualMain()override;
-			void Windows()override;
 
 			// 注册模块，需要传入模块指针和名称，以及优先级，从1开始，数字越小优先级越高
             bool RegisteModule(std::unique_ptr<MulNX::ModuleBase>&& Module, std::string&& Name, int Priority = 0);
@@ -53,8 +52,6 @@ namespace MulNX {
 			bool PackedInit();
 			// 主循环调用所有模块的VirtualMain
 			void PackedVirtualMain();
-			// 对窗口入口的包装
-			void PackedWindows();
 		};
 	}
 

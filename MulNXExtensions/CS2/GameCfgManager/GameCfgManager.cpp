@@ -12,7 +12,8 @@ bool GameCfgManager::Init() {
 	this->GamePath = this->IPCer->PathGet_CS_cfg();
 	//初始化Cfg文件列表
     this->UpdateCfgList();
-	return true;
+    this->NeedUINode = true;
+    return true;
 }
 
 bool GameCfgManager::UpdateCfgList() {
@@ -75,8 +76,8 @@ bool GameCfgManager::DeleteCfg(const std::string& CfgName) {
 }
 
 
-void GameCfgManager::Windows() {
-    if (!this->ShowWindow) return;
+bool GameCfgManager::UINodeFunc(MulNXUINode* ThisNode) {
+    if (!this->ShowWindow) return true;
     static bool op;
     op = this->ShowWindow;
     ImGui::Begin("Cfg管理器", &op);
@@ -178,5 +179,5 @@ void GameCfgManager::Windows() {
     ImGui::TextDisabled("提示: 点击按钮在工具目录和游戏目录间移动文件");
 
     ImGui::End();
-    return;
+    return true;
 }
