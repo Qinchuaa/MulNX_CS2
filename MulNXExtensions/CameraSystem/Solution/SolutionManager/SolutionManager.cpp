@@ -9,6 +9,15 @@
 //解决方案管理器
 
 bool SolutionManager::Init() {
+    auto* PathManager = this->ISys().PathManager();
+    if (PathManager->CreateKey("Solutions", "Solutions",
+        [this](MulNX::PathManager* PathManager)->bool {
+            auto Path = PathManager->PathGetFromKey("Solutions");
+            this->ISys().LogSucc("成功设置解决方案路径为：" + Path.string());
+            return true;
+        })) {
+        PathManager->KeyBindDynamic("Solutions", "CurrentProject");
+    }
     return true;
 }
 void SolutionManager::InjectDependence(CameraDrawer* CamDrawer, ElementManager* EManager, ProjectManager* PManager) {

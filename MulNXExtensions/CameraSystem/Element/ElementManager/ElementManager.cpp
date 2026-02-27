@@ -19,6 +19,15 @@ bool ElementManager::Init() {
     this->ElementDebugger->SetName("ElementDebugger");
     this->ElementDebugger->EntryInit(this->Core);
 
+    auto* PathManager = this->ISys().PathManager();
+    if (PathManager->CreateKey("Elements", "Elements",
+        [this](MulNX::PathManager* PathManager)->bool {
+            auto Path = PathManager->PathGetFromKey("Elements");
+            this->ISys().LogSucc("成功设置元素路径为：" + Path.string());
+            return true;
+        })) {
+        PathManager->KeyBindDynamic("Elements", "CurrentProject");
+    }
     return true;
 }
 void ElementManager::InjectDependence(CameraDrawer* CamDrawer, SolutionManager* SManager, ProjectManager* PManager) {

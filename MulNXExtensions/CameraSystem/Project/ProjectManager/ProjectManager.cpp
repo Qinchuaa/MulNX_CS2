@@ -18,6 +18,33 @@ ProjectManager::~ProjectManager() {
 //项目管理器基本函数
 
 bool ProjectManager::Init() {
+    auto* PathManager = this->ISys().PathManager();
+    if (PathManager->CreateKey("CurrentProject", {},
+        [this](MulNX::PathManager* PathManager)->bool {
+            auto NewProjectPath = PathManager->PathGetFromKey("CurrentProject");
+            // 检验文件夹是否已存在
+            if (!std::filesystem::exists(NewProjectPath)) {
+                this->ISys().LogInfo("指定的项目文件夹不存在，需创建新的项目文件夹！  路径：" + NewProjectPath.string());
+                //创建文件夹
+                try {
+                    std::filesystem::create_directory(NewProjectPath);
+                    //创建子文件夹
+                    std::filesystem::create_directory(NewProjectPath / "Elements");
+                    std::filesystem::create_directory(NewProjectPath / "Solutions");
+                }
+                catch (const std::filesystem::filesystem_error& e) {
+                    this->ISys().LogError("创建项目文件夹失败，错误信息：" + std::string(e.what()));
+                    return false;
+                }
+                this->ISys().LogSucc("成功创建项目文件夹，路径：" + NewProjectPath.string());
+                return true;
+            }
+            this->ISys().LogSucc("成功设置项目路径为：" + NewProjectPath.string());
+            return true;
+        })) {
+        PathManager->KeyBindDynamic("CurrentProject", "CurrentWorkspace");
+    }
+
     return true;
 }
 void ProjectManager::InjectDependence(ElementManager* EManager, SolutionManager* SManager) {

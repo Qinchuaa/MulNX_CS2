@@ -7,6 +7,30 @@
 #include <MulNX/MulNX.hpp>
 
 bool WorkspaceManager::Init() {
+    auto* PathManager = this->ISys().PathManager();
+    if (PathManager->CreateKey("CurrentWorkspace", {},
+        [this](MulNX::PathManager* PathManager)->bool {
+            auto NewWorkspacePath = PathManager->PathGetFromKey("CurrentWorkspace");
+            // 检验文件夹是否已存在
+            if (!std::filesystem::exists(NewWorkspacePath)) {
+                this->ISys().LogInfo("指定的工作区文件夹不存在，需创建新的工作区文件夹！  路径：" + NewWorkspacePath.string());
+                // 创建文件夹
+                try {
+                    std::filesystem::create_directory(NewWorkspacePath);
+                    // 子文件夹由项目创建时创建
+                }
+                catch (const std::filesystem::filesystem_error& e) {
+                    this->ISys().LogError("创建工作区文件夹失败，错误信息：" + std::string(e.what()));
+                    return false;
+                }
+                this->ISys().LogSucc("成功创建工作区文件夹，路径：" + NewWorkspacePath.string());
+            }
+            this->ISys().LogSucc("成功设置工作区路径为：" + NewWorkspacePath.string());
+            return true;
+        })) {
+        auto Workspaces = this->ISys().PathGet("Workspaces");
+        PathManager->KeyBindStatic("CurrentWorkspace", Workspaces);
+    }
     return true;
 }
 void WorkspaceManager::InjectDependence(ElementManager* EManager, SolutionManager* SManager, ProjectManager* PManager) {

@@ -34,6 +34,7 @@ namespace MulNX {
         std::unordered_map<std::string, FilePathNode> Nodes;
 
         FilePathNode* NodeGetFromKey(const std::string& Key);
+        bool NodeHasRoot(FilePathNode* Node);
         bool KeyBindParentKey(const std::string& Key, const std::string& Parent);
         bool KeyUnbindParentKey(const std::string& Key);
         bool CallNodeChange(FilePathNode* Node);
@@ -50,7 +51,7 @@ namespace MulNX {
 
         bool PathCreate_Workspace(const std::string& NewWorkspaceName);
 
-        bool CreateKey(const std::string& Key, std::function<bool(PathManager*)>&& OnChange);
+        bool CreateKey(const std::string& Key, std::string&& Value, std::function<bool(PathManager*)>&& OnChange);
         bool KeyBindStatic(const std::string& Key, const std::filesystem::path& Position);
         bool KeyBindDynamic(const std::string& Key, const std::string& Parent);
         bool KeySetCurrent(const std::string& Key, const std::string& Current);

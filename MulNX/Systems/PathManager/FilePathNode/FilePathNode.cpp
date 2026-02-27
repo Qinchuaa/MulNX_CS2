@@ -7,6 +7,18 @@ MulNX::FilePathNode* MulNX::PathManager::NodeGetFromKey(const std::string& Key) 
     }
     return &it->second;
 }
+bool MulNX::PathManager::NodeHasRoot(FilePathNode* Node) {  
+    if (!Node->Static.empty()) {
+        return true;
+    }
+    else if (Node->KeyParent.empty()) {
+        return false;
+    }
+    auto* nodeParent = this->NodeGetFromKey(Node->KeyParent);
+    if (nodeParent == nullptr)return false;
+    if (nodeParent->CurrentValue.empty())return false;
+    return this->NodeHasRoot(nodeParent);
+}
 
 bool MulNX::PathManager::KeyBindParentKey(const std::string& Key, const std::string& Parent) {
     auto* Node = this->NodeGetFromKey(Key);
@@ -37,7 +49,7 @@ bool MulNX::PathManager::KeyUnbindParentKey(const std::string& Key) {
 
 bool MulNX::PathManager::CallNodeChange(FilePathNode* Node) {
     // 这里不需要加锁，内部函数只有加锁的内部函数进行访问
-    if (Node->CurrentValue.empty()) {
+    if ((!this->NodeHasRoot(Node)) || Node->CurrentValue.empty()) {
         return true;
     }
     bool AllRight = true;
@@ -56,7 +68,7 @@ bool MulNX::PathManager::CallNodeChange(FilePathNode* Node) {
     return AllRight;
 }
 
-bool MulNX::PathManager::CreateKey(const std::string& Key, std::function<bool(PathManager*)>&& OnChange) {
+bool MulNX::PathManager::CreateKey(const std::string& Key, std::string&& Value, std::function<bool(PathManager*)>&& OnChange) {
     std::unique_lock lock(this->MutexEx);
     auto it = this->Nodes.find(Key);
     if (it != this->Nodes.end()) {
@@ -65,6 +77,7 @@ bool MulNX::PathManager::CreateKey(const std::string& Key, std::function<bool(Pa
     }
     this->Nodes[Key] = MulNX::FilePathNode{};
     this->Nodes[Key].OnCurrentValueChange = std::move(OnChange);
+    this->Nodes[Key].CurrentValue = std::move(Value);
     return true;
 }
 bool MulNX::PathManager::KeyBindStatic(const std::string& Key, const std::filesystem::path& Position) {

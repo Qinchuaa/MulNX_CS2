@@ -55,7 +55,7 @@ public:
 
     //解决方案管理器基本函数
     //初始化函数
-    bool Init();
+    bool Init()override;
     //依赖注入
     void InjectDependence(CameraDrawer* CamDrawer, ElementManager* EManager, ProjectManager* PManager);
     //逻辑主函数
