@@ -3,11 +3,27 @@
 #include <MulNX/MulNX.hpp>
 
 bool CameraSystem::tempfunc() {
-    std::string Key = "CurrentWorkspace";
     auto* PathManager = this->ISys().PathManager();
+
+    std::string Key = "CurrentWorkspace";
     if (PathManager->CreateKey(Key,
-        [](MulNX::PathManager* PathManager)->bool {
-            auto Path = PathManager->PathGetFromKey("CurrentWorkspace");
+        [this](MulNX::PathManager* PathManager)->bool {
+            auto NewWorkspacePath = PathManager->PathGetFromKey("CurrentWorkspace");
+            // 检验文件夹是否已存在
+            if (!std::filesystem::exists(NewWorkspacePath)) {
+                this->ISys().LogInfo("指定的工作区文件夹不存在，需创建新的工作区文件夹！  路径：" + NewWorkspacePath.string());
+                // 创建文件夹
+                try {
+                    std::filesystem::create_directory(NewWorkspacePath);
+                    // 子文件夹由项目创建时创建
+                }
+                catch (const std::filesystem::filesystem_error& e) {
+                    this->ISys().LogError("创建工作区文件夹失败，错误信息：" + std::string(e.what()));
+                    return false;
+                }
+                this->ISys().LogSucc("成功创建工作区文件夹，路径：" + NewWorkspacePath.string());
+            }
+            this->ISys().LogSucc("成功设置工作区路径为：" + NewWorkspacePath.string());
             return true;
         })) {
         PathManager->KeySetCurrent(Key, "DefaultWorkspace");
@@ -16,22 +32,65 @@ bool CameraSystem::tempfunc() {
     }
     auto Path = PathManager->PathGetFromKey("CurrentWorkspace");
     PathManager->KeySetCurrent(Key, "NewWorkspace");
-    // if (NewWorkspaceName.empty()) {
-    //     this->ISys().LogError("工作区名称不能为空，无法设置工作区路径！");
-    //     return false;
-    // }
-    // //检验文件夹存在
-    // std::filesystem::path NewWorkspacePath = this->Paths.MulNX.Saves.Internal.Core.CameraSystem.Workspaces.Path / NewWorkspaceName;
-    // if (!std::filesystem::exists(NewWorkspacePath) || !std::filesystem::is_directory(NewWorkspacePath)) {
-    //     this->ISys().LogError("指定的工作区文件夹不存在，无法设置工作区路径！  路径：" + NewWorkspacePath.string());
-    //     return false;
-    // }
-    // this->Paths.MulNX.Saves.Internal.Core.CameraSystem.Workspaces.Workspace.Path = std::move(NewWorkspacePath);
-    // //this->Paths.MulNX.Saves.Internal.Core.CameraSystem.Workspaces.Workspace.Projects.Path = this->Paths.MulNX.Saves.Internal.Core.CameraSystem.Workspaces.Workspace.Path / "Projects";
-    // //this->Paths.MulNX.Saves.Internal.Core.CameraSystem.Workspaces.Workspace.Solutions.Path = this->Paths.MulNX.Saves.Internal.Core.CameraSystem.Workspaces.Workspace.Path / "Solutions";
-    // //this->Paths.MulNX.Saves.Internal.Core.CameraSystem.Workspaces.Workspace.Elements.Path = this->Paths.MulNX.Saves.Internal.Core.CameraSystem.Workspaces.Workspace.Path / "Elements";
-    // this->ISys().LogSucc("成功设置工作区路径为：" + this->Paths.MulNX.Saves.Internal.Core.CameraSystem.Workspaces.Workspace.Path.string());
-    // return true;
+
+    
+    std::string Key2 = "CurrentProject";
+    if (PathManager->CreateKey(Key2,
+        [this](MulNX::PathManager* PathManager)->bool {
+            auto NewProjectPath = PathManager->PathGetFromKey("CurrentProject");
+            // 检验文件夹是否已存在
+            if (!std::filesystem::exists(NewProjectPath)) {
+                this->ISys().LogInfo("指定的项目文件夹不存在，需创建新的项目文件夹！  路径：" + NewProjectPath.string());
+                //创建文件夹
+                try {
+                    std::filesystem::create_directory(NewProjectPath);
+                    //创建子文件夹
+                    std::filesystem::create_directory(NewProjectPath / "Elements");
+                    std::filesystem::create_directory(NewProjectPath / "Solutions");
+                }
+                catch (const std::filesystem::filesystem_error& e) {
+                    this->ISys().LogError("创建项目文件夹失败，错误信息：" + std::string(e.what()));
+                    return false;
+                }
+                this->ISys().LogSucc("成功创建项目文件夹，路径：" + NewProjectPath.string());
+                return true;
+            }
+            this->ISys().LogSucc("成功设置项目路径为：" + NewProjectPath.string());
+            return true;
+        })) {
+        PathManager->KeySetCurrent(Key2, "DefaultCurrentProject");
+        PathManager->KeyBindDynamic(Key2, Key);
+    }
+    auto Path2 = PathManager->PathGetFromKey("CurrentProject");
+    PathManager->KeySetCurrent(Key, "New2Workspace");
+
+    std::string Key3 = "Solutions";
+    if (PathManager->CreateKey(Key3,
+        [this](MulNX::PathManager* PathManager)->bool {
+            auto Path = PathManager->PathGetFromKey("Solutions");
+            this->ISys().LogSucc("成功设置解决方案路径为：" + Path.string());
+            return true;
+        })) {
+        PathManager->KeySetCurrent(Key3, "Solutions");
+        PathManager->KeyBindDynamic(Key3, Key2);
+    }
+    auto Path3 = PathManager->PathGetFromKey("Solutions");
+    PathManager->KeySetCurrent(Key, "New3Workspace");
+
+
+    std::string Key4 = "Elements";
+    if (PathManager->CreateKey(Key4,
+        [this](MulNX::PathManager* PathManager)->bool {
+            auto Path = PathManager->PathGetFromKey("Elements");
+            this->ISys().LogSucc("成功设置元素路径为：" + Path.string());
+            return true;
+        })) {
+        PathManager->KeySetCurrent(Key4, "Elements");
+        PathManager->KeyBindDynamic(Key4, Key2);
+    }
+    auto Path4 = PathManager->PathGetFromKey("Elements");
+    PathManager->KeySetCurrent(Key, "New4Workspace");
+    auto PathFinal = PathManager->PathGetFromKey("Elements");
 
     return true;
 }

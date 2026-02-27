@@ -120,9 +120,6 @@ bool MulNX::IPCer::PathSet_Workspace(const std::string& NewWorkspaceName) {
         return false;
 	}
     this->Paths.MulNX.Saves.Internal.Core.CameraSystem.Workspaces.Workspace.Path = std::move(NewWorkspacePath);
-    //this->Paths.MulNX.Saves.Internal.Core.CameraSystem.Workspaces.Workspace.Projects.Path = this->Paths.MulNX.Saves.Internal.Core.CameraSystem.Workspaces.Workspace.Path / "Projects";
-    //this->Paths.MulNX.Saves.Internal.Core.CameraSystem.Workspaces.Workspace.Solutions.Path = this->Paths.MulNX.Saves.Internal.Core.CameraSystem.Workspaces.Workspace.Path / "Solutions";
-    //this->Paths.MulNX.Saves.Internal.Core.CameraSystem.Workspaces.Workspace.Elements.Path = this->Paths.MulNX.Saves.Internal.Core.CameraSystem.Workspaces.Workspace.Path / "Elements";
     this->ISys().LogSucc("成功设置工作区路径为：" + this->Paths.MulNX.Saves.Internal.Core.CameraSystem.Workspaces.Workspace.Path.string());
     return true;
 }

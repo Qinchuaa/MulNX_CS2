@@ -37,6 +37,9 @@ bool MulNX::PathManager::KeyUnbindParentKey(const std::string& Key) {
 
 bool MulNX::PathManager::CallNodeChange(FilePathNode* Node) {
     // 这里不需要加锁，内部函数只有加锁的内部函数进行访问
+    if (Node->CurrentValue.empty()) {
+        return true;
+    }
     bool AllRight = true;
     if (Node->OnCurrentValueChange == nullptr) {
         AllRight = false;
