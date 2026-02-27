@@ -11,10 +11,6 @@ namespace MulNX {
 	public:
 		std::recursive_mutex UIMtx;
 
-		IUISystem() : ModuleBase() {
-			//this->Type = ModuleType::MulNXUISystem;
-		}
-
 		virtual std::shared_mutex& GetMutex() = 0;
 
 		virtual int Render() = 0;

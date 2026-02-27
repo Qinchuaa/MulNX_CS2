@@ -1,7 +1,7 @@
 ﻿#pragma once
 
-#include"Pawn/Pawn.hpp"
-#include"Controller/Controller.hpp"
+#include "Pawn/Pawn.hpp"
+#include "Controller/Controller.hpp"
 
 class C_Entity {
 public:

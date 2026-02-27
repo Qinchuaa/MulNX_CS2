@@ -47,6 +47,10 @@ namespace MulNX {
         MulNX::IMessageManager* IMsgManager = nullptr;
         // 路径管理器指针
         MulNX::PathManager* pPathManager = nullptr;
+        // 线程锁
+        std::shared_mutex MyThreadMutex;
+        // 可重入锁
+        std::unique_ptr<std::recursive_mutex> pMutexEx = nullptr;
     protected:
 		// 运行标志
 		std::atomic<bool> Running = false;
@@ -56,24 +60,18 @@ namespace MulNX {
 		std::atomic<bool>MyThreadRunning = false;
 		// 线程执行间隔，默认以100Hz基准执行
 		std::atomic<int> MyThreadDelta = 10;
-		// 线程锁
-		std::shared_mutex MyThreadMutex;
 	public:
-		std::shared_mutex& GetMutex() { return this->MyThreadMutex; }
-	public:
+        std::shared_mutex& GetMutex() { return this->MyThreadMutex; }
+    public:
 		// 删除不需要的构造函数
 		ModuleBase(const ModuleBase&) = delete;
 		ModuleBase(ModuleBase&&) = delete;
 		ModuleBase& operator=(const ModuleBase&) = delete;
 		ModuleBase& operator=(ModuleBase&&) = delete;
-		// 提供输入名称的构造函数，方便创建时直接命名
-        ModuleBase(std::string&& Name) {
-            this->SetName(std::move(Name));
-        }
-		ModuleBase();
+        ModuleBase() = default;
 		// 虚析构函数确保正确调用析构函数
-		virtual ~ModuleBase();
-	protected:
+        virtual ~ModuleBase();
+	private:
 		// 线程析构辅助函数
 		void CloseMyThread();
 	public:
@@ -95,7 +93,7 @@ namespace MulNX {
         virtual void ProcessMsg(MulNX::Message* Msg) {};
 
 		// 基本函数
-	protected:
+	private:
 		// 基础初始化
         bool BaseInit();
         // 基础主循环

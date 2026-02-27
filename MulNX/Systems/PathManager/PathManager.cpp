@@ -49,9 +49,58 @@ bool MulNX::PathManager::CheckShared() {
 }
 
 std::filesystem::path MulNX::PathManager::PathGetForModule(const std::string& ModuleName, const std::string& Target) {
-    return this->CoreRoot / ModuleName / Target;// 等价于this->Root / this->CoreName / ModuleName / Target
+    auto path = this->CoreRoot / ModuleName / Target;
+    if (!std::filesystem::exists(path)) {
+        this->ISys().LogInfo("模块[" + ModuleName + "]尝试访问不存在的文件夹，将尝试为其创建");
+        try {
+            // 可创建多级目录
+            if (!std::filesystem::create_directories(path)) {
+                this->ISys().LogError("创建文件夹失败！路径：" + path.string());
+                return {};
+            }
+            else {
+                this->ISys().LogSucc("文件夹创建成功：" + path.string());
+            }
+        }
+        catch (const std::filesystem::filesystem_error& e) {
+            MulNX::ErrorTerminate("创建文件夹时发生文件系统错误：" + std::string(e.what()) + " 路径：" + path.string());
+        }
+        catch (...) {
+            MulNX::ErrorTerminate("在创建文件夹时发生未知错误：" + path.string());
+        }
+    }
+    else if (!std::filesystem::is_directory(path)) {
+        MulNX::ErrorTerminate("模块[" + ModuleName + "]的路径存在但不是文件夹：" + path.string());
+    }
+
+    return path;
 }
 
 std::filesystem::path MulNX::PathManager::PathGetForShared(const std::string& Target) {
-    return this->Root / Target;
+    auto path = this->Root / Target;
+
+    if (!std::filesystem::exists(path)) {
+        this->ISys().LogInfo("共享资源路径不存在，将尝试为其创建：" + path.string());
+        try {
+            // 可创建多级目录
+            if (!std::filesystem::create_directories(path)) {
+                this->ISys().LogError("创建共享目录失败！路径：" + path.string());
+                return {};
+            }
+            else {
+                this->ISys().LogSucc("共享目录创建成功：" + path.string());
+            }
+        }
+        catch (const std::filesystem::filesystem_error& e) {
+            MulNX::ErrorTerminate("创建共享目录时发生文件系统错误：" + std::string(e.what()) + " 路径：" + path.string());
+        }
+        catch (...) {
+            MulNX::ErrorTerminate("在创建共享目录时发生未知错误：" + path.string());
+        }
+    }
+    else if (!std::filesystem::is_directory(path)) {
+        MulNX::ErrorTerminate("共享路径存在但不是文件夹：" + path.string());
+    }
+
+    return path;
 }

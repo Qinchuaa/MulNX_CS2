@@ -92,10 +92,6 @@ namespace MulNX {
     class IPCer final :public MulNX::ModuleBase {
         Paths Paths{};
     public:
-        IPCer() : ModuleBase() {
-            //this->Type = MulNX::ModuleType::IPCer;
-        }
-
         bool Init()override;
 
         bool GetWindowPathByName(const LPCWSTR& WindowName, std::filesystem::path& Output);

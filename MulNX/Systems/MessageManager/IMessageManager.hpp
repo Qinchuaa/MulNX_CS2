@@ -10,10 +10,6 @@ namespace MulNX {
 			friend IMessageChannel;
 			friend class MessageChannel;
 		public:
-			IMessageManager() : ModuleBase() {
-				//this->Type = ModuleType::MessageManager;
-			}
-
 			// 注册，获取消息指针
 			virtual bool Registe(ModuleBase* const Module) = 0;
 			// 订阅，获得对应类型消息推送

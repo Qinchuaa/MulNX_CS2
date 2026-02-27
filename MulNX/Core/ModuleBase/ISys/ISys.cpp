@@ -36,6 +36,6 @@ std::filesystem::path MulNX::C_ISys::PathGet(const std::string& Target) {
     return this->pModuleBase->pPathManager->PathGetForModule(this->pModuleBase->GetName(), Target);
 }
 
-std::filesystem::path MulNX::C_ISys::PathGetShared(const std::string& Target) {
-    return this->pModuleBase->pPathManager->PathGetForShared(Target);
+MulNX::PathManager* MulNX::C_ISys::PathManager() {
+    return this->pModuleBase->pPathManager;
 }

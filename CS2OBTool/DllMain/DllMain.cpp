@@ -99,16 +99,17 @@ DWORD MulNX_CS2_Start(void*) {
     // 注册所有模块
     (*Core->ModuleManager())
         .CreateSystemModules()// 创建所有系统模块，这是框架运行的基础
+        .BindAbstractLayer3D<CSController>("CSController")// 创建CS控制器模块为AbstractLayer3D模块，ID固定自动分配为系统模块最大ID 100
         .CreateModule<CameraSystem>("CameraSystem", 101)// 摄像机系统模块
         .CreateModule<MiniMap>("MiniMap", 103)// 小地图模块
         .CreateModule<VirtualUser>("VirtualUser", 104)// 虚拟用户模块
-        .CreateModule<CSController>("CSController", 201)// CS控制模块
         .CreateModule<GameCfgManager>("GameCfgManager", 206)// 游戏配置管理模块
         .CreateModule<DemoHelper>("DemoHelper", 207)// Demo辅助模块
         .CreateModule<GameSettingsManager>("GameSettingsManager", 208)// 游戏设置管理模块
         .CreateModule<ConsoleManager>("ConsoleManager", 209)// 控制台管理模块
-        .CreateModule<MulNXController>("MulNXController", 210);// MulNX控制器模块
-    
+        .CreateModule<MulNXController>("MulNXController", 210)// MulNX控制器模块
+        ;
+
     // 启动核心
     Core->Init();
 

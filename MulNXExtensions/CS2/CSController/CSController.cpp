@@ -76,7 +76,14 @@ void HandleOverrideView(void* ThisCViewSetup) {
         pViewAngles[1] = AnglesY.load();
         pViewAngles[2] = AnglesZ.load();
 
+        if (FOV.load() - 0 < 0.001f) {
+            FOV.store(90);
+        }
+
         *pFov = FOV.load();
+    }
+    else {
+        FOV.store(*pFov);
     }
     return;
 }
@@ -105,25 +112,50 @@ void CSController::InitInterface() {
     if (!pFunc) return;
     this->CmdInterface = pFunc(InterfaceName, nullptr);
 }
+
+bool CSController::ExecuteCommand(const std::string& cmd) {
+    this->Execute(cmd.c_str());
+    return true;
+}
+float* CSController::GetViewMatrix()const {
+    return this->LocalPlayer.ViewMatrix;
+}
+MulNX::Base::Math::SpatialState CSController::GetSpatialState()const {
+    //std::shared_lock lock(this->MyThreadMutex);
+    auto state = this->LocalPlayer.GetSpatialState();
+    return state;
+}
+float CSController::GetTime()const {
+    float time = 0;
+    uintptr_t GlobalVarsPointer = this->CSGlobalVars.GetCurrentTimePointer();
+    MulNX::Memory::Read<float>(GlobalVarsPointer, time);
+    return time;
+}
+
+void CSController::VirtualMain() {
+    this->EntryProcessMsg();
+    if (!this->GlobalVars->CampathPlaying) {
+        *this->GetLocalPlayer().pGlobalFOV = 0.0f;
+    }
+    return;
+}
+void CSController::ProcessMsg(MulNX::Message* Msg) {
+    switch (Msg->Type) {
+    case MulNX::MsgType::Core_ReHook: {
+        this->ISys().LogSucc("已完成Hook重载！");
+        break;
+    }
+
+    }
+}
+
 bool CSController::Init() {
     this->InitInterface();
     this->GetModules();
     this->Catch();
     this->EntryCreateThread();// 包含线程创建
     this->SetMyThreadDelta(3);
-    this->AL3D->SetCmdInterface([this](const char* command) {
-        this->Execute(command);
-        return true;
-        });
-    this->AL3D->SetCameraSystemIOOverrideFunc([this](const CameraSystemIO* const IO) {
-        return this->CameraSystemIOOverride(IO);
-        });
-    this->AL3D->SetGetViewMatrixFunc([this]() {
-        return this->LocalPlayer.ViewMatrix;
-        });
-    this->AL3D->SetGetSpatialStateFunc([this]() {
-        return this->LocalPlayer.GetSpatialState();
-        });
+    this->ISubscribe(MulNX::MsgType::Core_ReHook);
     
     MulNX::Memory::DllModule clientModule(L"client.dll");
     if (clientModule.IsValid()) {
@@ -174,7 +206,8 @@ void CSController::GetModules() {
     auto pFunc = reinterpret_cast<void* (*)(const char*, int*)>(GetProcAddress(hModule, "CreateInterface"));
     this->CvarSystem.Address = (uintptr_t)pFunc(InterfaceName, nullptr);
 
-    this->LocalPlayer.pGlobalFOV = this->CvarSystem.GetCvar("fov_cs_debug")->GetPtr<float>();
+    //this->LocalPlayer.pGlobalFOV = this->CvarSystem.GetCvar("fov_cs_debug")->GetPtr<float>();
+    this->LocalPlayer.pGlobalFOV = &FOV;
 }
 
 void CSController::Catch() {
@@ -237,7 +270,11 @@ int CSController::EntityListUpdate() {
             .IndexInEntityList = Entity.IndexInEntityList,
             .IndexInMap = IndexInMap,
             };
-            this->AL3D->UpdatePlayerMsg(std::move(PlayerMsg));
+
+            std::unique_lock lock(this->GetMutex());
+            this->AL3DGameData.Players[PlayerMsg.IndexInMap] = std::move(PlayerMsg);
+            lock.unlock();
+
             this->IndexInMap_To_IndexInEntityList_Map[IndexInMap] = Entity.IndexInEntityList;
             ++IndexInMap;
         }
@@ -278,21 +315,8 @@ int CSController::TryGetMsg() {
         this->PlantedC4.Update();
     }
 
-    if (this->CSGameRules.m_bBombPlanted) {
-        this->AL3D->SetPhaseStartTime(this->PlantedC4.m_flC4Blow - this->PlantedC4.m_flTimerLength);
-        this->AL3D->SetPhaseDuration(this->PlantedC4.m_flTimerLength);
-    }
-    else {
-        this->AL3D->SetPhaseStartTime(this->CSGameRules.m_fRoundStartTime);
-        this->AL3D->SetPhaseDuration(this->CSGameRules.m_iRoundTime);
-    }
 
     this->CSGlobalVars.Update();
-    uintptr_t CurrentTimePointer = this->AL3D->GetCurrentTimePointer();
-    uintptr_t GlobalVarsPointer = this->CSGlobalVars.GetCurrentTimePointer();
-    if (CurrentTimePointer != GlobalVarsPointer) {
-        this->AL3D->SetCurrentTimePointer(GlobalVarsPointer);
-    }
 
     this->CurrentTime = this->CSGlobalVars.CurrentTime;
 

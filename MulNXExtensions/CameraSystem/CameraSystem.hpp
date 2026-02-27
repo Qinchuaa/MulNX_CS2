@@ -55,10 +55,7 @@ private:
     ProjectManager PManager{};
     WorkspaceManager WManager{};
 public:
-    CameraSystem() : ICameraSystem() {
-        //this->Type = MulNX::ModuleType::CameraSystem;
-    }
-
+    bool tempfunc();
     // 初始化
     bool Init()override;
     // 菜单

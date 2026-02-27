@@ -21,7 +21,7 @@ bool ModuleManager::Init() {
 	return true;
 }
 void ModuleManager::ProcessMsg(MulNX::Message* Msg) {
-	std::unique_lock lock(this->MyThreadMutex);
+	std::unique_lock lock(this->GetMutex());
 	switch (Msg->Type) {
 	case MulNX::MsgType::ModuleManager_RequestModuleInfo: {
 		auto [Info, pInfo] = MulNX::Base::make_any_unique<ModuleInfo>();
@@ -43,17 +43,15 @@ void ModuleManager::VirtualMain() {
 	this->PackedVirtualMain();
 }
 
-bool ModuleManager::RegisteModule(std::unique_ptr<MulNX::ModuleBase>&& Module, std::string&& Name, int Priority) {
-	std::unique_lock lock(this->MyThreadMutex);
+bool ModuleManager::RegisteModule(std::unique_ptr<MulNX::ModuleBase>&& Module, int Priority) {
+	std::unique_lock lock(this->GetMutex());
 	if (!Module->HModule.IsValid()) {
 		Module->HModule = MulNXHandle::CreateHandle();
     }
     // 先保存模块句柄，因为后续需要使用
     MulNXHandle hModule = Module->HModule;
     // 再创建名称到句柄的映射
-    this->NameToHandleMap[Name] = hModule;
-    // 然后安全地移动Name到模块内部
-    Module->SetName(std::move(Name));
+    this->NameToHandleMap[Module->GetName()] = hModule;
     // 最后将模块保存到Modules中
     this->Modules[hModule] = std::move(Module);
     // 同时记录优先级
@@ -70,27 +68,32 @@ ModuleManager& ModuleManager::CreateSystemModules() {
         .CreateModule<MulNX::HandleSystem>("HandleSystem", 20)// 句柄系统模块
         .CreateModule<MulNX::KeyTracker>("KeyTracker", 50)// 按键追踪器模块
         .CreateModule<MulNX::GlobalVars>("GlobalVars", 70)// 全局变量模块
-        .CreateModule<MulNX::AbstractLayer3D>("AbstractLayer3D", 90)// 3D抽象层模块
+        //.CreateModule<MulNX::AbstractLayer3D>("AbstractLayer3D", 90)// 3D抽象层模块
         ;
 
     return *this;
 }
 MulNX::ModuleBase* ModuleManager::FindModule(const std::string& Name) {
-	std::shared_lock lock(this->MyThreadMutex);
+	std::shared_lock lock(this->GetMutex());
 	auto it = this->NameToHandleMap.find(Name);
-	if (it == this->NameToHandleMap.end()) {
-		return nullptr;
+    if (it == this->NameToHandleMap.end()) {
+        MulNX::ErrorTerminate("查找模块错误 0x1");
+        return nullptr;
 	}
 	MulNXHandle HModule = it->second;
 	auto mit = this->Modules.find(HModule);
-	if (mit == this->Modules.end()) {
-		return nullptr;
+    if (mit == this->Modules.end()) {
+        MulNX::ErrorTerminate("查找模块错误 0x2");
+        return nullptr;
 	}
 	return mit->second.get();
 }
+MulNX::IAbstractLayer3D* ModuleManager::FindAbstractLayer3D() {
+    return this->FindModule<MulNX::IAbstractLayer3D>("CSController");
+}
 
 bool ModuleManager::PackedInit() {
-	std::shared_lock lock(this->MyThreadMutex);
+	std::shared_lock lock(this->GetMutex());
     // 通过有序的初始化任务列表进行初始化，尽管Modules是无序的
     for (auto& [Priority, hModule] : this->PriorityToHandleMap) {
         auto* pModule = this->Modules[hModule].get();
@@ -104,7 +107,7 @@ bool ModuleManager::PackedInit() {
 }
 
 void ModuleManager::PackedVirtualMain() {
-	std::shared_lock lock(this->MyThreadMutex);
+	std::shared_lock lock(this->GetMutex());
     for (auto& [Priority, hModule] : this->PriorityToHandleMap) {
         auto* pModule = this->Modules[hModule].get();
         if (!pModule->HasParent()) {

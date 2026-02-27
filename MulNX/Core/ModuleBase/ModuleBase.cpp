@@ -7,15 +7,10 @@
 
 #include <MulNXThirdParty/All_ImGui.hpp>
 
-// 构造与析构函数，线程自动析构
-MulNX::ModuleBase::ModuleBase() {
-
-}
 MulNX::ModuleBase::~ModuleBase() {
     this->CloseMyThread();
 }
 void MulNX::ModuleBase::CloseMyThread() {
-    std::unique_lock lock(this->MyThreadMutex);
     if (this->MyThreadRunning) {
         this->MyThreadRunning = false;
         this->MyThread.join();
@@ -42,7 +37,8 @@ bool MulNX::ModuleBase::BaseInit() {
         this->IMsgManager = this->Core->ModuleManager()->FindModule<MulNX::IMessageManager>("MessageManager");
         this->IDebugger = this->Core->ModuleManager()->FindModule<MulNX::IDebugger>("Debugger");
         this->GlobalVars = this->Core->ModuleManager()->FindModule<MulNX::GlobalVars>("GlobalVars");
-        this->AL3D = this->Core->ModuleManager()->FindModule<MulNX::IAbstractLayer3D>("AbstractLayer3D");
+        //this->AL3D = this->Core->ModuleManager()->FindModule<MulNX::IAbstractLayer3D>("AbstractLayer3D");
+        this->AL3D = this->Core->ModuleManager()->FindAbstractLayer3D();
         this->KT = this->Core->ModuleManager()->FindModule<MulNX::KeyTracker>("KeyTracker");
         this->pPathManager = this->Core->ModuleManager()->FindModule<MulNX::PathManager>("PathManager");
 

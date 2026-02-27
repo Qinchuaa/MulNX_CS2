@@ -1,6 +1,7 @@
 #pragma once
 
 #include <MulNX/MulNX.hpp>
+#include <MulNX/Systems/AbstractLayer3D/AbstractLayer3D.hpp>
 
 #include "ConVarSystem/ConVarSystem.hpp"
 #include "EntityList/EntityList.hpp"
@@ -19,7 +20,7 @@ public:
 namespace MulNX {
     class Debugger;
 }
-class CSController final :public MulNX::ModuleBase {
+class CSController final :public MulNX::AbstractLayer3D {
     friend MulNX::Debugger;
 private:
     // 逆向层关键接口
@@ -40,6 +41,8 @@ private:
     int GetIndexInEntityListFromIndexInMap(int IndexInMap);
 public:
     bool Init()override;
+    void VirtualMain()override;
+    void ProcessMsg(MulNX::Message* Msg)override;
     void InitInterface();
     void ThreadMain()override;
     // 核心任务
@@ -55,12 +58,16 @@ public:
 
     // 核心接口
     void Execute(const char* cmd);
+    bool ExecuteCommand(const std::string& cmd)override;
+    float* GetViewMatrix()const override;
+    MulNX::Base::Math::SpatialState GetSpatialState()const;
+    float GetTime()const override;
 
     // CameraSystemIO的处理
 
     void HandleFreeCameraPath(const CameraSystemIO* const IO);
     void HandleFirstPersonCameraPath(const CameraSystemIO* const IO);
-    bool CameraSystemIOOverride(const CameraSystemIO* const IO);
+    bool CameraSystemIOOverride(const CameraSystemIO* const IO)override;
 
     // 获取LocalPlayer的引用
     C_LocalPlayer& GetLocalPlayer() { return this->LocalPlayer; }

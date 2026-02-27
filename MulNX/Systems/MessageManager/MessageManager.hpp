@@ -21,7 +21,6 @@ namespace MulNX {
 
         std::unordered_map<MulNXHandle, std::unique_ptr<MessageChannel>>Channels;
     public:
-        MessageManager() : IMessageManager() {};
         ~MessageManager();
 
         bool Init()override;

@@ -41,7 +41,7 @@ void MulNX::Debugger::VirtualMain() {
 }
 
 void MulNX::Debugger::ResetMaxMsgCount(const int Max) {
-    std::unique_lock lock(this->MyThreadMutex);
+    std::unique_lock lock(this->GetMutex());
     if (Max < 1) {
         this->AddError("最大信息条数不能小于一1!");
         return;
@@ -56,13 +56,13 @@ void MulNX::Debugger::ResetMaxMsgCount(const int Max) {
     return;
 }
 void MulNX::Debugger::SaveToFile() {
-    std::shared_lock lock(this->MyThreadMutex);
+    std::shared_lock lock(this->GetMutex());
     std::string data;
     for (const auto& msg : this->DebugMsg) {
         data += msg + "\n";
     }
     
-    auto path = this->ISys().PathGetShared("Log") / ("Log_" + this->Core->GetName() + ".txt");
+    auto path = this->ISys().PathManager()->PathGetForShared("Log") / ("Log_" + this->Core->GetName() + ".txt");
     if (!MySaveStringToFile(data, path)) {
         // 处理错误
         throw std::runtime_error("无法保存调试日志到文件: " + path.string());
@@ -123,22 +123,22 @@ void MulNX::Debugger::PushBack(const std::string& NewMsg, const std::string& pre
 }
 
 void MulNX::Debugger::AddInfo(const std::string& NewMsg) {
-    std::unique_lock lock(this->MyThreadMutex);
+    std::unique_lock lock(this->GetMutex());
     this->PushBack(NewMsg, this->Info);
 }
 
 void MulNX::Debugger::AddSucc(const std::string& NewMsg) {
-    std::unique_lock lock(this->MyThreadMutex);
+    std::unique_lock lock(this->GetMutex());
     this->PushBack(NewMsg, this->Succ);
 }
 
 void MulNX::Debugger::AddWarning(const std::string& NewMsg) {
-    std::unique_lock lock(this->MyThreadMutex);
+    std::unique_lock lock(this->GetMutex());
     this->PushBack(NewMsg, this->Warning);
 }
 
 void MulNX::Debugger::AddError(const std::string& NewMsg) {
-    std::unique_lock lock(this->MyThreadMutex);
+    std::unique_lock lock(this->GetMutex());
     this->PushBack(NewMsg, this->Error);
     if (this->ShowWhenError) {
         this->ShowWindow = true;
@@ -148,7 +148,7 @@ void MulNX::Debugger::AddError(const std::string& NewMsg) {
 
 bool MulNX::Debugger::UINodeFunc(MulNXUINode* ThisNode) {
     if (!this->ShowWindow)return true;
-    std::shared_lock lock(this->MyThreadMutex);
+    std::shared_lock lock(this->GetMutex());
     this->ShowFunc(this);
     return true;
 }

@@ -27,7 +27,7 @@ namespace MulNX {
 			void VirtualMain()override;
 
 			// 注册模块，需要传入模块指针和名称，以及优先级，从1开始，数字越小优先级越高
-            bool RegisteModule(std::unique_ptr<MulNX::ModuleBase>&& Module, std::string&& Name, int Priority = 0);
+            bool RegisteModule(std::unique_ptr<MulNX::ModuleBase>&& Module, int Priority = 0);
             // 记录模块，需要传入
             
             // 创建模块
@@ -35,11 +35,19 @@ namespace MulNX {
             requires std::derived_from<T, ModuleBase>
             ModuleManager& CreateModule(std::string&& Name, int Priority = 0) {
                 std::unique_ptr<T>Module = std::make_unique<T>();
-                this->RegisteModule(std::move(Module), std::move(Name), Priority);
+                Module->SetName(std::move(Name));
+                this->RegisteModule(std::move(Module), Priority);
                 return *this;
             }
             ModuleManager& CreateSystemModules();
-
+            template<typename T>
+            ModuleManager& BindAbstractLayer3D(std::string&& Name) {
+                std::unique_ptr<T>AL3DImpl = std::make_unique<T>();
+                AL3DImpl->SetName(std::move(Name));
+                this->RegisteModule(std::move(AL3DImpl), 100);
+                return *this;
+            }
+            IAbstractLayer3D* FindAbstractLayer3D();
             // 根据名称获取模块指针
 			MulNX::ModuleBase* FindModule(const std::string& Name);
 			// 按类型查找模块

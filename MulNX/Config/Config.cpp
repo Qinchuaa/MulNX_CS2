@@ -28,6 +28,6 @@ void MulNX::ErrorTerminate(const std::string& Msg,
     std::string Full = oss.str();
     std::wstring wFull = MulNX::Base::CharUtility::U8ToW(Full);
 
-    MessageBoxW(nullptr, wFull.c_str(), L"MulNX", MB_OK);
+    MessageBoxW(nullptr, wFull.c_str(), L"MulNX 错误中断！", MB_OK);
     std::terminate();
 }

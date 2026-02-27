@@ -12,9 +12,13 @@
 // 共享目录（如 Shared/Saves）不受核心名影响，为所有二进制文件共用。
 
 #include "../../Core/ModuleBase/ModuleBase.hpp"
+#include "FilePathNode/FilePathNode.hpp"
 
 namespace MulNX {
     class PathManager :public ModuleBase {
+    private:
+        std::recursive_mutex MutexEx;
+        
         IPCer* IPCer = nullptr;
         // MulNX目录（根目录）
         std::filesystem::path Root;
@@ -26,6 +30,13 @@ namespace MulNX {
         std::unordered_map<std::string, std::filesystem::path>Cache;
 
         std::vector<std::string>Shareds;
+        // 以字符串为Key
+        std::unordered_map<std::string, FilePathNode> Nodes;
+
+        FilePathNode* NodeGetFromKey(const std::string& Key);
+        bool KeyBindParentKey(const std::string& Key, const std::string& Parent);
+        bool KeyUnbindParentKey(const std::string& Key);
+        bool CallNodeChange(FilePathNode* Node);
     public:
         bool Init()override;
 
@@ -36,5 +47,13 @@ namespace MulNX {
         std::filesystem::path PathGetForModule(const std::string& ModuleName, const std::string& Target);
         // 将目标映射到共享的目录
         std::filesystem::path PathGetForShared(const std::string& Target);
+
+        bool PathCreate_Workspace(const std::string& NewWorkspaceName);
+
+        bool CreateKey(const std::string& Key, std::function<bool(PathManager*)>&& OnChange);
+        bool KeyBindStatic(const std::string& Key, const std::filesystem::path& Position);
+        bool KeyBindDynamic(const std::string& Key, const std::string& Parent);
+        bool KeySetCurrent(const std::string& Key, const std::string& Current);
+        std::filesystem::path PathGetFromKey(const std::string& Key);
     };
 }

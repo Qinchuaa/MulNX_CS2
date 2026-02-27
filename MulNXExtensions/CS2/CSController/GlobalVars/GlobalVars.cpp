@@ -8,6 +8,6 @@ void C_GlobalVars::Update() {
 
     return;
 }
-uintptr_t C_GlobalVars::GetCurrentTimePointer() {
+uintptr_t C_GlobalVars::GetCurrentTimePointer()const {
     return this->Address + 0x30;
 }

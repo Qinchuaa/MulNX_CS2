@@ -17,5 +17,5 @@ public:
 
     void Update();
 
-    uintptr_t GetCurrentTimePointer();
+    uintptr_t GetCurrentTimePointer()const;
 };

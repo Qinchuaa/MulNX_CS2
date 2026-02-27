@@ -6,7 +6,7 @@
 #include"../HandleSystem/HandleSystem.hpp"
 
 bool MulNX::MessageManager::Registe(ModuleBase* const Module) {
-	std::unique_lock lock(this->MyThreadMutex);
+    std::unique_lock lock(this->GetMutex());
 	// 指针引用以重定向，得到访问当前消息服务
 	// 存储注册信息
 	// this->RegisteMsg[Pack.ptrID] = std::move(Pack);
@@ -14,14 +14,14 @@ bool MulNX::MessageManager::Registe(ModuleBase* const Module) {
 }
 
 bool MulNX::MessageManager::Subscribe(const MsgType MsgType, ModuleBase* const Module) {
-	std::unique_lock lock(this->MyThreadMutex);
+    std::unique_lock lock(this->GetMutex());
 	this->SubscribeMap[MsgType].push_back(Module);
 	return true;
 }
 
 // 创建私有消息队列（但是生命周期仍然委托给消息管理器）
 MulNXHandle MulNX::MessageManager::CreateMessageChannel() {
-	std::unique_lock lock(this->MyThreadMutex);
+    std::unique_lock lock(this->GetMutex());
 	std::unique_ptr<MessageChannel> Channel = std::make_unique<MessageChannel>(this);
 	MulNXHandle hChannel = MulNXHandle::CreateHandle();
 	Channel->hChannel = hChannel;
@@ -29,7 +29,7 @@ MulNXHandle MulNX::MessageManager::CreateMessageChannel() {
 	return hChannel;
 }
 MulNX::IMessageChannel* MulNX::MessageManager::GetMessageChannel(const MulNXHandle& hChannel) {
-	std::unique_lock lock(this->MyThreadMutex);
+    std::unique_lock lock(this->GetMutex());
 	auto it = this->Channels.find(hChannel);
 	if (it == this->Channels.end())return nullptr;
 	return it->second.get();
@@ -37,7 +37,7 @@ MulNX::IMessageChannel* MulNX::MessageManager::GetMessageChannel(const MulNXHand
 
 
 bool MulNX::MessageManager::Unsubscribe(const MsgType MsgType, ModuleBase* const Module) {
-	std::unique_lock lock(this->MyThreadMutex);
+    std::unique_lock lock(this->GetMutex());
 	auto MapIt = this->SubscribeMap.find(MsgType);
 	if (MapIt == this->SubscribeMap.end()) return false;
 	auto& Vector = MapIt->second;
@@ -49,7 +49,7 @@ bool MulNX::MessageManager::Unsubscribe(const MsgType MsgType, ModuleBase* const
 }
 bool MulNX::MessageManager::Publish(Message&& Msg) {
 	// 先获取锁
-	std::unique_lock lock(this->MyThreadMutex);
+    std::unique_lock lock(this->GetMutex());
 	// 总线订阅
 	bool HasMain = false;
 	// 这个索引同时用来判断是否需要转发，是否需要拷贝，还是数组索引
@@ -110,7 +110,7 @@ bool MulNX::MessageManager::Release() {
 }
 
 bool MulNX::MessageManager::NextMsg() {
-	std::unique_lock lock(this->MyThreadMutex);//只有切换消息时加锁，而等待组件处理消息时不加锁，不阻塞发布订阅
+    std::unique_lock lock(this->GetMutex());//只有切换消息时加锁，而等待组件处理消息时不加锁，不阻塞发布订阅
 	if (this->Messages.empty())return false;
 	
 	// 检测当前引用计数
@@ -169,9 +169,7 @@ void MulNX::MessageManager::ThreadMain() {
 	}
 }
 MulNX::MessageManager::~MessageManager() {
-	// 退出线程
-	this->CloseMyThread();
-	std::unique_lock lock(this->MyThreadMutex);
+    std::unique_lock lock(this->GetMutex());
 	// 释放所有剩余消息
 	while (!this->Messages.empty()) {
 		this->Messages.pop_front();

@@ -1,35 +1,32 @@
 #pragma once
 
-#include"../EntityList/EntityList.hpp"
-
-#include<shared_mutex>
+#include "../EntityList/EntityList.hpp"
 
 class C_LocalPlayer {
 public:
-	std::shared_mutex LocalPlayerMutex;
+	mutable std::shared_mutex LocalPlayerMutex;
 
 	C_Entity Entity{};
 	DirectX::XMFLOAT3* PositionA{};
 	DirectX::XMFLOAT3* PositionB{};
 	DirectX::XMFLOAT3* ViewAngles{};
 	float* ViewMatrix;
-	float* pGlobalFOV = nullptr;
+	std::atomic<float>* pGlobalFOV = nullptr;
 
-	//获取综合信息
+	// 获取综合信息
 	std::ostringstream GetMsg();
 
-	//读取
-	MulNX::Base::Math::SpatialState GetSpatialState();
+	// 读取
+	MulNX::Base::Math::SpatialState GetSpatialState()const;
 	DirectX::XMFLOAT3 GetPosition();
 	DirectX::XMFLOAT3 GetRotationEuler();
 	float GetFov();
 	float* GetMatrix();
 
-	//设置
+	// 设置
 	void SetViewAngle(const DirectX::XMFLOAT3& Angles);
-	void SetFOV(float FOV);
 	bool SetPosition(const DirectX::XMFLOAT4& PosAndFOV);
 
-	//更新
+	// 更新
 	int Update();
 };

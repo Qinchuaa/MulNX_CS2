@@ -11,7 +11,7 @@ std::ostringstream C_LocalPlayer::GetMsg() {
     return oss;
 }
 
-MulNX::Base::Math::SpatialState C_LocalPlayer::GetSpatialState() {
+MulNX::Base::Math::SpatialState C_LocalPlayer::GetSpatialState()const {
     std::shared_lock lock(this->LocalPlayerMutex);
 
     DirectX::XMFLOAT3 pos = this->Entity.Pawn.GetEyePos();
@@ -78,10 +78,6 @@ bool C_LocalPlayer::SetPosition(const DirectX::XMFLOAT4& PosAndFOV) {
     __except (EXCEPTION_EXECUTE_HANDLER) {
         return false;
     }
-}
-
-void C_LocalPlayer::SetFOV(float FOV) {
-    *this->pGlobalFOV = FOV;
 }
 
 int C_LocalPlayer::Update() {

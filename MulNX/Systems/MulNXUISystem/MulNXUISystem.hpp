@@ -1,6 +1,6 @@
 #pragma once
 
-#include"IMulNXUISystem.hpp"
+#include "IMulNXUISystem.hpp"
 
 namespace MulNX {
 	class UISystem final :public IUISystem {
@@ -11,9 +11,6 @@ namespace MulNX {
 		std::function<void(void)>FrameBefore = nullptr;
 		std::function<void(void)>FrameBehind = nullptr;
 	public:
-		UISystem() :IUISystem() {
-			//this->Type = ModuleType::MulNXUISystem;
-		}
 		bool Init()override;
 
 		void ProcessMsg(MulNX::Message* Msg)override;

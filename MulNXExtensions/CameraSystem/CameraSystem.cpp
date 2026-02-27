@@ -2,12 +2,53 @@
 
 #include <MulNX/MulNX.hpp>
 
+bool CameraSystem::tempfunc() {
+    std::string Key = "CurrentWorkspace";
+    auto* PathManager = this->ISys().PathManager();
+    if (PathManager->CreateKey(Key,
+        [](MulNX::PathManager* PathManager)->bool {
+            auto Path = PathManager->PathGetFromKey("CurrentWorkspace");
+            return true;
+        })) {
+        PathManager->KeySetCurrent(Key, "DefaultWorkspace");
+        auto Workspaces = this->ISys().PathGet("Workspaces");
+        PathManager->KeyBindStatic(Key, Workspaces);
+    }
+    auto Path = PathManager->PathGetFromKey("CurrentWorkspace");
+    PathManager->KeySetCurrent(Key, "NewWorkspace");
+    // if (NewWorkspaceName.empty()) {
+    //     this->ISys().LogError("工作区名称不能为空，无法设置工作区路径！");
+    //     return false;
+    // }
+    // //检验文件夹存在
+    // std::filesystem::path NewWorkspacePath = this->Paths.MulNX.Saves.Internal.Core.CameraSystem.Workspaces.Path / NewWorkspaceName;
+    // if (!std::filesystem::exists(NewWorkspacePath) || !std::filesystem::is_directory(NewWorkspacePath)) {
+    //     this->ISys().LogError("指定的工作区文件夹不存在，无法设置工作区路径！  路径：" + NewWorkspacePath.string());
+    //     return false;
+    // }
+    // this->Paths.MulNX.Saves.Internal.Core.CameraSystem.Workspaces.Workspace.Path = std::move(NewWorkspacePath);
+    // //this->Paths.MulNX.Saves.Internal.Core.CameraSystem.Workspaces.Workspace.Projects.Path = this->Paths.MulNX.Saves.Internal.Core.CameraSystem.Workspaces.Workspace.Path / "Projects";
+    // //this->Paths.MulNX.Saves.Internal.Core.CameraSystem.Workspaces.Workspace.Solutions.Path = this->Paths.MulNX.Saves.Internal.Core.CameraSystem.Workspaces.Workspace.Path / "Solutions";
+    // //this->Paths.MulNX.Saves.Internal.Core.CameraSystem.Workspaces.Workspace.Elements.Path = this->Paths.MulNX.Saves.Internal.Core.CameraSystem.Workspaces.Workspace.Path / "Elements";
+    // this->ISys().LogSucc("成功设置工作区路径为：" + this->Paths.MulNX.Saves.Internal.Core.CameraSystem.Workspaces.Workspace.Path.string());
+    // return true;
+
+    return true;
+}
+
 // 摄像机系统
 
 bool CameraSystem::Init() {
     // 传递指针，注入依赖，提升性能，直接调用
     // 注意，本模块所有级别的管理器相互显示注入，其它服务借助Core隐式注入
     this->CamDrawer.Init(20.0, 30.0, 15.0, 10.0, IM_COL32(255, 0, 255, 255));
+
+    std::filesystem::path paConfig = this->ISys().PathManager()->PathGetForShared("Config");
+    bool temp = std::filesystem::exists(paConfig);
+
+    std::filesystem::path paConfig2 = this->ISys().PathGet("Config");
+    bool temp2 = std::filesystem::exists(paConfig2);
+    this->tempfunc();
 
     this->EManager.SetName("ElementManager");
     this->EManager.EntryInit(this->Core);
@@ -25,15 +66,10 @@ bool CameraSystem::Init() {
     this->WManager.EntryInit(this->Core);
     this->WManager.InjectDependence(&this->EManager, &this->SManager, &this->PManager);
 
-    std::filesystem::path paConfig = this->ISys().PathGetShared("Config");
-    bool temp = std::filesystem::exists(paConfig);
-
-    std::filesystem::path paConfig2 = this->ISys().PathGet("Config");
-    bool temp2 = std::filesystem::exists(paConfig2);
-
     this->NeedUINode = true;
     return true;
 }
+
 bool CameraSystem::UINodeFunc(MulNXUINode* ThisNode) {
     this->EManager.Windows();
     this->SManager.Windows();

@@ -9,10 +9,6 @@ typedef unsigned int ImU32;
 
 class ICameraSystem :public MulNX::ModuleBase {
 public:
-    ICameraSystem() : ModuleBase() {
-        //this->Type = MulNX::ModuleType::CameraSystem;
-    }
-
     virtual void ResetCameraModule(const float CameraHigh, const float CameraX, const float CameraY, const float AxisLenth, const ImU32 Colour) = 0;
     virtual void DrawCameraByPAR(const DirectX::XMFLOAT3& Position, const DirectX::XMFLOAT3& Rotation, const char* label) = 0;
 

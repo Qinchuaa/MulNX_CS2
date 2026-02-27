@@ -10,10 +10,6 @@ namespace MulNX {
 		std::unordered_map<MulNXHandle, MulNX::Base::any_unique_ptr>UniqueResources{};
 		std::unordered_map<MulNXHandle, MulNX::Base::any_shared_ptr>SharedResources{};
 	public:
-		HandleSystem() :IHandleSystem() {
-			//this->Type = ModuleType::HandleSystem;
-		}
-
 		bool Init()override;
 
 		// 注册句柄，传入任意类型的资源，返回对应的句柄

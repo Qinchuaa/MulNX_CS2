@@ -10,9 +10,9 @@ check_ipo_supported(RESULT ipo_supported)
 if(ipo_supported)
     set(CMAKE_INTERPROCEDURAL_OPTIMIZATION_CONFIG Release)
     set(CMAKE_INTERPROCED URAL_OPTIMIZATION TRUE)
-    message(STATUS "IPO/LTO enabled for Release builds")
+    message(STATUS "IPO/LTO 在 Release 模式下可用")
 else()
-    message(WARNING "IPO/LTO is not supported by the compiler. Skipping.")
+    message(WARNING "IPO/LTO 不支持！")
 endif()
 
 # C++ 标准设置
@@ -20,12 +20,9 @@ set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-# MSVC 专用设置
-if(MSVC)
-    add_compile_options(/utf-8)
-    add_compile_definitions(NOMINMAX)
-    add_compile_definitions(WIN32_LEAN_AND_MEAN)
-endif()
+add_compile_options(/utf-8)
+add_compile_definitions(NOMINMAX)
+add_compile_definitions(WIN32_LEAN_AND_MEAN)
 
 # 添加子目录
 add_subdirectory("MulNXThirdParty")

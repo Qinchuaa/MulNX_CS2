@@ -24,6 +24,6 @@ namespace MulNX {
         void PublishAsync(MulNX::MsgType Msg);
 
         std::filesystem::path PathGet(const std::string& Target);
-        std::filesystem::path PathGetShared(const std::string& Target);
+        MulNX::PathManager* PathManager();
     };
 }
