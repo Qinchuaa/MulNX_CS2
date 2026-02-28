@@ -104,8 +104,6 @@ bool ProjectManager::Project_Create(const std::string& Name) {
     //创建项目指针
     std::shared_ptr<Project> CreateProject = std::make_shared<Project>(Name);
     CreateProject->Refresh();
-    //执行路径操作
-    if (!this->Core->IPCer().PathCreate_Project(Name))return false;
     //添加进项目组
     this->Projects.push_back(std::move(CreateProject));
     this->ISys().LogSucc("成功创建项目：" + Name);
@@ -132,7 +130,7 @@ bool ProjectManager::Project_Save() {
     this->EManager->Element_SaveAll();
     this->SManager->Solution_SaveAll();
     //保存项目到磁盘
-    std::filesystem::path Path = this->Core->IPCer().PathGet_CurrentWorkspace() / this->ActiveProject->Name;
+    std::filesystem::path Path = this->ISys().PathManager()->PathGetFromKey("CurrentWorkspace") / this->ActiveProject->Name;
     std::string strRuselt;
     if (this->ActiveProject->SaveToXML(Path, strRuselt)) {
         this->ISys().LogSucc(std::move(strRuselt));
@@ -173,19 +171,19 @@ bool ProjectManager::Project_Apply(const std::shared_ptr<Project> Project) {
     this->SManager->Solution_ClearAll();
     //清空旧元素，防止冲突
     this->EManager->Element_ClearAll();
-    if (!this->Core->IPCer().PathSet_Project(Project->Name)) {
+    if (!this->ISys().PathManager()->KeySetCurrent("CurrentProject", Project->Name)) {
         this->ISys().LogError("尝试切换到项目时出现问题，设置项目文件夹路径失败！");
         return false;
     }
     //获取元素文件夹路径
-    std::filesystem::path ElementsPath = this->Core->IPCer().PathGet_CurrentElements();
+    std::filesystem::path ElementsPath = this->ISys().PathManager()->PathGetFromKey("Elements");
     std::vector<std::string>ElementXMLs = this->Core->IPCer().GetFileNamesByPath(ElementsPath);
     //遍历加载元素
     for (const std::string& ElementXML : ElementXMLs) {
         this->EManager->Element_LoadFromXML_Pre(ElementsPath / ElementXML);
     }
     //获取解决方案文件夹路径
-    std::filesystem::path SolutionsPath = this->Core->IPCer().PathGet_CurrentSolutions();
+    std::filesystem::path SolutionsPath = this->ISys().PathManager()->PathGetFromKey("Solutions");
     std::vector<std::string>SolutionXMLs = this->Core->IPCer().GetFileNamesByPath(SolutionsPath);
     //遍历加载解决方案
     for (const std::string& SolutionXML : SolutionXMLs) {

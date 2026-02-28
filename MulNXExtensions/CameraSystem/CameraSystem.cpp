@@ -15,6 +15,31 @@ bool CameraSystem::Init() {
     // 注意，本模块所有级别的管理器相互显示注入，其它服务借助Core隐式注入
     this->CamDrawer.Init(20.0, 30.0, 15.0, 10.0, IM_COL32(255, 0, 255, 255));
 
+    auto* PathManager = this->ISys().PathManager();
+    if (PathManager->CreateKey("CurrentWorkspace", {},
+        [this](MulNX::PathManager* PathManager)->bool {
+            auto NewWorkspacePath = PathManager->PathGetFromKey("CurrentWorkspace");
+            // 检验文件夹是否已存在
+            if (!std::filesystem::exists(NewWorkspacePath)) {
+                this->ISys().LogInfo("指定的工作区文件夹不存在，需创建新的工作区文件夹！  路径：" + NewWorkspacePath.string());
+                // 创建文件夹
+                try {
+                    std::filesystem::create_directory(NewWorkspacePath);
+                    // 子文件夹由项目创建时创建
+                }
+                catch (const std::filesystem::filesystem_error& e) {
+                    this->ISys().LogError("创建工作区文件夹失败，错误信息：" + std::string(e.what()));
+                    return false;
+                }
+                this->ISys().LogSucc("成功创建工作区文件夹，路径：" + NewWorkspacePath.string());
+            }
+            this->ISys().LogSucc("成功设置工作区路径为：" + NewWorkspacePath.string());
+            return true;
+        })) {
+        auto Workspaces = this->ISys().PathGet("Workspaces");
+        PathManager->KeyBindStatic("CurrentWorkspace", Workspaces);
+    }
+
     this->WManager.SetName("WorkspaceManager");
     this->WManager.EntryInit(this->Core);
     this->WManager.InjectDependence(&this->EManager, &this->SManager, &this->PManager);
@@ -179,7 +204,7 @@ void CameraSystem::MenuElement() {
         ImGui::SameLine();
         // 载入成功则清空输入框
         if (ImGui::Button("载入##元素")) {
-            if (this->EManager.Element_LoadFromXML_Pre(LoadElementName, this->Core->IPCer().PathGet_CurrentElements())) {
+            if (this->EManager.Element_LoadFromXML_Pre(LoadElementName, this->ISys().PathManager()->PathGetFromKey("Elements"))) {
                 LoadElementName.clear();
             }
         }
@@ -241,7 +266,7 @@ void CameraSystem::MenuSolution() {
         ImGui::SameLine();
         // 载入成功则清空输入框
         if (ImGui::Button("载入解决方案")) {
-            if (this->SManager.Solution_LoadFromXML(LoadSolutionName, this->Core->IPCer().PathGet_CurrentSolutions())) {
+            if (this->SManager.Solution_LoadFromXML(LoadSolutionName, this->ISys().PathManager()->PathGetFromKey("Solutions"))) {
                 this->ISys().LogSucc(("加载解决方案成功：" + LoadSolutionName).c_str());
                 LoadSolutionName.clear();
             }
@@ -292,9 +317,6 @@ void CameraSystem::MenuWorkspace() {
     ImGui::Text("工作区名：");
     ImGui::SameLine();
     ImGui::InputText("##TargetWorkspaceName", &TargetWorkspaceName);
-    if (ImGui::Button("新建")) {
-        this->WManager.Workspace_Create(TargetWorkspaceName);
-    }
     ImGui::SameLine();
     if (ImGui::Button("切换")) {
         if (!this->WManager.Workspace_Set(TargetWorkspaceName))return;

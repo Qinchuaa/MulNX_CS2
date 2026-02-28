@@ -8,7 +8,7 @@ bool GameCfgManager::Init() {
     //基础服务
 	this->IPCer = &this->Core->IPCer();
     //路径绑定
-	this->ToolPath = this->IPCer->PathGet_Tool_Cfg();
+    this->ToolPath = this->ISys().PathGet("CS2Configs");
 	this->GamePath = this->IPCer->PathGet_CS_cfg();
 	//初始化Cfg文件列表
     this->UpdateCfgList();
@@ -38,7 +38,7 @@ bool GameCfgManager::UpdateCfgList() {
 	return true;
 }
 bool GameCfgManager::MoveToGame(const std::string& CfgName) {
-    const std::filesystem::path CfgPath = this->IPCer->PathGet_Tool_Cfg() / (CfgName + ".cfg");
+    const std::filesystem::path CfgPath = this->ToolPath / (CfgName + ".cfg");
     const std::string FullName = CfgName + ".cfg";
     if (!this->IPCer->FileMove(FullName, this->ToolPath, this->GamePath)) {
 		this->ISys().LogError("从工具目录移动到游戏目录失败，文件可能不存在或移动过程中出现错误！  路径：" + CfgPath.string());
@@ -47,7 +47,7 @@ bool GameCfgManager::MoveToGame(const std::string& CfgName) {
 	return true;
 }
 bool GameCfgManager::LoadCfg(const std::string& CfgName) {
-	const std::filesystem::path CfgPath = this->IPCer->PathGet_CS_cfg() / (CfgName + ".cfg");
+	const std::filesystem::path CfgPath = this->GamePath / (CfgName + ".cfg");
 	if (!std::filesystem::exists(CfgPath)) {
 		this->ISys().LogError("指定的配置文件不存在，无法加载配置文件！  路径：" + CfgPath.string());
 		return false;
@@ -57,7 +57,7 @@ bool GameCfgManager::LoadCfg(const std::string& CfgName) {
 	return true;
 }
 bool GameCfgManager::MoveToTool(const std::string& CfgName) {
-    const std::filesystem::path CfgPath = this->IPCer->PathGet_CS_cfg() / (CfgName + ".cfg");
+    const std::filesystem::path CfgPath = this->ToolPath / (CfgName + ".cfg");
     const std::string FullName = CfgName + ".cfg";
     if (!this->IPCer->FileMove(FullName, this->GamePath, this->ToolPath)) {
 		this->ISys().LogError("从游戏目录移动到工具目录失败，文件可能不存在或移动过程中出现错误！  路径：" + CfgPath.string());
@@ -66,7 +66,7 @@ bool GameCfgManager::MoveToTool(const std::string& CfgName) {
 	return true;
 }
 bool GameCfgManager::DeleteCfg(const std::string& CfgName) {
-    const std::filesystem::path CfgPath = this->IPCer->PathGet_Tool_Cfg() / (CfgName + ".cfg");
+    const std::filesystem::path CfgPath = this->ToolPath / (CfgName + ".cfg");
     const std::string FullName = CfgName + ".cfg";
     if (!this->IPCer->FileDelete(FullName, this->ToolPath)) {
 		this->ISys().LogError("从工具目录删除配置文件失败，文件可能不存在或删除过程中出现错误！  路径：" + CfgPath.string());

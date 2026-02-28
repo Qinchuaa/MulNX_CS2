@@ -97,7 +97,7 @@ void ElementManager::ElementDebugWindow() {
         }
         if (ImGui::Button("保存到XML文件")) {
             std::string Ruselt;
-            if (this->CurrentElement->SaveToXML(this->Core->IPCer().PathGet_CurrentElements(), Ruselt)) {
+            if (this->CurrentElement->SaveToXML(this->ISys().PathManager()->PathGetFromKey("Elements"), Ruselt)) {
                 this->ISys().LogSucc(std::move(Ruselt));
             }
             else {
@@ -152,7 +152,7 @@ bool ElementManager::Element_SaveAll() {
         this->ISys().LogWarning("当前没有任何元素，跳过保存操作！");
         return true;
     }
-    std::filesystem::path ElementFolderPath = this->Core->IPCer().PathGet_CurrentElements();
+    std::filesystem::path ElementFolderPath = this->ISys().PathManager()->PathGetFromKey("Elements");
     //遍历所有元素并保存
     for (const auto& elem : this->Elements) {
         if (!elem->Dirty) {

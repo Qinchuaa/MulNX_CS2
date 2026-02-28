@@ -7,30 +7,7 @@
 #include <MulNX/MulNX.hpp>
 
 bool WorkspaceManager::Init() {
-    auto* PathManager = this->ISys().PathManager();
-    if (PathManager->CreateKey("CurrentWorkspace", {},
-        [this](MulNX::PathManager* PathManager)->bool {
-            auto NewWorkspacePath = PathManager->PathGetFromKey("CurrentWorkspace");
-            // 检验文件夹是否已存在
-            if (!std::filesystem::exists(NewWorkspacePath)) {
-                this->ISys().LogInfo("指定的工作区文件夹不存在，需创建新的工作区文件夹！  路径：" + NewWorkspacePath.string());
-                // 创建文件夹
-                try {
-                    std::filesystem::create_directory(NewWorkspacePath);
-                    // 子文件夹由项目创建时创建
-                }
-                catch (const std::filesystem::filesystem_error& e) {
-                    this->ISys().LogError("创建工作区文件夹失败，错误信息：" + std::string(e.what()));
-                    return false;
-                }
-                this->ISys().LogSucc("成功创建工作区文件夹，路径：" + NewWorkspacePath.string());
-            }
-            this->ISys().LogSucc("成功设置工作区路径为：" + NewWorkspacePath.string());
-            return true;
-        })) {
-        auto Workspaces = this->ISys().PathGet("Workspaces");
-        PathManager->KeyBindStatic("CurrentWorkspace", Workspaces);
-    }
+    
     return true;
 }
 void WorkspaceManager::InjectDependence(ElementManager* EManager, SolutionManager* SManager, ProjectManager* PManager) {
@@ -42,17 +19,7 @@ void WorkspaceManager::VirtualMain() {
     return;
 }
 
-bool WorkspaceManager::Workspace_Create(const std::string& Name) {
-    std::string strResult{};
-    if (this->Core->IPCer().PathCreate_Workspace(Name)) {
-        this->ISys().LogSucc(strResult);
-        return true;
-    }
-    else {
-        this->ISys().LogError(strResult);
-        return false;
-    }
-}
+
 bool WorkspaceManager::Workspace_Save() {
     //生成配置文件
     if (!this->Workspace_ConfigGenerate()) {
@@ -69,36 +36,30 @@ bool WorkspaceManager::Workspace_Save() {
     this->ISys().LogSucc("工作区保存成功");
     return true;
 }
-bool WorkspaceManager::Workspace_TrySetPath(const std::string& Name) {
-    return this->Core->IPCer().PathSet_Workspace(Name);
-}
 bool WorkspaceManager::Workspace_Set(const std::string& Name) {
-    //尝试设置路径
-    if (!this->Workspace_TrySetPath(Name)) {
-        return false;
-    }
     this->InWorkspace = false;
-    //清空旧存储
+    // 清空旧存储
     this->EManager->Element_ClearAll();
     this->SManager->Solution_ClearAll();
     this->PManager->Project_ClearAll();
-    //制作指针
+    // 制作指针
     this->CurrentWorkspace = std::make_unique<Workspace>(Name);
-    MulNX::IPCer& IPCer = this->Core->IPCer();
-    //获取配置信息
-    if (!this->Workspace_ConfigLoad(IPCer.PathGet_CurrentWorkspace())) {
-        return false;
+    auto* PathManager = this->ISys().PathManager();
+
+    this->ISys().PathManager()->KeySetCurrent("CurrentProject", {});
+    this->ISys().PathManager()->KeySetCurrent("CurrentWorkspace", Name);
+    // 获取配置信息
+    if (this->Workspace_ConfigLoad(PathManager->PathGetFromKey("CurrentWorkspace"))) {
+        this->Workspace_ConfigApply();
     }
-    if (!this->Workspace_ConfigApply()) {
-        return false;
-    }
-    //进入工作区
+    // 进入工作区
     this->InWorkspace = true;
-    //自动加载所有项目到内存中
-    std::vector<std::string> ProjectsNames = IPCer.GetProjectsNames();
+    // 自动加载所有项目到内存中
+    auto ProPath = PathManager->PathGetFromKey("CurrentWorkspace");
+    std::vector<std::string> ProjectsNames = this->Core->IPCer().GetProjectsNames(ProPath);
     if (!ProjectsNames.empty()) {
         for (const auto& ProjectName : ProjectsNames) {
-            std::filesystem::path ProjectPath = IPCer.PathGet_CurrentWorkspace() / ProjectName;
+            std::filesystem::path ProjectPath = PathManager->PathGetFromKey("CurrentWorkspace") / ProjectName;
             this->PManager->Project_LoadFromXML(ProjectPath, ProjectName);
         }
     }
@@ -125,7 +86,7 @@ bool WorkspaceManager::Workspace_ConfigSave() {
         return false;
     }
     std::string strResult{};
-    if (this->CurrentWorkspace->SaveConfigToXML(this->Core->IPCer().PathGet_CurrentWorkspace(), strResult)) {
+    if (this->CurrentWorkspace->SaveConfigToXML(this->ISys().PathManager()->PathGetFromKey("CurrentWorkspace"), strResult)) {
         this->ISys().LogSucc(strResult);
         return true;
     }
@@ -152,7 +113,7 @@ bool WorkspaceManager::Workspace_ConfigLoad(const std::filesystem::path& Workspa
 
     //检查文件本身存在性
     if (!std::filesystem::exists(FullPath)) {
-        this->ISys().LogError("XML文件不存在！文件路径：" + FullPath.string());
+        this->ISys().LogWarning("XML文件不存在！文件路径：" + FullPath.string());
         return false;
     }
 

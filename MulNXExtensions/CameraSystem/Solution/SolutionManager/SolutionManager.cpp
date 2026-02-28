@@ -82,7 +82,7 @@ bool SolutionManager::Solution_SaveAll() {
         this->ISys().LogWarning("尝试在没有任何解决方案的情况下保存");
         return true;
     }
-    std::filesystem::path SolutionFolderPath = this->Core->IPCer().PathGet_CurrentSolutions();
+    std::filesystem::path SolutionFolderPath = this->ISys().PathManager()->PathGetFromKey("Solutions");
     //遍历所有解决方案保存
     for (const auto& solution : this->Solutions) {
         if (!solution->Dirty) {
@@ -458,7 +458,7 @@ void SolutionManager::Solution_DebugWindow() {
 
         if (ImGui::Button("保存到XML文件")) {
             std::string SaveResult;
-            if (this->CurrentSolution->SaveToXML(this->Core->IPCer().PathGet_CurrentSolutions(), SaveResult)) {
+            if (this->CurrentSolution->SaveToXML(this->ISys().PathManager()->PathGetFromKey("Solutions"), SaveResult)) {
                 this->ISys().LogSucc(SaveResult);
             }
             else {

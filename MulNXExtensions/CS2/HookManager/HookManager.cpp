@@ -175,7 +175,7 @@ void HookManager::d3dInit(IDXGISwapChain* _this) {
 
 			// 转换为GBK（供ImGui使用）
 
-			this->imguiIniPath = this->Core->IPCer().PathGet_Core() / "MulNXUIConfig.ini";
+			this->imguiIniPath = this->ISys().PathGet("Config") / "MulNXUIConfig.ini";
 			this->imguiIniPathString = MulNX::Base::CharUtility::FilePathToString(this->imguiIniPath);
 			io.IniFilename = this->imguiIniPathString.c_str();
 

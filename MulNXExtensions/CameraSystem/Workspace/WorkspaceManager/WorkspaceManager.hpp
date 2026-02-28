@@ -30,12 +30,8 @@ public:
 
     //工作区
 
-    //创建工作区，创建文件路径
-    bool Workspace_Create(const std::string& Name);
     //保存工作区所有内容到磁盘中
     bool Workspace_Save();
-    //加载工作区并重置文件路径（会验证目标的存在性，如果目标文件夹不存在会返回false，此时应当不影响当前工作区）
-    bool Workspace_TrySetPath(const std::string& Name);
     //真正切换到目标工作区并清空当前数据（在开始会先调用Workspace_TrySetPath进行检测，通过后才会从当前工作区退出）
     bool Workspace_Set(const std::string& Name);
 
