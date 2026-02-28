@@ -9,7 +9,7 @@ check_ipo_supported(RESULT ipo_supported)
 
 if(ipo_supported)
     set(CMAKE_INTERPROCEDURAL_OPTIMIZATION_CONFIG Release)
-    set(CMAKE_INTERPROCED URAL_OPTIMIZATION TRUE)
+    set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)
     message(STATUS "IPO/LTO 在 Release 模式下可用")
 else()
     message(WARNING "IPO/LTO 不支持！")
@@ -20,7 +20,10 @@ set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-add_compile_options(/utf-8)
+# 添加编译选项
+add_compile_options(/utf-8) # utf8
+add_compile_options(/EHsc) # C++ 异常处理
+
 add_compile_definitions(NOMINMAX)
 add_compile_definitions(WIN32_LEAN_AND_MEAN)
 
