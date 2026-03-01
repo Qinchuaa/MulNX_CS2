@@ -49,8 +49,6 @@ namespace MulNX {
         // 将目标映射到共享的目录
         std::filesystem::path PathGetForShared(const std::string& Target);
 
-        bool PathCreate_Workspace(const std::string& NewWorkspaceName);
-
         bool CreateKey(const std::string& Key, std::string&& Value, std::function<bool(PathManager*)>&& OnChange);
         bool KeyBindStatic(const std::string& Key, const std::filesystem::path& Position);
         bool KeyBindDynamic(const std::string& Key, const std::string& Parent);

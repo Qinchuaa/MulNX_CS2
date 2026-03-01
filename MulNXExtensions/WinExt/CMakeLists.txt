@@ -4,6 +4,12 @@ add_library(WinExt STATIC
     "HookUtility/HookUtility.cpp"
 
     "Memory/Assembler/Assembler.cpp"
+    "Memory/Assembler/Help/Help.cpp"
+    "Memory/Assembler/do/mov.cpp"
+    "Memory/Assembler/do/add.cpp"
+    "Memory/Assembler/do/sub.cpp"
+
+
     "Memory/DllModule/DllModule.cpp"
     "Memory/Pattern/Pattern.cpp"
     "Memory/Region/Region.cpp"

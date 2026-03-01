@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Element Type="FreeCameraPath" Name="kadun">
+	<ElementMain DurationTime="11.9776611">
+		<KeyFrame Time="342.660553" Px="-215.395142" Py="-868.392334" Pz="-128.191284" FOV="89.9999924" Pitch="1.92398071" Yaw="-45.9637108" Roll="5.33909521e-08" />
+		<KeyFrame Time="354.638214" Px="-1008.3418" Py="-48.3075371" Pz="-89.9223785" FOV="89.9999924" Pitch="1.92398071" Yaw="-45.9637108" Roll="5.33909521e-08" />
+	</ElementMain>
+</Element>

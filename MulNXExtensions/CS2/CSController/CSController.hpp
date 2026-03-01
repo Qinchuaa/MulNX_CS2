@@ -2,6 +2,7 @@
 
 #include <MulNX/MulNX.hpp>
 #include <MulNX/Systems/AbstractLayer3D/AbstractLayer3D.hpp>
+#include <MulNXExtensions/WinExt/WinExt.hpp>
 
 #include "ConVarSystem/ConVarSystem.hpp"
 #include "EntityList/EntityList.hpp"
@@ -40,6 +41,9 @@ private:
     std::unordered_map<int, int>IndexInMap_To_IndexInEntityList_Map{};
     int GetIndexInEntityListFromIndexInMap(int IndexInMap);
 public:
+    static void HandleOverrideView(void* ThisCViewSetup);
+    void tempfunc(MulNX::Memory::Region& Target);
+    bool UINodeFunc(MulNXUINode* ThisNode)override;
     bool Init()override;
     void VirtualMain()override;
     void ProcessMsg(MulNX::Message* Msg)override;

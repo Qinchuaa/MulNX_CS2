@@ -3,9 +3,9 @@
 #include "../Signatures.hpp"
 
 #include <MulNX/MulNX.hpp>
-#include <MulNXExtensions/WinExt/WinExt.hpp>
 #include <MulNXExtensions/CameraSystem/CameraSystemIO/CameraSystemIO.hpp>
 #include <MulNXThirdParty/All_cs2_dumper.hpp>
+#include <MulNXThirdParty/All_ImGui.hpp>
 
 std::atomic<bool> IsInCameraSystemOverride = false;
 std::atomic<float> OriginX = 0;
@@ -18,7 +18,7 @@ std::atomic<float> FOV = 90.0f;
 
 constexpr float M_PI = 3.1415926535;
 
-void HandleOverrideView(void* ThisCViewSetup) {
+void CSController::HandleOverrideView(void* ThisCViewSetup) {
 
     int* pWidth = (int*)((unsigned char*)ThisCViewSetup + 0x434);
     int* pHeight = (int*)((unsigned char*)ThisCViewSetup + 0x43C);
@@ -156,7 +156,8 @@ bool CSController::Init() {
     this->EntryCreateThread();// 包含线程创建
     this->SetMyThreadDelta(3);
     this->ISubscribe(MulNX::MsgType::Core_ReHook);
-    
+    this->NeedUINode = true;
+
     MulNX::Memory::DllModule clientModule(L"client.dll");
     if (clientModule.IsValid()) {
         // 搜索 .text 段
@@ -165,29 +166,31 @@ bool CSController::Init() {
             // 搜索特征码
             const auto& pattern = MulNX::CS2::Signatures::CallIsPlayingDemo;
             auto Target = textRegion.FindRegion(pattern);
-            if (Target.IsValid()) {
-                auto Guard = Target.ExchangeProtection(PAGE_EXECUTE_READWRITE);
-                static LPVOID ptr = HandleOverrideView;
-                MulNX::Memory::Asm::Code Code{};
-                {
-                    using enum MulNX::Memory::Asm::Reg;
-                    using namespace MulNX::Memory::Asm;
-                    Assembler Asm{};
-                    Asm
-                        .mov(RCX, RSI)
-                        .mov(RAX, (uintptr_t)&ptr)
-                        .call(Mem(RAX))
-                        .nop();
 
-                    Code = Asm.Release();
-                }
-                try {
-                    Target.TryResize(16);
-                    Target.SameSizeSwap(Code);
-                }
-                catch (...) {
-                    this->ISys().LogError("汇编代码与目标大小不匹配！");
-                }
+            if (Target.IsValid()) {
+                this->tempfunc(Target);
+                // auto Guard = Target.ExchangeProtection(PAGE_EXECUTE_READWRITE);
+                // static LPVOID ptr = HandleOverrideView;
+                // MulNX::Memory::Asm::Code Code{};
+                // {
+                //     using enum MulNX::Memory::Asm::Reg;
+                //     using namespace MulNX::Memory::Asm;
+                //     Assembler Asm{};
+                //     Asm
+                //         .mov(RCX, RSI)
+                //         .mov(RAX, (uintptr_t)&ptr)
+                //         .call(Mem(RAX))
+                //         .nop();
+
+                //     Code = Asm.Release();
+                // }
+                // try {
+                //     Target.TryResize(16);
+                //     Target.SameSizeSwap(Code);
+                // }
+                // catch (...) {
+                //     this->ISys().LogError("汇编代码与目标大小不匹配！");
+                // }
             }
         }
     }

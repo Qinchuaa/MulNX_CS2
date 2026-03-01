@@ -10,9 +10,9 @@ namespace MulNX {
 	class ModuleBase {
         friend MulNX::Core::Core;
         friend C_ISys;
-    protected:
         // 标记是否已经完成初始化，未完成前不允许执行主循环等操作
         bool Inited = false;
+    protected:
         // 父模块句柄
         MulNXHandle hParent{};
         // 模块名称，唯一标识
@@ -49,8 +49,6 @@ namespace MulNX {
         MulNX::PathManager* pPathManager = nullptr;
         // 线程锁
         std::shared_mutex MyThreadMutex;
-        // 可重入锁
-        std::unique_ptr<std::recursive_mutex> pMutexEx = nullptr;
     protected:
 		// 运行标志
 		std::atomic<bool> Running = false;
@@ -141,6 +139,7 @@ namespace MulNX {
 		// 自动创建私有消息管道
 		MulNX::IMessageChannel* ICreateAndGetMessageChannel();
     public:
+        // 系统服务包装器
         C_ISys ISys();
     };
 }

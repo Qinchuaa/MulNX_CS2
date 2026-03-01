@@ -18,6 +18,8 @@ add_library(MulNXCS2Ext
     "GameCfgManager/GameCfgManager.cpp"
     "GameSettingsManager/GameSettingsManager.cpp"
     "HookManager/HookManager.cpp"
+
+    "CSController/MulNXHook.cpp"
 )
 
 target_link_libraries(MulNXCS2Ext PUBLIC
