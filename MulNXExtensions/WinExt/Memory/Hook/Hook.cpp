@@ -103,10 +103,11 @@ MulNX::Memory::HookEx* MulNX::Memory::HookEx::Create(uint8_t* Target, int Len) {
         CodeCaller = Asm.Release();
     }
 
-
-    // 复制原始指令，等到集成反汇编引擎处理相对寻址
-    //CodeCaller.push_back(std::move(Raw));
-
+    {
+        // 复制原始指令，等到集成反汇编引擎处理相对寻址
+        //CodeCaller.push_back(std::move(Raw));
+    }
+    
     // 跳转到原处
     {
         using enum MulNX::Memory::Asm::Reg;

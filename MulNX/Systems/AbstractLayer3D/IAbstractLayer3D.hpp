@@ -24,7 +24,8 @@ public:
 namespace MulNX {
     class IAbstractLayer3D :public MulNX::ModuleBase {
     protected:
-        //当前屏幕宽高，默认1080P
+        // 当前屏幕宽高，默认1080P
+        
         int AL3DCurrentWindowWidth = 1920;
         int AL3DCurrentWindowHeight = 1080;
         D_GameData AL3DGameData{};
