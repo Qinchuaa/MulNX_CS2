@@ -56,8 +56,6 @@ namespace MulNX {
 
         std::filesystem::path PathGet_CS_cfg();
 
-        std::string GetAllPathMsg();
-
         std::vector<std::string> GetProjectsNames(std::filesystem::path Path);
         std::vector<std::string> GetFileNamesByPath(std::filesystem::path& FolderPath);
 

@@ -4,6 +4,7 @@
 #include "Pattern/Pattern.hpp"
 #include "Region/Region.hpp"
 #include "Assembler/Assembler.hpp"
+#include "Hook/Hook.hpp"
 
 #include <atomic>
 #include <string>

@@ -38,23 +38,6 @@ bool MulNXController::UINodeFunc(MulNXUINode* ThisNode) {
         Msg.pMsgChannel = this->MainMsgChannel;
         this->ISys().PublishAsync(std::move(Msg));
     }
-    if (ImGui::CollapsingHeader("初始化控制")) {
-        if (ImGui::Button("初始化IPCer")) {
-            this->ISys().LogInfo("正在尝试初始化IPCer");
-            this->Core->IPCer().Init();
-        }
-        ImGui::SameLine();
-        if (ImGui::Button("查看IPCer结果")) {
-            if (this->Core->IPCer().IsInited()) {
-                this->ISys().LogInfo("---------------------------------------------------------------------------------");
-                this->ISys().LogInfo(this->Core->IPCer().GetAllPathMsg());
-                this->ISys().LogInfo("---------------------------------------------------------------------------------");
-            }
-            else {
-                this->ISys().LogError("IPCer尚未初始化成功！");
-            }
-        }
-    }
     return true;
 }
 

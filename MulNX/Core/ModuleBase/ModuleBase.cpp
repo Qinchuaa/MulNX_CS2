@@ -70,7 +70,6 @@ bool MulNX::ModuleBase::CreateUINode() {
         Msg.Handle = hUINode;
         // 发送UI消息
         this->ISys().PublishAsync(std::move(Msg));
-        this->ISys().LogInfo("推送了UI节点到UI系统");
     }
     catch (...) {
         return false;
@@ -89,6 +88,13 @@ bool MulNX::ModuleBase::EntryInit(MulNX::Core::Core* Core) {
         if (!this->CreateUINode()) {
             return false;
         }
+        this->ISys().LogInfo("推送了UI节点到UI系统");
+    }
+    if (this->InitNeedThread) {
+        if (!this->CreateThread()) {
+            return false;
+        }
+        this->ISys().LogInfo("申请了一个线程创建");
     }
     this->ISys().LogSucc("初始化成功!");
     this->Inited = true;
@@ -103,7 +109,11 @@ void MulNX::ModuleBase::EntryVirtualMain() {
     this->VirtualMain();
 }
 // 线程创建
-bool MulNX::ModuleBase::EntryCreateThread() {
+void MulNX::ModuleBase::NeedThread(int TimeDelta) {
+    this->InitNeedThread = true;
+    this->SetMyThreadDelta(TimeDelta);
+}
+bool MulNX::ModuleBase::CreateThread() {
     for (;;) {
         //如果线程已经创建，则立即返回
         if (this->MyThreadRunning) return true;

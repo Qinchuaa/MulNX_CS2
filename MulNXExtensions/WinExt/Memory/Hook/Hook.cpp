@@ -1,55 +1,35 @@
-#include "CSController.hpp"
+#include "Hook.hpp"
 
-#include "../Signatures.hpp"
+#include <Windows.h>
+#include "../Assembler/Assembler.hpp"
+#include <atomic>
 
-#include <MulNX/MulNX.hpp>
-#include <MulNXExtensions/CameraSystem/CameraSystemIO/CameraSystemIO.hpp>
-#include <MulNXThirdParty/All_cs2_dumper.hpp>
-#include <MulNXThirdParty/All_ImGui.hpp>
+int MyAddable = 0;
 
-//#include <cstdio>
-
-int addable = 0;
-
-struct RegContext {
-    uint64_t rax, rcx, rdx, rbx, rsp, rbp, rsi, rdi;
-    uint64_t r8, r9, r10, r11, r12, r13, r14, r15;
-};
-
-using HookCallBack = void(*)(RegContext*);
-
-void myCallBack(RegContext* RegCtx) {
-    CSController::HandleOverrideView(reinterpret_cast<void*>(RegCtx->rsi));
-    // MessageBoxA(nullptr, "buffer", "MulNX Dispatch", MB_OK);
+void MulNX::Memory::HookEx::Dispatch(HookEx* pHookExInstance, RegContext* Ctx) {
+    std::shared_lock lock(pHookExInstance->MutexEx);
+    if (!pHookExInstance->Enable) {
+        return;
+    }
+    const auto& CallbacksInstance = pHookExInstance->Callbacks;
+    for (const auto& CallbackInstance : CallbacksInstance) {
+        CallbackInstance(Ctx);
+    }
+    return;
 }
 
-struct HookInfo {
-    int var1;
-    int var2;
-    HookCallBack callback;
-};
-
-void MulNX_Dispatch(const HookInfo* pInfo, RegContext* RegCtx) {
-    // char buffer[256];
-    //sprintf_s(buffer, "var1: %d, var2: %d", pInfo->var1, pInfo->var2);
-    pInfo->callback(RegCtx);
-}
-
-// 全局或类静态成员
-std::atomic<uintptr_t> atoPos = 0;
-std::atomic<uintptr_t> atoCaller = 0;
-
-void CSController::tempfunc(MulNX::Memory::Region& Target) {
-    auto Guard = Target.ExchangeProtection(PAGE_EXECUTE_READWRITE);
-    auto HookPos = Target.Data();
+MulNX::Memory::HookEx* MulNX::Memory::HookEx::Create(uint8_t* Target, int Len) {
+    // 首先创建HookEx实例
+    auto* HookExInstance = new HookEx();
+    HookExInstance->Target = Target;
 
     // 复制覆盖处指令
     // 逆向分析已知是14字节
-    std::vector<uint8_t> Raw(Target.Data(), Target.Data() + 14);
+    HookExInstance->RawCmd = std::vector<uint8_t>(Target, Target + 14);
 
     // 为调度器汇编部分分配代码
-    auto* pCaller = VirtualAlloc(0, 1000, MEM_COMMIT, PAGE_EXECUTE_READWRITE);
-    if (pCaller) {
+    HookExInstance->pCaller = VirtualAlloc(0, 1000, MEM_COMMIT, PAGE_EXECUTE_READWRITE);
+    if (HookExInstance->pCaller) {
         MessageBoxW(nullptr, L"内存分配成功", L"MulNX", 0);
     }
 
@@ -87,14 +67,10 @@ void CSController::tempfunc(MulNX::Memory::Region& Target) {
 
         // 指令执行区
         {
-            auto* p_instance_HookInfo = reinterpret_cast<HookInfo*>(malloc(sizeof(HookInfo)));
-            p_instance_HookInfo->var1 = 42;
-            p_instance_HookInfo->var2 = 666;
-            p_instance_HookInfo->callback = &myCallBack;
             Asm
-                .mov(RCX, (uintptr_t)p_instance_HookInfo)
-                .mov(RDX, RSP)
-                .mov(RAX, (uintptr_t)&MulNX_Dispatch)
+                .mov(RCX, (uintptr_t)HookExInstance)// 此参数对应 HookEx
+                .mov(RDX, RSP)// 此参数对应 RegContext
+                .mov(RAX, (uintptr_t)&MulNX::Memory::HookEx::Dispatch)
                 .call(RAX);
         }
 
@@ -120,15 +96,15 @@ void CSController::tempfunc(MulNX::Memory::Region& Target) {
         Asm.add(RSP, ctxSize);
 
 
-        // 临时：给RAX分配一个合法内存，让游戏不崩溃
+        // 临时：给RAX分配一个合法内存，让CS2不崩溃
         Asm
-            .mov(RAX, (uintptr_t)&addable);
-        
+            .mov(RAX, (uintptr_t)&MyAddable);
+
         CodeCaller = Asm.Release();
     }
 
 
-    // 复制原始指令
+    // 复制原始指令，等到集成反汇编引擎处理相对寻址
     //CodeCaller.push_back(std::move(Raw));
 
     // 跳转到原处
@@ -137,63 +113,35 @@ void CSController::tempfunc(MulNX::Memory::Region& Target) {
         using namespace MulNX::Memory::Asm;
         Assembler Asm{};
         Asm.nop().nop()
-            .jmp64((uintptr_t)HookPos + 14)
+            .jmp64((uintptr_t)Target + 14)
             .nop()
             .nop()
             .nop();
         CodeCaller.push_back(std::move(Asm.Release()));
     }
     // 复制机器码到VirtualAlloc分配的内存
-    memcpy(pCaller, CodeCaller.Data(), CodeCaller.Size());
-    atoCaller = reinterpret_cast<uintptr_t>(pCaller);
+    memcpy(HookExInstance->pCaller, CodeCaller.Data(), CodeCaller.Size());
+    return HookExInstance;
+}
 
+void MulNX::Memory::HookEx::AddCallback(std::function<void(RegContext*)>&& Callback) {
+    std::unique_lock lock(this->MutexEx);
+    this->Callbacks.push_back(std::move(Callback));
+    return;
+}
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+void MulNX::Memory::HookEx::Attach() {
     // 修改原指令位置
     MulNX::Memory::Asm::Code Code{};
     {
         using enum MulNX::Memory::Asm::Reg;
         using namespace MulNX::Memory::Asm;
         Assembler Asm{};
-        
-        Asm.jmp64((uintptr_t)pCaller);
+
+        Asm.jmp64((uintptr_t)this->pCaller);
         Code = Asm.Release();
     }
 
     // 覆盖原位置
-    memcpy(HookPos, Code.Data(), Code.Size());
-    atoPos = (uintptr_t)HookPos;
-}
-
-bool CSController::UINodeFunc(MulNXUINode* ThisNode) {
-    ImGui::Begin("测试222");
-
-    // 从原子变量读取地址
-    uintptr_t posVal = atoPos.load();
-    uintptr_t CallerVal = atoCaller.load();
-
-    // 用于显示的临时缓冲区
-    char buf[64];
-
-    snprintf(buf, sizeof(buf), "0x%p", reinterpret_cast<void*>(posVal));
-    ImGui::InputText("目标地址", buf, sizeof(buf), ImGuiInputTextFlags_ReadOnly);
-    // 汇编调度器部分地址
-    snprintf(buf, sizeof(buf), "0x%p", reinterpret_cast<void*>(CallerVal));
-    ImGui::InputText("调度器位置：", buf, sizeof(buf));
-
-    ImGui::End();
-    return true; // 根据实际需要返回值
+    memcpy(this->Target, Code.Data(), Code.Size());
 }

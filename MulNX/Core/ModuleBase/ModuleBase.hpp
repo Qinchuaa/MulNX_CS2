@@ -49,6 +49,8 @@ namespace MulNX {
         MulNX::PathManager* pPathManager = nullptr;
         // 线程锁
         std::shared_mutex MyThreadMutex;
+        // 是否需要一个线程
+        bool InitNeedThread = false;
     protected:
 		// 运行标志
 		std::atomic<bool> Running = false;
@@ -99,14 +101,16 @@ namespace MulNX {
 		// 基础消息处理
 		void BaseProcessMsg();
 
-		// 入口点
+        bool CreateThread();
+        
+        // 入口点
 	public:
 		// 初始化入口
 		bool EntryInit(MulNX::Core::Core* Core);
 		// 主循环入口
 		void EntryVirtualMain();
 		// 创建线程入口
-		bool EntryCreateThread();
+		
 	protected:
 		// 消息处理入口
 		void EntryProcessMsg();
@@ -117,6 +121,8 @@ namespace MulNX {
     protected:
         // 是否需要UI节点，默认不需要
         bool NeedUINode = false;
+        // 指示需要线程，在初始化中创建
+        void NeedThread(int TimeDelta);
     private:
         // 自动创建UI节点
         bool CreateUINode();

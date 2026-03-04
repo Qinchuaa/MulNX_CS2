@@ -73,6 +73,7 @@ bool MulNX::KeyCheckPack::ReadXMLNode(pugi::xml_node& node_KeyCheckPack) {
 
 
 bool MulNX::KeyTracker::Init() {
+    this->NeedThread(3);
     return true;
 }
 

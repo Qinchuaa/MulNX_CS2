@@ -14,9 +14,9 @@ bool HookManager::Init() {
 void HookManager::StartAll() {
 	this->MainMsgChannel = this->ICreateAndGetMessageChannel();
 	this->ReHook = true;
-	MH_Initialize();
-	this->EntryCreateThread();
-	this->SetMyThreadDelta(250);
+    MH_Initialize();
+    this->NeedThread(250);
+    this->ThreadMain();// 手动执行一次Hook
 }
 
 void HookManager::ThreadMain() {

@@ -153,10 +153,8 @@ bool CSController::Init() {
     this->InitInterface();
     this->GetModules();
     this->Catch();
-    this->EntryCreateThread();// 包含线程创建
-    this->SetMyThreadDelta(3);
+    this->NeedThread(3);
     this->ISubscribe(MulNX::MsgType::Core_ReHook);
-    this->NeedUINode = true;
 
     MulNX::Memory::DllModule clientModule(L"client.dll");
     if (clientModule.IsValid()) {
@@ -168,29 +166,12 @@ bool CSController::Init() {
             auto Target = textRegion.FindRegion(pattern);
 
             if (Target.IsValid()) {
-                this->tempfunc(Target);
-                // auto Guard = Target.ExchangeProtection(PAGE_EXECUTE_READWRITE);
-                // static LPVOID ptr = HandleOverrideView;
-                // MulNX::Memory::Asm::Code Code{};
-                // {
-                //     using enum MulNX::Memory::Asm::Reg;
-                //     using namespace MulNX::Memory::Asm;
-                //     Assembler Asm{};
-                //     Asm
-                //         .mov(RCX, RSI)
-                //         .mov(RAX, (uintptr_t)&ptr)
-                //         .call(Mem(RAX))
-                //         .nop();
-
-                //     Code = Asm.Release();
-                // }
-                // try {
-                //     Target.TryResize(16);
-                //     Target.SameSizeSwap(Code);
-                // }
-                // catch (...) {
-                //     this->ISys().LogError("汇编代码与目标大小不匹配！");
-                // }
+                auto Guard = Target.ExchangeProtection(PAGE_EXECUTE_READWRITE);
+                this->MyHook = MulNX::Memory::HookEx::Create(Target.Data(), 14);
+                this->MyHook->AddCallback([this](RegContext* Ctx)->void {
+                    return this->HandleOverrideView((void*)Ctx->rsi);
+                    });
+                this->MyHook->Attach();
             }
         }
     }

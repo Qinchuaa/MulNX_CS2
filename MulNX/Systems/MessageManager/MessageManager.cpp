@@ -156,7 +156,8 @@ bool MulNX::MessageManager::NextMsg() {
 }
 
 bool MulNX::MessageManager::Init() {
-	return true;
+    this->NeedThread(10);
+    return true;
 }
 void MulNX::MessageManager::ThreadMain() {
 	if (this->NextMsg()) {

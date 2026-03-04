@@ -73,11 +73,6 @@ std::filesystem::path MulNX::IPCer::PathGet_CS_cfg() {
     return this->Paths.Counter_Strike_Global_Offensive.game.csgo.cfg.Path;
 }
 
-
-std::string MulNX::IPCer::GetAllPathMsg() {
-	return "已弃用";
-}
-
 std::vector<std::string> MulNX::IPCer::GetProjectsNames(std::filesystem::path Path) {
     std::vector<std::string> FileNames;
     //检查路径存在且为文件夹
