@@ -1,7 +1,6 @@
 #pragma once
 
 #include <MulNX/MulNX.hpp>
-#include <MulNX/Systems/AbstractLayer3D/AbstractLayer3D.hpp>
 #include <MulNXExtensions/WinExt/WinExt.hpp>
 
 #include "ConVarSystem/ConVarSystem.hpp"
@@ -18,11 +17,7 @@ public:
     uintptr_t tier0 = 0;
 };
 
-namespace MulNX {
-    class Debugger;
-}
-class CSController final :public MulNX::AbstractLayer3D {
-    friend MulNX::Debugger;
+class CSController final :public MulNX::IAbstractLayer3D {
 private:
     // 逆向层关键接口
     void* CmdInterface = nullptr;
@@ -66,6 +61,10 @@ public:
     float* GetViewMatrix()const override;
     MulNX::Base::Math::SpatialState GetSpatialState()const;
     float GetTime()const override;
+    float GetWinWidth()const override;
+    float GetWinHeight()const override;
+    bool SpecPlayer(int IndexInMap)override;
+    D_Player& GetPlayerMsg(int Index)override;
 
     // CameraSystemIO的处理
 

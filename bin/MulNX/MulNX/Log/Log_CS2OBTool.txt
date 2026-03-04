@@ -38,6 +38,7 @@
 [成功][ConsoleManager]初始化成功!
 [提示][MulNXController]推送了UI节点到UI系统
 [成功][MulNXController]初始化成功!
+[提示][ModuleManager]注意: AbstractLayer3D(3D抽象层)被绑定为CSController
 [成功][UISystem]接收到一个UI节点
 [成功][UISystem]接收到一个UI节点
 [成功][UISystem]接收到一个UI节点
@@ -57,70 +58,3 @@
 [提示][VirtualUser]接收到新回合信息
 [提示][ProjectManager]项目管理器正在处理消息！
 [警告][ProjectManager]无活跃项目，无法执行自动操作
-[警告][ElementManager]当前没有任何元素，跳过清空操作！
-[提示][SolutionManager]已关闭播放
-[警告][SolutionManager]当前没有任何解决方案，跳过清空操作！
-[成功][CameraSystem]成功设置工作区路径为：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace
-[提示][WorkspaceManager]尝试从XML文件加载工作区配置，文件路径：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace\WorkspaceConfig.xml
-[成功][WorkspaceManager]成功从XML文件加载工作区配置！ 文件路径：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace\WorkspaceConfig.xml
-[提示][ProjectManager]尝试从XML文件加载项目，文件路径：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace\Mtp\Mtp.xml
-[成功][ProjectManager]成功从XML文件加载项目：Mtp
-[提示][ProjectManager]尝试从XML文件加载项目，文件路径：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace\new\new.xml
-[成功][ProjectManager]成功从XML文件加载项目：new
-[提示][ProjectManager]尝试从XML文件加载项目，文件路径：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace\ntest\ntest.xml
-[成功][ProjectManager]成功从XML文件加载项目：ntest
-[提示][ProjectManager]尝试从XML文件加载项目，文件路径：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace\tttttttt\tttttttt.xml
-[成功][ProjectManager]成功从XML文件加载项目：tttttttt
-[提示][SolutionManager]已关闭播放
-[警告][SolutionManager]当前没有任何解决方案，跳过清空操作！
-[警告][ElementManager]当前没有任何元素，跳过清空操作！
-[成功][ProjectManager]成功设置项目路径为：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace\Mtp
-[成功][SolutionManager]成功设置解决方案路径为：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace\Mtp\Solutions
-[成功][ElementManager]成功设置元素路径为：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace\Mtp\Elements
-[提示][ElementManager]尝试从XML文件加载元素，文件路径：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace\Mtp\Elements\CT_Begin_1.xml
-[提示][ElementManager]尝试进行分发，元素类型为 FreeCameraPath ，文件路径：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace\Mtp\Elements\CT_Begin_1.xml
-[成功][ElementManager]成功从XML文件加载自由摄像机轨道信息！ 自由摄像机轨道 名：CT_Begin_1
-[提示][ElementManager]尝试从XML文件加载元素，文件路径：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace\Mtp\Elements\CT_Begin_2.xml
-[提示][ElementManager]尝试进行分发，元素类型为 FreeCameraPath ，文件路径：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace\Mtp\Elements\CT_Begin_2.xml
-[成功][ElementManager]成功从XML文件加载自由摄像机轨道信息！ 自由摄像机轨道 名：CT_Begin_2
-[提示][ElementManager]尝试从XML文件加载元素，文件路径：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace\Mtp\Elements\fovtest.xml
-[提示][ElementManager]尝试进行分发，元素类型为 FreeCameraPath ，文件路径：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace\Mtp\Elements\fovtest.xml
-[成功][ElementManager]成功从XML文件加载自由摄像机轨道信息！ 自由摄像机轨道 名：fovtest
-[提示][ElementManager]尝试从XML文件加载元素，文件路径：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace\Mtp\Elements\kadun.xml
-[提示][ElementManager]尝试进行分发，元素类型为 FreeCameraPath ，文件路径：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace\Mtp\Elements\kadun.xml
-[成功][ElementManager]成功从XML文件加载自由摄像机轨道信息！ 自由摄像机轨道 名：kadun
-[提示][ElementManager]尝试从XML文件加载元素，文件路径：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace\Mtp\Elements\Mte.xml
-[提示][ElementManager]尝试进行分发，元素类型为 FreeCameraPath ，文件路径：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace\Mtp\Elements\Mte.xml
-[成功][ElementManager]成功从XML文件加载自由摄像机轨道信息！ 自由摄像机轨道 名：Mte
-[提示][ElementManager]尝试从XML文件加载元素，文件路径：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace\Mtp\Elements\nnn.xml
-[提示][ElementManager]尝试进行分发，元素类型为 FreeCameraPath ，文件路径：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace\Mtp\Elements\nnn.xml
-[成功][ElementManager]成功从XML文件加载自由摄像机轨道信息！ 自由摄像机轨道 名：nnn
-[提示][ElementManager]尝试从XML文件加载元素，文件路径：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace\Mtp\Elements\ttt.xml
-[提示][ElementManager]尝试进行分发，元素类型为 FreeCameraPath ，文件路径：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace\Mtp\Elements\ttt.xml
-[成功][ElementManager]成功从XML文件加载自由摄像机轨道信息！ 自由摄像机轨道 名：ttt
-[提示][ElementManager]尝试从XML文件加载元素，文件路径：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace\Mtp\Elements\T_Begin_1.xml
-[提示][ElementManager]尝试进行分发，元素类型为 FreeCameraPath ，文件路径：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace\Mtp\Elements\T_Begin_1.xml
-[成功][ElementManager]成功从XML文件加载自由摄像机轨道信息！ 自由摄像机轨道 名：T_Begin_1
-[提示][SolutionManager]尝试从XML文件加载解决方案，文件路径：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace\Mtp\Solutions\begin.xml
-[成功][SolutionManager]成功添加元素到解决方案   元素名：T_Begin_1
-[成功][SolutionManager]成功添加元素到解决方案   元素名：CT_Begin_1
-[成功][SolutionManager]成功添加元素到解决方案   元素名：CT_Begin_2
-[成功][SolutionManager]成功从XML文件加载解决方案！ 解决方案名：begin  共包含元素个数：3
-[成功][SolutionManager]---------------------
-[提示][SolutionManager]尝试从XML文件加载解决方案，文件路径：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace\Mtp\Solutions\Mts.xml
-[成功][SolutionManager]成功添加元素到解决方案   元素名：ttt
-[成功][SolutionManager]成功添加元素到解决方案   元素名：Mte
-[成功][SolutionManager]成功添加元素到解决方案   元素名：nnn
-[成功][SolutionManager]成功从XML文件加载解决方案！ 解决方案名：Mts  共包含元素个数：3
-[成功][SolutionManager]---------------------
-[成功][ProjectManager]已切换至项目Mtp
-[成功][ProjectManager]尝试加载元素总数：8
-[成功][ProjectManager]尝试加载解决方案总数：2
-[成功][ProjectManager]成功加载元素总数：8
-[成功][ProjectManager]成功加载解决方案总数：2
-[成功][WorkspaceManager]成功保存工作区配置文件到XML文件！ 文件路径：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace\WorkspaceConfig.xml
-[成功][ElementManager]成功保存所有元素到XML文件！
-[成功][SolutionManager]成功保存所有解决方案到XML文件！
-[成功][ProjectManager]保存成功  项目名：Mtp
-[成功][WorkspaceManager]工作区保存成功
-[提示][VirtualUser]已触发自动保存（频率：每分钟）

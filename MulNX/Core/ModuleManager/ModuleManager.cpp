@@ -5,7 +5,7 @@
 #include "../../Systems/Debugger/Debugger.hpp"
 #include "../../Systems/KeyTracker/KeyTracker.hpp"
 #include "../../Systems/MulNXGlobalVars/MulNXGlobalVars.hpp"
-#include "../../Systems/AbstractLayer3D/AbstractLayer3D.hpp"
+#include "../../Systems/AbstractLayer3D/IAbstractLayer3D.hpp"
 #include "../../Systems/IPCer/IPCer.hpp"
 #include "../../Systems/MulNXUISystem/MulNXUISystem.hpp"
 #include "../../Systems/PathManager/PathManager.hpp"
@@ -68,7 +68,7 @@ ModuleManager& ModuleManager::CreateSystemModules() {
         .CreateModule<MulNX::HandleSystem>("HandleSystem", 20)// 句柄系统模块
         .CreateModule<MulNX::KeyTracker>("KeyTracker", 50)// 按键追踪器模块
         .CreateModule<MulNX::GlobalVars>("GlobalVars", 70)// 全局变量模块
-        //.CreateModule<MulNX::AbstractLayer3D>("AbstractLayer3D", 90)// 3D抽象层模块
+        // ID 100(最后一个模块)分配给3D抽象层
         ;
 
     return *this;
@@ -89,7 +89,7 @@ MulNX::ModuleBase* ModuleManager::FindModule(const std::string& Name) {
 	return mit->second.get();
 }
 MulNX::IAbstractLayer3D* ModuleManager::FindAbstractLayer3D() {
-    return this->FindModule<MulNX::IAbstractLayer3D>("CSController");
+    return this->FindModule<MulNX::IAbstractLayer3D>(this->AbstractLayer3DName);
 }
 
 bool ModuleManager::PackedInit() {
@@ -100,9 +100,10 @@ bool ModuleManager::PackedInit() {
         if (!pModule->EntryInit(this->Core)) {
             MulNX::ErrorTerminate("在模块初始化时出现错误，模块名：" + pModule->GetName());
             return false;
-		}
-	}
-	// 完成初始化
+        }
+    }
+    this->ISys().LogInfo("注意: AbstractLayer3D(3D抽象层)被绑定为" + this->AbstractLayer3DName);
+    // 完成初始化
 	return true;
 }
 

@@ -395,3 +395,18 @@ C_CSGameRules CSController::GetCSGameRules() {
 //         schemas.push_back(schema);
 //     }
 // }
+
+float CSController::GetWinWidth()const {
+    return this->AL3DCurrentWindowWidth;
+}
+float CSController::GetWinHeight()const {
+    return this->AL3DCurrentWindowHeight;
+}
+bool CSController::SpecPlayer(int IndexInMap) {
+    this->ExecuteCommand("spec_mode 2;spec_player " + std::to_string(this->AL3DGameData.Players[IndexInMap].IndexInMap));
+    return true;
+}
+D_Player& CSController::GetPlayerMsg(int Index) {
+    //std::shared_lock lock(this->GetMtx());
+    return this->AL3DGameData.Players[Index];
+}

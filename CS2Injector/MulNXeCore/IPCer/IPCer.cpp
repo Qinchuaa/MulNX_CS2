@@ -222,6 +222,7 @@ bool IPCer::OpenCS2() {
         this->NeedToTryInject = true;
         return true;
     }
+    return false;
 }
 bool IPCer::TryCatchCS2() {
     //检测是否已经有了进程句柄，有了则直接返回，代表已有
@@ -328,6 +329,7 @@ bool IPCer::Inject() {
     if (exitCode) {
         return true;
     }
+    return false;
 }
 
 //bool IPCer::StartDLL() {

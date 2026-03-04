@@ -17,7 +17,7 @@ add_library(MulNX
     "Core/Cores.hpp"
 
 
-    "Systems/AbstractLayer3D/AbstractLayer3D.cpp"
+    "Systems/AbstractLayer3D/IAbstractLayer3D.cpp"
     "Systems/Debugger/Debugger.cpp"
     "Systems/HandleSystem/HandleSystem.cpp"
     "Systems/IPCer/IPCer.cpp"

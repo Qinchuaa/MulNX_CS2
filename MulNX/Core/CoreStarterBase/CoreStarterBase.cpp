@@ -10,7 +10,7 @@
 #include "../../Systems/MessageManager/MessageManager.hpp"
 #include "../../Systems/MulNXGlobalVars/MulNXGlobalVars.hpp"
 #include "../../Systems/MulNXUISystem/MulNXUISystem.hpp"
-#include "../../Systems/AbstractLayer3D/AbstractLayer3D.hpp"
+#include "../../Systems/AbstractLayer3D/IAbstractLayer3D.hpp"
 
 
 using namespace MulNX::Core;
