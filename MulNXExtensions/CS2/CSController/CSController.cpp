@@ -7,19 +7,7 @@
 #include <MulNXThirdParty/All_cs2_dumper.hpp>
 #include <MulNXThirdParty/All_ImGui.hpp>
 
-std::atomic<bool> IsInCameraSystemOverride = false;
-std::atomic<float> OriginX = 0;
-std::atomic<float> OriginY = 0;
-std::atomic<float> OriginZ = 0;
-std::atomic<float> AnglesX = 0;
-std::atomic<float> AnglesY = 0;
-std::atomic<float> AnglesZ = 0;
-std::atomic<float> FOV = 90.0f;
-
-constexpr float M_PI = 3.1415926535;
-
 void CSController::HandleOverrideView(void* ThisCViewSetup) {
-
     int* pWidth = (int*)((unsigned char*)ThisCViewSetup + 0x434);
     int* pHeight = (int*)((unsigned char*)ThisCViewSetup + 0x43C);
 
@@ -27,63 +15,26 @@ void CSController::HandleOverrideView(void* ThisCViewSetup) {
     float* pViewOrigin = (float*)((unsigned char*)ThisCViewSetup + 0x4a0);
     float* pViewAngles = (float*)((unsigned char*)ThisCViewSetup + 0x4b8);
 
-    // using namespace DirectX;
-    // using namespace MulNX::Base::Math;
-
-    // // 1. 读取当前位置和角度
-    // XMFLOAT3 pos_old(pViewOrigin[0], pViewOrigin[1], pViewOrigin[2]);
-    // XMFLOAT3 ang_old(pViewAngles[0], pViewAngles[1], pViewAngles[2]);
-
-    // // 2. 计算当前前方向（默认前向为 +X）
-    // XMVECTOR quat = CSEulerToQuatVec(ang_old);
-    // XMVECTOR defaultForward = XMVectorSet(1.0f, 0.0f, 0.0f, 0.0f);
-    // XMVECTOR forwardVec = XMVector3Rotate(defaultForward, quat);
-    // XMFLOAT3 forward;
-    // XMStoreFloat3(&forward, forwardVec);
-
-    // float distance = 70.0f;
-
-    // // 3. 计算新位置
-    // XMFLOAT3 pos_new;
-    // pos_new.x = pos_old.x + forward.x * distance;
-    // pos_new.y = pos_old.y + forward.y * distance;
-    // pos_new.z = pos_old.z + forward.z * distance;
-
-    // // 4. 计算新方向（指向原位置）
-    // XMFLOAT3 dir_new;
-    // dir_new.x = pos_old.x - pos_new.x;  // 等价于 -forward.x * distance
-    // dir_new.y = pos_old.y - pos_new.y;
-    // dir_new.z = pos_old.z - pos_new.z;
-
-    // // 5. 方向向量转欧拉角
-    // XMFLOAT3 ang_new;
-    // CSDirToEuler(dir_new, ang_new);  // 输出：pitch, yaw, roll=0
-
-    // // 6. 写回内存
-    // pViewOrigin[0] = pos_new.x;
-    // pViewOrigin[1] = pos_new.y;
-    // pViewOrigin[2] = pos_new.z;
-    // pViewAngles[0] = ang_new.x;
-    // pViewAngles[1] = ang_new.y;
-    // pViewAngles[2] = 0;  // 滚转置0
-    
+    auto View = this->ViewToGame.load();
     if (IsInCameraSystemOverride.load()) {
-        pViewOrigin[0] = OriginX.load();
-        pViewOrigin[1] = OriginY.load();
-        pViewOrigin[2] = OriginZ.load();
+        if (View != nullptr) {
+            pViewOrigin[0] = View->OriginX;
+            pViewOrigin[1] = View->OriginY;
+            pViewOrigin[2] = View->OriginZ;
 
-        pViewAngles[0] = AnglesX.load();
-        pViewAngles[1] = AnglesY.load();
-        pViewAngles[2] = AnglesZ.load();
+            pViewAngles[0] = View->AnglesX;
+            pViewAngles[1] = View->AnglesY;
+            pViewAngles[2] = View->AnglesZ;
 
-        if (FOV.load() - 0 < 0.001f) {
-            FOV.store(90);
+            if (this->CSFOV.load() - 0 < 0.001f) {
+                this->CSFOV.store(90);
+            }
+
+            *pFov = this->CSFOV.load();
         }
-
-        *pFov = FOV.load();
     }
     else {
-        FOV.store(*pFov);
+        this->CSFOV.store(*pFov);
     }
     return;
 }
@@ -154,7 +105,9 @@ bool CSController::Init() {
     this->GetModules();
     this->Catch();
     this->NeedThread(3);
-    this->ISubscribe(MulNX::MsgType::Core_ReHook);
+    
+    this->MainMsgChannel = this->ICreateAndGetMessageChannel();
+    this->ISys().SubscribeAsync(MulNX::MsgType::Core_ReHook);
 
     MulNX::Memory::DllModule clientModule(L"client.dll");
     if (clientModule.IsValid()) {
@@ -191,7 +144,7 @@ void CSController::GetModules() {
     this->CvarSystem.Address = (uintptr_t)pFunc(InterfaceName, nullptr);
 
     //this->LocalPlayer.pGlobalFOV = this->CvarSystem.GetCvar("fov_cs_debug")->GetPtr<float>();
-    this->LocalPlayer.pGlobalFOV = &FOV;
+    this->LocalPlayer.pGlobalFOV = &this->CSFOV;
 }
 
 void CSController::Catch() {
@@ -311,30 +264,33 @@ int CSController::TryGetMsg() {
 
 
 void CSController::HandleFreeCameraPath(const CameraSystemIO* const IO) {
-    if (this->LocalPlayer.Entity.Pawn.m_pObserverServices.m_iObserverMode == 4) {
-        DirectX::XMFLOAT4 PosAndFOV = IO->Frame.GetPositionAndFOV();
-        DirectX::XMFLOAT3 RotEuler = IO->Frame.GetRotationEuler();
+    DirectX::XMFLOAT4 PosAndFOV = IO->Frame.GetPositionAndFOV();
+    DirectX::XMFLOAT3 RotEuler = IO->Frame.GetRotationEuler();
 #ifdef _DEBUG
-        static MulNX::Base::Math::Frame thisFrame;
-        if (thisFrame != IO->Frame) {
-            thisFrame = IO->Frame;
-            this->ISys().LogInfo(thisFrame.GetMsg());
-        }
+    static MulNX::Base::Math::Frame thisFrame;
+    if (thisFrame != IO->Frame) {
+        thisFrame = IO->Frame;
+        this->ISys().LogInfo(thisFrame.GetMsg());
+    }
 #endif // _DEBUG
-        //this->LocalPlayer.SetPosition(PosAndFOV);
-        OriginX = PosAndFOV.x;
-        OriginY = PosAndFOV.y;
-        OriginZ = PosAndFOV.z;
-        //this->LocalPlayer.SetFOV(PosAndFOV.w);
-        FOV = PosAndFOV.w;
-        //this->LocalPlayer.SetViewAngle(RotEuler);
-        AnglesX = RotEuler.x;
-        AnglesY = RotEuler.y;
-        AnglesZ = RotEuler.z;
-    }
-    else {
-        this->Execute("spec_mode 4");
-    }
+    auto view = std::make_shared<Views>();
+    //this->LocalPlayer.SetPosition(PosAndFOV);
+    view->OriginX = PosAndFOV.x;
+    view->OriginY = PosAndFOV.y;
+    view->OriginZ = PosAndFOV.z;
+    //this->LocalPlayer.SetFOV(PosAndFOV.w);
+    this->CSFOV.store(PosAndFOV.w);
+    //this->LocalPlayer.SetViewAngle(RotEuler);
+    view->AnglesX = RotEuler.x;
+    view->AnglesY = RotEuler.y;
+    view->AnglesZ = RotEuler.z;
+    this->ViewToGame.store(view);
+    // if (this->LocalPlayer.Entity.Pawn.m_pObserverServices.m_iObserverMode == 4) {
+        
+    // }
+    // else {
+    //     this->Execute("spec_mode 4");
+    // }
 }
 void CSController::HandleFirstPersonCameraPath(const CameraSystemIO* const IO) {
     static uint8_t LastIndex = 0xFFFF;

@@ -5,7 +5,7 @@
 // 不允许写操作
 class MulNXGlobalVarsOnlyRead {
 public:
-	static constexpr const char MulNXVersion[] = "V0.2.0";
+	static constexpr const char MulNXVersion[] = "V0.3.0";
 	static constexpr const char TimeStamp[] = "Built: " __DATE__ " " __TIME__;
 	static constexpr const char FullName[] = "Multiple Next eXtension";
 	static constexpr const char DeveloperName[] = "Co1Swet";

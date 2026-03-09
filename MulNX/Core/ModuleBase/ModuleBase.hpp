@@ -2,6 +2,7 @@
 
 #include "../../Base/Base.hpp"
 #include "ISys/ISys.hpp"
+
 // 前向声明：MulNXController 位于 MulNXExtensions 命名空间
 namespace MulNXExtensions { class MulNXController; }
 
@@ -10,39 +11,9 @@ namespace MulNX {
 	class ModuleBase {
         friend MulNX::Core::Core;
         friend C_ISys;
+    private:
         // 标记是否已经完成初始化，未完成前不允许执行主循环等操作
         bool Inited = false;
-    protected:
-        // 父模块句柄
-        MulNXHandle hParent{};
-        // 模块名称，唯一标识
-        std::string ModuleName;
-        // 核心管理器指针
-		MulNX::Core::Core* Core;
-		// 全局变量指针
-		MulNX::GlobalVars* GlobalVars = nullptr;
-		// 按键追踪器指针
-		MulNX::KeyTracker* KT = nullptr;
-	public:
-		// 主要消息管道指针
-		MulNX::IMessageChannel* MainMsgChannel = nullptr;
-	public:
-		// 当前消息指针
-        std::atomic<MulNX::Message*> CurrentMsg = nullptr;
-        // 是否初始化
-        bool IsInited()const {
-            return this->Inited;
-        }
-        bool SetName(std::string&& Name);
-        std::string GetName()const;
-    public:
-		// 组件句柄
-		MulNXHandle HModule;
-		// 3D抽象层指针
-        IAbstractLayer3D* AL3D = nullptr;
-        // 调试器指针
-        IDebugger* IDebugger = nullptr;
-    private:
         // 消息管理器指针
         MulNX::IMessageManager* IMsgManager = nullptr;
         // 路径管理器指针
@@ -52,16 +23,34 @@ namespace MulNX {
         // 是否需要一个线程
         bool InitNeedThread = false;
     protected:
-		// 运行标志
-		std::atomic<bool> Running = false;
-		// 线程对象成员
-		std::thread MyThread;
-		// 线程运行状态
-		std::atomic<bool>MyThreadRunning = false;
-		// 线程执行间隔，默认以100Hz基准执行
-		std::atomic<int> MyThreadDelta = 10;
+        // 父模块句柄
+        MulNXHandle hParent{};
+        // 模块名称，唯一标识
+        std::string ModuleName{};
+        // 核心管理器指针
+        MulNX::Core::Core* Core = nullptr;
+		// 全局变量指针
+		MulNX::GlobalVars* GlobalVars = nullptr;
+		// 按键追踪器指针
+		MulNX::KeyTracker* KT = nullptr;
+        // 运行标志
+        std::atomic<bool> Running = false;
+        // 线程对象成员
+        std::thread MyThread;
+        // 线程运行状态
+        std::atomic<bool>MyThreadRunning = false;
+        // 线程执行间隔，默认以100Hz基准执行
+        std::atomic<int> MyThreadDelta = 10;
 	public:
-        std::shared_mutex& GetMutex() { return this->MyThreadMutex; }
+		// 主要消息管道指针
+		MulNX::IMessageChannel* MainMsgChannel = nullptr;
+		// 组件句柄
+		MulNXHandle HModule;
+		// 3D抽象层指针
+        IAbstractLayer3D* AL3D = nullptr;
+        // 调试器指针
+        IDebugger* IDebugger = nullptr;
+        
     public:
 		// 删除不需要的构造函数
 		ModuleBase(const ModuleBase&) = delete;
@@ -74,15 +63,10 @@ namespace MulNX {
 	private:
 		// 线程析构辅助函数
 		void CloseMyThread();
-	public:
-		// 通用函数：
 
-		// 模块时间控制接口
-		void SetMyThreadDelta(int Delta);
-
-		// 虚函数要求：
-	private:
-		// 初始化，拉取各种依赖
+        // 虚函数要求：
+        
+        // 初始化，拉取各种依赖
 		virtual bool Init() = 0;
 
 		// 虚拟主循环，执行组件逻辑
@@ -92,16 +76,15 @@ namespace MulNX {
 		// 消息处理函数，只需处理即可，消息会由入口点释放
         virtual void ProcessMsg(MulNX::Message* Msg) {};
 
-		// 基本函数
-	private:
+		// 基本函数：
+
 		// 基础初始化
         bool BaseInit();
         // 基础主循环
 		void BaseVirtualMain();
 		// 基础消息处理
-		void BaseProcessMsg();
+        void BaseProcessMsg(MulNX::Message* Msg);
 
-        bool CreateThread();
         
         // 入口点
 	public:
@@ -109,43 +92,44 @@ namespace MulNX {
 		bool EntryInit(MulNX::Core::Core* Core);
 		// 主循环入口
 		void EntryVirtualMain();
-		// 创建线程入口
-		
 	protected:
 		// 消息处理入口
 		void EntryProcessMsg();
-    public:
-        // 窗口控制
-        // 窗口显示标志
-        std::atomic<bool> ShowWindow = false;
-    protected:
-        // 是否需要UI节点，默认不需要
-        bool NeedUINode = false;
-        // 指示需要线程，在初始化中创建
-        void NeedThread(int TimeDelta);
+       
     private:
+        // 创建线程入口
+        bool CreateThread();
         // 自动创建UI节点
         bool CreateUINode();
         // UI节点函数，默认空实现
         virtual bool UINodeFunc(MulNXUINode* ThisNode) { return true; }
+    protected:
+        // 自动创建私有消息管道
+        MulNX::IMessageChannel* ICreateAndGetMessageChannel();
+        // 是否需要UI节点，默认不需要
+        bool NeedUINode = false;
+        // 指示需要线程，在初始化中创建
+        void NeedThread(int TimeDelta);
     public:
-        MulNX::Core::Core* GetCore()const {
-			return this->Core;
-		}
-
+        // 是否初始化
+        bool IsInited()const { return this->Inited; }
+        // 设置模块名称
+        bool SetName(std::string&& Name);
+        std::string GetName()const;
+        // 得到核心指针
+        MulNX::Core::Core* GetCore()const { return this->Core; }
+        // 设置父模块句柄
         void SetParent(MulNXHandle hModule);
+        // 是否有父模块
         bool HasParent();
-        
-        // 工具函数
-        
-        // 自动注册
-		void IRegiste();
-		// 自动订阅消息类型
-		void ISubscribe(MulNX::MsgType MsgType);
-		// 自动创建私有消息管道
-		MulNX::IMessageChannel* ICreateAndGetMessageChannel();
-    public:
-        // 系统服务包装器
+        // 便捷窗口显示标志
+        std::atomic<bool> ShowWindow = false;
+        // 得到读写锁
+        std::shared_mutex& GetMutex() { return this->MyThreadMutex; }
+        // 模块时间控制接口
+        void SetMyThreadDelta(int Delta);
+
+        // 系统服务包装器(原则上是protected权限)
         C_ISys ISys();
     };
 }

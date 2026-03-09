@@ -10,13 +10,12 @@ bool VirtualUser::Init() {
     this->CameraSystem = this->Core->ModuleManager()->FindModule<ICameraSystem>("CameraSystem");
     this->Running = true;
 
-    // this->ISubscribe(MsgType::Core_Tick1);
-    this->ISubscribe(MulNX::MsgType::Core_Tick60);
-#ifdef _DEBUG
-    this->ISubscribe(MulNX::MsgType::Core_Tick30min);
-#endif // _DEBUG
     this->MainMsgChannel = this->ICreateAndGetMessageChannel();
     this->ISys()
+#ifdef _DEBUG
+        .SubscribeAsync(MulNX::MsgType::Core_Tick30min)
+#endif // _DEBUG
+        .SubscribeAsync(MulNX::MsgType::Core_Tick60)
         .SubscribeAsync(MulNX::MsgType::CameraSystem_PlayingShutdown)
         .SubscribeAsync(MulNX::MsgType::Command_SpecPlayer)
         .SubscribeAsync(MulNX::MsgType::Game_NewRound);

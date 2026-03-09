@@ -17,8 +17,22 @@ public:
     uintptr_t tier0 = 0;
 };
 
+class Views {
+public:
+    float OriginX = 0;
+    float OriginY = 0;
+    float OriginZ = 0;
+    float AnglesX = 0;
+    float AnglesY = 0;
+    float AnglesZ = 0;
+    float FOV = 90.0f;
+};
+
 class CSController final :public MulNX::IAbstractLayer3D {
 private:
+    std::atomic<std::shared_ptr<Views>> ViewToGame = nullptr;
+    std::atomic<float> CSFOV;
+    std::atomic<bool> IsInCameraSystemOverride = false;
     // 逆向层关键接口
     void* CmdInterface = nullptr;
     // 逆向层数据备份
@@ -37,7 +51,7 @@ private:
     int GetIndexInEntityListFromIndexInMap(int IndexInMap);
 public:
     MulNX::Memory::HookEx* MyHook = nullptr;
-    static void HandleOverrideView(void* ThisCViewSetup);
+    void HandleOverrideView(void* ThisCViewSetup);
     //bool UINodeFunc(MulNXUINode* ThisNode)override;
     bool Init()override;
     void VirtualMain()override;

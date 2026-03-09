@@ -4,8 +4,7 @@
 #include <string>
 #include <source_location>
 
-typedef float GameTime_t;
-
+using GameTime_t = float;
 // 摄像机系统输入输出前置声明
 class CameraSystemIO;
 

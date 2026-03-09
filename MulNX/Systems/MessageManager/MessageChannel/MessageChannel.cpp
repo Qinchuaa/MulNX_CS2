@@ -1,5 +1,5 @@
-#include"MessageChannel.hpp"
-#include"../MessageManager.hpp"
+#include "MessageChannel.hpp"
+#include "../MessageManager.hpp"
 
 MulNX::MessageChannel::MessageChannel(MessageManager* MsgManager) {
 	this->MsgManager = MsgManager;

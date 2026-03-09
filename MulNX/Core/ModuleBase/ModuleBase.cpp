@@ -45,7 +45,6 @@ bool MulNX::ModuleBase::BaseInit() {
         if (!this->HModule.IsValid()) {
             this->HModule = MulNXHandle::CreateHandle();
         }
-        this->IRegiste();
     }
     catch (...) {
         return false;
@@ -141,33 +140,21 @@ bool MulNX::ModuleBase::CreateThread() {
     }
 }
 // 消息处理
-void MulNX::ModuleBase::BaseProcessMsg() {
+void MulNX::ModuleBase::BaseProcessMsg(MulNX::Message* Msg) {
+    return;
+}
+void MulNX::ModuleBase::EntryProcessMsg() {
     MulNX::IMessageChannel* Channel = this->MainMsgChannel;
     if (Channel != nullptr) {
         MulNX::Message Msg{ MulNX::MsgType::Null };
         while (Channel->PullMessage(Msg)) {
+            this->BaseProcessMsg(&Msg);
             this->ProcessMsg(&Msg);
         }
     }
     return;
 }
-void MulNX::ModuleBase::EntryProcessMsg() {
-    this->BaseProcessMsg();
-    auto pMsg = this->CurrentMsg.load();
-    if (pMsg) {
-        this->ProcessMsg(pMsg);
-        this->CurrentMsg.store(nullptr);
-        this->IMsgManager->Release();
-    }
-}
 
-
-void MulNX::ModuleBase::IRegiste() {
-    this->IMsgManager->Registe(this);
-}
-void MulNX::ModuleBase::ISubscribe(MulNX::MsgType MsgType) {
-    this->IMsgManager->Subscribe(MsgType, this);
-}
 MulNX::IMessageChannel* MulNX::ModuleBase::ICreateAndGetMessageChannel() {
     return this->IMsgManager->GetMessageChannel(this->IMsgManager->CreateMessageChannel());
 }
