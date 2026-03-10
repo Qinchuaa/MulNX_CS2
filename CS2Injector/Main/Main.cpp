@@ -13,7 +13,8 @@
 #include <tchar.h>
 #pragma comment(lib,"d3d11.lib")
 
-#include"../MulNXeCore/MulNXeCore.hpp"
+#include <MulNX/Config/Config.hpp>
+#include "../MulNXeCore/MulNXeCore.hpp"
 
 // Data
 static ID3D11Device* g_pd3dDevice = nullptr;
@@ -95,7 +96,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
         io.Fonts->GetGlyphRangesChineseFull()   // 支持中文
     );
     if (myFont == nullptr) {
-        throw 1;
+        MulNX::ErrorTerminate("缺失了字体！");
     }
 
     // 设置为默认字体

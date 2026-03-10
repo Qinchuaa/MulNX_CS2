@@ -1,9 +1,8 @@
 #include "HookManager.hpp"
 
 #include <MulNX/MulNX.hpp>
-
 #include <MulNXThirdParty/All_ImGui.hpp>
-
+#pragma comment(lib,"d3d11.lib")
 #include <chrono>
 
 static bool AllowReHook = false;// 允许重hook

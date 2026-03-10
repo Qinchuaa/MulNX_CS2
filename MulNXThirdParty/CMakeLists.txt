@@ -8,10 +8,12 @@ add_library(MulNXThirdParty
     "MulNXThirdParty/imgui_d11/imgui_widgets.cpp"
 
     "MulNXThirdParty/pugixml/pugixml.cpp"
-)
-
-target_link_libraries(MulNXThirdParty PUBLIC
-    "${CMAKE_CURRENT_SOURCE_DIR}/MulNXThirdParty/minhook_debug_x64/lib/minhook.x64d.lib"
+    
+    "MulNXThirdParty/minhook/src/buffer.c"
+    "MulNXThirdParty/minhook/src/hook.c"
+    "MulNXThirdParty/minhook/src/trampoline.c"
+    "MulNXThirdParty/minhook/src/hde/hde32.c"
+    "MulNXThirdParty/minhook/src/hde/hde64.c"
 )
 
 target_include_directories(MulNXThirdParty PUBLIC
