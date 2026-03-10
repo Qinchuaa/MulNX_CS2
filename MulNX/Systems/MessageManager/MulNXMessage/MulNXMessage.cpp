@@ -1,4 +1,4 @@
-#include"MulNXMessage.hpp"
+#include "MulNXMessage.hpp"
 
 void MulNX::Message::Clear() {
 	this->Type = MsgType::Null;

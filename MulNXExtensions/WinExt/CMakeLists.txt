@@ -19,5 +19,6 @@ add_library(WinExt STATIC
 )
 
 target_link_libraries(WinExt PUBLIC
+    MulNX
     MulNXThirdParty
 )

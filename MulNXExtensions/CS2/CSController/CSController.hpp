@@ -50,7 +50,7 @@ private:
     std::unordered_map<int, int>IndexInMap_To_IndexInEntityList_Map{};
     int GetIndexInEntityListFromIndexInMap(int IndexInMap);
 public:
-    MulNX::Memory::HookEx* MyHook = nullptr;
+    std::unique_ptr<MulNX::Memory::HookEx> MyHook = nullptr;
     void HandleOverrideView(void* ThisCViewSetup);
     //bool UINodeFunc(MulNXUINode* ThisNode)override;
     bool Init()override;

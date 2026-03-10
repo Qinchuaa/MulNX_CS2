@@ -1,5 +1,7 @@
 #pragma once
 
+#include "../Assembler/Assembler.hpp"
+
 #include <cstdint>
 #include <functional>
 #include <vector>
@@ -25,14 +27,15 @@ namespace MulNX {
             bool Enable = true;
             uint8_t* Target = nullptr;
             void* pCaller = nullptr;
+            MulNX::Memory::Asm::Code CodeCaller{};
             std::vector<std::function<void(RegContext*)>> Callbacks;
             std::shared_mutex MutexEx;
             std::vector<uint8_t> RawCmd;
         private:
-            HookEx() = default;
             static void Dispatch(HookEx* pHookExInstance, RegContext* Ctx);
         public:
-            static HookEx* Create(uint8_t* Target, int Len);
+            HookEx() = default;
+            static std::unique_ptr<HookEx> Create(uint8_t* Target, int Len);
             void AddCallback(std::function<void(RegContext*)>&& Callback);
             void Attach();
 

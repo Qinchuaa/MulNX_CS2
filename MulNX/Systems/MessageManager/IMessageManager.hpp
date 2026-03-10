@@ -1,9 +1,9 @@
 #pragma once
 
-#include"../../Core/ModuleBase/ModuleBase.hpp"
+#include "../../Core/ModuleBase/ModuleBase.hpp"
 
-#include"MulNXMessage/MulNXMessage.hpp"
-#include"MessageChannel/IMessageChannel.hpp"
+#include "MulNXMessage/MulNXMessage.hpp"
+#include "MessageChannel/IMessageChannel.hpp"
 
 namespace MulNX {
 	class IMessageManager :public ModuleBase {
@@ -16,5 +16,5 @@ namespace MulNX {
 			virtual IMessageChannel* GetMessageChannel(const MulNXHandle& hChannel) = 0;
 			// 发布，在堆空间创建消息后传递，所有权转移至总线
 			virtual bool Publish(Message&& Msg) = 0;
-	};
+    };
 }

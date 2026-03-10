@@ -49,7 +49,7 @@ namespace MulNX {
 
 
 
-    void ErrorTerminate(const std::string& Msg,
+    [[noreturn]] void ErrorTerminate(const std::string& Msg,
         const std::source_location& loc = std::source_location::current());
 }
 class MulNXUINode;

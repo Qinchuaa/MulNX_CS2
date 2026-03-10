@@ -1,8 +1,8 @@
 #pragma once
 
-#include"IMessageChannel.hpp"
+#include "IMessageChannel.hpp"
 
-#include<deque>
+#include <deque>
 
 namespace MulNX {
 	class MessageChannel final :public IMessageChannel {

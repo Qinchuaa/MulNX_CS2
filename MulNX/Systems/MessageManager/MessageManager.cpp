@@ -1,9 +1,50 @@
-#include"MessageManager.hpp"
+#include "MessageManager.hpp"
 
-#include"../../Core/Core.hpp"
+#include "../../Core/Core.hpp"
 
-#include"MessageChannel/MessageChannel.hpp"
-#include"../HandleSystem/HandleSystem.hpp"
+#include "MessageChannel/MessageChannel.hpp"
+#include "../HandleSystem/HandleSystem.hpp"
+
+// FNV-1a 64位常数
+constexpr std::size_t fnv_basis = 14695981039346656037ULL;
+constexpr std::size_t fnv_prime = 1099511628211ULL;
+
+// FNV-1a 核心算法（constexpr）
+constexpr std::size_t fnv1a_hash(const std::string& sv) noexcept {
+    std::size_t hash = fnv_basis;
+    for (unsigned char c : sv) {
+        hash = (hash ^ static_cast<std::size_t>(c)) * fnv_prime;
+    }
+    return hash;
+}
+
+MulNX::MessageManager& MulNX::MessageManager::DeclareType(const std::string& Type) {
+    size_t hashed = fnv1a_hash(Type);
+    auto it = map.find(hashed);
+    if (it == map.end()) {
+        map[hashed] = 1;
+        return *this;
+    }
+    else {
+        MulNX::ErrorTerminate("哈希碰撞！   " + Type);
+    }
+}
+
+// 定义字面量操作符
+consteval size_t operator"" _hash(const char* str, size_t n) {
+    std::string Str(str, n);
+    return fnv1a_hash(Str);
+}
+
+bool MulNX::MessageManager::Init() {
+    this->NeedThread(10);
+    (*this)
+        .DeclareType("你好")
+        .DeclareType("你好2")
+        .DeclareType("你好2")
+        .DeclareType("你好3");
+    return true;
+}
 
 // 创建私有消息队列（但是生命周期仍然委托给消息管理器）
 MulNXHandle MulNX::MessageManager::CreateMessageChannel() {
@@ -46,10 +87,7 @@ bool MulNX::MessageManager::NextMsg() {
     return false;
 }
 
-bool MulNX::MessageManager::Init() {
-    this->NeedThread(10);
-    return true;
-}
+
 void MulNX::MessageManager::ThreadMain() {
 	if (this->NextMsg()) {
 		// 有消息在处理,快速轮询
