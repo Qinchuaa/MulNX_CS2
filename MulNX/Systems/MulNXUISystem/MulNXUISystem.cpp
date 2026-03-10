@@ -13,22 +13,22 @@
 bool MulNX::UISystem::Init() {
     this->MainMsgChannel = this->ICreateAndGetMessageChannel();
     this->ISys()
-        .SubscribeAsync(MulNX::MsgType::UISystem_Start)
-        .SubscribeAsync(MulNX::MsgType::UISystem_ModulePush);
+        .SubscribeAsync("UISystem_Start")
+        .SubscribeAsync("UISystem_ModulePush");
     this->UIContext.Core = this->Core;
     return true;
 }
 
 void MulNX::UISystem::ProcessMsg(MulNX::Message* Msg) {
     switch (Msg->Type) {
-    case MulNX::MsgType::UISystem_Start: {
+    case "UISystem_Start"_hash: {
         MulNX::Base::any_unique_ptr EntryStr = this->Core->IHandleSystem().ReleaseUnique(Msg->Handle);
         std::string* pStr = EntryStr.get<std::string>();
         this->UIContext.EntryDraw = std::move(*pStr);
         this->UISystemRunning = true;
         break;
     }
-    case MulNX::MsgType::UISystem_ModulePush: {
+    case "UISystem_ModulePush"_hash: {
         MulNX::Base::any_unique_ptr UINode = this->Core->IHandleSystem().ReleaseUnique(Msg->Handle);
         this->UIContext.AddUINode(Msg->Handle, std::move(UINode));
         this->ISys().LogSucc("接收到一个UI节点");

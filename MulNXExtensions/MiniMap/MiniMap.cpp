@@ -120,7 +120,7 @@ bool MiniMap::UINodeFunc(MulNXUINode* ThisNode) {
                 std::ostringstream oss;
                 oss << "点击玩家: " << i << " 位置: (" << Player.Position.x << ", " << Player.Position.y << ", " << Player.Position.z << ")";
                 this->ISys().LogInfo(oss.str().c_str());
-                MulNX::Message ClickMsg(MulNX::MsgType::Command_SpecPlayer);
+                MulNX::Message ClickMsg("Command_SpecPlayer"_hash);
                 ClickMsg.ParamInt = i;
                 this->ISys().PublishAsync(std::move(ClickMsg));
             }

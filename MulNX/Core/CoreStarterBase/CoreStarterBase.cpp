@@ -28,7 +28,7 @@ void CoreStarterBase::StartUIWith(std::string&& EntryName) {
 	// UI系统主界面初始化
 	auto [StartString, pStartString] = MulNX::Base::make_any_unique<std::string>(std::move(EntryName));
 	MulNXHandle hStr = this->Core->IHandleSystem().RegisteUnique(std::move(StartString));
-	MulNX::Message StartMsg(MulNX::MsgType::UISystem_Start);
+	MulNX::Message StartMsg("UISystem_Start"_hash);
 	StartMsg.Handle = hStr;
 	this->ISys().PublishAsync(std::move(StartMsg));
 }
@@ -40,7 +40,7 @@ void CoreStarterBase::RegisterMainDrawWith(std::function<void(MulNXUINode*)>&& M
 	pUINode->MyMsgChannel = this->ICreateAndGetMessageChannel();
 	pUINode->MyFunc = MainDrawFunc;
 	MulNXHandle hContext = this->Core->IHandleSystem().RegisteUnique(std::move(UINode));
-	MulNX::Message Msg(MulNX::MsgType::UISystem_ModulePush);
+	MulNX::Message Msg("UISystem_ModulePush"_hash);
 	Msg.Handle = hContext;
 	this->ISys().PublishAsync(std::move(Msg));
 }

@@ -50,7 +50,7 @@ void HookManager::ThreadMain() {
 		this->CreateHook();
 
 		//发送重新Hook消息
-		MulNX::Message Msg(MulNX::MsgType::Core_ReHook);
+		MulNX::Message Msg("Core_ReHook"_hash);
 		this->ISys().PublishAsync(std::move(Msg));
 
 		ReHook = false;

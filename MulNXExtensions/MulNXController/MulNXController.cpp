@@ -18,7 +18,7 @@ bool MulNXController::UINodeFunc(MulNXUINode* ThisNode) {
         this->IDebugger->ShowWindow = false;
     }
     if (ImGui::Button("保存调试日志到文件")) {
-        MulNX::Message Msg(MulNX::MsgType::Debugger_SaveToFile);
+        MulNX::Message Msg("Debugger_SaveToFile"_hash);
         this->ISys().PublishAsync(std::move(Msg));
     }
     ImGui::Checkbox("当有错误信息时弹出调试器", &this->IDebugger->ShowWhenError);
@@ -29,12 +29,12 @@ bool MulNXController::UINodeFunc(MulNXUINode* ThisNode) {
     ImGui::InputInt("##最大消息数量", &MaxDebugMsgs);
     ImGui::SameLine();
     if (ImGui::Button("应用")) {
-        MulNX::Message Msg(MulNX::MsgType::Debugger_SetMaxInfoCount);
+        MulNX::Message Msg("Debugger_SetMaxInfoCount"_hash);
         Msg.ParamInt = MaxDebugMsgs;
         this->ISys().PublishAsync(std::move(Msg));
     }
     if (ImGui::Button("尝试拉取所有模块信息")) {
-        MulNX::Message Msg(MulNX::MsgType::ModuleManager_RequestModuleInfo);
+        MulNX::Message Msg("ModuleManager_RequestModuleInfo"_hash);
         Msg.pMsgChannel = this->MainMsgChannel;
         this->ISys().PublishAsync(std::move(Msg));
     }
@@ -101,7 +101,7 @@ bool MulNXController::Init() {
 
 void MulNXController::ProcessMsg(MulNX::Message* Msg) {
     switch (Msg->Type) {
-    case MulNX::MsgType::ModuleManager_ResponseModuleInfo: {
+    case "ModuleManager_ResponseModuleInfo"_hash: {
         auto Info = this->Core->IHandleSystem().ReleaseUnique(Msg->Handle);
         auto pInfo = Info.get<ModuleInfo>();
         this->ISys().LogInfo("检测到以下注册模块");

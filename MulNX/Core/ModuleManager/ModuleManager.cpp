@@ -15,15 +15,13 @@ using namespace MulNX::Core;
 
 bool ModuleManager::Init() {
 	this->MainMsgChannel = this->ICreateAndGetMessageChannel();
-	this->ISys()
-		.SubscribeAsync(MulNX::MsgType::ModuleManager_RequestModuleInfo);
-
+	// 后置消息订阅，参见 PackedInit
 	return true;
 }
 void ModuleManager::ProcessMsg(MulNX::Message* Msg) {
 	std::unique_lock lock(this->GetMutex());
 	switch (Msg->Type) {
-	case MulNX::MsgType::ModuleManager_RequestModuleInfo: {
+	case "ModuleManager_RequestModuleInfo"_hash: {
 		auto [Info, pInfo] = MulNX::Base::make_any_unique<ModuleInfo>();
 		
 		for (auto& [Name, Handle] : this->NameToHandleMap) {
@@ -32,7 +30,7 @@ void ModuleManager::ProcessMsg(MulNX::Message* Msg) {
 
 		MulNXHandle hInfo = this->Core->IHandleSystem().RegisteUnique(std::move(Info));
 
-		MulNX::Message ResponseMsg(MulNX::MsgType::ModuleManager_ResponseModuleInfo);
+		MulNX::Message ResponseMsg("ModuleManager_ResponseModuleInfo"_hash);
 		ResponseMsg.Handle = hInfo;
 		Msg->pMsgChannel->PushMessage(std::move(ResponseMsg));
 	}
@@ -103,6 +101,10 @@ bool ModuleManager::PackedInit() {
         }
     }
     this->ISys().LogInfo("注意: AbstractLayer3D(3D抽象层)被绑定为" + this->AbstractLayer3DName);
+
+    // 进行后置消息订阅
+    this->ISys()
+        .SubscribeAsync("ModuleManager_RequestModuleInfo");
     // 完成初始化
 	return true;
 }

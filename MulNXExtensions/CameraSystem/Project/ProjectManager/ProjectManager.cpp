@@ -610,7 +610,7 @@ bool ProjectManager::Playing_AutoCall(const MulNX::Message& Msg) {
         return false;
     }
     switch (Msg.Type) {
-    case MulNX::MsgType::Game_NewRound: {
+    case "Game_NewRound"_hash: {
         const std::vector<std::string>& OnNewRound = this->ActiveProject->OnNewRound;
         if (OnNewRound.empty()) {
             this->ISys().LogWarning("无新回合解决方案可尝试调用");
@@ -619,7 +619,7 @@ bool ProjectManager::Playing_AutoCall(const MulNX::Message& Msg) {
         int temp = rand() % OnNewRound.size();
         return this->SManager->Playing_SetSolution(OnNewRound[temp], PlaybackMode::Serial);
     }
-    case MulNX::MsgType::Game_RoundEnd: {
+    case "Game_RoundEnd"_hash: {
         const std::vector<std::string>& OnEnd = this->ActiveProject->OnRoundEnd;
         if (OnEnd.empty()) {
             this->ISys().LogWarning("无回合结束解决方案可尝试调用");

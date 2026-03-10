@@ -5,44 +5,55 @@
 #include "MessageChannel/MessageChannel.hpp"
 #include "../HandleSystem/HandleSystem.hpp"
 
-// FNV-1a 64位常数
-constexpr std::size_t fnv_basis = 14695981039346656037ULL;
-constexpr std::size_t fnv_prime = 1099511628211ULL;
-
-// FNV-1a 核心算法（constexpr）
-constexpr std::size_t fnv1a_hash(const std::string& sv) noexcept {
-    std::size_t hash = fnv_basis;
-    for (unsigned char c : sv) {
-        hash = (hash ^ static_cast<std::size_t>(c)) * fnv_prime;
-    }
-    return hash;
-}
-
 MulNX::MessageManager& MulNX::MessageManager::DeclareType(const std::string& Type) {
-    size_t hashed = fnv1a_hash(Type);
-    auto it = map.find(hashed);
-    if (it == map.end()) {
-        map[hashed] = 1;
+    size_t hashed = MulNX::HashString(Type);
+    auto it = this->MsgMap.find(hashed);
+    if (it == this->MsgMap.end()) {
+        this->MsgMap[hashed].RawString = Type;
         return *this;
     }
     else {
-        MulNX::ErrorTerminate("哈希碰撞！   " + Type);
+        MulNX::ErrorTerminate(
+            std::string("哈希碰撞!") +
+            "\n想要声明的: " + Type +
+            "\n已有的: " + it->second.RawString);
     }
-}
-
-// 定义字面量操作符
-consteval size_t operator"" _hash(const char* str, size_t n) {
-    std::string Str(str, n);
-    return fnv1a_hash(Str);
 }
 
 bool MulNX::MessageManager::Init() {
     this->NeedThread(10);
     (*this)
-        .DeclareType("你好")
-        .DeclareType("你好2")
-        .DeclareType("你好2")
-        .DeclareType("你好3");
+        .DeclareType("Core_Begin")
+        .DeclareType("Core_Shutdown")
+        .DeclareType("Core_Tick1")
+        .DeclareType("Core_Tick5")
+        .DeclareType("Core_Tick10")
+        .DeclareType("Core_Tick15")
+        .DeclareType("Core_Tick20")
+        .DeclareType("Core_Tick30")
+        .DeclareType("Core_Tick45")
+        .DeclareType("Core_Tick60")
+        .DeclareType("Core_Tick30min")
+        .DeclareType("Core_ReHook")
+        .DeclareType("Debugger_SetMaxInfoCount")
+        .DeclareType("Debugger_SaveToFile")
+        .DeclareType("ModuleManager_RequestModuleInfo")
+        .DeclareType("ModuleManager_ResponseModuleInfo")
+        .DeclareType("UISystem_Start")
+        .DeclareType("UISystem_UIPull")
+        .DeclareType("UISystem_ModulePush")
+        .DeclareType("UISystem_UIRequest")
+        .DeclareType("UISystem_UICommand")
+        .DeclareType("UISystem_ModuleResponse")
+        .DeclareType("Game_NewRound")
+        .DeclareType("Game_RoundStart")
+        .DeclareType("Game_BombPlanted")
+        .DeclareType("Game_BombDefused")
+        .DeclareType("Game_Boomed")
+        .DeclareType("Game_RoundEnd")
+        .DeclareType("CameraSystem_CallSolution")
+        .DeclareType("CameraSystem_PlayingShutdown")
+        .DeclareType("Command_SpecPlayer");
     return true;
 }
 
@@ -64,11 +75,8 @@ MulNX::IMessageChannel* MulNX::MessageManager::GetMessageChannel(const MulNXHand
 
 bool MulNX::MessageManager::Publish(Message&& Msg) {
     std::unique_lock lock(this->GetMutex());
-
 	// 检查是否存在管道订阅者
-	auto ChannelSubscribeMapIt = this->ChannelSubscribeMap.find(Msg.Type);
-    if (ChannelSubscribeMapIt == this->ChannelSubscribeMap.end())return false;
-    auto& SubscriberVector = ChannelSubscribeMapIt->second;// 获取订阅者容器，这里不可能是空指针
+    auto& SubscriberVector = this->MsgMap[Msg.Type].Subscribers;// 获取订阅者容器，这里不可能是空指针
     size_t size = SubscriberVector.size();
     if (size == 0)return false;
     --size;
@@ -79,6 +87,15 @@ bool MulNX::MessageManager::Publish(Message&& Msg) {
     }
     // 最后一个订阅者获得原始消息
     SubscriberVector[size]->PushMessage(std::move(Msg));
+    return true;
+}
+bool MulNX::MessageManager::Subscribe(MessageChannel* const pChannel, const std::string& Type) {
+    MulNX::MsgType hashed = MulNX::HashString(Type);
+    auto& Meta = this->MsgMap[hashed];
+    if (Meta.RawString.empty()) {
+        MulNX::ErrorTerminate("尝试订阅不存在的消息类型: " + Type);
+    }
+    Meta.Subscribers.push_back(pChannel);
     return true;
 }
 

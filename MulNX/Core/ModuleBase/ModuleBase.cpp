@@ -65,7 +65,7 @@ bool MulNX::ModuleBase::CreateUINode() {
         // 注册UI句柄
         MulNXHandle hUINode = this->Core->IHandleSystem().RegisteUnique(std::move(UINode));
         // 创建UI消息并设置句柄
-        MulNX::Message Msg(MulNX::MsgType::UISystem_ModulePush);
+        MulNX::Message Msg("UISystem_ModulePush"_hash);
         Msg.Handle = hUINode;
         // 发送UI消息
         this->ISys().PublishAsync(std::move(Msg));
@@ -146,7 +146,7 @@ void MulNX::ModuleBase::BaseProcessMsg(MulNX::Message* Msg) {
 void MulNX::ModuleBase::EntryProcessMsg() {
     MulNX::IMessageChannel* Channel = this->MainMsgChannel;
     if (Channel != nullptr) {
-        MulNX::Message Msg{ MulNX::MsgType::Null };
+        MulNX::Message Msg{};
         while (Channel->PullMessage(Msg)) {
             this->BaseProcessMsg(&Msg);
             this->ProcessMsg(&Msg);

@@ -44,7 +44,7 @@ static void MyDraw(MulNXUINode* This) {
 bool DemoHelper::Init() {
 	this->MainMsgChannel = this->ICreateAndGetMessageChannel();
 	this->ISys()
-		.SubscribeAsync(MulNX::MsgType::UISystem_UICommand);
+		.SubscribeAsync("UISystem_UICommand");
 
 	auto SingleContext = MulNXUINode::Create(this);
 	auto* SContextPtr = SingleContext.get<MulNXUINode>();	
@@ -55,7 +55,7 @@ bool DemoHelper::Init() {
 
 	this->hUINode = this->Core->IHandleSystem().RegisteUnique(std::move(SingleContext));
 
-	MulNX::Message Msg(MulNX::MsgType::UISystem_ModulePush);
+	MulNX::Message Msg("UISystem_ModulePush"_hash);
 	Msg.Handle = this->hUINode;
 	this->ISys().PublishAsync(std::move(Msg));
 
@@ -64,10 +64,10 @@ bool DemoHelper::Init() {
 
 void DemoHelper::ProcessMsg(MulNX::Message* Msg) {
 	switch (Msg->Type) {
-	case MulNX::MsgType::UISystem_UICommand: {
+        case "UISystem_UICommand"_hash: {
 		this->ISys().LogSucc("测试成功");
 		this->HandleUICommand(Msg);
-		Msg->pMsgChannel->PushMessage(MulNX::Message(MulNX::MsgType::UISystem_ModuleResponse));
+		Msg->pMsgChannel->PushMessage(MulNX::Message("UISystem_ModuleResponse"_hash));
 		break;
 	}
 	}

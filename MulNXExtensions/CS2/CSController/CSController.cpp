@@ -92,7 +92,7 @@ void CSController::VirtualMain() {
 }
 void CSController::ProcessMsg(MulNX::Message* Msg) {
     switch (Msg->Type) {
-    case MulNX::MsgType::Core_ReHook: {
+    case "Core_ReHook"_hash: {
         this->ISys().LogSucc("已完成Hook重载！");
         break;
     }
@@ -107,7 +107,7 @@ bool CSController::Init() {
     this->NeedThread(3);
     
     this->MainMsgChannel = this->ICreateAndGetMessageChannel();
-    this->ISys().SubscribeAsync(MulNX::MsgType::Core_ReHook);
+    this->ISys().SubscribeAsync("Core_ReHook");
 
     MulNX::Memory::DllModule clientModule(L"client.dll");
     if (clientModule.IsValid()) {
@@ -175,7 +175,7 @@ int CSController::BasicUpdate() {
 
     static int OldRoundStartCount = this->CSGameRules.m_nRoundStartCount;
     if (OldRoundStartCount != this->CSGameRules.m_nRoundStartCount) {
-        MulNX::Message Msg(MulNX::MsgType::Game_NewRound);
+        MulNX::Message Msg("Game_NewRound"_hash);
         this->ISys().PublishAsync(std::move(Msg));
         OldRoundStartCount = this->CSGameRules.m_nRoundStartCount;
     }

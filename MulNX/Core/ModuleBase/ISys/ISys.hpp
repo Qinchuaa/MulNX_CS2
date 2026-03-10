@@ -17,11 +17,11 @@ namespace MulNX {
         void LogError(const std::string& Msg);
 
         // 自动订阅消息类型
-        C_ISys& SubscribeAsync(const MsgType MsgType);
+        C_ISys& SubscribeAsync(const std::string& MsgType);
         // 自动发送消息
         void PublishAsync(MulNX::Message&& Msg);
         // 根据类型自动构建消息并发送
-        void PublishAsync(MulNX::MsgType Msg);
+        void PublishAsync(MulNX::MsgType MsgType);
 
         std::filesystem::path PathGet(const std::string& Target);
         MulNX::PathManager* PathManager();

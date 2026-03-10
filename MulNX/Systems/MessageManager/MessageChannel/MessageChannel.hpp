@@ -17,8 +17,7 @@ namespace MulNX {
 	public:
 		MessageChannel(MessageManager* MsgManager);
 	private:
-		IMessageChannel& Subscribe(const MsgType MsgType)override;
-		IMessageChannel& Unsubscribe(const MsgType MsgType)override;
+        IMessageChannel& Subscribe(const std::string& MsgType)override;
 		bool PushMessage(Message&& Msg)override;
 		bool PullMessage(Message& OutMsg)override;
 		bool HasMessage()const override;

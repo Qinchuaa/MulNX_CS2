@@ -6,6 +6,26 @@
 #include "MessageChannel/IMessageChannel.hpp"
 
 namespace MulNX {
+    // FNV-1a 64位常数
+    constexpr std::size_t fnv_basis = 14695981039346656037ULL;
+    constexpr std::size_t fnv_prime = 1099511628211ULL;
+    // FNV-1a 核心算法（constexpr）
+    constexpr std::size_t HashString(const std::string& str) noexcept {
+        std::size_t hash = fnv_basis;
+        for (unsigned char c : str) {
+            hash = (hash ^ static_cast<std::size_t>(c)) * fnv_prime;
+        }
+        return hash;
+    }
+}
+
+// 定义字面量操作符
+consteval size_t operator"" _hash(const char* str, size_t n) {
+    std::string Str(str, n);
+    return MulNX::HashString(Str);
+}
+
+namespace MulNX {
 	class IMessageManager :public ModuleBase {
 			friend IMessageChannel;
 			friend class MessageChannel;

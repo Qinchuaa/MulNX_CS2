@@ -7,16 +7,18 @@
 #include "IMessageManager.hpp"
 #include "MessageChannel/MessageChannel.hpp"
 namespace MulNX {
+    class MsgMeta {
+    public:
+        std::vector<MessageChannel*>Subscribers;
+        std::string RawString;
+    };
     class MessageManager final :public IMessageManager {
         friend MessageChannel;
         friend IMessageManager;
     private:
         // 存储类
-        std::unordered_map<MsgType, std::vector<MessageChannel*>>ChannelSubscribeMap{};
-        //std::unordered_map<std::atomic<bool>*, RegistePack>RegisteMsg;
+        std::unordered_map<MulNX::MsgType, MsgMeta>MsgMap{};
         std::unordered_map<MulNXHandle, std::unique_ptr<MessageChannel>>Channels;
-
-        std::unordered_map<size_t, size_t>map;
     public:
         bool Init()override;
         void ThreadMain()override;
@@ -31,6 +33,8 @@ namespace MulNX {
         IMessageChannel* GetMessageChannel(const MulNXHandle& hChannel)override;
         // 需要在堆中构建消息，消息的创建由发送者负责，消息的销毁由消息总线负责
         bool Publish(Message&& Msg)override;
+
+        bool Subscribe(MessageChannel* const pChannel, const std::string& Type);
 
         MessageManager& DeclareType(const std::string& Type);
     };

@@ -21,17 +21,17 @@ bool MySaveStringToFile(const std::string& data,
 bool MulNX::Debugger::Init() {
     this->MainMsgChannel = this->ICreateAndGetMessageChannel();
     this->ISys()
-        .SubscribeAsync(MulNX::MsgType::Debugger_SetMaxInfoCount)
-        .SubscribeAsync(MulNX::MsgType::Debugger_SaveToFile);
+        .SubscribeAsync("Debugger_SetMaxInfoCount")
+        .SubscribeAsync("Debugger_SaveToFile");
     this->NeedUINode = true;
     return true;
 }
 void MulNX::Debugger::ProcessMsg(MulNX::Message* Msg) {
     switch (Msg->Type) {
-    case MulNX::MsgType::Debugger_SetMaxInfoCount: {
+    case "Debugger_SetMaxInfoCount"_hash: {
         this->ResetMaxMsgCount(Msg->ParamInt);
     }
-    case MulNX::MsgType::Debugger_SaveToFile: {
+    case "Debugger_SaveToFile"_hash: {
         this->SaveToFile();
     }
     }

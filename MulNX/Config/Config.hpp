@@ -39,7 +39,7 @@ namespace MulNX {
     // MulNX消息
     class Message;
     // MulNX消息类型
-    enum class MsgType :uint32_t;
+    using MsgType = size_t;
     // 消息管理器
     class IMessageManager;
     // 消息管道

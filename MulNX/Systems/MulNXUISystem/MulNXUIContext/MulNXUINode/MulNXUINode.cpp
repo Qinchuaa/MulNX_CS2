@@ -8,9 +8,9 @@
 
 void MulNXUINode::Draw() {
 	if (this->MyMsgChannel->HasMessage()) {
-		MulNX::Message Msg(MulNX::MsgType::Null);
+		MulNX::Message Msg;
 		while(this->MyMsgChannel->PullMessage(Msg)){
-			if(Msg.Type == MulNX::MsgType::UISystem_ModuleResponse){
+			if(Msg.Type == "UISystem_ModuleResponse"_hash){
 				this->WaitingResponse = false;
 			}
 		}
@@ -35,7 +35,7 @@ bool MulNXUINode::SendToOwner(MulNX::Message&& Msg) {
 	return true;
 }
 MulNX::Message MulNXUINode::CreateMsg(uint32_t SubType) {
-	MulNX::Message Msg(MulNX::MsgType::UISystem_UICommand);
+	MulNX::Message Msg("UISystem_UICommand"_hash);
 	Msg.SubType = SubType;
 	Msg.pMsgChannel = this->MyMsgChannel;
 	return Msg;
@@ -62,7 +62,7 @@ bool MulNXUINode::CreateAndRegiste(MulNX::ModuleBase* const MB, std::string&& Na
     pNode->MyFunc = MyFunc;
     MulNX::Core::Core* pCore = MB->GetCore();
     MulNXHandle hContext = pCore->IHandleSystem().RegisteUnique(std::move(Node));
-    MulNX::Message Msg(MulNX::MsgType::UISystem_ModulePush);
+    MulNX::Message Msg("UISystem_ModulePush"_hash);
     Msg.Handle = hContext;
     MB->ISys().PublishAsync(std::move(Msg));
     return true;

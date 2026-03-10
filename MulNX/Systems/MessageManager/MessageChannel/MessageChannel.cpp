@@ -4,22 +4,9 @@
 MulNX::MessageChannel::MessageChannel(MessageManager* MsgManager) {
 	this->MsgManager = MsgManager;
 }
-MulNX::IMessageChannel& MulNX::MessageChannel::Subscribe(const MsgType MsgType) {
-	std::unique_lock<std::shared_mutex>lock(this->MsgManager->GetMutex());
-	this->MsgManager->ChannelSubscribeMap[MsgType].push_back(this);
-	return *this;
-}
-MulNX::IMessageChannel& MulNX::MessageChannel::Unsubscribe(const MsgType MsgType) {
-	std::unique_lock lock(this->MsgManager->GetMutex());//独占锁
-	auto MapIt = this->MsgManager->ChannelSubscribeMap.find(MsgType);//找订阅列表
-	if (MapIt != this->MsgManager->ChannelSubscribeMap.end()) {
-		auto& SubscriberVector = MapIt->second;//得到订阅列表容器
-		auto VecIt = std::find(SubscriberVector.begin(), SubscriberVector.end(), this);//找到自己的位置
-		if (VecIt != SubscriberVector.end()) {
-			SubscriberVector.erase(VecIt);//找到则删除
-			if (SubscriberVector.empty())this->MsgManager->ChannelSubscribeMap.erase(MapIt);//删除后如果为空，则删除这个条目
-		}
-	}
+MulNX::IMessageChannel& MulNX::MessageChannel::Subscribe(const std::string& MsgType) {
+	std::unique_lock lock(this->MsgManager->GetMutex());
+    this->MsgManager->Subscribe(this, MsgType);
 	return *this;
 }
 bool MulNX::MessageChannel::PullMessage(Message& OutMsg) {

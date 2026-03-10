@@ -1,7 +1,7 @@
 #include "MulNXMessage.hpp"
 
 void MulNX::Message::Clear() {
-	this->Type = MsgType::Null;
+	this->Type = 0;
 	this->SubType = 0;
 	this->Handle = MulNXHandle{};
 	this->ParamInt = 0;
