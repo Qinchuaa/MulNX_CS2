@@ -15,7 +15,24 @@ public:
 
     ImU32 Colour{};
 
+    DirectX::XMFLOAT2 Origin2D{};
+    DirectX::XMFLOAT2 Lens2D[4]{};
+    DirectX::XMFLOAT2 X2D{};
+    DirectX::XMFLOAT2 Y2D{};
+    DirectX::XMFLOAT2 Z2D{};
+
     void Init(float CameraHigh, float CameraX, float CameraY, float AxisLenth, ImU32 Colour);
+
+    void Rotate(const DirectX::XMFLOAT3& Rotation);
+    void Move(const DirectX::XMFLOAT3& TargetPoint);
+    void ToScreen(const float* const pMatrix, const float WinWidth, const float WinHeight);
+
+    void Draw(const char* Lable);
+
+    void DrawCamera(const DirectX::XMFLOAT3& Position, const DirectX::XMFLOAT3& Rotation, const char* label,
+        const float* const pMatrix, const float WinWidth, const float WinHeight);
+
+    CameraModel() = default;
 };
 
 class CameraDrawer {
@@ -23,27 +40,8 @@ public:
     bool IfDraw = true;
 private:
 
-
+    // Model源
     CameraModel CameraModel{};
-
-    DirectX::XMFLOAT3 Origin{};
-    DirectX::XMFLOAT3 Lens[4]{};
-    DirectX::XMFLOAT3 X{};
-    DirectX::XMFLOAT3 Y{};
-    DirectX::XMFLOAT3 Z{};
-
-    DirectX::XMFLOAT2 Origin2D{};
-    DirectX::XMFLOAT2 Lens2D[4]{};
-    DirectX::XMFLOAT2 X2D{};
-    DirectX::XMFLOAT2 Y2D{};
-    DirectX::XMFLOAT2 Z2D{};
-
-    ImU32 Colour{};
-
-    float CameraHigh;
-    float CameraX;
-    float CameraY;
-    float AxisLenth;
 
     ImDrawList* drawList{};
 
@@ -52,12 +50,9 @@ private:
     float WinHeight{};
 public:
     void Init(float CameraHigh, float CameraX, float CameraY, float AxisLenth, ImU32 Colour);
-    void Rotate(DirectX::XMFLOAT3 Rotation);
-    void Move(DirectX::XMFLOAT3 TargetPoint);
-    void ToScreen();
-    void Draw(const char* label);
+
     void Update(float* pMatrixPtr, float pWinWidth, float pWinHeight);
     void DrawCamera(DirectX::XMFLOAT3 Position, DirectX::XMFLOAT3 Rotation, const char* label);
     void DrawFrameCamera(const MulNX::Base::Math::Frame& frame, const char* label);
-    void DrawFirstPersonCamera(const char* label);
+    //void DrawFirstPersonCamera(const char* label);
 };
