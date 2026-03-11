@@ -1,8 +1,8 @@
 #include "../Assembler.hpp"
 
-using namespace MulNX::Memory::Asm;
+using namespace MulNX::Memory;
 
-Assembler& Assembler::mov(Reg dst, Reg src) {
+Asm::Assembler& Asm::Assembler::mov(Reg dst, Reg src) {
     auto dst_info = get_reg_info(dst);
     auto src_info = get_reg_info(src);
 
@@ -18,7 +18,7 @@ Assembler& Assembler::mov(Reg dst, Reg src) {
     emit_byte(modrm);
     return *this;
 }
-Assembler& Assembler::mov(Reg dst, uint64_t imm) {
+Asm::Assembler& Asm::Assembler::mov(Reg dst, uint64_t imm) {
     auto dst_info = get_reg_info(dst);
 
     // REX 前缀：W=1（64位操作），如果目标寄存器是扩展寄存器则设置 B 位
@@ -39,7 +39,7 @@ Assembler& Assembler::mov(Reg dst, uint64_t imm) {
     return *this;
 }
 
-Assembler& Assembler::mov(Mem mem, Reg src) {
+Asm::Assembler& Asm::Assembler::mov(Mem mem, Reg src) {
     auto src_info = get_reg_info(src);          // 源寄存器（出现在 ModRM.reg）
     auto base_info = get_reg_info(mem.base);    // 基址寄存器
 
@@ -90,7 +90,7 @@ Assembler& Assembler::mov(Mem mem, Reg src) {
     return *this;
 }
 
-Assembler& Assembler::mov(Reg dst, Mem mem) {
+Asm::Assembler& Asm::Assembler::mov(Reg dst, Mem mem) {
     auto dst_info = get_reg_info(dst);          // 目标寄存器（出现在 ModRM.reg）
     auto base_info = get_reg_info(mem.base);
 

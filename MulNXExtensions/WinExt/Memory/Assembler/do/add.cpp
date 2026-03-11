@@ -1,8 +1,8 @@
 #include "../Assembler.hpp"
 
-using namespace MulNX::Memory::Asm;
+using namespace MulNX::Memory;
 
-Assembler& Assembler::add(Reg dst, Reg src) {
+Asm::Assembler& Asm::Assembler::add(Reg dst, Reg src) {
     // add dst, src 对应 opcode 0x01 (r/m64, r64) 方向：dst 是 r/m，src 是 reg
     // 我们使用 0x01 指令，ModRM.reg = src, r/m = dst
     auto dst_info = get_reg_info(dst);
@@ -22,7 +22,7 @@ Assembler& Assembler::add(Reg dst, Reg src) {
     return *this;
 }
 
-Assembler& Assembler::add(Reg dst, Mem src) {
+Asm::Assembler& Asm::Assembler::add(Reg dst, Mem src) {
     // add dst, [src] 对应 0x03 (r64, r/m64)
     auto dst_info = get_reg_info(dst);
     auto base_info = get_reg_info(src.base);
@@ -65,7 +65,7 @@ Assembler& Assembler::add(Reg dst, Mem src) {
     return *this;
 }
 
-Assembler& Assembler::add(Mem dst, Reg src) {
+Asm::Assembler& Asm::Assembler::add(Mem dst, Reg src) {
     // add [dst], src 对应 0x01 (r/m64, r64)
     auto src_info = get_reg_info(src);
     auto base_info = get_reg_info(dst.base);
@@ -107,7 +107,7 @@ Assembler& Assembler::add(Mem dst, Reg src) {
     return *this;
 }
 
-Assembler& Assembler::add(Reg dst, int32_t imm) {
+Asm::Assembler& Asm::Assembler::add(Reg dst, int32_t imm) {
     auto dst_info = get_reg_info(dst);
 
     // 判断 imm 是否可以用 8 位有符号表示
@@ -137,7 +137,7 @@ Assembler& Assembler::add(Reg dst, int32_t imm) {
     return *this;
 }
 
-Assembler& Assembler::add(Mem dst, int32_t imm) {
+Asm::Assembler& Asm::Assembler::add(Mem dst, int32_t imm) {
     auto base_info = get_reg_info(dst.base);
     bool use_imm8 = (imm >= -128 && imm <= 127);
 

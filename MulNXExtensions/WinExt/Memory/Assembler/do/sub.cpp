@@ -1,8 +1,8 @@
 #include "../Assembler.hpp"
 
-using namespace MulNX::Memory::Asm;
+using namespace MulNX::Memory;
 
-Assembler& Assembler::sub(Reg dst, Reg src) {
+Asm::Assembler& Asm::Assembler::sub(Reg dst, Reg src) {
     auto dst_info = get_reg_info(dst);
     auto src_info = get_reg_info(src);
 
@@ -19,7 +19,7 @@ Assembler& Assembler::sub(Reg dst, Reg src) {
     return *this;
 }
 
-Assembler& Assembler::sub(Reg dst, Mem src) {
+Asm::Assembler& Asm::Assembler::sub(Reg dst, Mem src) {
     // sub dst, [src] 对应 0x2B
     auto dst_info = get_reg_info(dst);
     auto base_info = get_reg_info(src.base);
@@ -61,7 +61,7 @@ Assembler& Assembler::sub(Reg dst, Mem src) {
     return *this;
 }
 
-Assembler& Assembler::sub(Mem dst, Reg src) {
+Asm::Assembler& Asm::Assembler::sub(Mem dst, Reg src) {
     // sub [dst], src 对应 0x29
     auto src_info = get_reg_info(src);
     auto base_info = get_reg_info(dst.base);
@@ -103,7 +103,7 @@ Assembler& Assembler::sub(Mem dst, Reg src) {
     return *this;
 }
 
-Assembler& Assembler::sub(Reg dst, int32_t imm) {
+Asm::Assembler& Asm::Assembler::sub(Reg dst, int32_t imm) {
     auto dst_info = get_reg_info(dst);
     bool use_imm8 = (imm >= -128 && imm <= 127);
 
@@ -129,7 +129,7 @@ Assembler& Assembler::sub(Reg dst, int32_t imm) {
     return *this;
 }
 
-Assembler& Assembler::sub(Mem dst, int32_t imm) {
+Asm::Assembler& Asm::Assembler::sub(Mem dst, int32_t imm) {
     auto base_info = get_reg_info(dst.base);
     bool use_imm8 = (imm >= -128 && imm <= 127);
 
