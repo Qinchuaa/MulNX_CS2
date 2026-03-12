@@ -108,7 +108,7 @@ public:
     //信息获取函数（虚）
     virtual std::string GetMsg()const = 0;
     //加载信息函数（虚），注意这不是创建而是加载
-    virtual bool ReadElementMain(const pugi::xml_node& node_ElementMain, std::string& strRuselt) = 0;
+    virtual std::pair<bool, std::string> ReadElementMain(const pugi::xml_node& node_ElementMain) = 0;
 
     //保存基础函数（元素类型，元素名称，持续时间（附加声明））
     bool SaveBase(pugi::xml_document& doc, pugi::xml_node& node_ElementMain, std::string& strRuselt)const;

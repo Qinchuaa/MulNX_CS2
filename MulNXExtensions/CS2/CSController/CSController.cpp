@@ -6,6 +6,8 @@
 #include <MulNXExtensions/CameraSystem/CameraSystemIO/CameraSystemIO.hpp>
 #include <MulNXThirdParty/All_cs2_dumper.hpp>
 #include <MulNXThirdParty/All_ImGui.hpp>
+#include <MulNXThirdParty/All_MinHook.hpp>
+
 
 void CSController::HandleOverrideView(void* ThisCViewSetup) {
     int* pWidth = (int*)((unsigned char*)ThisCViewSetup + 0x434);
@@ -49,19 +51,11 @@ int CSController::GetIndexInEntityListFromIndexInMap(int IndexInMap) {
     return -1;
 }
 
-void CSController::Execute(const char* cmd) {
-    vmt::CallVirtual<void>(49, this->CmdInterface, 0, cmd, 1);
-    return;
-}
+void CSController::Execute(const char* cmd) {     
+    // 直接调用，自动传入对象指针
+    this->executor(0, cmd, 1);
 
-void CSController::InitInterface() {
-    const char* ModuleName = "engine2.dll";
-    const char* InterfaceName = "Source2EngineToClient001";
-    HMODULE hModule = GetModuleHandleA(ModuleName);
-    if (!hModule) return;
-    auto pFunc = reinterpret_cast<void* (*)(const char*, int*)>(GetProcAddress(hModule, "CreateInterface"));
-    if (!pFunc) return;
-    this->CmdInterface = pFunc(InterfaceName, nullptr);
+    return;
 }
 
 bool CSController::ExecuteCommand(const std::string& cmd) {
@@ -101,18 +95,17 @@ void CSController::ProcessMsg(MulNX::Message* Msg) {
 }
 
 bool CSController::Init() {
-    this->InitInterface();
     this->GetModules();
+    
     this->Catch();
     this->NeedThread(3);
     
     this->MainMsgChannel = this->ICreateAndGetMessageChannel();
     this->ISys().SubscribeAsync("Core_ReHook");
 
-    MulNX::Memory::DllModule clientModule(L"client.dll");
-    if (clientModule.IsValid()) {
+    if (this->Modules.client.Valid) {
         // 搜索 .text 段
-        auto textRegion = clientModule.GetTextRegion();
+        auto textRegion = this->Modules.client.GetTextRegion();
         if (textRegion.IsValid()) {
             // 搜索特征码
             const auto& pattern = MulNX::CS2::Signatures::CallIsPlayingDemo;
@@ -133,15 +126,18 @@ bool CSController::Init() {
 }
 
 void CSController::GetModules() {
-    this->Modules.client = reinterpret_cast<uintptr_t>(GetModuleHandleW(L"client.dll"));
-    this->Modules.engine2 = reinterpret_cast<uintptr_t>(GetModuleHandleW(L"engine2.dll"));
-    this->Modules.tier0 = reinterpret_cast<uintptr_t>(GetModuleHandleW(L"tier0.dll"));
+    this->Modules.client = MulNX::Memory::DllModule(L"client.dll");
+    this->Modules.engine2 = MulNX::Memory::DllModule(L"engine2.dll");
+    this->Modules.tier0 = MulNX::Memory::DllModule(L"tier0.dll");
 
-    const char* ModuleName = "tier0.dll";
-    const char* InterfaceName = "VEngineCvar007";
-    HMODULE hModule = GetModuleHandleA(ModuleName);
-    auto pFunc = reinterpret_cast<void* (*)(const char*, int*)>(GetProcAddress(hModule, "CreateInterface"));
-    this->CvarSystem.Address = (uintptr_t)pFunc(InterfaceName, nullptr);
+    this->Source2EngineToClient001 =
+        this->Modules.engine2.GetProcAddressT<void* (const char*, int*)>("CreateInterface")
+        ("Source2EngineToClient001", nullptr);
+    this->executor = IVClass::Assume(this->Source2EngineToClient001)->GetVFunc<void(int, const char*, int)>(49);
+    
+    this->CvarSystem.Address =
+        (uintptr_t)this->Modules.tier0.GetProcAddressT<void* (const char*, int*)>("CreateInterface")
+        ("VEngineCvar007", nullptr);
 
     //this->LocalPlayer.pGlobalFOV = this->CvarSystem.GetCvar("fov_cs_debug")->GetPtr<float>();
     this->LocalPlayer.pGlobalFOV = &this->CSFOV;
@@ -150,23 +146,23 @@ void CSController::GetModules() {
 void CSController::Catch() {
     // 本地工作
     // 获取本地视图投影矩阵
-    this->LocalPlayer.ViewMatrix = reinterpret_cast<float*>(this->Modules.client + cs2_dumper::offsets::client_dll::dwViewMatrix);
+    this->LocalPlayer.ViewMatrix = reinterpret_cast<float*>(this->Modules.client.GetBaseAddress() + cs2_dumper::offsets::client_dll::dwViewMatrix);
     // 获取本地欧拉角
-    this->LocalPlayer.ViewAngles = reinterpret_cast<DirectX::XMFLOAT3*>(this->Modules.client + cs2_dumper::offsets::client_dll::dwViewAngles);
+    this->LocalPlayer.ViewAngles = reinterpret_cast<DirectX::XMFLOAT3*>(this->Modules.client.GetBaseAddress() + cs2_dumper::offsets::client_dll::dwViewAngles);
 
     return;
 }
 int CSController::BasicUpdate() {
     // 获取EntityList
-    if (!MulNX::Memory::Read(this->Modules.client + cs2_dumper::offsets::client_dll::dwEntityList, this->EntityList.Address)) {
+    if (!MulNX::Memory::Read(this->Modules.client.GetBaseAddress() + cs2_dumper::offsets::client_dll::dwEntityList, this->EntityList.Address)) {
         return -1;
     }
     // 获取CS2全局变量
-    if (!MulNX::Memory::Read(this->Modules.client + cs2_dumper::offsets::client_dll::dwGlobalVars, this->CSGlobalVars.Address)) {
+    if (!MulNX::Memory::Read(this->Modules.client.GetBaseAddress() + cs2_dumper::offsets::client_dll::dwGlobalVars, this->CSGlobalVars.Address)) {
         return -2;
     }
     //获取本地控制器
-    if (!MulNX::Memory::Read(this->Modules.client + cs2_dumper::offsets::client_dll::dwLocalPlayerController, this->LocalPlayer.Entity.Controller.Address)) {
+    if (!MulNX::Memory::Read(this->Modules.client.GetBaseAddress() + cs2_dumper::offsets::client_dll::dwLocalPlayerController, this->LocalPlayer.Entity.Controller.Address)) {
         return -1001;
     }
     if (int result = this->LocalPlayer.Update()) {
@@ -219,7 +215,7 @@ int CSController::EntityListUpdate() {
     return 0;
 }
 int CSController::GameRulesUpdate() {
-    MulNX::Memory::Read(this->Modules.client + cs2_dumper::offsets::client_dll::dwGameRules, this->CSGameRules.Address);
+    MulNX::Memory::Read(this->Modules.client.GetBaseAddress() + cs2_dumper::offsets::client_dll::dwGameRules, this->CSGameRules.Address);
     this->CSGameRules.Update();
     return 0;
 }
@@ -246,7 +242,7 @@ int CSController::TryGetMsg() {
     }
 
     uintptr_t ppPlantedC4;
-    MulNX::Memory::Read(this->Modules.client + cs2_dumper::offsets::client_dll::dwPlantedC4, ppPlantedC4);
+    MulNX::Memory::Read(this->Modules.client.GetBaseAddress() + cs2_dumper::offsets::client_dll::dwPlantedC4, ppPlantedC4);
     if (ppPlantedC4) {
         MulNX::Memory::Read(ppPlantedC4, this->PlantedC4.Address);
         this->PlantedC4.Update();

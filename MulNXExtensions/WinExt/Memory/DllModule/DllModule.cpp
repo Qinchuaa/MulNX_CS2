@@ -19,7 +19,7 @@ size_t MulNX::Memory::DllModule::GetModuleSize()const {
 }
 
 MulNX::Memory::Region MulNX::Memory::DllModule::GetTextRegion()const {
-    if (!this->IsValid()) return Region::InValid();
+    if (!this->Valid) return Region::InValid();
     uintptr_t textStart = 0;
     size_t textSize = 0;
     if (!GetTextSectionRange(this->GetBaseAddress(), textStart, textSize)) {

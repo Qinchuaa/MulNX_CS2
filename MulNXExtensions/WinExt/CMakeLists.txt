@@ -2,6 +2,7 @@ add_library(WinExt STATIC
     "WIN32Msg/WIN32Msg.cpp"
     "WinException/WinException.cpp"
     "HookUtility/HookUtility.cpp"
+    "vtable/vtable.cpp"
 
     "Memory/Assembler/Assembler.cpp"
     "Memory/Assembler/Help/Help.cpp"

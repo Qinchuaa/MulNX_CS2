@@ -203,51 +203,44 @@ void FreeCameraPath::Clear() {
     this->Refresh();
     return;
 }
-bool FreeCameraPath::ReadElementMain(const pugi::xml_node& node_ElementMain, std::string& strRuselt) {
-    //获取关键帧节点
-    pugi::xml_node node_KeyFrame = node_ElementMain.child("KeyFrame");
-    if (!node_KeyFrame) {
-        strRuselt = "找不到关键帧节点！ 自由摄像机轨道 名：" + this->Name;
-        return false;
-    }
-    else {
-        //在有信息可读取时，先清空自身信息，准备进入读取流程
-        this->Clear();
-        //读取流程
-        for (; node_KeyFrame; node_KeyFrame = node_KeyFrame.next_sibling("KeyFrame")) {
-            MulNX::Base::Math::CameraKeyFrame CameraKeyFrame;
-            // 读取时间
-            CameraKeyFrame.KeyTime = node_KeyFrame.attribute("Time").as_float();
+std::pair<bool, std::string> FreeCameraPath::ReadElementMain(const pugi::xml_node& node_ElementMain) {
+    // 获取关键帧节点
+    if (!node_ElementMain.child("KeyFrame"))return { false, "找不到关键帧节点！ 自由摄像机轨道 名：" + this->Name };
+    
+    // 在有信息可读取时，先清空自身信息，准备进入读取流程
+    this->Clear();
+    // 读取流程
+    for (const auto& node_KeyFrame : node_ElementMain.children("KeyFrame")) {
+        MulNX::Base::Math::CameraKeyFrame CameraKeyFrame;
+        // 读取时间
+        CameraKeyFrame.KeyTime = node_KeyFrame.attribute("Time").as_float();
 
-            // 读取坐标和FOV
-            DirectX::XMFLOAT4 PositionAndFOV;// = Frame.SpatialState.GetPositionAndFOV();
+        // 读取坐标和FOV
+        DirectX::XMFLOAT4 PositionAndFOV;// = Frame.SpatialState.GetPositionAndFOV();
 
-            PositionAndFOV.x = node_KeyFrame.attribute("Px").as_float();
-            PositionAndFOV.y = node_KeyFrame.attribute("Py").as_float();
-            PositionAndFOV.z = node_KeyFrame.attribute("Pz").as_float();
-            PositionAndFOV.w = node_KeyFrame.attribute("FOV").as_float();
+        PositionAndFOV.x = node_KeyFrame.attribute("Px").as_float();
+        PositionAndFOV.y = node_KeyFrame.attribute("Py").as_float();
+        PositionAndFOV.z = node_KeyFrame.attribute("Pz").as_float();
+        PositionAndFOV.w = node_KeyFrame.attribute("FOV").as_float();
 
-            CameraKeyFrame.SpatialState.PositionAndFOV = DirectX::XMLoadFloat4(&PositionAndFOV);
+        CameraKeyFrame.SpatialState.PositionAndFOV = DirectX::XMLoadFloat4(&PositionAndFOV);
 
-            // 读取角度
-            // 欧拉角 → 四元数转换
-            DirectX::XMFLOAT3 temEuler{
-                node_KeyFrame.attribute("Pitch").as_float(),
-                node_KeyFrame.attribute("Yaw").as_float(),
-                node_KeyFrame.attribute("Roll").as_float()
-            };
-            DirectX::XMFLOAT4 temQuat;
-            MulNX::Base::Math::CSEulerToQuat(temEuler, temQuat);
+        // 读取角度
+        // 欧拉角 → 四元数转换
+        DirectX::XMFLOAT3 temEuler{
+            node_KeyFrame.attribute("Pitch").as_float(),
+            node_KeyFrame.attribute("Yaw").as_float(),
+            node_KeyFrame.attribute("Roll").as_float()
+        };
+        DirectX::XMFLOAT4 temQuat;
+        MulNX::Base::Math::CSEulerToQuat(temEuler, temQuat);
 
-            CameraKeyFrame.SpatialState.RotationQuat = DirectX::XMLoadFloat4(&temQuat);
+        CameraKeyFrame.SpatialState.RotationQuat = DirectX::XMLoadFloat4(&temQuat);
 
-            this->AddKeyframe(std::move(CameraKeyFrame));
-        }
+        this->AddKeyframe(std::move(CameraKeyFrame));
     }
 
-    strRuselt = "成功从XML文件加载自由摄像机轨道信息！ 自由摄像机轨道 名：" + this->Name;
-
-    return true;
+    return { true,"成功从XML文件加载自由摄像机轨道信息！ 自由摄像机轨道 名：" + this->Name };
 }
 bool FreeCameraPath::SaveToXML(const std::filesystem::path& FolderPath, std::string& strRuselt)const {
     if (FolderPath.empty()) {

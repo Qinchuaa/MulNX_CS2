@@ -7,13 +7,13 @@
 
 static bool AllowReHook = false;// 允许重hook
 bool HookManager::Init() {
-	this->pInstance = this;
-	return true;
+    this->pInstance = this;
+    MH_Initialize();
+    return true;
 }
 void HookManager::StartAll() {
 	this->MainMsgChannel = this->ICreateAndGetMessageChannel();
 	this->ReHook = true;
-    MH_Initialize();
     this->NeedThread(250);
     this->ThreadMain();// 手动执行一次Hook
 }

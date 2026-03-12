@@ -12,9 +12,9 @@
 
 class C_Modules {
 public:
-    uintptr_t client = 0;
-    uintptr_t engine2 = 0;
-    uintptr_t tier0 = 0;
+    MulNX::Memory::DllModule client{};
+    MulNX::Memory::DllModule engine2{};
+    MulNX::Memory::DllModule tier0{};
 };
 
 class Views {
@@ -34,7 +34,8 @@ private:
     std::atomic<float> CSFOV;
     std::atomic<bool> IsInCameraSystemOverride = false;
     // 逆向层关键接口
-    void* CmdInterface = nullptr;
+    void* Source2EngineToClient001 = nullptr;
+    VExecutor<void(int, const char*, int)> executor{};
     // 逆向层数据备份
     C_ConVarSystem CvarSystem{};
     C_GlobalVars CSGlobalVars{};
@@ -56,7 +57,6 @@ public:
     bool Init()override;
     void VirtualMain()override;
     void ProcessMsg(MulNX::Message* Msg)override;
-    void InitInterface();
     void ThreadMain()override;
     // 核心任务
     std::atomic<int> GetMsgResult = 0;

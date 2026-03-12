@@ -53,3 +53,12 @@ namespace MulNX {
         const std::source_location& loc = std::source_location::current());
 }
 class MulNXUINode;
+
+// 辅助模板：将函数签名 R(Args...) 转换为对应的函数指针类型 R(*)(Args...)
+template<typename T>
+struct MulNXFunc;
+
+template<typename R, typename... Args>
+struct MulNXFunc<R(Args...)> {
+    using type = R(*)(Args...);
+};

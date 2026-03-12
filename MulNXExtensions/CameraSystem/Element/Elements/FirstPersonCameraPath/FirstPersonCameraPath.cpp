@@ -41,17 +41,15 @@ std::string FirstPersonCameraPath::GetMsg()const {
 }
 
 
-bool FirstPersonCameraPath::ReadElementMain(const pugi::xml_node& node_ElementMain, std::string& strRuselt) {
+std::pair<bool, std::string> FirstPersonCameraPath::ReadElementMain(const pugi::xml_node& node_ElementMain) {
     pugi::xml_node node_Target = node_ElementMain.child("Target");
-    if (!node_Target) {
-        strRuselt = "找不到Target节点！ 元素名：" + this->Name;
-        return false;
-	}
-	this->TargetPlayerIndexInMap = static_cast<uint8_t>(node_Target.attribute("PlayerIndex").as_int());
+    if (!node_Target)return { false,"找不到Target节点！ 元素名：" + this->Name };
+    
+    this->TargetPlayerIndexInMap = static_cast<uint8_t>(node_Target.attribute("PlayerIndex").as_int());
 	this->StartTime = node_Target.attribute("StartTime").as_float();
 	this->EndTime = node_Target.attribute("EndTime").as_float();
 
-	return true;
+    return { true,"成功读取第一人称摄像机轨道：" + this->Name };
 }
 bool FirstPersonCameraPath::SaveToXML(const std::filesystem::path& FolderPath, std::string& strRuselt)const {
     if (FolderPath.empty()) {

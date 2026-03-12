@@ -1,18 +1,19 @@
 ﻿#include "ConVarSystem.hpp"
 
 #include <string.h>
-
+#include <MulNXExtensions/WinExt/WinExt.hpp>
 
 void* C_ConVarSystem::GetFirstCvarIterator(uint64_t& idx)const {
-	return vmt::CallVirtual<void*>(12, this->Address, &idx);
+    static auto exec = IVClass::Assume(this->Address)->GetVFunc<void* (uint64_t&)>(12);
+    return exec(idx);
 }
 void* C_ConVarSystem::GetNextCvarIterator(uint64_t& idx)const {
-	return vmt::CallVirtual<void*>(13, this->Address, &idx, idx);
+    static auto exec = IVClass::Assume(this->Address)->GetVFunc<void* (uint64_t&, uint64_t)>(13);
+    return exec(idx, idx);
 }
 C_ConVar* C_ConVarSystem::GetCVarByIndex(uint64_t index)const {
-    C_ConVar* pCvar = nullptr;
-    pCvar = vmt::CallVirtual<C_ConVar*>(43, this->Address, index);
-    return pCvar;
+    static auto exec = IVClass::Assume(this->Address)->GetVFunc<C_ConVar * (uint64_t)>(43);
+    return exec(index);
 }
 C_ConVar* C_ConVarSystem::GetCVarByName(const char* var_name)const {
 	uint64_t i = 0;

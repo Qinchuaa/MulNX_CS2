@@ -261,23 +261,21 @@ bool ElementManager::Element_LoadFromXML_Pre(const std::filesystem::path& FullPa
         this->ISys().LogError("尝试从XML文件加载元素失败，无法创建指定类型的元素实例！ 元素类型：" + NewElementTypeString);
         return false;
     }
-    //设置元素类型
+    // 设置元素类型
     pElement->Type = NewElementType;
-    //重设名称
+    // 重设名称
     pElement->ResetName(NewElementName);
-    //统一加载信息
-    std::string strRuselt;
-    if (pElement->ReadElementMain(node_ElementMain, strRuselt)) {
-        pElement->Refresh();
-        pElement->Dirty = false;//刚刚进入内存，非脏
-        this->ISys().LogSucc(std::move(strRuselt));
-        this->Elements.push_back(std::move(pElement));
-        return true;
-    }
-    else {
-        this->ISys().LogError(std::move(strRuselt));
+    // 统一加载信息
+    auto [ok, msg] = pElement->ReadElementMain(node_ElementMain);
+    if (!ok) {
+        this->ISys().LogError(std::move(msg));
         return false;
     }
+    pElement->Refresh();
+    pElement->Dirty = false;// 刚刚进入内存，非脏
+    this->ISys().LogSucc(std::move(msg));
+    this->Elements.push_back(std::move(pElement));
+    return true;
 }
 bool ElementManager::Element_Delete(const std::string& Name) {
     // 安全检查
