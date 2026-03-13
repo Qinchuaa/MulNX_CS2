@@ -3,7 +3,7 @@
 #include "../Core.hpp"
 #include "../ModuleManager/ModuleManager.hpp"
 
-#include "../../Systems/Systems.hpp"
+#include "../../Systems/ISystems.hpp"
 
 #include <MulNXThirdParty/All_ImGui.hpp>
 
@@ -65,7 +65,7 @@ bool MulNX::ModuleBase::CreateUINode() {
         // 注册UI句柄
         MulNXHandle hUINode = this->Core->IHandleSystem().RegisteUnique(std::move(UINode));
         // 创建UI消息并设置句柄
-        MulNX::Message Msg("UISystem_ModulePush"_hash);
+        MulNX::Message Msg("UISystem/ModulePush"_hash);
         Msg.Handle = hUINode;
         // 发送UI消息
         this->ISys().PublishAsync(std::move(Msg));

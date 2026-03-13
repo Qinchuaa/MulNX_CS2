@@ -4,10 +4,10 @@
 
 
 //拷贝语义版
-void FreeCameraPath::AddKeyframe(const MulNX::Base::Math::CameraKeyFrame& KeyFrame) {
+void FreeCameraPath::AddKeyframe(const MulNX::Math::CameraKeyFrame& KeyFrame) {
 	//按照时间排序插入
     auto it = std::lower_bound(CameraKeyFrames.begin(), CameraKeyFrames.end(), KeyFrame,
-        [&](const MulNX::Base::Math::CameraKeyFrame& a, const MulNX::Base::Math::CameraKeyFrame& b) {//引用捕获加速
+        [&](const MulNX::Math::CameraKeyFrame& a, const MulNX::Math::CameraKeyFrame& b) {//引用捕获加速
             return a.KeyTime < b.KeyTime;
         });
     CameraKeyFrames.insert(it, KeyFrame); // 拷贝插入
@@ -16,10 +16,10 @@ void FreeCameraPath::AddKeyframe(const MulNX::Base::Math::CameraKeyFrame& KeyFra
     return;
 }
 //移动语义版
-void FreeCameraPath::AddKeyframe(MulNX::Base::Math::CameraKeyFrame&& KeyFrame) {
+void FreeCameraPath::AddKeyframe(MulNX::Math::CameraKeyFrame&& KeyFrame) {
 	//按照时间排序插入
     auto it = std::lower_bound(CameraKeyFrames.begin(), CameraKeyFrames.end(), KeyFrame,
-        [&](const MulNX::Base::Math::CameraKeyFrame& a, const MulNX::Base::Math::CameraKeyFrame& b) {//引用捕获加速
+        [&](const MulNX::Math::CameraKeyFrame& a, const MulNX::Math::CameraKeyFrame& b) {//引用捕获加速
             return a.KeyTime < b.KeyTime;
         });
     CameraKeyFrames.insert(it, std::move(KeyFrame)); // 移动插入
@@ -77,7 +77,7 @@ bool FreeCameraPath::Call(CameraSystemIO* IO)const {
 
     //查找当前时间所在的关键帧区间（使用绝对时间来搜索以匹配以绝对时间存储的关键帧）
     auto it = std::lower_bound(CameraKeyFrames.begin(), CameraKeyFrames.end(), Time,
-        [](const MulNX::Base::Math::CameraKeyFrame& k, float t) {
+        [](const MulNX::Math::CameraKeyFrame& k, float t) {
             return k.KeyTime < t;
         });
 
@@ -89,10 +89,10 @@ bool FreeCameraPath::Call(CameraSystemIO* IO)const {
     if (index + 1 >= this->Size_Frames) return false;
 
     //获取相邻的四个关键帧用于插值
-    const MulNX::Base::Math::CameraKeyFrame& k1 = CameraKeyFrames[index];
-    const MulNX::Base::Math::CameraKeyFrame& k2 = CameraKeyFrames[index + 1];
-    const MulNX::Base::Math::CameraKeyFrame& k0 = (index > 0) ? CameraKeyFrames[index - 1] : k1;
-    const MulNX::Base::Math::CameraKeyFrame& k3 = (index + 2 < this->Size_Frames) ? CameraKeyFrames[index + 2] : k2;
+    const MulNX::Math::CameraKeyFrame& k1 = CameraKeyFrames[index];
+    const MulNX::Math::CameraKeyFrame& k2 = CameraKeyFrames[index + 1];
+    const MulNX::Math::CameraKeyFrame& k0 = (index > 0) ? CameraKeyFrames[index - 1] : k1;
+    const MulNX::Math::CameraKeyFrame& k3 = (index + 2 < this->Size_Frames) ? CameraKeyFrames[index + 2] : k2;
 
     //计算当前片段的时间比例 (0~1)
     float segmentDuration = k2.KeyTime - k1.KeyTime;
@@ -131,7 +131,7 @@ bool FreeCameraPath::Call(CameraSystemIO* IO)const {
 }
 //绘制函数（虚），各个元素按需实现
 bool FreeCameraPath::Draw(CameraDrawer* CamDrawer, const float* Matrix, const float WinWidth, const float WinHeight)const {
-    const std::vector<MulNX::Base::Math::CameraKeyFrame>& Frames = this->GetAllKeyFrames();
+    const std::vector<MulNX::Math::CameraKeyFrame>& Frames = this->GetAllKeyFrames();
     int Size = Frames.size();
 
     // 存储上一个关键帧的位置（用于连线）
@@ -155,9 +155,9 @@ bool FreeCameraPath::Draw(CameraDrawer* CamDrawer, const float* Matrix, const fl
             DirectX::XMFLOAT2 prevScreenPos, currentScreenPos;
 
             // 使用CameraDrawer中的转换方法
-            MulNX::Base::Math::XMWorldToScreen(prevPosition, prevScreenPos, Matrix, WinWidth, WinHeight);
+            MulNX::Math::XMWorldToScreen(prevPosition, prevScreenPos, Matrix, WinWidth, WinHeight);
 
-            MulNX::Base::Math::XMWorldToScreen(Frame.SpatialState.GetPosition(), currentScreenPos, Matrix, WinWidth, WinHeight);
+            MulNX::Math::XMWorldToScreen(Frame.SpatialState.GetPosition(), currentScreenPos, Matrix, WinWidth, WinHeight);
 
             // 绘制连线
             drawList->AddLine(
@@ -181,9 +181,9 @@ std::string FreeCameraPath::GetMsg()const {
     const size_t& Size = this->CameraKeyFrames.size();
     oss << "  关键帧总数： " << std::to_string(Size) << "\n";
     for (size_t i = 0; i < Size; ++i) {
-        const MulNX::Base::Math::CameraKeyFrame& Frame = this->CameraKeyFrames.at(i);
+        const MulNX::Math::CameraKeyFrame& Frame = this->CameraKeyFrames.at(i);
         DirectX::XMFLOAT3 Euler;
-        MulNX::Base::Math::CSQuatToEuler(Frame.SpatialState.GetRotationQuat(), Euler);
+        MulNX::Math::CSQuatToEuler(Frame.SpatialState.GetRotationQuat(), Euler);
         oss << "编号： " << std::to_string(i) << Frame.GetMsg() << "\n";
     }
 	return oss.str();
@@ -192,10 +192,10 @@ std::string FreeCameraPath::GetMsg()const {
 size_t FreeCameraPath::GetKeyFrameCount() const {
     return this->CameraKeyFrames.size();
 }
-const MulNX::Base::Math::CameraKeyFrame& FreeCameraPath::GetKeyFrame(const size_t& index)const {
+const MulNX::Math::CameraKeyFrame& FreeCameraPath::GetKeyFrame(const size_t& index)const {
     return this->CameraKeyFrames[index];
 }
-const std::vector<MulNX::Base::Math::CameraKeyFrame>& FreeCameraPath::GetAllKeyFrames()const {
+const std::vector<MulNX::Math::CameraKeyFrame>& FreeCameraPath::GetAllKeyFrames()const {
     return this->CameraKeyFrames;
 }
 void FreeCameraPath::Clear() {
@@ -211,7 +211,7 @@ std::pair<bool, std::string> FreeCameraPath::ReadElementMain(const pugi::xml_nod
     this->Clear();
     // 读取流程
     for (const auto& node_KeyFrame : node_ElementMain.children("KeyFrame")) {
-        MulNX::Base::Math::CameraKeyFrame CameraKeyFrame;
+        MulNX::Math::CameraKeyFrame CameraKeyFrame;
         // 读取时间
         CameraKeyFrame.KeyTime = node_KeyFrame.attribute("Time").as_float();
 
@@ -233,7 +233,7 @@ std::pair<bool, std::string> FreeCameraPath::ReadElementMain(const pugi::xml_nod
             node_KeyFrame.attribute("Roll").as_float()
         };
         DirectX::XMFLOAT4 temQuat;
-        MulNX::Base::Math::CSEulerToQuat(temEuler, temQuat);
+        MulNX::Math::CSEulerToQuat(temEuler, temQuat);
 
         CameraKeyFrame.SpatialState.RotationQuat = DirectX::XMLoadFloat4(&temQuat);
 
@@ -242,16 +242,14 @@ std::pair<bool, std::string> FreeCameraPath::ReadElementMain(const pugi::xml_nod
 
     return { true,"成功从XML文件加载自由摄像机轨道信息！ 自由摄像机轨道 名：" + this->Name };
 }
-bool FreeCameraPath::SaveToXML(const std::filesystem::path& FolderPath, std::string& strRuselt)const {
-    if (FolderPath.empty()) {
-        strRuselt = "文件夹路径为空，无法保存元素到XML文件！";
-        return false;
-    }
+std::pair<bool, std::string> FreeCameraPath::SaveToXML(const std::filesystem::path& FolderPath)const {
+    if (FolderPath.empty())return { false,"文件夹路径为空，无法保存元素到XML文件！" };
+    
     pugi::xml_document XML;
     pugi::xml_node node_ElementMain;
-    if (!this->SaveBase(XML, node_ElementMain, strRuselt)) {
-		return false;
-    }
+    auto [ok, msg] = this->SaveBase(XML, node_ElementMain);
+    if (!ok) return { false,std::move(msg) };
+    
     std::filesystem::path FullPath = FolderPath / (this->Name + ".xml");
     // 添加注释
     //node_ElementMain.append_child(pugi::node_comment).set_value("采用欧拉角存储角度，但工具实际使用四元数系统，如果你觉得加载速度慢，可以向作者反馈");
@@ -282,10 +280,7 @@ bool FreeCameraPath::SaveToXML(const std::filesystem::path& FolderPath, std::str
         //node_KeyFrame.append_attribute("Depth") = Frame.Depth;
     }
     // 保存XML到文件
-    if (!XML.save_file(FullPath.c_str())) {
-        strRuselt = "尝试保存自由摄像机轨道到XML文件失败，无法保存XML文件！ 文件路径：" + FullPath.string();
-        return false;
-    }
-    strRuselt = "成功保存自由摄像机轨道到XML文件！ 文件路径：" + FullPath.string();
-    return true;
+    if (!XML.save_file(FullPath.c_str()))return { false,"尝试保存自由摄像机轨道到XML文件失败，无法保存XML文件！ 文件路径：" + FullPath.string() };
+    
+    return { true,"成功保存自由摄像机轨道到XML文件！ 文件路径：" + FullPath.string() };
 }

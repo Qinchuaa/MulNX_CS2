@@ -13,12 +13,12 @@ bool VirtualUser::Init() {
     this->MainMsgChannel = this->ICreateAndGetMessageChannel();
     this->ISys()
 #ifdef _DEBUG
-        .SubscribeAsync("Core_Tick30min")
+        .SubscribeAsync("Core/Tick30min")
 #endif // _DEBUG
-        .SubscribeAsync("Core_Tick60")
-        .SubscribeAsync("CameraSystem_PlayingShutdown")
-        .SubscribeAsync("Command_SpecPlayer")
-        .SubscribeAsync("Game_NewRound");
+        .SubscribeAsync("Core/Tick60")
+        .SubscribeAsync("CameraSystem/Play/Shutdown")
+        .SubscribeAsync("Command/SpecPlayer")
+        .SubscribeAsync("Game/NewRound");
     return true;
 }
 void VirtualUser::Menu() {
@@ -73,36 +73,36 @@ void VirtualUser::VirtualMain() {
 
 void VirtualUser::ProcessMsg(MulNX::Message* Msg) {
     if (!this->Running)return;
-    switch (Msg->Type) {
-    case "Game_NewRound"_hash: {
+    switch (Msg->type) {
+    case "Game/NewRound"_hash: {
         this->ISys().LogInfo("接收到新回合信息");
         this->CameraSystem->CallSolution(*Msg);
         break;
     }
-    case "CameraSystem_PlayingShutdown"_hash: {
+    case "CameraSystem/Play/Shutdown"_hash: {
         // 处理播放停止消息
         this->ISys().LogInfo("接收到摄像机系统播放停止信息");
         this->CameraSystem->ShutDown();
         break;
     }
-    case "Core_Tick1"_hash: {
+    case "Core/Tick1"_hash: {
         // this->Debugger->AddInfo("一秒");
         break;
     }
-    case "Core_Tick60"_hash: {
+    case "Core/Tick60"_hash: {
         this->CameraSystem->Save();
         this->ISys().LogInfo("已触发自动保存（频率：每分钟）");
         break;
     }
 #ifdef _DEBUG
-    case "Core_Tick30min"_hash: {
+    case "Core/Tick30min"_hash: {
         this->AL3D->ExecuteCommand("playdemo 111");
         break;
     }
 #endif // _DEBUG
-    case "Command_SpecPlayer"_hash: {
+    case "Command/SpecPlayer"_hash: {
         this->CameraSystem->ShutDown();
-        this->AL3D->SpecPlayer(Msg->ParamInt);
+        this->AL3D->SpecPlayer(Msg->p1.i);
         break;
     }
     default: {

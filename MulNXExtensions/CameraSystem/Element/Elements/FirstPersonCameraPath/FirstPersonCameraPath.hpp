@@ -27,5 +27,5 @@ public:
     //加载信息函数（虚），注意这不是创建而是加载
     std::pair<bool, std::string> ReadElementMain(const pugi::xml_node& node_ElementMain)override final;
     //保存函数（虚）
-    bool SaveToXML(const std::filesystem::path& FolderPath, std::string& strRuselt)const override final;
+    std::pair<bool, std::string> SaveToXML(const std::filesystem::path& FolderPath)const override final;
 };

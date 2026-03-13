@@ -7,18 +7,18 @@ namespace MulNX {
 	class HandleSystem final :public IHandleSystem {
 	private:
 		std::shared_mutex MapMutex{};
-		std::unordered_map<MulNXHandle, MulNX::Base::any_unique_ptr>UniqueResources{};
-		std::unordered_map<MulNXHandle, MulNX::Base::any_shared_ptr>SharedResources{};
+		std::unordered_map<MulNXHandle, MulNX::any_unique_ptr>UniqueResources{};
+		std::unordered_map<MulNXHandle, MulNX::any_shared_ptr>SharedResources{};
 	public:
 		bool Init()override;
 
 		// 注册句柄，传入任意类型的资源，返回对应的句柄
-		MulNXHandle RegisteUnique(MulNX::Base::any_unique_ptr Resource)override;
+		MulNXHandle RegisteUnique(MulNX::any_unique_ptr Resource)override;
 		// 释放句柄，返回对应的资源所有权
-		MulNX::Base::any_unique_ptr ReleaseUnique(MulNXHandle Handle)override;
+		MulNX::any_unique_ptr ReleaseUnique(MulNXHandle Handle)override;
 		// 注册共享句柄，传入任意类型的资源，返回对应的句柄
-		MulNXHandle RegisteShared(MulNX::Base::any_shared_ptr Resource)override;
+		MulNXHandle RegisteShared(MulNX::any_shared_ptr Resource)override;
 		// 获取共享句柄，返回对应的资源共享指针
-		MulNX::Base::any_shared_ptr GetShared(MulNXHandle Handle)override;
+		MulNX::any_shared_ptr GetShared(MulNXHandle Handle)override;
 	};
 }

@@ -4,7 +4,7 @@
 #include "../MulNXGlobalVars/MulNXGlobalVars.hpp"
 
 #include "../../Core/Cores.hpp"
-#include "../../Systems/Systems.hpp"
+#include "../../Systems/ISystems.hpp"
 
 #include <bitset>
 bool MySaveStringToFile(const std::string& data,
@@ -21,17 +21,17 @@ bool MySaveStringToFile(const std::string& data,
 bool MulNX::Debugger::Init() {
     this->MainMsgChannel = this->ICreateAndGetMessageChannel();
     this->ISys()
-        .SubscribeAsync("Debugger_SetMaxInfoCount")
-        .SubscribeAsync("Debugger_SaveToFile");
+        .SubscribeAsync("Debugger/SetMaxInfoCount")
+        .SubscribeAsync("Debugger/SaveToFile");
     this->NeedUINode = true;
     return true;
 }
 void MulNX::Debugger::ProcessMsg(MulNX::Message* Msg) {
-    switch (Msg->Type) {
-    case "Debugger_SetMaxInfoCount"_hash: {
-        this->ResetMaxMsgCount(Msg->ParamInt);
+    switch (Msg->type) {
+    case "Debugger/SetMaxInfoCount"_hash: {
+        this->ResetMaxMsgCount(Msg->p1.i);
     }
-    case "Debugger_SaveToFile"_hash: {
+    case "Debugger/SaveToFile"_hash: {
         this->SaveToFile();
     }
     }

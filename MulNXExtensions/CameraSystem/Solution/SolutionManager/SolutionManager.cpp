@@ -88,14 +88,12 @@ bool SolutionManager::Solution_SaveAll() {
         if (!solution->Dirty) {
             continue;//不脏不需保存
         }
-        std::string Ruselt;
-        if (solution->SaveToXML(SolutionFolderPath, Ruselt)) {
-            this->ISys().LogSucc(Ruselt);
-        }
-        else {
-            this->ISys().LogError(Ruselt);
+        auto [ok, msg] = solution->SaveToXML(SolutionFolderPath);
+        if (!ok) {
+            this->ISys().LogError(msg);
             return false;
         }
+        this->ISys().LogSucc(msg);
     }
     this->ISys().LogSucc("成功保存所有解决方案到XML文件！");
     return true;
@@ -128,7 +126,8 @@ bool SolutionManager::Solution_LoadFromXML(const std::filesystem::path& FullPath
     //打开XML文件并检验结果
     pugi::xml_parse_result result = NewXML.load_file(FullPath.c_str());
     if (!result) {
-        this->ISys().LogError("尝试从XML文件加载解决方案失败，无法加载XML文件！ 文件路径：" + FullPath.string() +
+        this->ISys().LogError(
+            "尝试从XML文件加载解决方案失败，无法加载XML文件！ 文件路径：" + FullPath.string() +
             "\n     错误描述：" + result.description());
         return false;
     }
@@ -457,12 +456,12 @@ void SolutionManager::Solution_DebugWindow() {
         }
 
         if (ImGui::Button("保存到XML文件")) {
-            std::string SaveResult;
-            if (this->CurrentSolution->SaveToXML(this->ISys().PathManager()->PathGetFromKey("Solutions"), SaveResult)) {
-                this->ISys().LogSucc(SaveResult);
+            auto [ok, msg] = this->CurrentSolution->SaveToXML(this->ISys().PathManager()->PathGetFromKey("Solutions"));
+            if (ok) {
+                this->ISys().LogSucc(std::move(msg));
             }
             else {
-                this->ISys().LogError(SaveResult);
+                this->ISys().LogError(std::move(msg));
             }
         }
 

@@ -37,9 +37,9 @@ void ElementDebugger::DebugMenu_FreeCameraPath(FreeCameraPath* const FreeCamPath
     ImGui::Text(FreeCamPath->GetMsg().c_str());
 
     if (ImGui::Button("添加关键帧") || this->KT->CheckComboClick(VK_CAPITAL, 1)) {
-        MulNX::Base::Math::CameraKeyFrame Frame;
+        MulNX::Math::CameraKeyFrame Frame;
         Frame.KeyTime = this->AL3D->GetTime();
-        Frame.SpatialState = this->AL3D->GetSpatialState();
+        Frame.SpatialState = this->AL3D->GetView().ToSpatialState();
         FreeCamPath->AddKeyframe(Frame);
     }
 
@@ -67,7 +67,7 @@ void ElementDebugger::DebugMenu_FreeCameraPath(FreeCameraPath* const FreeCamPath
     ImGui::InputInt("要调整的关键帧", &IndexForReset);
 
     if (0 <= IndexForReset && IndexForReset < FreeCamPath->CameraKeyFrames.size()) {
-        const MulNX::Base::Math::CameraKeyFrame& Frame = FreeCamPath->GetKeyFrame(IndexForReset);
+        const MulNX::Math::CameraKeyFrame& Frame = FreeCamPath->GetKeyFrame(IndexForReset);
         ImGui::Text(("关键帧信息： 编号： " + std::to_string(IndexForReset) + Frame.GetMsg()).c_str());
 
         ImGui::Separator();
@@ -92,14 +92,14 @@ void ElementDebugger::DebugMenu_FreeCameraPath(FreeCameraPath* const FreeCamPath
         this->CamDrawer->DrawCamera(DirectX::XMFLOAT3{ tempPositionAndFOV.x,tempPositionAndFOV.y ,tempPositionAndFOV.z }, tempRotationEuler, "目标摄像机关键帧");
         if (ImGui::Button("修改")) {
             //构造临时摄像机关键帧
-            MulNX::Base::Math::CameraKeyFrame tempKey;
+            MulNX::Math::CameraKeyFrame tempKey;
             //注入时间
             tempKey.KeyTime = temptime;
             //注入位置和FOV
             tempKey.SpatialState.PositionAndFOV = DirectX::XMLoadFloat4(&tempPositionAndFOV);
             //转换角度并注入
             DirectX::XMFLOAT4 tempRotationQuat;
-            MulNX::Base::Math::CSEulerToQuat(tempRotationEuler, tempRotationQuat);
+            MulNX::Math::CSEulerToQuat(tempRotationEuler, tempRotationQuat);
             tempKey.SpatialState.RotationQuat = DirectX::XMLoadFloat4(&tempRotationQuat);
             //擦除旧关键帧
             FreeCamPath->CameraKeyFrames.erase(FreeCamPath->CameraKeyFrames.begin() + IndexForReset);

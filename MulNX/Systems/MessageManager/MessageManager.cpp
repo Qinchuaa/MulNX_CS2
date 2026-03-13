@@ -14,46 +14,46 @@ MulNX::MessageManager& MulNX::MessageManager::DeclareType(const std::string& Typ
     }
     else {
         MulNX::ErrorTerminate(
-            std::string("哈希碰撞!") +
+            std::string("哈希碰撞!"
             "\n想要声明的: " + Type +
-            "\n已有的: " + it->second.RawString);
+            "\n已有的: " + it->second.RawString));
     }
 }
 
 bool MulNX::MessageManager::Init() {
     this->NeedThread(10);
     (*this)
-        .DeclareType("Core_Begin")
-        .DeclareType("Core_Shutdown")
-        .DeclareType("Core_Tick1")
-        .DeclareType("Core_Tick5")
-        .DeclareType("Core_Tick10")
-        .DeclareType("Core_Tick15")
-        .DeclareType("Core_Tick20")
-        .DeclareType("Core_Tick30")
-        .DeclareType("Core_Tick45")
-        .DeclareType("Core_Tick60")
-        .DeclareType("Core_Tick30min")
-        .DeclareType("Core_ReHook")
-        .DeclareType("Debugger_SetMaxInfoCount")
-        .DeclareType("Debugger_SaveToFile")
-        .DeclareType("ModuleManager_RequestModuleInfo")
-        .DeclareType("ModuleManager_ResponseModuleInfo")
-        .DeclareType("UISystem_Start")
-        .DeclareType("UISystem_UIPull")
-        .DeclareType("UISystem_ModulePush")
-        .DeclareType("UISystem_UIRequest")
-        .DeclareType("UISystem_UICommand")
-        .DeclareType("UISystem_ModuleResponse")
-        .DeclareType("Game_NewRound")
-        .DeclareType("Game_RoundStart")
-        .DeclareType("Game_BombPlanted")
-        .DeclareType("Game_BombDefused")
-        .DeclareType("Game_Boomed")
-        .DeclareType("Game_RoundEnd")
-        .DeclareType("CameraSystem_CallSolution")
-        .DeclareType("CameraSystem_PlayingShutdown")
-        .DeclareType("Command_SpecPlayer");
+        .DeclareType("Core/Begin")
+        .DeclareType("Core/Shutdown")
+        .DeclareType("Core/Tick1")
+        .DeclareType("Core/Tick5")
+        .DeclareType("Core/Tick10")
+        .DeclareType("Core/Tick15")
+        .DeclareType("Core/Tick20")
+        .DeclareType("Core/Tick30")
+        .DeclareType("Core/Tick45")
+        .DeclareType("Core/Tick60")
+        .DeclareType("Core/Tick30min")
+        .DeclareType("Core/ReHook")
+        .DeclareType("Debugger/SetMaxInfoCount")
+        .DeclareType("Debugger/SaveToFile")
+        .DeclareType("ModuleManager/RequestModuleInfo")
+        .DeclareType("ModuleManager/ResponseModuleInfo")
+        .DeclareType("UISystem/Start")
+        .DeclareType("UISystem/UIPull")
+        .DeclareType("UISystem/ModulePush")
+        .DeclareType("UISystem/UIRequest")
+        .DeclareType("UISystem/UICommand")
+        .DeclareType("UISystem/ModuleResponse")
+        .DeclareType("Game/NewRound")
+        .DeclareType("Game/RoundStart")
+        .DeclareType("Game/BombPlanted")
+        .DeclareType("Game/BombDefused")
+        .DeclareType("Game/Boomed")
+        .DeclareType("Game/RoundEnd")
+        .DeclareType("CameraSystem/Play/Solution")
+        .DeclareType("CameraSystem/Play/Shutdown")
+        .DeclareType("Command/SpecPlayer");
     return true;
 }
 
@@ -76,7 +76,7 @@ MulNX::IMessageChannel* MulNX::MessageManager::GetMessageChannel(const MulNXHand
 bool MulNX::MessageManager::Publish(Message&& Msg) {
     std::unique_lock lock(this->GetMutex());
 	// 检查是否存在管道订阅者
-    auto& SubscriberVector = this->MsgMap[Msg.Type].Subscribers;// 获取订阅者容器，这里不可能是空指针
+    auto& SubscriberVector = this->MsgMap[Msg.type].Subscribers;// 获取订阅者容器，这里不可能是空指针
     size_t size = SubscriberVector.size();
     if (size == 0)return false;
     --size;

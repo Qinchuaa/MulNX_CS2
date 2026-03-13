@@ -64,7 +64,7 @@ public:
     bool RemoveElementAt(const size_t Index);
 
     //将解决方案保存到XML文件(序列化，反序列化在SolutionManager)
-    bool SaveToXML(const std::filesystem::path& FolderPath, std::string& stRuselt);
+    std::pair<bool, std::string> SaveToXML(const std::filesystem::path& FolderPath);
 
     //清空数据
     void Clear();

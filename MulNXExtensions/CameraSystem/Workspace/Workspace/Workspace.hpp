@@ -1,11 +1,11 @@
 #pragma once
 
-#include"../../Element/ElementManager/ElementConfig.hpp"
-#include"../../Solution/SolutionManager/SolutionConfig.hpp"
-#include"../../Project/ProjectManager/ProjectConfig.hpp"
+#include "../../Element/ElementManager/ElementConfig.hpp"
+#include "../../Solution/SolutionManager/SolutionConfig.hpp"
+#include "../../Project/ProjectManager/ProjectConfig.hpp"
 
-#include<string>
-#include<filesystem>
+#include <string>
+#include <filesystem>
 
 class WorkspaceConfig {
 public:   
@@ -27,5 +27,5 @@ public:
 	}
 
 	//保存配置文件
-	bool SaveConfigToXML(const std::filesystem::path& FolderPath, std::string& strRuselt);
+    std::pair<bool, std::string> SaveConfigToXML(const std::filesystem::path& FolderPath);
 };

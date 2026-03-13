@@ -16,42 +16,42 @@ void CameraModel::Init(float CameraHigh, float CameraX, float CameraY, float Axi
 }
 
 void CameraModel::Rotate(const DirectX::XMFLOAT3& Rotation) {
-    this->Origin = MulNX::Base::Math::RotatePoint(this->Origin, Rotation.x, Rotation.y, Rotation.z);
+    this->Origin = MulNX::Math::RotatePoint(this->Origin, Rotation.x, Rotation.y, Rotation.z);
 
-    this->Lens[0] = MulNX::Base::Math::RotatePoint(this->Lens[0], Rotation.x, Rotation.y, Rotation.z);
-    this->Lens[1] = MulNX::Base::Math::RotatePoint(this->Lens[1], Rotation.x, Rotation.y, Rotation.z);
-    this->Lens[2] = MulNX::Base::Math::RotatePoint(this->Lens[2], Rotation.x, Rotation.y, Rotation.z);
-    this->Lens[3] = MulNX::Base::Math::RotatePoint(this->Lens[3], Rotation.x, Rotation.y, Rotation.z);
+    this->Lens[0] = MulNX::Math::RotatePoint(this->Lens[0], Rotation.x, Rotation.y, Rotation.z);
+    this->Lens[1] = MulNX::Math::RotatePoint(this->Lens[1], Rotation.x, Rotation.y, Rotation.z);
+    this->Lens[2] = MulNX::Math::RotatePoint(this->Lens[2], Rotation.x, Rotation.y, Rotation.z);
+    this->Lens[3] = MulNX::Math::RotatePoint(this->Lens[3], Rotation.x, Rotation.y, Rotation.z);
 
-    this->X = MulNX::Base::Math::RotatePoint(this->X, Rotation.x, Rotation.y, Rotation.z);
-    this->Y = MulNX::Base::Math::RotatePoint(this->Y, Rotation.x, Rotation.y, Rotation.z);
-    this->Z = MulNX::Base::Math::RotatePoint(this->Z, Rotation.x, Rotation.y, Rotation.z);
+    this->X = MulNX::Math::RotatePoint(this->X, Rotation.x, Rotation.y, Rotation.z);
+    this->Y = MulNX::Math::RotatePoint(this->Y, Rotation.x, Rotation.y, Rotation.z);
+    this->Z = MulNX::Math::RotatePoint(this->Z, Rotation.x, Rotation.y, Rotation.z);
 }
 
 void CameraModel::Move(const DirectX::XMFLOAT3& TargetPoint) {
-    MulNX::Base::Math::MovePoint(this->Origin, TargetPoint);
+    MulNX::Math::MovePoint(this->Origin, TargetPoint);
 
-    MulNX::Base::Math::MovePoint(this->Lens[0], TargetPoint);
-    MulNX::Base::Math::MovePoint(this->Lens[1], TargetPoint);
-    MulNX::Base::Math::MovePoint(this->Lens[2], TargetPoint);
-    MulNX::Base::Math::MovePoint(this->Lens[3], TargetPoint);
+    MulNX::Math::MovePoint(this->Lens[0], TargetPoint);
+    MulNX::Math::MovePoint(this->Lens[1], TargetPoint);
+    MulNX::Math::MovePoint(this->Lens[2], TargetPoint);
+    MulNX::Math::MovePoint(this->Lens[3], TargetPoint);
 
-    MulNX::Base::Math::MovePoint(this->X, TargetPoint);
-    MulNX::Base::Math::MovePoint(this->Y, TargetPoint);
-    MulNX::Base::Math::MovePoint(this->Z, TargetPoint);
+    MulNX::Math::MovePoint(this->X, TargetPoint);
+    MulNX::Math::MovePoint(this->Y, TargetPoint);
+    MulNX::Math::MovePoint(this->Z, TargetPoint);
 }
 
 void CameraModel::ToScreen(const float* const pMatrix, const float WinWidth, const float WinHeight) {
-    MulNX::Base::Math::XMWorldToScreen(this->Origin, this->Origin2D, pMatrix, WinWidth, WinHeight);
+    MulNX::Math::XMWorldToScreen(this->Origin, this->Origin2D, pMatrix, WinWidth, WinHeight);
 
-    MulNX::Base::Math::XMWorldToScreen(this->Lens[0], this->Lens2D[0], pMatrix, WinWidth, WinHeight);
-    MulNX::Base::Math::XMWorldToScreen(this->Lens[1], this->Lens2D[1], pMatrix, WinWidth, WinHeight);
-    MulNX::Base::Math::XMWorldToScreen(this->Lens[2], this->Lens2D[2], pMatrix, WinWidth, WinHeight);
-    MulNX::Base::Math::XMWorldToScreen(this->Lens[3], this->Lens2D[3], pMatrix, WinWidth, WinHeight);
+    MulNX::Math::XMWorldToScreen(this->Lens[0], this->Lens2D[0], pMatrix, WinWidth, WinHeight);
+    MulNX::Math::XMWorldToScreen(this->Lens[1], this->Lens2D[1], pMatrix, WinWidth, WinHeight);
+    MulNX::Math::XMWorldToScreen(this->Lens[2], this->Lens2D[2], pMatrix, WinWidth, WinHeight);
+    MulNX::Math::XMWorldToScreen(this->Lens[3], this->Lens2D[3], pMatrix, WinWidth, WinHeight);
 
-    MulNX::Base::Math::XMWorldToScreen(this->X, this->X2D, pMatrix, WinWidth, WinHeight);
-    MulNX::Base::Math::XMWorldToScreen(this->Y, this->Y2D, pMatrix, WinWidth, WinHeight);
-    MulNX::Base::Math::XMWorldToScreen(this->Z, this->Z2D, pMatrix, WinWidth, WinHeight);
+    MulNX::Math::XMWorldToScreen(this->X, this->X2D, pMatrix, WinWidth, WinHeight);
+    MulNX::Math::XMWorldToScreen(this->Y, this->Y2D, pMatrix, WinWidth, WinHeight);
+    MulNX::Math::XMWorldToScreen(this->Z, this->Z2D, pMatrix, WinWidth, WinHeight);
 }
 
 void CameraModel::Draw(const char* Label) {
@@ -117,7 +117,7 @@ void CameraDrawer::DrawCamera(DirectX::XMFLOAT3 Position, DirectX::XMFLOAT3 Rota
     this->CameraModel.DrawCamera(Position, Rotation, label, this->pMatrixPtr, this->WinWidth, this->WinHeight);
 }
 
-void CameraDrawer::DrawFrameCamera(const MulNX::Base::Math::Frame& frame, const char* label) {
+void CameraDrawer::DrawFrameCamera(const MulNX::Math::Frame& frame, const char* label) {
     auto Rotation = frame.SpatialState.GetRotationEuler();
     auto Position = frame.SpatialState.GetPosition();
     this->DrawCamera(Position, Rotation, label);
@@ -156,9 +156,9 @@ void CameraDrawer::DrawFrameCamera(const MulNX::Base::Math::Frame& frame, const 
 
 //     // 将模型直接投影到屏幕（使用固定矩阵）
 //     DirectX::XMFLOAT2 origin2D, lens2D[4];
-//     MulNX::Base::Math::XMWorldToScreen(fpOrigin, origin2D, (float*)&identityMatrix, this->WinWidth, this->WinHeight);
+//     MulNX::Math::XMWorldToScreen(fpOrigin, origin2D, (float*)&identityMatrix, this->WinWidth, this->WinHeight);
 //     for (int i = 0; i < 4; i++) {
-//         MulNX::Base::Math::XMWorldToScreen(fpLens[i], lens2D[i], (float*)&identityMatrix, this->WinWidth, this->WinHeight);
+//         MulNX::Math::XMWorldToScreen(fpLens[i], lens2D[i], (float*)&identityMatrix, this->WinWidth, this->WinHeight);
 //     }
 
 //     // 调整到屏幕中心

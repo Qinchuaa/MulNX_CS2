@@ -32,7 +32,7 @@ public:
     void Refresh();
 
     //保存项目到XML文件（加载在ProjectManager）
-    bool SaveToXML(const std::filesystem::path& FolderPath, std::string& strRuselt);
+    std::pair<bool, std::string> SaveToXML(const std::filesystem::path& FolderPath);
 
     //获取项目描述
     std::string GetDescription()const {

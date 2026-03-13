@@ -67,8 +67,8 @@ bool GameSettingsManager::UINodeFunc(MulNXUINode* ThisNode) {
                 DOFChange |= ImGui::SliderFloat("清晰半径", &this->dof.CrispRadius, 0, 5000);
                 DOFChange |= ImGui::SliderFloat("模糊距离", &this->dof.BlurDistance, 0, 5000);
                 if (DOFChange) {
-                    MulNX::Base::Math::DOFParam Param;
-                    MulNX::Base::Math::CalculateDOFParameters(this->dof.FocusDistance, this->dof.CrispRadius, this->dof.BlurDistance, Param);
+                    MulNX::Math::DOFParam Param;
+                    MulNX::Math::CalculateDOFParameters(this->dof.FocusDistance, this->dof.CrispRadius, this->dof.BlurDistance, Param);
 
                     *this->dof.r_dof_override_near_blurry = Param.NearBlurry;// 近模糊
                     *this->dof.r_dof_override_near_crisp = Param.NearCrisp;// 近清晰
@@ -209,8 +209,8 @@ void GameSettingsManager::ESPDraw() {
 		DirectX::XMFLOAT2 EyePos2D{};
 		DirectX::XMFLOAT2 OriginPos2D{};
 
-		MulNX::Base::Math::XMWorldToScreen(EyePos3D, EyePos2D, this->AL3D->GetViewMatrix(), this->AL3D->GetWinWidth(), this->AL3D->GetWinHeight());
-		MulNX::Base::Math::XMWorldToScreen(OriginPos3D, OriginPos2D, this->AL3D->GetViewMatrix(), this->AL3D->GetWinWidth(), this->AL3D->GetWinHeight());
+		MulNX::Math::XMWorldToScreen(EyePos3D, EyePos2D, this->AL3D->GetViewMatrix(), this->AL3D->GetWinWidth(), this->AL3D->GetWinHeight());
+		MulNX::Math::XMWorldToScreen(OriginPos3D, OriginPos2D, this->AL3D->GetViewMatrix(), this->AL3D->GetWinWidth(), this->AL3D->GetWinHeight());
 
 		const float hight{ ::abs(EyePos2D.y - OriginPos2D.y) * 1.25f };
 		const float width{ hight / 2.f };

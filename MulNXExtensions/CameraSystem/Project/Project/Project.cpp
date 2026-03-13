@@ -16,12 +16,10 @@ void Project::Refresh() {
     return;
 }
 
-bool Project::SaveToXML(const std::filesystem::path& FolderPath, std::string& strRuselt) {
+std::pair<bool, std::string> Project::SaveToXML(const std::filesystem::path& FolderPath) {
     //检查文件路径和名称存在性
-    if (FolderPath.empty()) {
-        strRuselt = "文件夹路径为空，无法保存解决方案！";
-        return false;
-    }
+    if (FolderPath.empty())return { false,"文件夹路径为空，无法保存解决方案！" };
+    
 
     //拼接完整路径
     std::filesystem::path FullPath = FolderPath / (this->Name + ".xml");
@@ -77,14 +75,9 @@ bool Project::SaveToXML(const std::filesystem::path& FolderPath, std::string& st
     }
 
     //保存XML文件到磁盘
-    if (!NewXML.save_file(FullPath.c_str())) {
-        strRuselt = "保存文件失败！路径：" + FullPath.string();
-        return false;
-    }
-
-    strRuselt = "保存成功  项目名：" + this->Name;
-
-    return true;
+    if (!NewXML.save_file(FullPath.c_str()))return { false,"保存文件失败！路径：" + FullPath.string() };
+    
+    return { true,"保存成功  项目名：" + this->Name };
 }
 
 std::string Project::GetMsg()const {

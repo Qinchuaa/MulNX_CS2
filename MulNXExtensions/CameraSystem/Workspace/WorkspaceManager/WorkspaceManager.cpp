@@ -85,13 +85,13 @@ bool WorkspaceManager::Workspace_ConfigSave() {
     if (!this->CurrentWorkspace) {
         return false;
     }
-    std::string strResult{};
-    if (this->CurrentWorkspace->SaveConfigToXML(this->ISys().PathManager()->PathGetFromKey("CurrentWorkspace"), strResult)) {
-        this->ISys().LogSucc(strResult);
+    auto [ok, msg] = this->CurrentWorkspace->SaveConfigToXML(this->ISys().PathManager()->PathGetFromKey("CurrentWorkspace"));
+    if (ok) {
+        this->ISys().LogSucc(std::move(msg));
         return true;
     }
     else {
-        this->ISys().LogError(strResult);
+        this->ISys().LogError(std::move(msg));
         return false;
     }
 }

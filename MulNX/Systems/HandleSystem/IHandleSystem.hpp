@@ -6,12 +6,12 @@ namespace MulNX {
 	class IHandleSystem :public ModuleBase {
 	public:
 		// 注册句柄，传入任意类型的资源，返回对应的句柄
-		virtual MulNXHandle RegisteUnique(MulNX::Base::any_unique_ptr Resource) = 0;
+		virtual MulNXHandle RegisteUnique(MulNX::any_unique_ptr Resource) = 0;
 		// 释放句柄，返回对应的资源所有权
-		virtual MulNX::Base::any_unique_ptr ReleaseUnique(MulNXHandle Handle) = 0;
+		virtual MulNX::any_unique_ptr ReleaseUnique(MulNXHandle Handle) = 0;
 		// 注册共享句柄，传入任意类型的资源，返回对应的句柄
-		virtual MulNXHandle RegisteShared(MulNX::Base::any_shared_ptr Resource) = 0;
+		virtual MulNXHandle RegisteShared(MulNX::any_shared_ptr Resource) = 0;
 		// 获取共享句柄，返回对应的资源共享指针
-		virtual MulNX::Base::any_shared_ptr GetShared(MulNXHandle Handle) = 0;
+		virtual MulNX::any_shared_ptr GetShared(MulNXHandle Handle) = 0;
 	};
 }

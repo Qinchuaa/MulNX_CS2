@@ -31,8 +31,8 @@ public:
 class CSController final :public MulNX::IAbstractLayer3D {
 private:
     std::atomic<std::shared_ptr<Views>> ViewToGame = nullptr;
-    std::atomic<float> CSFOV;
-    std::atomic<bool> IsInCameraSystemOverride = false;
+    std::atomic<float> outFOV;
+    std::atomic<float> atoRoll = 0;
     // 逆向层关键接口
     void* Source2EngineToClient001 = nullptr;
     VExecutor<void(int, const char*, int)> executor{};
@@ -55,6 +55,7 @@ public:
     void HandleOverrideView(void* ThisCViewSetup);
     //bool UINodeFunc(MulNXUINode* ThisNode)override;
     bool Init()override;
+    bool UINodeFunc(MulNXUINode* node)override;
     void VirtualMain()override;
     void ProcessMsg(MulNX::Message* Msg)override;
     void ThreadMain()override;
@@ -70,10 +71,9 @@ public:
 
 
     // 核心接口
-    void Execute(const char* cmd);
     bool ExecuteCommand(const std::string& cmd)override;
     float* GetViewMatrix()const override;
-    MulNX::Base::Math::SpatialState GetSpatialState()const;
+    MulNX::Math::View GetView()const override;
     float GetTime()const override;
     float GetWinWidth()const override;
     float GetWinHeight()const override;

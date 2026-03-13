@@ -51,16 +51,14 @@ std::pair<bool, std::string> FirstPersonCameraPath::ReadElementMain(const pugi::
 
     return { true,"成功读取第一人称摄像机轨道：" + this->Name };
 }
-bool FirstPersonCameraPath::SaveToXML(const std::filesystem::path& FolderPath, std::string& strRuselt)const {
-    if (FolderPath.empty()) {
-        strRuselt = "文件夹路径为空，无法保存元素到XML文件！";
-        return false;
-    }
+std::pair<bool, std::string> FirstPersonCameraPath::SaveToXML(const std::filesystem::path& FolderPath)const {
+    if (FolderPath.empty())return { false,"文件夹路径为空，无法保存元素到XML文件！" };
+    
     pugi::xml_document XML;
     pugi::xml_node node_ElementMain;
-    if (!this->SaveBase(XML, node_ElementMain, strRuselt)) {
-        return false;
-    }
+    auto [ok, msg] = this->SaveBase(XML, node_ElementMain);
+    if (!ok)return { false,std::move(msg) };
+    
     std::filesystem::path FullPath = FolderPath / (this->Name + ".xml");
     
     pugi::xml_node node_Target = node_ElementMain.append_child("Target");
@@ -70,10 +68,7 @@ bool FirstPersonCameraPath::SaveToXML(const std::filesystem::path& FolderPath, s
 	node_Target.append_attribute("EndTime") = this->EndTime;
 
     // 保存XML到文件
-    if (!XML.save_file(FullPath.c_str())) {
-        strRuselt = "尝试保存到XML文件失败，无法保存XML文件！ 文件路径：" + FullPath.string();
-        return false;
-    }
-    strRuselt = "成功保存到XML文件！ 文件路径：" + FullPath.string();
-    return true;
+    if (!XML.save_file(FullPath.c_str()))return { false,"尝试保存到XML文件失败，无法保存XML文件！ 文件路径：" + FullPath.string() };
+    
+    return { true,"成功保存到XML文件！ 文件路径：" + FullPath.string() };
 }

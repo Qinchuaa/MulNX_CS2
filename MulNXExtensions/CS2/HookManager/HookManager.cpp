@@ -50,7 +50,7 @@ void HookManager::ThreadMain() {
 		this->CreateHook();
 
 		//发送重新Hook消息
-		MulNX::Message Msg("Core_ReHook"_hash);
+		MulNX::Message Msg("Core/ReHook"_hash);
 		this->ISys().PublishAsync(std::move(Msg));
 
 		ReHook = false;
@@ -61,7 +61,7 @@ void HookManager::ThreadMain() {
 }
 
 void HookManager::ProcessMsg(MulNX::Message* Msg) {
-	switch (Msg->Type) {
+	switch (Msg->type) {
 
 	}
 	return;
@@ -286,7 +286,7 @@ ULONG __stdcall HookManager::MyRelease(IUnknown* pThis) {
 //if (ImGui::IsKeyPressed(ImGuiKey_K)) {
 //	TestPosition = this->Core->ModuleManager()->FindModule<CSController>("CSController")->GetLocalPlayer().GetPosition();
 //	TestRotationEuler = this->Core->ModuleManager()->FindModule<CSController>("CSController")->GetLocalPlayer().GetRotationEuler();
-//	MulNX::Base::Math::CSEulerToQuat(TestRotationEuler, TestRotation4);
+//	MulNX::Math::CSEulerToQuat(TestRotationEuler, TestRotation4);
 //}
 //
 //// 显示存储的测试值
@@ -300,7 +300,7 @@ ULONG __stdcall HookManager::MyRelease(IUnknown* pThis) {
 //	TestRotation4.x, TestRotation4.y, TestRotation4.z, TestRotation4.w);
 //
 //DirectX::XMFLOAT3 back{};
-//MulNX::Base::Math::CSQuatToEuler(TestRotation4, back);
+//MulNX::Math::CSQuatToEuler(TestRotation4, back);
 //ImGui::Text("回转欧拉角：X: %.6f, Y: %.6f, Z: %.6f",
 //	back.x, back.y, back.z);
 //

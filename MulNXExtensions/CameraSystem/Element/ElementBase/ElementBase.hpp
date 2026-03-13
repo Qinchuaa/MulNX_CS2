@@ -111,7 +111,7 @@ public:
     virtual std::pair<bool, std::string> ReadElementMain(const pugi::xml_node& node_ElementMain) = 0;
 
     //保存基础函数（元素类型，元素名称，持续时间（附加声明））
-    bool SaveBase(pugi::xml_document& doc, pugi::xml_node& node_ElementMain, std::string& strRuselt)const;
+    std::pair<bool, std::string> SaveBase(pugi::xml_document& doc, pugi::xml_node& node_ElementMain)const;
     //保存函数（虚）
-    virtual bool SaveToXML(const std::filesystem::path& FolderPath, std::string& strRuselt)const = 0;
+    virtual std::pair<bool, std::string> SaveToXML(const std::filesystem::path& FolderPath)const = 0;
 };

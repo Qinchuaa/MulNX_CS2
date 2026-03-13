@@ -73,11 +73,9 @@ bool ElementBase::Draw(CameraDrawer* CamDrawer, const float* Matrix, const float
     return true;
 }
 
-bool ElementBase::SaveBase(pugi::xml_document& doc, pugi::xml_node& node_ElementMain, std::string& strRuselt)const {
-    if (this->Name.empty()) {
-        strRuselt = "元素名为空，无法保存元素到XML文件！";
-        return false;
-    }
+std::pair<bool, std::string> ElementBase::SaveBase(pugi::xml_document& doc, pugi::xml_node& node_ElementMain)const {
+    if (this->Name.empty())return { false,"元素名为空，无法保存元素到XML文件！" };
+    
     //初始化
     pugi::xml_node declarationNode = doc.prepend_child(pugi::node_declaration);
     declarationNode.append_attribute("version") = "1.0";
@@ -92,7 +90,7 @@ bool ElementBase::SaveBase(pugi::xml_document& doc, pugi::xml_node& node_Element
     node_ElementMain = node_Element.append_child("ElementMain");
     node_ElementMain.append_attribute("DurationTime") = this->DurationTime;
 
-    return true;
+    return { true,{} };
 }
 
 float ElementBase::GetStartTime()const {

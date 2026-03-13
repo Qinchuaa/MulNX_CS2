@@ -17,7 +17,7 @@ public:
 	std::ostringstream GetMsg();
 
 	// 读取
-	MulNX::Base::Math::SpatialState GetSpatialState()const;
+	MulNX::Math::View GetView()const;
 	DirectX::XMFLOAT3 GetPosition();
 	DirectX::XMFLOAT3 GetRotationEuler();
 	float GetFov();

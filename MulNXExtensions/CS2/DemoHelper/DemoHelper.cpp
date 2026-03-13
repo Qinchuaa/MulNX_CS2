@@ -31,7 +31,7 @@ static void MyDraw(MulNXUINode* This) {
 			std::string str = "跳转##" + std::to_string(time);
 			if (ImGui::Button(str.c_str())) {
 				MulNX::Message Msg = This->CreateMsg(0x102);
-				Msg.ParamFloat = time;
+				Msg.p1.f = time;
 				This->SendToOwner(std::move(Msg));
 			}
 		}
@@ -44,18 +44,18 @@ static void MyDraw(MulNXUINode* This) {
 bool DemoHelper::Init() {
 	this->MainMsgChannel = this->ICreateAndGetMessageChannel();
 	this->ISys()
-		.SubscribeAsync("UISystem_UICommand");
+		.SubscribeAsync("UISystem/UICommand");
 
 	auto SingleContext = MulNXUINode::Create(this);
 	auto* SContextPtr = SingleContext.get<MulNXUINode>();	
     SContextPtr->name = "DemoHelper";
-    auto [Buffer, pBuffer] = MulNX::Base::make_any_unique<MulNX::Base::TripleBuffer<DemoHelperPrivateData>>();
+    auto [Buffer, pBuffer] = MulNX::make_any_unique<MulNX::Base::TripleBuffer<DemoHelperPrivateData>>();
     SContextPtr->pBuffer = std::move(Buffer);
 	SContextPtr->MyFunc = MyDraw;
 
 	this->hUINode = this->Core->IHandleSystem().RegisteUnique(std::move(SingleContext));
 
-	MulNX::Message Msg("UISystem_ModulePush"_hash);
+	MulNX::Message Msg("UISystem/ModulePush"_hash);
 	Msg.Handle = this->hUINode;
 	this->ISys().PublishAsync(std::move(Msg));
 
@@ -63,25 +63,25 @@ bool DemoHelper::Init() {
 }
 
 void DemoHelper::ProcessMsg(MulNX::Message* Msg) {
-	switch (Msg->Type) {
-        case "UISystem_UICommand"_hash: {
+	switch (Msg->type) {
+        case "UISystem/UICommand"_hash: {
 		this->ISys().LogSucc("测试成功");
 		this->HandleUICommand(Msg);
-		Msg->pMsgChannel->PushMessage(MulNX::Message("UISystem_ModuleResponse"_hash));
+		Msg->pMsgChannel->PushMessage(MulNX::Message("UISystem/ModuleResponse"_hash));
 		break;
 	}
 	}
 }
 
 void DemoHelper::HandleUICommand(MulNX::Message* Msg) {
-	switch (Msg->SubType) {
+	switch (Msg->p2.i) {
 	case 0x101: {
 		this->MarkTime();
 		ClickCount++;
 		break;
 	}
 	case 0x102: {
-		float data = Msg->ParamFloat;
+		float data = Msg->p1.f;
 		std::string str = "跳转到" + std::to_string(data);
 		this->ISys().LogInfo(str);
 	}

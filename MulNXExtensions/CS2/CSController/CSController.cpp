@@ -8,8 +8,8 @@
 #include <MulNXThirdParty/All_ImGui.hpp>
 #include <MulNXThirdParty/All_MinHook.hpp>
 
-
 void CSController::HandleOverrideView(void* ThisCViewSetup) {
+    // 定位关键数据
     int* pWidth = (int*)((unsigned char*)ThisCViewSetup + 0x434);
     int* pHeight = (int*)((unsigned char*)ThisCViewSetup + 0x43C);
 
@@ -17,28 +17,57 @@ void CSController::HandleOverrideView(void* ThisCViewSetup) {
     float* pViewOrigin = (float*)((unsigned char*)ThisCViewSetup + 0x4a0);
     float* pViewAngles = (float*)((unsigned char*)ThisCViewSetup + 0x4b8);
 
-    auto View = this->ViewToGame.load();
-    if (IsInCameraSystemOverride.load()) {
-        if (View != nullptr) {
-            pViewOrigin[0] = View->OriginX;
-            pViewOrigin[1] = View->OriginY;
-            pViewOrigin[2] = View->OriginZ;
+    // 加载来自摄像机系统的View
+    auto view = this->ViewToGame.load(std::memory_order_acquire);
+    // 如果处于摄像机轨道播放中
+    if (this->GlobalVars->CampathPlaying.load(std::memory_order_acquire)) {
+        if (view != nullptr) {
+            pViewOrigin[0] = view->OriginX;
+            pViewOrigin[1] = view->OriginY;
+            pViewOrigin[2] = view->OriginZ;
 
-            pViewAngles[0] = View->AnglesX;
-            pViewAngles[1] = View->AnglesY;
-            pViewAngles[2] = View->AnglesZ;
+            pViewAngles[0] = view->AnglesX;
+            pViewAngles[1] = view->AnglesY;
+            pViewAngles[2] = view->AnglesZ;
 
-            if (this->CSFOV.load() - 0 < 0.001f) {
-                this->CSFOV.store(90);
+            if (view->FOV > 0.01f) {
+                *pFov = view->FOV;
             }
 
-            *pFov = this->CSFOV.load();
+            this->atoRoll.store(view->AnglesZ, std::memory_order_release);
         }
+        return;
+    }
+    // 记录关键数据
+    if (*pFov < 0.01f) {
+        this->outFOV.store(90.0f, std::memory_order_release);
     }
     else {
-        this->CSFOV.store(*pFov);
+        this->outFOV.store(*pFov, std::memory_order_release);
     }
+    pViewAngles[2] = this->atoRoll.load(std::memory_order_acquire);
     return;
+}
+
+bool CSController::UINodeFunc(MulNXUINode* node) {
+    ImGui::Begin("CS摄像机控制");
+
+    auto roll = this->atoRoll.load(std::memory_order_acquire);
+    if (ImGui::SliderFloat("roll调整", &roll, -179, 179)) {
+        this->atoRoll.store(roll, std::memory_order_release);
+    }
+
+    auto* pGlobalFOV = this->CvarSystem.GetCvar("fov_cs_debug")->GetPtr<float>();
+    if (ImGui::SliderFloat("fov调整", pGlobalFOV, 0, 179));
+
+    if (ImGui::Button("一键归正")) {
+        this->atoRoll.store(0, std::memory_order_release);
+        *pGlobalFOV = 0;
+    }
+
+    ImGui::End();
+
+    return true;
 }
 
 int CSController::GetIndexInEntityListFromIndexInMap(int IndexInMap) {
@@ -51,42 +80,15 @@ int CSController::GetIndexInEntityListFromIndexInMap(int IndexInMap) {
     return -1;
 }
 
-void CSController::Execute(const char* cmd) {     
-    // 直接调用，自动传入对象指针
-    this->executor(0, cmd, 1);
 
-    return;
-}
-
-bool CSController::ExecuteCommand(const std::string& cmd) {
-    this->Execute(cmd.c_str());
-    return true;
-}
-float* CSController::GetViewMatrix()const {
-    return this->LocalPlayer.ViewMatrix;
-}
-MulNX::Base::Math::SpatialState CSController::GetSpatialState()const {
-    //std::shared_lock lock(this->MyThreadMutex);
-    auto state = this->LocalPlayer.GetSpatialState();
-    return state;
-}
-float CSController::GetTime()const {
-    float time = 0;
-    uintptr_t GlobalVarsPointer = this->CSGlobalVars.GetCurrentTimePointer();
-    MulNX::Memory::Read<float>(GlobalVarsPointer, time);
-    return time;
-}
 
 void CSController::VirtualMain() {
     this->EntryProcessMsg();
-    if (!this->GlobalVars->CampathPlaying) {
-        *this->GetLocalPlayer().pGlobalFOV = 0.0f;
-    }
     return;
 }
 void CSController::ProcessMsg(MulNX::Message* Msg) {
-    switch (Msg->Type) {
-    case "Core_ReHook"_hash: {
+    switch (Msg->type) {
+    case "Core/ReHook"_hash: {
         this->ISys().LogSucc("已完成Hook重载！");
         break;
     }
@@ -95,14 +97,14 @@ void CSController::ProcessMsg(MulNX::Message* Msg) {
 }
 
 bool CSController::Init() {
-    this->GetModules();
-    
-    this->Catch();
-    this->NeedThread(3);
-    
     this->MainMsgChannel = this->ICreateAndGetMessageChannel();
-    this->ISys().SubscribeAsync("Core_ReHook");
+    this->ISys().SubscribeAsync("Core/ReHook");
+    this->NeedThread(3);
+    this->NeedUINode = true;
 
+    this->GetModules();
+    this->Catch();
+    
     if (this->Modules.client.Valid) {
         // 搜索 .text 段
         auto textRegion = this->Modules.client.GetTextRegion();
@@ -140,7 +142,7 @@ void CSController::GetModules() {
         ("VEngineCvar007", nullptr);
 
     //this->LocalPlayer.pGlobalFOV = this->CvarSystem.GetCvar("fov_cs_debug")->GetPtr<float>();
-    this->LocalPlayer.pGlobalFOV = &this->CSFOV;
+    this->LocalPlayer.pGlobalFOV = &this->outFOV;
 }
 
 void CSController::Catch() {
@@ -171,7 +173,7 @@ int CSController::BasicUpdate() {
 
     static int OldRoundStartCount = this->CSGameRules.m_nRoundStartCount;
     if (OldRoundStartCount != this->CSGameRules.m_nRoundStartCount) {
-        MulNX::Message Msg("Game_NewRound"_hash);
+        MulNX::Message Msg("Game/NewRound"_hash);
         this->ISys().PublishAsync(std::move(Msg));
         OldRoundStartCount = this->CSGameRules.m_nRoundStartCount;
     }
@@ -222,7 +224,6 @@ int CSController::GameRulesUpdate() {
 
 void CSController::ThreadMain() {
     this->GetMsgResult = this->TryGetMsg();
-    IsInCameraSystemOverride.store(this->GlobalVars->CampathPlaying);
     return;
 }
 int CSController::TryGetMsg() {
@@ -263,7 +264,7 @@ void CSController::HandleFreeCameraPath(const CameraSystemIO* const IO) {
     DirectX::XMFLOAT4 PosAndFOV = IO->Frame.GetPositionAndFOV();
     DirectX::XMFLOAT3 RotEuler = IO->Frame.GetRotationEuler();
 #ifdef _DEBUG
-    static MulNX::Base::Math::Frame thisFrame;
+    static MulNX::Math::Frame thisFrame;
     if (thisFrame != IO->Frame) {
         thisFrame = IO->Frame;
         this->ISys().LogInfo(thisFrame.GetMsg());
@@ -275,7 +276,7 @@ void CSController::HandleFreeCameraPath(const CameraSystemIO* const IO) {
     view->OriginY = PosAndFOV.y;
     view->OriginZ = PosAndFOV.z;
     //this->LocalPlayer.SetFOV(PosAndFOV.w);
-    this->CSFOV.store(PosAndFOV.w);
+    view->FOV = PosAndFOV.w;
     //this->LocalPlayer.SetViewAngle(RotEuler);
     view->AnglesX = RotEuler.x;
     view->AnglesY = RotEuler.y;
@@ -291,7 +292,7 @@ void CSController::HandleFreeCameraPath(const CameraSystemIO* const IO) {
 void CSController::HandleFirstPersonCameraPath(const CameraSystemIO* const IO) {
     static uint8_t LastIndex = 0xFFFF;
     if (LastIndex != IO->Frame.TargetPlayerIndexInMap) {
-        this->Execute(("spec_mode 2;spec_player " + std::to_string(IO->Frame.TargetPlayerIndexInMap)).c_str());
+        this->ExecuteCommand("spec_mode 2;spec_player " + std::to_string(IO->Frame.TargetPlayerIndexInMap));
         LastIndex = IO->Frame.TargetPlayerIndexInMap;
     }
 }
@@ -319,7 +320,7 @@ void CSController::HandleAimAtEntity(int AimTargetIndexInMap) {
 
     DirectX::XMFLOAT3 dir = TargetEyePos - LocalEyePos;
     DirectX::XMFLOAT3 TargetViewAngles{};
-    MulNX::Base::Math::CSDirToEuler(dir, TargetViewAngles);
+    MulNX::Math::CSDirToEuler(dir, TargetViewAngles);
 
     this->LocalPlayer.SetViewAngle(TargetViewAngles);
 }
@@ -347,18 +348,3 @@ C_CSGameRules CSController::GetCSGameRules() {
 //         schemas.push_back(schema);
 //     }
 // }
-
-float CSController::GetWinWidth()const {
-    return this->AL3DCurrentWindowWidth;
-}
-float CSController::GetWinHeight()const {
-    return this->AL3DCurrentWindowHeight;
-}
-bool CSController::SpecPlayer(int IndexInMap) {
-    this->ExecuteCommand("spec_mode 2;spec_player " + std::to_string(this->AL3DGameData.Players[IndexInMap].IndexInMap));
-    return true;
-}
-D_Player& CSController::GetPlayerMsg(int Index) {
-    //std::shared_lock lock(this->GetMtx());
-    return this->AL3DGameData.Players[Index];
-}

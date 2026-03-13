@@ -9,7 +9,7 @@ class MulNXUIContext;
 
 class MulNXUINode {
 public:
-    MulNX::Base::any_unique_ptr pBuffer = nullptr;
+    MulNX::any_unique_ptr pBuffer = nullptr;
 	std::string name{};
     std::function<void(MulNXUINode*)>MyFunc = nullptr;
 
@@ -42,13 +42,13 @@ public:
 
 	void Draw();
 	bool SendToOwner(MulNX::Message&& Msg);
-	MulNX::Message CreateMsg(uint32_t SubType);
+	MulNX::Message CreateMsg(int SubType);
 	MulNXHandle CreateStringHandle(std::string&& Str);
 
     bool CallUINode(std::string&& Name);
     bool SetNextUINode(std::string&& Name);
 
-    static MulNX::Base::any_unique_ptr Create(const MulNX::ModuleBase* const MB);
+    static MulNX::any_unique_ptr Create(const MulNX::ModuleBase* const MB);
     static bool CreateAndRegiste(MulNX::ModuleBase* const MB, std::string&& Name, std::function<void(MulNXUINode*)>MyFunc);
 
 	MulNXUINode() = default;

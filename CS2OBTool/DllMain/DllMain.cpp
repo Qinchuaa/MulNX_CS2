@@ -14,36 +14,36 @@
 // 这是MulNX_CS2项目的入口文件，也是MulNX项目的示例模块
 // 本文件展示了如何使用MulNX核心系统创建一个功能完整的注入式DLL工具。
 
-static void MainDraw(MulNXUINode* ThisNode) {
+static void MainDraw(MulNXUINode* node) {
     ImGui::Begin("主窗口");
     if (ImGui::BeginTabBar("主标签页集")) {
         if (ImGui::BeginTabItem("摄像机系统")) {
-            ThisNode->CallUINode("CameraSystem");
+            node->CallUINode("CameraSystem");
             ImGui::EndTabItem();
         }
         if (ImGui::BeginTabItem("游戏设置")) {
-            ThisNode->CallUINode("GameSettingsManager");
+            node->CallUINode("GameSettingsManager");
             ImGui::EndTabItem();
         }
         if (ImGui::BeginTabItem("控制台")) {
-            ThisNode->CallUINode("ConsoleManager");
+            node->CallUINode("ConsoleManager");
             ImGui::EndTabItem();
         }
         if (ImGui::BeginTabItem("Demo助手")) {
-            ThisNode->CallUINode("DemoHelper");
+            node->CallUINode("DemoHelper");
             ImGui::EndTabItem();
         }
         if (ImGui::BeginTabItem("MulNX框架控制器")) {
-            ThisNode->CallUINode("MulNXController");
+            node->CallUINode("MulNXController");
             ImGui::EndTabItem();
         }
         ImGui::EndTabBar();
     }
     ImGui::End();
-    ThisNode->CallUINode("Debugger");
-    ThisNode->CallUINode("GameCfgManager");
-    ThisNode->CallUINode("MiniMap");
-    ThisNode->CallUINode("CSController");
+    node->CallUINode("Debugger");
+    node->CallUINode("GameCfgManager");
+    node->CallUINode("MiniMap");
+    node->CallUINode("CSController");
 }
 
 BOOL APIENTRY DllMain(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserved) {

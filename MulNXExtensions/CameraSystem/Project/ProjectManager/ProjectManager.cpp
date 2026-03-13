@@ -131,13 +131,13 @@ bool ProjectManager::Project_Save() {
     this->SManager->Solution_SaveAll();
     //保存项目到磁盘
     std::filesystem::path Path = this->ISys().PathManager()->PathGetFromKey("CurrentWorkspace") / this->ActiveProject->Name;
-    std::string strRuselt;
-    if (this->ActiveProject->SaveToXML(Path, strRuselt)) {
-        this->ISys().LogSucc(std::move(strRuselt));
+    auto [ok, msg] = this->ActiveProject->SaveToXML(Path);
+    if (ok) {
+        this->ISys().LogSucc(std::move(msg));
         return true;
     }
     else {
-        this->ISys().LogError(std::move(strRuselt));
+        this->ISys().LogError(std::move(msg));
         return false;
     }
 }
@@ -609,8 +609,8 @@ bool ProjectManager::Playing_AutoCall(const MulNX::Message& Msg) {
         this->ISys().LogWarning("无活跃项目，无法执行自动操作");
         return false;
     }
-    switch (Msg.Type) {
-    case "Game_NewRound"_hash: {
+    switch (Msg.type) {
+    case "Game/NewRound"_hash: {
         const std::vector<std::string>& OnNewRound = this->ActiveProject->OnNewRound;
         if (OnNewRound.empty()) {
             this->ISys().LogWarning("无新回合解决方案可尝试调用");
@@ -619,7 +619,7 @@ bool ProjectManager::Playing_AutoCall(const MulNX::Message& Msg) {
         int temp = rand() % OnNewRound.size();
         return this->SManager->Playing_SetSolution(OnNewRound[temp], PlaybackMode::Serial);
     }
-    case "Game_RoundEnd"_hash: {
+    case "Game/RoundEnd"_hash: {
         const std::vector<std::string>& OnEnd = this->ActiveProject->OnRoundEnd;
         if (OnEnd.empty()) {
             this->ISys().LogWarning("无回合结束解决方案可尝试调用");

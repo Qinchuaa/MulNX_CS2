@@ -8,7 +8,7 @@ class TripleBufferBase;
 class DemoHelper final :public MulNX::ModuleBase {
 private:
     std::vector<float>Marks{};
-    std::atomic<MulNX::Base::any_unique_ptr*>* ppUpdateData = nullptr;
+    std::atomic<MulNX::any_unique_ptr*>* ppUpdateData = nullptr;
     MulNXHandle hUINode{};
 public:
     DemoHelper() : ModuleBase() {};

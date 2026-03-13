@@ -34,7 +34,7 @@ namespace MulNX {
 
         virtual float GetTime()const = 0;
 
-        virtual MulNX::Base::Math::SpatialState GetSpatialState()const = 0;
+        virtual MulNX::Math::View GetView()const = 0;
 
         virtual float* GetViewMatrix()const = 0;
         virtual float GetWinWidth()const = 0;

@@ -32,24 +32,24 @@ void MulNX::GlobalVars::VirtualMain() {
 }
 
 void MulNX::GlobalVars::PublishTickAll() {
-    this->ISys().PublishAsync("Core_Tick1"_hash);
-    this->ISys().PublishAsync("Core_Tick5"_hash);
-    this->ISys().PublishAsync("Core_Tick10"_hash);
-    this->ISys().PublishAsync("Core_Tick15"_hash);
-    this->ISys().PublishAsync("Core_Tick20"_hash);
-    this->ISys().PublishAsync("Core_Tick30"_hash);
-    this->ISys().PublishAsync("Core_Tick45"_hash);
-    this->ISys().PublishAsync("Core_Tick60"_hash);
+    this->ISys().PublishAsync("Core/Tick1"_hash);
+    this->ISys().PublishAsync("Core/Tick5"_hash);
+    this->ISys().PublishAsync("Core/Tick10"_hash);
+    this->ISys().PublishAsync("Core/Tick15"_hash);
+    this->ISys().PublishAsync("Core/Tick20"_hash);
+    this->ISys().PublishAsync("Core/Tick30"_hash);
+    this->ISys().PublishAsync("Core/Tick45"_hash);
+    this->ISys().PublishAsync("Core/Tick60"_hash);
 }
 void MulNX::GlobalVars::Tick() {
-    this->ISys().PublishAsync("Core_Tick1"_hash);
-    if (this->CoreTick % 5 == 0) this->ISys().PublishAsync ("Core_Tick5"_hash);
-    if (this->CoreTick % 10 == 0) this->ISys().PublishAsync("Core_Tick10"_hash);
-    if (this->CoreTick % 15 == 0) this->ISys().PublishAsync("Core_Tick15"_hash);
-    if (this->CoreTick % 20 == 0) this->ISys().PublishAsync("Core_Tick20"_hash);
-    if (this->CoreTick % 30 == 0) this->ISys().PublishAsync("Core_Tick30"_hash);
-    if (this->CoreTick % 45 == 0) this->ISys().PublishAsync("Core_Tick45"_hash);
-    if (this->CoreTick % 60 == 0) this->ISys().PublishAsync("Core_Tick60"_hash);
-    if (this->CoreTick % 1800 == 0) this->ISys().PublishAsync("Core_Tick30min"_hash);
+    this->ISys().PublishAsync("Core/Tick1"_hash);
+    if (this->CoreTick % 5 == 0) this->ISys().PublishAsync ("Core/Tick5"_hash);
+    if (this->CoreTick % 10 == 0) this->ISys().PublishAsync("Core/Tick10"_hash);
+    if (this->CoreTick % 15 == 0) this->ISys().PublishAsync("Core/Tick15"_hash);
+    if (this->CoreTick % 20 == 0) this->ISys().PublishAsync("Core/Tick20"_hash);
+    if (this->CoreTick % 30 == 0) this->ISys().PublishAsync("Core/Tick30"_hash);
+    if (this->CoreTick % 45 == 0) this->ISys().PublishAsync("Core/Tick45"_hash);
+    if (this->CoreTick % 60 == 0) this->ISys().PublishAsync("Core/Tick60"_hash);
+    if (this->CoreTick % 1800 == 0) this->ISys().PublishAsync("Core/Tick30min"_hash);
     return;
 }

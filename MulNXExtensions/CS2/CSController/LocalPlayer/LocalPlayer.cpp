@@ -11,22 +11,14 @@ std::ostringstream C_LocalPlayer::GetMsg() {
     return oss;
 }
 
-MulNX::Base::Math::SpatialState C_LocalPlayer::GetSpatialState()const {
+MulNX::Math::View C_LocalPlayer::GetView()const {
     std::shared_lock lock(this->LocalPlayerMutex);
 
-    DirectX::XMFLOAT3 pos = this->Entity.Pawn.GetEyePos();
-    MulNX::Base::Math::SpatialState temp;
-    temp.PositionAndFOV = DirectX::XMVectorSet(
-        pos.x,
-        pos.y,
-        pos.z,
-        *this->pGlobalFOV
-    );
+    MulNX::Math::View view;
+    view.position = this->Entity.Pawn.GetEyePos();
+    view.rotation = *this->ViewAngles;
 
-    DirectX::XMVECTOR quatVec = MulNX::Base::Math::CSEulerToQuatVec(*this->ViewAngles);
-    temp.RotationQuat = quatVec;
-
-    return temp;
+    return view;
 }
 
 DirectX::XMFLOAT3 C_LocalPlayer::GetPosition() {
@@ -82,7 +74,7 @@ bool C_LocalPlayer::SetPosition(const DirectX::XMFLOAT4& PosAndFOV) {
 
 int C_LocalPlayer::Update() {
     std::unique_lock lock(this->LocalPlayerMutex);
-    //判断本地控制器是否可用
+    // 判断本地控制器是否可用
     if (!this->Entity.Controller.Address) {
         return 1003;
     }
@@ -90,28 +82,28 @@ int C_LocalPlayer::Update() {
         MulNX::Memory::ReadString(this->Entity.Controller.Address + cs2_dumper::schemas::client_dll::CBasePlayerController::m_iszPlayerName,
             this->Entity.Controller.m_iszPlayerName,
             sizeof(this->Entity.Controller.m_iszPlayerName));
-        //获取本地控制器的期望FOV
+        // 获取本地控制器的期望FOV
         MulNX::Memory::Read(this->Entity.Controller.Address + cs2_dumper::schemas::client_dll::CBasePlayerController::m_iDesiredFOV,
             this->Entity.Controller.m_ipDesiredFOV);
     }
-    //获取本地实体句柄
+    // 获取本地实体句柄
     MulNX::Memory::Read(this->Entity.Controller.Address + cs2_dumper::schemas::client_dll::CBasePlayerController::m_hPawn, this->Entity.Controller.hPawn);
     if (this->Entity.Controller.hPawn == 0xFFFFFFFF)return 2001;
-    //获取本地实体
+    // 获取本地实体
     this->Entity.Pawn.Address = C_EntityList::GetEntityPawnFromHandle(this->Entity.Controller.hPawn);
     if (!this->Entity.Pawn.Address)return 3001;
-    //摄像机模块
+    // 摄像机模块
     {
-        //获取本地实体的摄像机模块
+        // 获取本地实体的摄像机模块
         MulNX::Memory::Read(this->Entity.Pawn.Address + cs2_dumper::schemas::client_dll::C_BasePlayerPawn::m_pCameraServices, this->Entity.Pawn.CameraServices.Address);
-        //从摄像机服务获取fov
+        // 从摄像机服务获取fov
         MulNX::Memory::Read(this->Entity.Pawn.CameraServices.Address + cs2_dumper::schemas::client_dll::CCSPlayerBase_CameraServices::m_iFOV, this->Entity.Pawn.CameraServices.iFOV);
         MulNX::Memory::Read(this->Entity.Pawn.CameraServices.Address + cs2_dumper::schemas::client_dll::CCSPlayerBase_CameraServices::m_flLastShotFOV, this->Entity.Pawn.CameraServices.LastShotFOV);
         MulNX::Memory::Read(this->Entity.Pawn.CameraServices.Address + cs2_dumper::schemas::client_dll::CCSPlayerBase_CameraServices::m_iFOVStart, this->Entity.Pawn.CameraServices.FOVStart);
         MulNX::Memory::Read(this->Entity.Pawn.CameraServices.Address + cs2_dumper::schemas::client_dll::CCSPlayerBase_CameraServices::m_flFOVRate, this->Entity.Pawn.CameraServices.FOVRate);
         MulNX::Memory::Read(this->Entity.Pawn.CameraServices.Address + cs2_dumper::schemas::client_dll::CCSPlayerBase_CameraServices::m_flFOVTime, this->Entity.Pawn.CameraServices.FOVTime);
     }
-    //其它
+    // 其它
     {
         this->Entity.Pawn.m_iTeamNum = -10;
         MulNX::Memory::Read(this->Entity.Pawn.Address + cs2_dumper::schemas::client_dll::C_BaseEntity::m_iTeamNum, this->Entity.Pawn.m_iTeamNum);
@@ -119,9 +111,9 @@ int C_LocalPlayer::Update() {
     }
 
 
-    //从本地实体获取GameSecneNode
+    // 从本地实体获取GameSecneNode
     MulNX::Memory::Read(this->Entity.Pawn.Address + cs2_dumper::schemas::client_dll::C_BaseEntity::m_pGameSceneNode, this->Entity.Pawn.GameSceneNode.Address);
-    //获取本地坐标
+    // 获取本地坐标
     MulNX::Memory::Read(this->Entity.Pawn.Address + cs2_dumper::schemas::client_dll::C_BasePlayerPawn::m_vOldOrigin, this->Entity.Pawn.m_vOldOrigin);
     MulNX::Memory::Read(this->Entity.Pawn.Address + cs2_dumper::schemas::client_dll::C_BasePlayerPawn::m_iHideHUD, this->Entity.Pawn.m_iHideHUD);
     this->PositionA = reinterpret_cast<DirectX::XMFLOAT3*>(this->Entity.Pawn.GameSceneNode.Address + cs2_dumper::schemas::client_dll::CGameSceneNode::m_vecAbsOrigin);

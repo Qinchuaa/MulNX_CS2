@@ -1,5 +1,6 @@
 add_library(MulNXCS2Ext
     "CSController/CSController.cpp"
+    "CSController/InterfaceImpl.cpp"
     "CSController/ConVarSystem/ConVarSystem.cpp"
     "CSController/CSGameRules/CSGameRules.cpp"
     "CSController/EntityList/EntityList.cpp"

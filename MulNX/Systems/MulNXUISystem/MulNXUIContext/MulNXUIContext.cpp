@@ -8,7 +8,7 @@ bool MulNXUIContext::CallUINode(const std::string& Name) {
     MulNXHandle& hUINode = ItEntry->second;
     auto ItUINode = this->UINodeMap.find(hUINode);
     if (ItUINode == this->UINodeMap.end())return false;
-    MulNX::Base::any_unique_ptr& UINode = ItUINode->second;
+    MulNX::any_unique_ptr& UINode = ItUINode->second;
     MulNXUINode* pUINode = UINode.get<MulNXUINode>();
     pUINode->Draw();
     return true;
@@ -37,7 +37,7 @@ void MulNXUIContext::Draw() {
         SContextPtr->Draw();
     }*/
 }
-void MulNXUIContext::AddUINode(MulNXHandle hUINode, MulNX::Base::any_unique_ptr UINode) {
+void MulNXUIContext::AddUINode(MulNXHandle hUINode, MulNX::any_unique_ptr UINode) {
     MulNXUINode* UINodePtr = UINode.get<MulNXUINode>();
     this->CallMap[UINodePtr->name] = hUINode;
     UINodePtr->MainContext = this;

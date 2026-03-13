@@ -109,115 +109,123 @@ const std::string Line_ = "+------------------------------------------------+";
 const std::string Gap_ = "     ";
 
 namespace MulNX {
-    namespace Base {
-        namespace Math {
-            //基本空间状态，包括坐标和旋转（四元数）
-            class SpatialState {
-            public:
-                DirectX::XMVECTOR PositionAndFOV{};
-                DirectX::XMVECTOR RotationQuat{};
+    namespace Math {
+        //基本空间状态，包括坐标和旋转（四元数）
+        class SpatialState {
+        public:
+            DirectX::XMVECTOR PositionAndFOV{};
+            DirectX::XMVECTOR RotationQuat{};
 
-                DirectX::XMFLOAT3 GetPosition()const;
-                DirectX::XMFLOAT4 GetRotationQuat()const;
-                DirectX::XMFLOAT3 GetRotationEuler()const;
-                float GetFOV()const;
+            DirectX::XMFLOAT3 GetPosition()const;
+            DirectX::XMFLOAT4 GetRotationQuat()const;
+            DirectX::XMFLOAT3 GetRotationEuler()const;
+            float GetFOV()const;
 
-                DirectX::XMFLOAT4 GetPositionAndFOV()const;
+            DirectX::XMFLOAT4 GetPositionAndFOV()const;
 
-                std::string GetMsg()const;
+            std::string GetMsg()const;
 
-                bool operator==(const SpatialState& other) const {
-                    const float epsilon = 1e-6f;
+            bool operator==(const SpatialState& other) const {
+                const float epsilon = 1e-6f;
 
-                    DirectX::XMFLOAT4 pos1, pos2, rot1, rot2;
-                    DirectX::XMStoreFloat4(&pos1, PositionAndFOV);
-                    DirectX::XMStoreFloat4(&pos2, other.PositionAndFOV);
-                    DirectX::XMStoreFloat4(&rot1, RotationQuat);
-                    DirectX::XMStoreFloat4(&rot2, other.RotationQuat);
+                DirectX::XMFLOAT4 pos1, pos2, rot1, rot2;
+                DirectX::XMStoreFloat4(&pos1, PositionAndFOV);
+                DirectX::XMStoreFloat4(&pos2, other.PositionAndFOV);
+                DirectX::XMStoreFloat4(&rot1, RotationQuat);
+                DirectX::XMStoreFloat4(&rot2, other.RotationQuat);
 
-                    return std::abs(pos1.x - pos2.x) < epsilon &&
-                        std::abs(pos1.y - pos2.y) < epsilon &&
-                        std::abs(pos1.z - pos2.z) < epsilon &&
-                        std::abs(pos1.w - pos2.w) < epsilon &&
-                        std::abs(rot1.x - rot2.x) < epsilon &&
-                        std::abs(rot1.y - rot2.y) < epsilon &&
-                        std::abs(rot1.z - rot2.z) < epsilon &&
-                        std::abs(rot1.w - rot2.w) < epsilon;
-                }
-            };
-
-            //关键帧,是时间、空间状态、FOV、景深的组合
-            class CameraKeyFrame {
-            public:
-                SpatialState SpatialState{};
-
-                float KeyTime{};
-                int Depth{ 0 };
-
-                std::string GetMsg()const;
-            };
-
-            //帧，包含渲染一帧的所有预备前置条件
-            class Frame {
-            public:
-                //目标空间状态，自由摄像机轨道完全使用，锁定摄像机轨道使用视角，不使用其它
-                SpatialState SpatialState{};
-
-                //目标OB模式，4是自由摄像机轨道和锁定摄像机轨道，2是第一人称摄像机轨道
-                uint8_t TargetOBMode = 4;
-                //第一人称摄像机轨道和锁定摄像机轨道使用，均指代目标人物
-                uint8_t TargetPlayerIndexInMap = 0;
-
-                float GameSpeed{};
-
-                std::string GetMsg()const;
-
-                DirectX::XMFLOAT3 GetPosition()const {
-                    return this->SpatialState.GetPosition();
-                }
-                DirectX::XMFLOAT4 GetRotationQuat()const {
-                    return this->SpatialState.GetRotationQuat();
-                }
-                DirectX::XMFLOAT3 GetRotationEuler()const {
-                    return this->SpatialState.GetRotationEuler();
-                }
-                float GetFOV()const {
-                    return this->SpatialState.GetFOV();
-                }
-
-                DirectX::XMFLOAT4 GetPositionAndFOV()const {
-                    return this->SpatialState.GetPositionAndFOV();
-                }
-
-                bool operator==(const Frame&)const = default;
-            };
-
-            void CSEulerToQuat(const DirectX::XMFLOAT3& Euler, DirectX::XMFLOAT4& QuaT);
-            DirectX::XMVECTOR CSEulerToQuatVec(const DirectX::XMFLOAT3& Euler);
-            void CSQuatToEuler(const DirectX::XMFLOAT4& Quat, DirectX::XMFLOAT3& Euler);
-            //只修改Pitch和Yaw，不修改Roll
-            void CSDirToEuler(const DirectX::XMFLOAT3& Dir, DirectX::XMFLOAT3& Euler);
-            bool XMWorldToScreen(const DirectX::XMFLOAT3& pWorldPos, DirectX::XMFLOAT2& pScreenPos, const float* pMatrixPtr, const float pWinWidth, const float pWinHeight);
-
-            DirectX::XMFLOAT3 RotatePoint(
-                const DirectX::XMFLOAT3& inputPoint,
-                float pitchDegrees,  // 绕Y轴旋转（俯仰）
-                float yawDegrees,    // 绕Z轴旋转（偏航）
-                float rollDegrees    // 绕X轴旋转（滚转）
-            );
-
-            //移动点
-            bool MovePoint(DirectX::XMFLOAT3& SourcePoint, const DirectX::XMFLOAT3& TargetPoint);
-
-            class DOFParam {
-            public:
-                float NearBlurry;
-                float NearCrisp;
-                float FarCrisp;
-                float FarBlurry;
-            };
-            //计算景深参数
-            void CalculateDOFParameters(float FocusDistance, float CrispRadius, float BlurDistance, DOFParam& DOFParam);
+                return std::abs(pos1.x - pos2.x) < epsilon &&
+                    std::abs(pos1.y - pos2.y) < epsilon &&
+                    std::abs(pos1.z - pos2.z) < epsilon &&
+                    std::abs(pos1.w - pos2.w) < epsilon &&
+                    std::abs(rot1.x - rot2.x) < epsilon &&
+                    std::abs(rot1.y - rot2.y) < epsilon &&
+                    std::abs(rot1.z - rot2.z) < epsilon &&
+                    std::abs(rot1.w - rot2.w) < epsilon;
+            }
         };
-    }
+
+        // 包含游戏提取视角信息
+        class View {
+        public:
+            DirectX::XMFLOAT3 position;
+            DirectX::XMFLOAT3 rotation;
+            float FOV;
+
+            SpatialState ToSpatialState();
+        };
+
+        //关键帧,是时间、空间状态、FOV、景深的组合
+        class CameraKeyFrame {
+        public:
+            SpatialState SpatialState{};
+
+            float KeyTime{};
+            int Depth{ 0 };
+
+            std::string GetMsg()const;
+        };
+
+        //帧，包含渲染一帧的所有预备前置条件
+        class Frame {
+        public:
+            //目标空间状态，自由摄像机轨道完全使用，锁定摄像机轨道使用视角，不使用其它
+            SpatialState SpatialState{};
+
+            //目标OB模式，4是自由摄像机轨道和锁定摄像机轨道，2是第一人称摄像机轨道
+            uint8_t TargetOBMode = 4;
+            //第一人称摄像机轨道和锁定摄像机轨道使用，均指代目标人物
+            uint8_t TargetPlayerIndexInMap = 0;
+
+            float GameSpeed{};
+
+            std::string GetMsg()const;
+
+            DirectX::XMFLOAT3 GetPosition()const {
+                return this->SpatialState.GetPosition();
+            }
+            DirectX::XMFLOAT4 GetRotationQuat()const {
+                return this->SpatialState.GetRotationQuat();
+            }
+            DirectX::XMFLOAT3 GetRotationEuler()const {
+                return this->SpatialState.GetRotationEuler();
+            }
+            float GetFOV()const {
+                return this->SpatialState.GetFOV();
+            }
+
+            DirectX::XMFLOAT4 GetPositionAndFOV()const {
+                return this->SpatialState.GetPositionAndFOV();
+            }
+
+            bool operator==(const Frame&)const = default;
+        };
+
+        void CSEulerToQuat(const DirectX::XMFLOAT3& Euler, DirectX::XMFLOAT4& QuaT);
+        DirectX::XMVECTOR CSEulerToQuatVec(const DirectX::XMFLOAT3& Euler);
+        void CSQuatToEuler(const DirectX::XMFLOAT4& Quat, DirectX::XMFLOAT3& Euler);
+        //只修改Pitch和Yaw，不修改Roll
+        void CSDirToEuler(const DirectX::XMFLOAT3& Dir, DirectX::XMFLOAT3& Euler);
+        bool XMWorldToScreen(const DirectX::XMFLOAT3& pWorldPos, DirectX::XMFLOAT2& pScreenPos, const float* pMatrixPtr, const float pWinWidth, const float pWinHeight);
+
+        DirectX::XMFLOAT3 RotatePoint(
+            const DirectX::XMFLOAT3& inputPoint,
+            float pitchDegrees,  // 绕Y轴旋转（俯仰）
+            float yawDegrees,    // 绕Z轴旋转（偏航）
+            float rollDegrees    // 绕X轴旋转（滚转）
+        );
+
+        //移动点
+        bool MovePoint(DirectX::XMFLOAT3& SourcePoint, const DirectX::XMFLOAT3& TargetPoint);
+
+        class DOFParam {
+        public:
+            float NearBlurry;
+            float NearCrisp;
+            float FarCrisp;
+            float FarBlurry;
+        };
+        //计算景深参数
+        void CalculateDOFParameters(float FocusDistance, float CrispRadius, float BlurDistance, DOFParam& DOFParam);
+    };
 };

@@ -96,12 +96,12 @@ void ElementManager::ElementDebugWindow() {
             ImGui::Checkbox("绘制", &this->CurrentElement->IfDraw);
         }
         if (ImGui::Button("保存到XML文件")) {
-            std::string Ruselt;
-            if (this->CurrentElement->SaveToXML(this->ISys().PathManager()->PathGetFromKey("Elements"), Ruselt)) {
-                this->ISys().LogSucc(std::move(Ruselt));
+            auto [ok, msg] = this->CurrentElement->SaveToXML(this->ISys().PathManager()->PathGetFromKey("Elements"));
+            if (ok) {
+                this->ISys().LogSucc(std::move(msg));
             }
             else {
-                this->ISys().LogError(std::move(Ruselt));
+                this->ISys().LogError(std::move(msg));
             }
         }
         if (ImGui::Button("删除当前元素")) {
@@ -159,12 +159,12 @@ bool ElementManager::Element_SaveAll() {
             //如果不脏则跳过保存
             continue;
         }
-        std::string Ruselt;
-        if (elem->SaveToXML(ElementFolderPath, Ruselt)) {
-            this->ISys().LogSucc(std::move(Ruselt));
+        auto [ok, msg] = elem->SaveToXML(ElementFolderPath);
+        if (ok) {
+            this->ISys().LogSucc(std::move(msg));
         }
         else {
-            this->ISys().LogError(std::move(Ruselt));
+            this->ISys().LogError(std::move(msg));
             return false;
         }
     }

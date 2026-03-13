@@ -5,35 +5,35 @@
 
 constexpr float PI = 3.141592653f;
 
-DirectX::XMFLOAT3 MulNX::Base::Math::SpatialState::GetPosition()const {
+DirectX::XMFLOAT3 MulNX::Math::SpatialState::GetPosition()const {
 	DirectX::XMFLOAT3 position;
 	DirectX::XMStoreFloat3(&position, this->PositionAndFOV);
 	return position;
 }
 
-DirectX::XMFLOAT4 MulNX::Base::Math::SpatialState::GetRotationQuat() const {
+DirectX::XMFLOAT4 MulNX::Math::SpatialState::GetRotationQuat() const {
 	DirectX::XMFLOAT4 Quat;
 	DirectX::XMStoreFloat4(&Quat, this->RotationQuat);
 	return Quat;
 }
 
-float MulNX::Base::Math::SpatialState::GetFOV() const {
+float MulNX::Math::SpatialState::GetFOV() const {
 	return DirectX::XMVectorGetW(this->PositionAndFOV);
 }
 
-DirectX::XMFLOAT3 MulNX::Base::Math::SpatialState::GetRotationEuler()const {
+DirectX::XMFLOAT3 MulNX::Math::SpatialState::GetRotationEuler()const {
 	DirectX::XMFLOAT3 Euler;
 	CSQuatToEuler(this->GetRotationQuat(), Euler);
 	return Euler;
 }
 
-DirectX::XMFLOAT4 MulNX::Base::Math::SpatialState::GetPositionAndFOV()const {
+DirectX::XMFLOAT4 MulNX::Math::SpatialState::GetPositionAndFOV()const {
 	DirectX::XMFLOAT4 PositionAndFOV;
 	DirectX::XMStoreFloat4(&PositionAndFOV, this->PositionAndFOV);
 	return PositionAndFOV;
 }
 
-std::string MulNX::Base::Math::SpatialState::GetMsg()const {
+std::string MulNX::Math::SpatialState::GetMsg()const {
 	DirectX::XMFLOAT4 PositionAndFOV = this->GetPositionAndFOV();
 	DirectX::XMFLOAT3 Euler = this->GetRotationEuler();
 	std::ostringstream oss;
@@ -51,7 +51,19 @@ std::string MulNX::Base::Math::SpatialState::GetMsg()const {
 	return oss.str();
 }
 
-std::string MulNX::Base::Math::CameraKeyFrame::GetMsg()const {
+MulNX::Math::SpatialState MulNX::Math::View::ToSpatialState() {
+    MulNX::Math::SpatialState temp;
+    temp.PositionAndFOV = DirectX::XMVectorSet(
+        this->position.x,
+        this->position.y,
+        this->position.z,
+        this->FOV
+    );
+    temp.RotationQuat = MulNX::Math::CSEulerToQuatVec(this->rotation);
+    return temp;
+}
+
+std::string MulNX::Math::CameraKeyFrame::GetMsg()const {
 	std::ostringstream oss;
 
 	oss << std::fixed << std::setprecision(6);
@@ -62,7 +74,7 @@ std::string MulNX::Base::Math::CameraKeyFrame::GetMsg()const {
 	return oss.str();
 }
 
-std::string MulNX::Base::Math::Frame::GetMsg()const {
+std::string MulNX::Math::Frame::GetMsg()const {
 	std::ostringstream oss;
 
 	oss << std::fixed << std::setprecision(6);
@@ -72,7 +84,7 @@ std::string MulNX::Base::Math::Frame::GetMsg()const {
 	return oss.str();
 }
 
-void MulNX::Base::Math::CSEulerToQuat(const DirectX::XMFLOAT3& Euler, DirectX::XMFLOAT4& QuaT) {
+void MulNX::Math::CSEulerToQuat(const DirectX::XMFLOAT3& Euler, DirectX::XMFLOAT4& QuaT) {
 	// 将角度转换为弧度
 	float yawRad = DirectX::XMConvertToRadians(Euler.y);   // 偏航角（绕Z轴，向左为正）
 	float pitchRad = DirectX::XMConvertToRadians(-Euler.x); // 俯仰角（绕Y轴，向下为正，取负以符合右手系）
@@ -97,7 +109,7 @@ void MulNX::Base::Math::CSEulerToQuat(const DirectX::XMFLOAT3& Euler, DirectX::X
 	return;
 }
 
-DirectX::XMVECTOR MulNX::Base::Math::CSEulerToQuatVec(const DirectX::XMFLOAT3& Euler) {
+DirectX::XMVECTOR MulNX::Math::CSEulerToQuatVec(const DirectX::XMFLOAT3& Euler) {
 	// 将角度转换为弧度
 	float yawRad = DirectX::XMConvertToRadians(Euler.y);   // 偏航角（绕Z轴，向左为正）
 	float pitchRad = DirectX::XMConvertToRadians(-Euler.x); // 俯仰角（绕Y轴，向下为正，取负以符合右手系）
@@ -120,7 +132,7 @@ DirectX::XMVECTOR MulNX::Base::Math::CSEulerToQuatVec(const DirectX::XMFLOAT3& E
 	return quatResult;
 }
 
-void MulNX::Base::Math::CSQuatToEuler(const DirectX::XMFLOAT4& Quat, DirectX::XMFLOAT3& Euler) {
+void MulNX::Math::CSQuatToEuler(const DirectX::XMFLOAT4& Quat, DirectX::XMFLOAT3& Euler) {
 	//提取四元数分量
 	const float& x = Quat.x;
 	const float& y = Quat.y;
@@ -163,7 +175,7 @@ void MulNX::Base::Math::CSQuatToEuler(const DirectX::XMFLOAT4& Quat, DirectX::XM
 	return;
 }
 
-void MulNX::Base::Math::CSDirToEuler(const DirectX::XMFLOAT3& Dir, DirectX::XMFLOAT3& Euler){
+void MulNX::Math::CSDirToEuler(const DirectX::XMFLOAT3& Dir, DirectX::XMFLOAT3& Euler){
 	Euler.x = std::atan2(-Dir.z, std::sqrt(Dir.x * Dir.x + Dir.y * Dir.y)) * (180.0 / PI);
 	Euler.y = std::atan2(Dir.y, Dir.x) * (180.0 / PI);
 
@@ -175,7 +187,7 @@ void MulNX::Base::Math::CSDirToEuler(const DirectX::XMFLOAT3& Dir, DirectX::XMFL
 }
 
 
-bool MulNX::Base::Math::XMWorldToScreen(const DirectX::XMFLOAT3& pWorldPos, DirectX::XMFLOAT2& pScreenPos, const float* pMatrixPtr, const float pWinWidth, const float pWinHeight)
+bool MulNX::Math::XMWorldToScreen(const DirectX::XMFLOAT3& pWorldPos, DirectX::XMFLOAT2& pScreenPos, const float* pMatrixPtr, const float pWinWidth, const float pWinHeight)
 {
 	if (!pMatrixPtr) return false;
 
@@ -210,7 +222,7 @@ bool MulNX::Base::Math::XMWorldToScreen(const DirectX::XMFLOAT3& pWorldPos, Dire
 }
 
 
-DirectX::XMFLOAT3 MulNX::Base::Math::RotatePoint(
+DirectX::XMFLOAT3 MulNX::Math::RotatePoint(
 	const DirectX::XMFLOAT3& inputPoint,
 	float pitchDegrees,  // 绕Y轴旋转（俯仰）
 	float yawDegrees,    // 绕Z轴旋转（偏航）
@@ -277,12 +289,12 @@ DirectX::XMFLOAT3 MulNX::Base::Math::RotatePoint(
 	return result;
 }
 
-bool MulNX::Base::Math::MovePoint(DirectX::XMFLOAT3& SourcePoint, const DirectX::XMFLOAT3& TargetPoint) {
+bool MulNX::Math::MovePoint(DirectX::XMFLOAT3& SourcePoint, const DirectX::XMFLOAT3& TargetPoint) {
 	SourcePoint += TargetPoint;
 	return true;
 }
 
-void MulNX::Base::Math::CalculateDOFParameters(float FocusDistance, float CrispRadius, float BlurDistance, DOFParam& DOFParam) {
+void MulNX::Math::CalculateDOFParameters(float FocusDistance, float CrispRadius, float BlurDistance, DOFParam& DOFParam) {
 	//确保输入参数有效
 	CrispRadius = std::max(0.0f, CrispRadius);
 	BlurDistance = std::max(0.0f, BlurDistance);

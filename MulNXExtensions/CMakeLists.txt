@@ -8,6 +8,7 @@ add_subdirectory("CameraSystem")
 add_subdirectory("MiniMap")
 add_subdirectory("VirtualUser")
 add_subdirectory("MulNXController")
+add_subdirectory("WebSocketManager")
 
 target_link_libraries(MulNXExtensions PUBLIC
     MulNX
