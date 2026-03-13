@@ -47,10 +47,6 @@ namespace MulNX {
 
             T& get() { return value_; }
             const T& get() const { return value_; }
-
-            /*any_base* clone() const override {
-                return new any_derived<T>(*this);
-            }*/
         };
     } // namespace detail
 

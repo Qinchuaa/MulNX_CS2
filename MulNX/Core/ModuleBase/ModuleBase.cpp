@@ -55,18 +55,16 @@ bool MulNX::ModuleBase::BaseInit() {
 bool MulNX::ModuleBase::CreateUINode() {
     try {
         // 创建UI节点
-        auto UINode = MulNXUINode::Create(this);
-        auto* pUINode = UINode.get<MulNXUINode>();
+        MulNXUINode UINode = MulNXUINode::Create(this);
         // 设置UI节点属性
-        pUINode->name = this->GetName();
-        pUINode->MyFunc = [this](MulNXUINode* ThisNode) {
+        UINode.name = this->GetName();
+        UINode.MyFunc = [this](MulNXUINode* ThisNode) {
             return this->UINodeFunc(ThisNode);
             };
-        // 注册UI句柄
-        MulNXHandle hUINode = this->Core->IHandleSystem().RegisteUnique(std::move(UINode));
         // 创建UI消息并设置句柄
         MulNX::Message Msg("UISystem/ModulePush"_hash);
-        Msg.Handle = hUINode;
+        auto [pNode, raw] = MulNX::make_any_shared<MulNXUINode>(std::move(UINode));
+        Msg.asp = std::move(pNode);
         // 发送UI消息
         this->ISys().PublishAsync(std::move(Msg));
     }

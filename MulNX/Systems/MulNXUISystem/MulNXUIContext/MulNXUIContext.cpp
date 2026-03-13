@@ -8,9 +8,8 @@ bool MulNXUIContext::CallUINode(const std::string& Name) {
     MulNXHandle& hUINode = ItEntry->second;
     auto ItUINode = this->UINodeMap.find(hUINode);
     if (ItUINode == this->UINodeMap.end())return false;
-    MulNX::any_unique_ptr& UINode = ItUINode->second;
-    MulNXUINode* pUINode = UINode.get<MulNXUINode>();
-    pUINode->Draw();
+    MulNXUINode& UINode = ItUINode->second;
+    UINode.Draw();
     return true;
 }
 
@@ -30,23 +29,16 @@ void MulNXUIContext::Draw() {
         this->Next = std::string{};
         CallResult = this->CallUINode(current);
     }
-
-    /*for (const auto& It : this->ContextOrder) {
-        auto& SContext = this->ContextMap[It];
-        MulNXUINode* SContextPtr = SContext.get<MulNXUINode>();
-        SContextPtr->Draw();
-    }*/
 }
-void MulNXUIContext::AddUINode(MulNXHandle hUINode, MulNX::any_unique_ptr UINode) {
-    MulNXUINode* UINodePtr = UINode.get<MulNXUINode>();
-    this->CallMap[UINodePtr->name] = hUINode;
-    UINodePtr->MainContext = this;
+void MulNXUIContext::AddUINode(MulNXHandle hUINode, MulNXUINode&& UINode) {
+    this->CallMap[UINode.name] = hUINode;
+    UINode.MainContext = this;
     this->UINodeMap[hUINode] = std::move(UINode);
 }
 MulNXUINode* MulNXUIContext::GetUINode(const MulNXHandle& hUINode) {
     auto It = this->UINodeMap.find(hUINode);
     if (It != this->UINodeMap.end()) {
-        return It->second.get<MulNXUINode>();
+        return &(It->second);
     }
     return nullptr;
 }

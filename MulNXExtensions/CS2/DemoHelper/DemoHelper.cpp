@@ -4,41 +4,37 @@
 
 #include <MulNXThirdParty/All_ImGui.hpp>
 
-// 具体数据类型都隐藏在CPP文件
-struct DemoHelperPrivateData {
-	std::vector<float> TimeMarks{};
-};
+
 
 static std::atomic<int> ClickCount = 0;
 
-static void MyDraw(MulNXUINode* This) {
-	auto ReadData = This->GetRead<DemoHelperPrivateData>();
-	auto ThisData = ReadData.get();
+bool DemoHelper::UINodeFunc(MulNXUINode* node) {
+    auto ReadData = this->Data.load(std::memory_order_acquire);
 	ImGui::Text("第一个异步模块");
 	if (ImGui::Button("标记当前时间")) {
-		This->SendToOwner(This->CreateMsg(0x101));
+        node->SendToOwner(node->CreateMsg(0x101));
 	}
 	ImGui::Text("目前，时间列表容器是");
 	ImGui::SameLine();
-	if(ThisData->TimeMarks.empty()){
+    if (ReadData->TimeMarks.empty()) {
 		ImGui::Text("空的");
 	}
 	else{
-		ImGui::Text("有 %d 个时间点的", (int)ThisData->TimeMarks.size());
-		for(auto time : ThisData->TimeMarks){
+        ImGui::Text("有 %d 个时间点的", (int)ReadData->TimeMarks.size());
+        for (auto time : ReadData->TimeMarks) {
 			ImGui::Text("时间点： %.3f 秒", time);
 			ImGui::SameLine();
 			std::string str = "跳转##" + std::to_string(time);
 			if (ImGui::Button(str.c_str())) {
-				MulNX::Message Msg = This->CreateMsg(0x102);
+                MulNX::Message Msg = node->CreateMsg(0x102);
 				Msg.p1.f = time;
-				This->SendToOwner(std::move(Msg));
+                node->SendToOwner(std::move(Msg));
 			}
 		}
 	}
 	ImGui::Text("按钮已被点击 %d 次", ClickCount.load());
 
-	return;
+	return true;
 }
 
 bool DemoHelper::Init() {
@@ -46,20 +42,8 @@ bool DemoHelper::Init() {
 	this->ISys()
 		.SubscribeAsync("UISystem/UICommand");
 
-	auto SingleContext = MulNXUINode::Create(this);
-	auto* SContextPtr = SingleContext.get<MulNXUINode>();	
-    SContextPtr->name = "DemoHelper";
-    auto [Buffer, pBuffer] = MulNX::make_any_unique<MulNX::Base::TripleBuffer<DemoHelperPrivateData>>();
-    SContextPtr->pBuffer = std::move(Buffer);
-	SContextPtr->MyFunc = MyDraw;
-
-	this->hUINode = this->Core->IHandleSystem().RegisteUnique(std::move(SingleContext));
-
-	MulNX::Message Msg("UISystem/ModulePush"_hash);
-	Msg.Handle = this->hUINode;
-	this->ISys().PublishAsync(std::move(Msg));
-
-	return true;
+    this->NeedUINode = true;
+    return true;
 }
 
 void DemoHelper::ProcessMsg(MulNX::Message* Msg) {
@@ -91,10 +75,10 @@ void DemoHelper::HandleUICommand(MulNX::Message* Msg) {
 
 void DemoHelper::VirtualMain() {
 	this->EntryProcessMsg();
-	auto UINode = this->Core->IUISystem().GetUIContext()->GetUINode(this->hUINode);
-	if (!UINode) return; // 或跳过本帧处理
-	auto data = UINode->GetWrite<DemoHelperPrivateData>();
-	data->TimeMarks = this->Marks;
+
+    auto data = std::make_shared<DemoHelperPrivateData>();
+    data->TimeMarks = this->Marks;
+    this->Data.store(std::move(data), std::memory_order_release);
 }
 
 bool DemoHelper::MarkTime() {

@@ -18,11 +18,11 @@ public:
 	// 由字符串映射到句柄
 	std::unordered_map<std::string, MulNXHandle>CallMap{};
 	// 然后从句柄得到具体的UI节点
-	std::unordered_map<MulNXHandle, MulNX::any_unique_ptr>UINodeMap{};
+	std::unordered_map<MulNXHandle, MulNXUINode>UINodeMap{};
 	// 下一个要调用的UI节点名称
 	std::string Next;
 
 	void Draw();
-    void AddUINode(MulNXHandle hUINode, MulNX::any_unique_ptr UINode);
+    void AddUINode(MulNXHandle hUINode, MulNXUINode&& UINode);
     MulNXUINode* GetUINode(const MulNXHandle& hUINode);
 };

@@ -9,8 +9,6 @@ namespace MulNX {
 	public:
 		// 消息类型，用于区分消息
 		size_t type;
-		// 句柄，用于传递任意类型数据，需要通过句柄系统取出
-		MulNXHandle Handle{};
         union { int i;float f; }p1;
         union { int i;float f; }p2;
         // 8字节类型安全擦除共享指针，使用时需用get方法正确恢复，类型错误返回nullptr

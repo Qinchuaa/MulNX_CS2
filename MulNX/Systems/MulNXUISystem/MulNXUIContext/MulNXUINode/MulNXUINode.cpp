@@ -46,24 +46,24 @@ MulNXHandle MulNXUINode::CreateStringHandle(std::string&& Str) {
     return pCore->IHandleSystem().RegisteUnique(std::move(str));
 }
 
-MulNX::any_unique_ptr MulNXUINode::Create(const MulNX::ModuleBase* const MB) {
-    auto [Node, pNode] = MulNX::make_any_unique<MulNXUINode>();
-	pNode->HModule = MB->HModule;
-	pNode->OwnerMsgChannel = MB->MainMsgChannel;
+MulNXUINode MulNXUINode::Create(const MulNX::ModuleBase* const MB) {
+    MulNXUINode node;
+    node.hSelf = MulNXHandle::CreateHandle();
+    node.HModule = MB->HModule;
+    node.OwnerMsgChannel = MB->MainMsgChannel;
 	MulNX::Core::Core* pCore = MB->GetCore();
-	pNode->MyMsgChannel = pCore->IMessageManager()
+    node.MyMsgChannel = pCore->IMessageManager()
 		.GetMessageChannel(pCore->IMessageManager().CreateMessageChannel());
-	return std::move(Node);
+    return std::move(node);
 }
 bool MulNXUINode::CreateAndRegiste(MulNX::ModuleBase* const MB, std::string&& Name, std::function<void(MulNXUINode*)>MyFunc) {
-    auto Node = MulNXUINode::Create(MB);
-    MulNXUINode* pNode = Node.get<MulNXUINode>();
-    pNode->name = std::move(Name);
-    pNode->MyFunc = MyFunc;
+    auto node = MulNXUINode::Create(MB);
+    node.name = std::move(Name);
+    node.MyFunc = MyFunc;
     MulNX::Core::Core* pCore = MB->GetCore();
-    MulNXHandle hContext = pCore->IHandleSystem().RegisteUnique(std::move(Node));
+    auto [pNode, raw] = MulNX::make_any_shared<MulNXUINode>(std::move(node));
     MulNX::Message Msg("UISystem/ModulePush"_hash);
-    Msg.Handle = hContext;
+    Msg.asp = std::move(pNode);
     MB->ISys().PublishAsync(std::move(Msg));
     return true;
 }
