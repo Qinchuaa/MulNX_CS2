@@ -87,7 +87,7 @@ DWORD MulNX_CS2_Start(void*) {
 #ifdef _DEBUG
         starter->AL3D->ExecuteCommand("playdemo 111");
         std::thread([]() {
-            MessageBoxW(NULL, L"MulNXDLL 注入成功！", L"MulNX", MB_OK | MB_ICONINFORMATION);
+            MessageBoxW(NULL, L"MulNX 注入成功！", L"MulNX", MB_OK | MB_ICONINFORMATION);
             }).detach();
 #endif
         // 注册主窗口UI上下文
