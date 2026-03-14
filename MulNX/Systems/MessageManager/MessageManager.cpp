@@ -5,55 +5,8 @@
 #include "MessageChannel/MessageChannel.hpp"
 #include "../HandleSystem/HandleSystem.hpp"
 
-MulNX::MessageManager& MulNX::MessageManager::DeclareType(const std::string& Type) {
-    size_t hashed = MulNX::HashString(Type);
-    auto it = this->MsgMap.find(hashed);
-    if (it == this->MsgMap.end()) {
-        this->MsgMap[hashed].RawString = Type;
-        return *this;
-    }
-    else {
-        MulNX::ErrorTerminate(
-            std::string("哈希碰撞!"
-            "\n想要声明的: " + Type +
-            "\n已有的: " + it->second.RawString));
-    }
-}
-
 bool MulNX::MessageManager::Init() {
     this->NeedThread(10);
-    (*this)
-        .DeclareType("Core/Begin")
-        .DeclareType("Core/Shutdown")
-        .DeclareType("Core/Tick1")
-        .DeclareType("Core/Tick5")
-        .DeclareType("Core/Tick10")
-        .DeclareType("Core/Tick15")
-        .DeclareType("Core/Tick20")
-        .DeclareType("Core/Tick30")
-        .DeclareType("Core/Tick45")
-        .DeclareType("Core/Tick60")
-        .DeclareType("Core/Tick30min")
-        .DeclareType("Core/ReHook")
-        .DeclareType("Debugger/SetMaxInfoCount")
-        .DeclareType("Debugger/SaveToFile")
-        .DeclareType("ModuleManager/RequestModuleInfo")
-        .DeclareType("ModuleManager/ResponseModuleInfo")
-        .DeclareType("UISystem/Start")
-        .DeclareType("UISystem/UIPull")
-        .DeclareType("UISystem/ModulePush")
-        .DeclareType("UISystem/UIRequest")
-        .DeclareType("UISystem/UICommand")
-        .DeclareType("UISystem/ModuleResponse")
-        .DeclareType("Game/NewRound")
-        .DeclareType("Game/RoundStart")
-        .DeclareType("Game/BombPlanted")
-        .DeclareType("Game/BombDefused")
-        .DeclareType("Game/Boomed")
-        .DeclareType("Game/RoundEnd")
-        .DeclareType("CameraSystem/Play/Solution")
-        .DeclareType("CameraSystem/Play/Shutdown")
-        .DeclareType("Command/SpecPlayer");
     return true;
 }
 
@@ -93,8 +46,18 @@ bool MulNX::MessageManager::Subscribe(MessageChannel* const pChannel, const std:
     MulNX::MsgType hashed = MulNX::HashString(Type);
     auto& Meta = this->MsgMap[hashed];
     if (Meta.RawString.empty()) {
-        MulNX::ErrorTerminate("尝试订阅不存在的消息类型: " + Type);
+        Meta.RawString = Type;
     }
+    else if (Meta.RawString == Type) {
+        
+    }
+    else {
+        MulNX::ErrorTerminate(
+            std::string("哈希碰撞!"
+                "\n想要声明的: " + Type +
+                "\n已有的: " + Meta.RawString));
+    }
+
     Meta.Subscribers.push_back(pChannel);
     return true;
 }

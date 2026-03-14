@@ -21,16 +21,16 @@ bool ModuleManager::Init() {
 void ModuleManager::ProcessMsg(MulNX::Message* Msg) {
 	std::unique_lock lock(this->GetMutex());
 	switch (Msg->type) {
-	case "ModuleManager/RequestModuleInfo"_hash: {
-		auto [Info, pInfo] = MulNX::make_any_shared<ModuleInfo>();
+	case "ModuleManager/ModuleInfo/Request"_hash: {
+		auto [pInfo, raw] = MulNX::make_any_shared<ModuleInfo>();
 		
 		for (auto& [Name, Handle] : this->NameToHandleMap) {
-			pInfo->Info.push_back(std::make_pair(Name, Handle));
+			raw->Info.push_back(std::make_pair(Name, Handle));
 		}
 
-		MulNX::Message ResponseMsg("ModuleManager/ResponseModuleInfo"_hash);
-        ResponseMsg.asp = std::move(Info);
-		Msg->pMsgChannel->PushMessage(std::move(ResponseMsg));
+		MulNX::Message msg("ModuleManager/ModuleInfo/Response"_hash);
+        msg.asp = std::move(pInfo);
+        this->ISys().PublishAsync(std::move(msg));
 	}
 	}
 }
@@ -102,7 +102,7 @@ bool ModuleManager::PackedInit() {
 
     // 进行后置消息订阅
     this->ISys()
-        .SubscribeAsync("ModuleManager/RequestModuleInfo");
+        .SubscribeAsync("ModuleManager/ModuleInfo/Request");
     // 完成初始化
 	return true;
 }

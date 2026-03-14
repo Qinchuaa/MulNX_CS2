@@ -2,7 +2,6 @@
 
 #include "../../../Base/Base.hpp"
 
-
 namespace MulNX {
 	// MulNX消息基类
 	class Message {
@@ -18,7 +17,10 @@ namespace MulNX {
 
 		Message() = default;
 		Message(size_t Type) :type(Type) {}
-		Message(const Message& Other) = default;
+        Message(const Message& Other) = default;
+        Message& operator=(const Message& other) = default;
+        Message(Message&& other) = default;
+        Message& operator=(Message&& other) = default;
 
 		void Clear();
 	};

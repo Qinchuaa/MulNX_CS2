@@ -356,18 +356,18 @@ void SolutionManager::Solution_ShowMsg(const std::string& Name) {
         this->ISys().LogError("不安全的解决方案：" + Name);
         return;
     }
-    this->ISys().LogInfo(Line_);
+    this->ISys().LogLine();
     this->ISys().LogInfo(solution->GetMsg());
-    this->ISys().LogInfo(Line_);
+    this->ISys().LogLine();
 }
 void SolutionManager::Solution_ShowAll() {
     size_t Size = this->Solutions.size();
     if (Size) {
-        this->ISys().LogInfo(Line_);
+        this->ISys().LogLine();
         for (size_t i = 0; i < Size; ++i) {
             this->ISys().LogInfo(" |解决方案编号：" + std::to_string(i) + "   解决方案名称：" + this->Solutions[i]->Name);
         }
-        this->ISys().LogInfo(Line_);
+        this->ISys().LogLine();
     }
     else {
         this->ISys().LogError("没有找到任何解决方案正存储在内存中！");
@@ -421,15 +421,14 @@ void SolutionManager::Windows() {
 
 }
 void SolutionManager::Solution_DebugWindow() {
-    //打开窗口
     ImGui::Begin("解决方案调试", &this->OpenSolutionDebugWindow);
-    //检查当前是否操作解决方案
+    // 检查当前是否操作解决方案
     if (this->CurrentSolution) {
         ImGui::Text(("当前操作解决方案名称：" + this->CurrentSolution->Name + "   元素数量：" + std::to_string(this->CurrentSolution->Size_Elements) + "   总时长：" + std::to_string(this->CurrentSolution->GetMsg().empty() ? 0.0f : this->CurrentSolution->TotalDurationTime)).data());
         if (ImGui::Button("打印解决方案信息到调试窗口")) {
-            this->ISys().LogInfo(Line_);
+            this->ISys().LogLine();
             this->ISys().LogInfo(this->CurrentSolution->GetMsg());
-            this->ISys().LogInfo(Line_);
+            this->ISys().LogLine();
         }
 
         static std::string NewElementName = "";

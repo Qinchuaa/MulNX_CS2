@@ -16,6 +16,9 @@ namespace MulNX {
         void LogWarning(const std::string& Msg);
         void LogError(const std::string& Msg);
 
+        // 提示级别
+        void LogLine();
+
         // 自动订阅消息类型
         C_ISys& SubscribeAsync(const std::string& MsgType);
         // 自动发送消息

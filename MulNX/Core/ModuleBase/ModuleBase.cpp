@@ -34,13 +34,13 @@ void MulNX::ModuleBase::SetMyThreadDelta(int Delta) {
 // 初始化
 bool MulNX::ModuleBase::BaseInit() {
     try {
-        this->IMsgManager = this->Core->ModuleManager()->FindModule<MulNX::IMessageManager>("MessageManager");
-        this->IDebugger = this->Core->ModuleManager()->FindModule<MulNX::IDebugger>("Debugger");
-        this->GlobalVars = this->Core->ModuleManager()->FindModule<MulNX::GlobalVars>("GlobalVars");
-        //this->AL3D = this->Core->ModuleManager()->FindModule<MulNX::IAbstractLayer3D>("AbstractLayer3D");
-        this->AL3D = this->Core->ModuleManager()->FindAbstractLayer3D();
-        this->KT = this->Core->ModuleManager()->FindModule<MulNX::KeyTracker>("KeyTracker");
-        this->pPathManager = this->Core->ModuleManager()->FindModule<MulNX::PathManager>("PathManager");
+        auto* moduleManager = this->Core->ModuleManager();
+        this->IMsgManager = moduleManager->FindModule<MulNX::IMessageManager>("MessageManager");
+        this->IDebugger = moduleManager->FindModule<MulNX::IDebugger>("Debugger");
+        this->GlobalVars = moduleManager->FindModule<MulNX::GlobalVars>("GlobalVars");
+        this->AL3D = moduleManager->FindAbstractLayer3D();
+        this->KT = moduleManager->FindModule<MulNX::KeyTracker>("KeyTracker");
+        this->pPathManager = moduleManager->FindModule<MulNX::PathManager>("PathManager");
 
         if (!this->HModule.IsValid()) {
             this->HModule = MulNXHandle::CreateHandle();

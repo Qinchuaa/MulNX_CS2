@@ -33,15 +33,27 @@ bool MulNXController::UINodeFunc(MulNXUINode* ThisNode) {
         this->ISys().PublishAsync(std::move(Msg));
     }
     if (ImGui::Button("尝试拉取所有模块信息")) {
-        MulNX::Message Msg("ModuleManager/RequestModuleInfo"_hash);
-        Msg.pMsgChannel = this->MainMsgChannel;
+        MulNX::Message Msg("ModuleManager/ModuleInfo/Request"_hash);
         this->ISys().PublishAsync(std::move(Msg));
+    }
+    static std::string msg{};
+    ImGui::InputText("手动注入消息", &msg);
+    if (ImGui::Button("注入到框架")) {
+        this->ISys().PublishAsync(MulNX::HashString(msg));
+        msg.clear();
+    }
+    ImGui::SameLine();
+    if (ImGui::Button("注入到游戏")) {
+        this->AL3D->ExecuteCommand(msg);
+        msg.clear();
     }
     return true;
 }
 
 bool MulNXController::Init() {
     this->MainMsgChannel = this->ICreateAndGetMessageChannel();
+    this->ISys()
+        .SubscribeAsync("ModuleManager/ModuleInfo/Response");
     this->NeedUINode = true;
 
     this->IDebugger->SetShowFunc([](MulNX::Debugger* This)->void {
@@ -100,7 +112,7 @@ bool MulNXController::Init() {
 
 void MulNXController::ProcessMsg(MulNX::Message* Msg) {
     switch (Msg->type) {
-    case "ModuleManager/ResponseModuleInfo"_hash: {
+    case "ModuleManager/ModuleInfo/Response"_hash: {
         auto* pInfo = Msg->asp.get<ModuleInfo>();
         this->ISys().LogInfo("检测到以下注册模块");
         for (auto& [Name, Handle] : pInfo->Info) {

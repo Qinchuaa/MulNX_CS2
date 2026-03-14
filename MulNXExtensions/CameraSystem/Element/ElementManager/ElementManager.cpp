@@ -358,21 +358,21 @@ void ElementManager::Element_ShowAll() {
         this->ISys().LogError("没有找到任何元素正存储在内存中！");
         return;
     }
-    this->ISys().LogInfo(Line_);
+    this->ISys().LogLine();
     for (size_t i = 0; i < Size; ++i) {
         this->ISys().LogInfo(" |元素编号：" + std::to_string(i) + "   元素名称：" + this->Elements.at(i).get()->Name);
     }
-    this->ISys().LogInfo(Line_);
+    this->ISys().LogLine();
 }
 void ElementManager::Element_ShowMsgToDebugMenu(const std::shared_ptr<ElementBase> element) {
-    this->ISys().LogInfo(Line_);
+    this->ISys().LogLine();
     this->ISys().LogInfo("元素名称：" + element->Name);
     this->ISys().LogInfo("元素类型：" + element->TypeGet_String());
     this->ISys().LogInfo("持续时长：" + std::to_string(element->DurationTime));
     this->ISys().LogInfo("详细信息：");
 
     this->ISys().LogInfo(element->GetMsg());
-    this->ISys().LogInfo(Line_);
+    this->ISys().LogLine();
 }
 std::vector<std::string> ElementManager::Element_GetNames()const {
     std::vector<std::string> ElementsNames;

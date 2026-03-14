@@ -105,9 +105,6 @@ namespace DirectX {
     }
 }
 
-const std::string Line_ = "+------------------------------------------------+";
-const std::string Gap_ = "     ";
-
 namespace MulNX {
     namespace Math {
         //基本空间状态，包括坐标和旋转（四元数）

@@ -18,4 +18,5 @@ add_library(MulNXThirdParty
 
 target_include_directories(MulNXThirdParty PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}
+    ${CMAKE_CURRENT_SOURCE_DIR}/MulNXThirdParty
 )

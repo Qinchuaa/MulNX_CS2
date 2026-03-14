@@ -7,6 +7,7 @@
 #include <MulNXExtensions/CS2/MulNXCS2Ext.hpp>
 #include <MulNXExtensions/VirtualUser/VirtualUser.hpp>
 #include <MulNXExtensions/MulNXController/MulNXController.hpp>
+#include <MulNXExtensions/WebSocketManager/WebSocketManager.hpp>
 #include <MulNXThirdParty/All_ImGui.hpp>
 
 #include <Windows.h>
@@ -101,7 +102,8 @@ DWORD MulNX_CS2_Start(void*) {
     (*Core->ModuleManager())
         .CreateSystemModules()// 创建所有系统模块，这是框架运行的基础
         .BindAbstractLayer3D<CSController>("CSController")// 创建CS控制器模块为AbstractLayer3D模块，ID固定自动分配为系统模块最大ID 100
-        .CreateModule<CameraSystem>("CameraSystem", 101)// 摄像机系统模块
+        .CreateModule<WebSocketManager>("WebSocketManager", 101)// 网络管理模块
+        .CreateModule<CameraSystem>("CameraSystem", 102)// 摄像机系统模块
         .CreateModule<MiniMap>("MiniMap", 103)// 小地图模块
         .CreateModule<VirtualUser>("VirtualUser", 104)// 虚拟用户模块
         .CreateModule<GameCfgManager>("GameCfgManager", 206)// 游戏配置管理模块
@@ -111,6 +113,46 @@ DWORD MulNX_CS2_Start(void*) {
         .CreateModule<MulNXController>("MulNXController", 210)// MulNX控制器模块
         ;
 
+    server echo_server;
+
+    // Disable logging to keep output minimal. Remove these lines to enable
+    // console logging for debugging.
+    echo_server.clear_access_channels(websocketpp::log::alevel::all);
+    echo_server.clear_error_channels(websocketpp::log::elevel::all);
+
+    // Initialize ASIO
+    echo_server.init_asio();
+
+    // Register a message handler that echoes back the received payload.
+    echo_server.set_message_handler([
+        &echo_server
+    ](websocketpp::connection_hdl hdl, server::message_ptr msg) {
+            try {
+                echo_server.send(hdl, msg->get_payload(), msg->get_opcode());
+                echo_server.send(hdl, "来自CS2！", msg->get_opcode());
+            }
+            catch (const websocketpp::exception& e) {
+                std::cerr << "Echo failed: " << e.what() << std::endl;
+            }
+        });
+
+        // Listen on port 55202 on all interfaces (0.0.0.0). Use localhost only by
+        // passing "127.0.0.1" to listen() if you want local-only.
+        uint16_t port = 55202;
+        try {
+            echo_server.listen(port);
+            echo_server.start_accept();
+
+            std::cout << "WebSocket echo server listening on port " << port << std::endl;
+
+            // This will block until the server is stopped.
+            echo_server.run();
+        }
+        catch (const std::exception& e) {
+            std::cerr << "Server failed: " << e.what() << std::endl;
+            return 1;
+        }
+    
     // 启动核心
     Core->Init();
 

@@ -26,6 +26,8 @@ add_compile_options(/EHsc) # C++ 异常处理
 
 add_compile_definitions(NOMINMAX)
 add_compile_definitions(WIN32_LEAN_AND_MEAN)
+add_compile_definitions(ASIO_STANDALONE)
+add_compile_definitions(_WEBSOCKETPP_CPP11_TYPE_TRAITS_)
 
 # 添加子目录
 add_subdirectory("MulNXThirdParty")

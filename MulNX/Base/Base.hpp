@@ -5,14 +5,11 @@
 #include "TripleBuffer/TripleBuffer.hpp"
 #include "CharUtility/CharUtility.hpp"
 #include "MulNXHandle/MulNXHandle.hpp"
+#include "Hash/Hash.hpp"
 
 #include "../Config/Config.hpp"
 
-#include <algorithm>
-#include <cmath>
-#include <chrono>
 #include <cstdint>
-#include <sstream>
 #include <string>
 #include <shared_mutex>
 #include <atomic>
@@ -20,5 +17,3 @@
 #include <filesystem>
 #include <functional>
 #include <memory>
-#include <variant>
-#include <array>

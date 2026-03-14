@@ -21,6 +21,10 @@ void MulNX::C_ISys::LogError(const std::string& Msg) {
     this->pModuleBase->IDebugger->AddError("[" + this->pModuleBase->GetName() + "]" + Msg);
 }
 
+void MulNX::C_ISys::LogLine() {
+    this->LogInfo("+------------------------------------------------+");
+}
+
 MulNX::C_ISys& MulNX::C_ISys::SubscribeAsync(const std::string& MsgType) {
     this->pModuleBase->MainMsgChannel->Subscribe(MsgType);
     this->LogSucc("成功订阅消息：" + MsgType);

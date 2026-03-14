@@ -329,28 +329,27 @@ void ProjectManager::Project_ShowMsg(const std::string& Name) {
         //如果操作项目和活跃项目是同一个项目，则需要刷新
         this->Project_Refresh();
     }
-    this->ISys().LogInfo(Line_);
+    this->ISys().LogLine();
     this->ISys().LogInfo(this->ControllingProject->GetMsg());
-    this->ISys().LogInfo(Line_);
+    this->ISys().LogLine();
     return;
 }
 void ProjectManager::Project_ShowAll() {
-    //判断是否有项目存在
+    // 判断是否有项目存在
     if (!this->Projects.empty())return;
-    //先尝试更新活跃项目
+    // 先尝试更新活跃项目
     this->Project_Refresh();
-    //隔离线
-    this->ISys().LogInfo(Line_);
-    this->ISys().LogInfo(Line_);
-    this->ISys().LogInfo(Line_);
-    //依次展示所有项目信息
+    // 隔离线
+    this->ISys().LogLine();
+    this->ISys().LogLine();
+    // 依次展示所有项目信息
     for (const auto& Project : this->Projects) {
         this->ISys().LogInfo(Project->GetMsg());
-        this->ISys().LogInfo(Line_);//隔离线
+        this->ISys().LogLine();
     }
-    //隔离线
-    this->ISys().LogInfo(Line_);
-    this->ISys().LogInfo(Line_);
+    // 隔离线
+    this->ISys().LogLine();
+    this->ISys().LogLine();
 
     return;
 }
