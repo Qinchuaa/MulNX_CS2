@@ -1,5 +1,5 @@
 #pragma once
 
-typedef unsigned long DWORD;
+using DWORD = unsigned long;
 
 DWORD MulNX_CS2_Start(void*);

@@ -1,15 +1,7 @@
 #include "Core.hpp"
 #include "CoreStarterBase/CoreStarterBase.hpp"
 #include "ModuleManager/ModuleManager.hpp"
-
-#include "../Systems/Debugger/Debugger.hpp"
-#include "../Systems/HandleSystem/HandleSystem.hpp"
-#include "../Systems/IPCer/IPCer.hpp"
-#include "../Systems/KeyTracker/KeyTracker.hpp"
-#include "../Systems/MessageManager/MessageManager.hpp"
-#include "../Systems/MulNXGlobalVars/MulNXGlobalVars.hpp"
-#include "../Systems/MulNXUISystem/MulNXUISystem.hpp"
-#include "../Systems/AbstractLayer3D/IAbstractLayer3D.hpp"
+#include <MulNX/Systems/ISystems.hpp>
 
 MulNX::Core::Core::Core(std::string&& Name) :
     CoreName(Name) {
@@ -75,15 +67,14 @@ void MulNX::Core::Core::Init() {
 	this->pCoreStarter->EntryInit(this);
 	// 通过核心启动器进行系统初始化
 	this->pCoreStarter->SystemInit(this);
-
-	this->ModuleManager()->FindModule<MulNX::GlobalVars>("GlobalVars")->SystemReady = true;
-
 	// 初始化注册模块
 	this->pModuleManager->PackedInit();
-
-	this->pCoreStarter->StartAll();
-	this->pCoreStarter->InitEndCall();
-
+    // 开启系统
+    this->pCoreStarter->StartAll();
+    // 设置系统标志位
+    this->ModuleManager()->FindModule<MulNX::GlobalVars>("GlobalVars")->SystemReady.store(true, std::memory_order_release);
+    // 执行启动器回调
+    this->pCoreStarter->InitEndCall();
 	return;
 }
 

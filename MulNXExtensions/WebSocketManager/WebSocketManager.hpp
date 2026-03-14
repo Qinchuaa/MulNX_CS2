@@ -1,14 +1,18 @@
 #pragma once
 
-#include <MulNX/MulNX.hpp>
+#include "IWebSocketManager.hpp"
 
 #include <websocketpp/config/asio_no_tls.hpp>
-#include <MulNXThirdParty/websocketpp/server.hpp>
+#include <websocketpp/server.hpp>
 
-// A minimal echo server using websocketpp (standalone Asio)
-typedef websocketpp::server<websocketpp::config::asio> server;
+using Server = websocketpp::server<websocketpp::config::asio>;
 
-class WebSocketManager final :public MulNX::ModuleBase {
+class WebSocketManager final :public IWebSocketManager {
+    Server server;
+    uint16_t port = 55202;
 public:
-    bool Init()override { return true; }
+    bool Init()override;
+    void ProcessMsg(MulNX::Message* Msg)override;
+    void VirtualMain()override;
+    void ThreadMain()override;
 };

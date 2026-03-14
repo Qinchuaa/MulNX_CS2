@@ -1,17 +1,7 @@
 #include "CoreStarterBase.hpp"
 
-#include "../Core.hpp"
-#include "../ModuleManager/ModuleManager.hpp"
-
-#include "../../Systems/Debugger/Debugger.hpp"
-#include "../../Systems/HandleSystem/HandleSystem.hpp"
-#include "../../Systems/IPCer/IPCer.hpp"
-#include "../../Systems/KeyTracker/KeyTracker.hpp"
-#include "../../Systems/MessageManager/MessageManager.hpp"
-#include "../../Systems/MulNXGlobalVars/MulNXGlobalVars.hpp"
-#include "../../Systems/MulNXUISystem/MulNXUISystem.hpp"
-#include "../../Systems/AbstractLayer3D/IAbstractLayer3D.hpp"
-
+#include <MulNX/Core/Cores.hpp>
+#include <MulNX/Systems/ISystems.hpp>
 
 using namespace MulNX::Core;
 

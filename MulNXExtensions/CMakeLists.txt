@@ -18,4 +18,5 @@ target_link_libraries(MulNXExtensions PUBLIC
     MiniMap
     VirtualUser
     MulNXController
+    WebSocketManager
 )

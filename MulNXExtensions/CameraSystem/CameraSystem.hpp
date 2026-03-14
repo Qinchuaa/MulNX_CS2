@@ -52,7 +52,6 @@ private:
     ProjectManager PManager{};
     WorkspaceManager WManager{};
 public:
-    bool tempfunc();
     // 初始化
     bool Init()override;
     // 菜单

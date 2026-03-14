@@ -33,6 +33,6 @@ add_library(MulNX
 
     "MulNX.cpp"
 )
-target_link_libraries(MulNX PUBLIC MulNXThirdParty)
-
-target_include_directories(MulNX PUBLIC ${CMAKE_SOURCE_DIR})
+target_link_libraries(MulNX PUBLIC
+    MulNXThirdParty
+ )

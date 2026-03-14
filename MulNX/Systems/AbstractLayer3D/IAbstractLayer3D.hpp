@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../../Core/ModuleBase/ModuleBase.hpp"
+#include <MulNX/Core/ModuleBase/ModuleBase.hpp>
 
 //1到10为玩家，0为本地
 class D_Player {

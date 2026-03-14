@@ -1,8 +1,5 @@
-#include "../ModuleBase.hpp"
-
-#include "../../Core.hpp"
-
-#include "../../../Systems/ISystems.hpp"
+#include <MulNX/Core/Cores.hpp>
+#include <MulNX/Systems/ISystems.hpp>
 
 MulNX::C_ISys MulNX::ModuleBase::ISys() {
     return C_ISys(this);

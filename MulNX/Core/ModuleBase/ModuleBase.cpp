@@ -1,10 +1,7 @@
 #include "ModuleBase.hpp"
 
-#include "../Core.hpp"
-#include "../ModuleManager/ModuleManager.hpp"
-
-#include "../../Systems/ISystems.hpp"
-
+#include <MulNX/Core/Cores.hpp>
+#include <MulNX/Systems/ISystems.hpp>
 #include <MulNXThirdParty/All_ImGui.hpp>
 
 MulNX::ModuleBase::~ModuleBase() {

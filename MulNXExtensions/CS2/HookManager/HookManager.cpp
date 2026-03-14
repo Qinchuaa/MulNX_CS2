@@ -218,7 +218,7 @@ LRESULT __stdcall HookManager::MyWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LP
 HRESULT __stdcall HookManager::MyPresent(IDXGISwapChain* swapChain, UINT syncInterval, UINT flags) {
 	if(!this->OriginWndProc)
 		this->OriginWndProc = (WNDPROC)SetWindowLongPtrW(this->CS2hWnd, GWLP_WNDPROC, (LONG_PTR)HookManager::pInstance->EntryMyWndProc);
-	if (this->GlobalVars->SystemReady) {
+	if (this->GlobalVars->SystemReady.load(std::memory_order_acquire)) {
 		this->pSwapChain = swapChain;
 		this->Core->IUISystem().Render();
 	}

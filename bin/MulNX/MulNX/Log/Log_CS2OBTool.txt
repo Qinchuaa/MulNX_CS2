@@ -24,6 +24,8 @@
 [提示][CSController]推送了UI节点到UI系统
 [提示][CSController]申请了一个线程创建
 [成功][CSController]初始化成功!
+[提示][WebSocketManager]申请了一个线程创建
+[成功][WebSocketManager]初始化成功!
 [成功][WorkspaceManager]初始化成功!
 [成功][ProjectManager]初始化成功!
 [成功][SolutionManager]初始化成功!
@@ -49,22 +51,24 @@
 [成功][GameSettingsManager]初始化成功!
 [提示][ConsoleManager]推送了UI节点到UI系统
 [成功][ConsoleManager]初始化成功!
+[成功][MulNXController]成功订阅消息：ModuleManager/ModuleInfo/Response
 [提示][MulNXController]推送了UI节点到UI系统
 [成功][MulNXController]初始化成功!
 [提示][ModuleManager]注意: AbstractLayer3D(3D抽象层)被绑定为CSController
 [成功][ModuleManager]成功订阅消息：ModuleManager/ModuleInfo/Request
-[成功][UISystem]接收到一个UI节点
-[成功][UISystem]接收到一个UI节点
-[成功][UISystem]接收到一个UI节点
-[成功][UISystem]接收到一个UI节点
-[成功][UISystem]接收到一个UI节点
-[成功][UISystem]接收到一个UI节点
-[成功][UISystem]接收到一个UI节点
-[成功][UISystem]接收到一个UI节点
-[成功][UISystem]接收到一个UI节点
 [成功][HookManager]注入成功！
 [提示][HookManager]各模块初始化完成！
 [警告][HookManager]您正在使用测试版本！！
+[成功][WebSocketManager]正在监听端口：55202
+[成功][UISystem]接收到一个UI节点
+[成功][UISystem]接收到一个UI节点
+[成功][UISystem]接收到一个UI节点
+[成功][UISystem]接收到一个UI节点
+[成功][UISystem]接收到一个UI节点
+[成功][UISystem]接收到一个UI节点
+[成功][UISystem]接收到一个UI节点
+[成功][UISystem]接收到一个UI节点
+[成功][UISystem]接收到一个UI节点
 [成功][UISystem]接收到一个UI节点
 [成功][CSController]已完成Hook重载！
 [提示][VirtualUser]接收到新回合信息
@@ -73,216 +77,8 @@
 [提示][VirtualUser]接收到新回合信息
 [提示][ProjectManager]项目管理器正在处理消息！
 [警告][ProjectManager]无活跃项目，无法执行自动操作
-[警告][ElementManager]当前没有任何元素，跳过清空操作！
-[提示][SolutionManager]已关闭播放
-[警告][SolutionManager]当前没有任何解决方案，跳过清空操作！
-[成功][CameraSystem]成功设置工作区路径为：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace
-[提示][WorkspaceManager]尝试从XML文件加载工作区配置，文件路径：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace\WorkspaceConfig.xml
-[成功][WorkspaceManager]成功从XML文件加载工作区配置！ 文件路径：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace\WorkspaceConfig.xml
-[提示][ProjectManager]尝试从XML文件加载项目，文件路径：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace\Mtp\Mtp.xml
-[成功][ProjectManager]成功从XML文件加载项目：Mtp
-[提示][ProjectManager]尝试从XML文件加载项目，文件路径：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace\new\new.xml
-[成功][ProjectManager]成功从XML文件加载项目：new
-[提示][ProjectManager]尝试从XML文件加载项目，文件路径：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace\ntest\ntest.xml
-[成功][ProjectManager]成功从XML文件加载项目：ntest
-[提示][ProjectManager]尝试从XML文件加载项目，文件路径：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace\tttttttt\tttttttt.xml
-[成功][ProjectManager]成功从XML文件加载项目：tttttttt
-[提示][SolutionManager]已关闭播放
-[警告][SolutionManager]当前没有任何解决方案，跳过清空操作！
-[警告][ElementManager]当前没有任何元素，跳过清空操作！
-[成功][ProjectManager]成功设置项目路径为：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace\Mtp
-[成功][SolutionManager]成功设置解决方案路径为：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace\Mtp\Solutions
-[成功][ElementManager]成功设置元素路径为：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace\Mtp\Elements
-[提示][ElementManager]尝试从XML文件加载元素，文件路径：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace\Mtp\Elements\CT_Begin_1.xml
-[提示][ElementManager]尝试进行分发，元素类型为 FreeCameraPath ，文件路径：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace\Mtp\Elements\CT_Begin_1.xml
-[成功][ElementManager]成功从XML文件加载自由摄像机轨道信息！ 自由摄像机轨道 名：CT_Begin_1
-[提示][ElementManager]尝试从XML文件加载元素，文件路径：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace\Mtp\Elements\CT_Begin_2.xml
-[提示][ElementManager]尝试进行分发，元素类型为 FreeCameraPath ，文件路径：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace\Mtp\Elements\CT_Begin_2.xml
-[成功][ElementManager]成功从XML文件加载自由摄像机轨道信息！ 自由摄像机轨道 名：CT_Begin_2
-[提示][ElementManager]尝试从XML文件加载元素，文件路径：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace\Mtp\Elements\fovtest.xml
-[提示][ElementManager]尝试进行分发，元素类型为 FreeCameraPath ，文件路径：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace\Mtp\Elements\fovtest.xml
-[成功][ElementManager]成功从XML文件加载自由摄像机轨道信息！ 自由摄像机轨道 名：fovtest
-[提示][ElementManager]尝试从XML文件加载元素，文件路径：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace\Mtp\Elements\kadun.xml
-[提示][ElementManager]尝试进行分发，元素类型为 FreeCameraPath ，文件路径：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace\Mtp\Elements\kadun.xml
-[成功][ElementManager]成功从XML文件加载自由摄像机轨道信息！ 自由摄像机轨道 名：kadun
-[提示][ElementManager]尝试从XML文件加载元素，文件路径：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace\Mtp\Elements\Mte.xml
-[提示][ElementManager]尝试进行分发，元素类型为 FreeCameraPath ，文件路径：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace\Mtp\Elements\Mte.xml
-[成功][ElementManager]成功从XML文件加载自由摄像机轨道信息！ 自由摄像机轨道 名：Mte
-[提示][ElementManager]尝试从XML文件加载元素，文件路径：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace\Mtp\Elements\nnn.xml
-[提示][ElementManager]尝试进行分发，元素类型为 FreeCameraPath ，文件路径：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace\Mtp\Elements\nnn.xml
-[成功][ElementManager]成功从XML文件加载自由摄像机轨道信息！ 自由摄像机轨道 名：nnn
-[提示][ElementManager]尝试从XML文件加载元素，文件路径：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace\Mtp\Elements\roll.xml
-[提示][ElementManager]尝试进行分发，元素类型为 FreeCameraPath ，文件路径：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace\Mtp\Elements\roll.xml
-[成功][ElementManager]成功从XML文件加载自由摄像机轨道信息！ 自由摄像机轨道 名：roll
-[提示][ElementManager]尝试从XML文件加载元素，文件路径：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace\Mtp\Elements\ttt.xml
-[提示][ElementManager]尝试进行分发，元素类型为 FreeCameraPath ，文件路径：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace\Mtp\Elements\ttt.xml
-[成功][ElementManager]成功从XML文件加载自由摄像机轨道信息！ 自由摄像机轨道 名：ttt
-[提示][ElementManager]尝试从XML文件加载元素，文件路径：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace\Mtp\Elements\T_Begin_1.xml
-[提示][ElementManager]尝试进行分发，元素类型为 FreeCameraPath ，文件路径：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace\Mtp\Elements\T_Begin_1.xml
-[成功][ElementManager]成功从XML文件加载自由摄像机轨道信息！ 自由摄像机轨道 名：T_Begin_1
-[提示][SolutionManager]尝试从XML文件加载解决方案，文件路径：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace\Mtp\Solutions\begin.xml
-[成功][SolutionManager]成功添加元素到解决方案   元素名：T_Begin_1
-[成功][SolutionManager]成功添加元素到解决方案   元素名：CT_Begin_1
-[成功][SolutionManager]成功添加元素到解决方案   元素名：CT_Begin_2
-[成功][SolutionManager]成功从XML文件加载解决方案！ 解决方案名：begin  共包含元素个数：3
-[成功][SolutionManager]---------------------
-[提示][SolutionManager]尝试从XML文件加载解决方案，文件路径：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace\Mtp\Solutions\Mts.xml
-[成功][SolutionManager]成功添加元素到解决方案   元素名：ttt
-[成功][SolutionManager]成功添加元素到解决方案   元素名：Mte
-[成功][SolutionManager]成功添加元素到解决方案   元素名：nnn
-[成功][SolutionManager]成功从XML文件加载解决方案！ 解决方案名：Mts  共包含元素个数：3
-[成功][SolutionManager]---------------------
-[成功][ProjectManager]已切换至项目Mtp
-[成功][ProjectManager]尝试加载元素总数：9
-[成功][ProjectManager]尝试加载解决方案总数：2
-[成功][ProjectManager]成功加载元素总数：9
-[成功][ProjectManager]成功加载解决方案总数：2
-[提示][SolutionManager]偏移时间轴播放，偏移时间设置为：92.515694
-[提示][SolutionManager]已经切换至解决方案：begin
-[提示][SolutionManager]已开启播放
-[提示][CSController]  坐标： X：1082.678955  Y：444.619781  Z：-153.673859  FOV:90.000000  角度： 俯仰：1.297915  偏航：166.494659  滚转：0.002979
-[提示][CSController]  坐标： X：1082.885376  Y：444.489838  Z：-153.670654  FOV:90.000000  角度： 俯仰：1.296708  偏航：166.536377  滚转：0.003205
-[提示][CSController]  坐标： X：1083.048584  Y：444.386902  Z：-153.668106  FOV:89.999992  角度： 俯仰：1.295774  偏航：166.569305  滚转：0.003365
-[提示][CSController]  坐标： X：1083.002197  Y：444.416229  Z：-153.668839  FOV:90.000008  角度： 俯仰：1.296037  偏航：166.559952  滚转：0.003321
-[提示][CSController]  坐标： X：1083.390869  Y：444.170349  Z：-153.662720  FOV:90.000000  角度： 俯仰：1.293872  偏航：166.638168  滚转：0.003650
-[提示][CSController]  坐标： X：1083.524170  Y：444.085815  Z：-153.660614  FOV:90.000008  角度： 俯仰：1.293152  偏航：166.664932  滚转：0.003743
-[提示][CSController]  坐标： X：1083.671143  Y：443.992432  Z：-153.658264  FOV:90.000000  角度： 俯仰：1.292371  偏航：166.694397  滚转：0.003835
-[提示][CSController]  坐标： X：1083.718628  Y：443.962097  Z：-153.657501  FOV:89.999992  角度： 俯仰：1.292120  偏航：166.703949  滚转：0.003862
-[提示][CSController]  坐标： X：1084.213745  Y：443.646210  Z：-153.649536  FOV:90.000000  角度： 俯仰：1.289593  偏航：166.802933  滚转：0.004078
-[提示][CSController]  坐标： X：1084.344849  Y：443.562225  Z：-153.647415  FOV:90.000000  角度： 俯仰：1.288945  偏航：166.829117  滚转：0.004115
-[提示][CSController]  坐标： X：1084.460693  Y：443.488037  Z：-153.645523  FOV:89.999992  角度： 俯仰：1.288381  偏航：166.852203  滚转：0.004141
-[提示][CSController]  坐标： X：1084.873901  Y：443.222412  Z：-153.638763  FOV:90.000000  角度： 俯仰：1.286423  偏航：166.934433  滚转：0.004186
-[提示][CSController]  坐标： X：1085.014893  Y：443.131500  Z：-153.636429  FOV:90.000008  角度： 俯仰：1.285773  偏航：166.962448  滚转：0.004185
-[提示][CSController]  坐标： X：1085.162964  Y：443.036072  Z：-153.633972  FOV:90.000000  角度： 俯仰：1.285102  偏航：166.991806  滚转：0.004174
-[提示][CSController]  坐标： X：1085.227539  Y：442.994354  Z：-153.632904  FOV:90.000008  角度： 俯仰：1.284812  偏航：167.004623  滚转：0.004167
-[提示][CSController]  坐标： X：1085.659790  Y：442.714752  Z：-153.625702  FOV:90.000000  角度： 俯仰：1.282919  偏航：167.090179  滚转：0.004078
-[提示][CSController]  坐标： X：1085.804565  Y：442.620819  Z：-153.623276  FOV:89.999992  角度： 俯仰：1.282302  偏航：167.118805  滚转：0.004032
-[提示][CSController]  坐标： X：1085.950928  Y：442.525787  Z：-153.620819  FOV:90.000008  角度： 俯仰：1.281687  偏航：167.147720  滚转：0.003978
-[提示][CSController]  坐标： X：1086.085083  Y：442.438568  Z：-153.618546  FOV:90.000000  角度： 俯仰：1.281131  偏航：167.174210  滚转：0.003922
-[提示][CSController]  坐标： X：1086.019165  Y：442.481445  Z：-153.619659  FOV:90.000000  角度： 俯仰：1.281404  偏航：167.161194  滚转：0.003951
-[提示][CSController]  坐标： X：1086.455933  Y：442.197174  Z：-153.612274  FOV:89.999992  角度： 俯仰：1.279631  偏航：167.247299  滚转：0.003736
-[提示][CSController]  坐标： X：1086.601074  Y：442.102539  Z：-153.609802  FOV:90.000000  角度： 俯仰：1.279057  偏航：167.275864  滚转：0.003651
-[提示][CSController]  坐标： X：1086.749512  Y：442.005707  Z：-153.607300  FOV:90.000000  角度： 俯仰：1.278479  偏航：167.305038  滚转：0.003558
-[提示][CSController]  坐标： X：1086.835205  Y：441.949768  Z：-153.605835  FOV:90.000000  角度： 俯仰：1.278149  偏航：167.321869  滚转：0.003501
-[提示][CSController]  坐标： X：1087.239258  Y：441.685303  Z：-153.598892  FOV:89.999992  角度： 俯仰：1.276623  偏航：167.401215  滚转：0.003202
-[提示][CSController]  坐标： X：1087.364136  Y：441.603485  Z：-153.596741  FOV:90.000000  角度： 俯仰：1.276163  偏航：167.425720  滚转：0.003100
-[提示][CSController]  坐标： X：1087.493530  Y：441.518555  Z：-153.594513  FOV:90.000000  角度： 俯仰：1.275690  偏航：167.451111  滚转：0.002989
-[提示][CSController]  坐标： X：1087.619507  Y：441.435883  Z：-153.592331  FOV:90.000000  角度： 俯仰：1.275236  偏航：167.475769  滚转：0.002878
-[提示][CSController]  坐标： X：1087.674927  Y：441.399628  Z：-153.591385  FOV:90.000000  角度： 俯仰：1.275038  偏航：167.486603  滚转：0.002827
-[提示][CSController]  坐标： X：1088.178223  Y：441.068573  Z：-153.582657  FOV:90.000000  角度： 俯仰：1.273278  偏航：167.585068  滚转：0.002332
-[提示][CSController]  坐标： X：1088.333374  Y：440.966431  Z：-153.579941  FOV:90.000000  角度： 俯仰：1.272750  偏航：167.615326  滚转：0.002167
-[提示][CSController]  坐标： X：1088.479736  Y：440.869904  Z：-153.577393  FOV:90.000000  角度： 俯仰：1.272259  偏航：167.643921  滚转：0.002006
-[提示][CSController]  坐标： X：1088.609253  Y：440.784515  Z：-153.575119  FOV:90.000000  角度： 俯仰：1.271828  偏航：167.669189  滚转：0.001859
-[提示][CSController]  坐标： X：1088.538208  Y：440.831360  Z：-153.576355  FOV:90.000000  角度： 俯仰：1.272064  偏航：167.655334  滚转：0.001940
-[提示][CSController]  坐标： X：1088.999756  Y：440.526520  Z：-153.568268  FOV:90.000000  角度： 俯仰：1.270557  偏航：167.745331  滚转：0.001393
-[提示][CSController]  坐标： X：1089.144287  Y：440.430908  Z：-153.565704  FOV:90.000000  角度： 俯仰：1.270096  偏航：167.773483  滚转：0.001212
-[提示][CSController]  坐标： X：1089.285400  Y：440.337524  Z：-153.563232  FOV:89.999992  角度： 俯仰：1.269651  偏航：167.800964  滚转：0.001031
-[提示][CSController]  坐标： X：1089.424561  Y：440.245361  Z：-153.560776  FOV:90.000000  角度： 俯仰：1.269217  偏航：167.828033  滚转：0.000849
-[提示][CSController]  坐标： X：1089.845459  Y：439.966461  Z：-153.553329  FOV:89.999992  角度： 俯仰：1.267932  偏航：167.909836  滚转：0.000273
-[提示][CSController]  坐标： X：1089.999268  Y：439.864410  Z：-153.550598  FOV:90.000000  角度： 俯仰：1.267472  偏航：167.939713  滚转：0.000054
-[提示][CSController]  坐标： X：1090.163574  Y：439.755310  Z：-153.547668  FOV:90.000008  角度： 俯仰：1.266987  偏航：167.971603  滚转：-0.000184
-[提示][CSController]  坐标： X：1090.315552  Y：439.654327  Z：-153.544983  FOV:90.000000  角度： 俯仰：1.266543  偏航：168.001099  滚转：-0.000410
-[提示][CSController]  坐标： X：1090.457031  Y：439.560364  Z：-153.542480  FOV:90.000000  角度： 俯仰：1.266134  偏航：168.028519  滚转：-0.000623
-[提示][CSController]  坐标： X：1090.333984  Y：439.642059  Z：-153.544647  FOV:90.000000  角度： 俯仰：1.266489  偏航：168.004684  滚转：-0.000437
-[提示][CSController]  坐标： X：1090.884033  Y：439.276093  Z：-153.534821  FOV:89.999992  角度： 俯仰：1.264924  偏航：168.111298  滚转：-0.001288
-[提示][CSController]  坐标： X：1091.039429  Y：439.172638  Z：-153.532043  FOV:90.000000  角度： 俯仰：1.264493  偏航：168.141388  滚转：-0.001538
-[提示][CSController]  坐标： X：1091.207275  Y：439.060730  Z：-153.529022  FOV:90.000008  角度： 俯仰：1.264032  偏航：168.173889  滚转：-0.001812
-[提示][CSController]  坐标： X：1091.265747  Y：439.021790  Z：-153.527985  FOV:90.000000  角度： 俯仰：1.263872  偏航：168.185196  滚转：-0.001908
-[提示][CSController]  坐标： X：1091.831299  Y：438.644379  Z：-153.517807  FOV:90.000000  角度： 俯仰：1.262363  偏航：168.294556  滚转：-0.002868
-[提示][CSController]  坐标： X：1092.003296  Y：438.529388  Z：-153.514709  FOV:90.000000  角度： 俯仰：1.261914  偏航：168.327820  滚转：-0.003170
-[提示][CSController]  坐标： X：1092.196289  Y：438.400360  Z：-153.511215  FOV:90.000000  角度： 俯仰：1.261417  偏航：168.365097  滚转：-0.003513
-[提示][CSController]  坐标： X：1092.219482  Y：438.384918  Z：-153.510803  FOV:90.000000  角度： 俯仰：1.261358  偏航：168.369553  滚转：-0.003554
-[提示][CSController]  坐标： X：1092.870972  Y：437.948883  Z：-153.498993  FOV:90.000000  角度： 俯仰：1.259725  偏航：168.495285  滚转：-0.004752
-[提示][CSController]  坐标： X：1093.046387  Y：437.831421  Z：-153.495819  FOV:90.000000  角度： 俯仰：1.259297  偏航：168.529068  滚转：-0.005083
-[提示][CSController]  坐标： X：1093.194946  Y：437.731873  Z：-153.493103  FOV:90.000000  角度： 俯仰：1.258937  偏航：168.557709  滚转：-0.005366
-[提示][CSController]  坐标： X：1093.754395  Y：437.356537  Z：-153.482910  FOV:90.000000  角度： 俯仰：1.257610  偏航：168.665482  滚转：-0.006458
-[提示][CSController]  坐标： X：1093.930176  Y：437.238556  Z：-153.479706  FOV:90.000000  角度： 俯仰：1.257202  偏航：168.699295  滚转：-0.006808
-[提示][CSController]  坐标： X：1094.094727  Y：437.127960  Z：-153.476715  FOV:90.000000  角度： 俯仰：1.256823  偏航：168.730988  滚转：-0.007139
-[提示][CSController]  坐标： X：1094.265991  Y：437.013000  Z：-153.473572  FOV:90.000000  角度： 俯仰：1.256433  偏航：168.763901  滚转：-0.007486
-[提示][CSController]  坐标： X：1094.191650  Y：437.062958  Z：-153.474945  FOV:90.000000  角度： 俯仰：1.256602  偏航：168.749603  滚转：-0.007335
-[提示][CSController]  坐标： X：1094.717285  Y：436.709595  Z：-153.465317  FOV:90.000000  角度： 俯仰：1.255420  偏航：168.850662  滚转：-0.008415
-[提示][CSController]  坐标： X：1094.879517  Y：436.600433  Z：-153.462341  FOV:90.000000  角度： 俯仰：1.255062  偏航：168.881866  滚转：-0.008754
-[提示][CSController]  坐标： X：1095.046387  Y：436.488159  Z：-153.459274  FOV:90.000000  角度： 俯仰：1.254697  偏航：168.913925  滚转：-0.009105
-[提示][CSController]  坐标： X：1095.209229  Y：436.378571  Z：-153.456299  FOV:90.000008  角度： 俯仰：1.254343  偏航：168.945206  滚转：-0.009450
-[提示][CSController]  坐标： X：1095.680786  Y：436.061035  Z：-153.447632  FOV:90.000008  角度： 俯仰：1.253335  偏航：169.035736  滚转：-0.010462
-[提示][CSController]  坐标： X：1095.846680  Y：435.949249  Z：-153.444550  FOV:90.000000  角度： 俯仰：1.252985  偏航：169.067581  滚转：-0.010822
-[提示][CSController]  坐标： X：1096.017700  Y：435.834076  Z：-153.441437  FOV:90.000000  角度： 俯仰：1.252628  偏航：169.100388  滚转：-0.011196
-[提示][CSController]  坐标： X：1096.187134  Y：435.719788  Z：-153.438278  FOV:90.000000  角度： 俯仰：1.252277  偏航：169.132904  滚转：-0.011569
-[提示][CSController]  坐标： X：1096.353516  Y：435.607544  Z：-153.435226  FOV:90.000000  角度： 俯仰：1.251934  偏航：169.164825  滚转：-0.011938
-[提示][CSController]  坐标： X：1096.247437  Y：435.679047  Z：-153.437180  FOV:90.000000  角度： 俯仰：1.252152  偏航：169.144485  滚转：-0.011703
-[提示][CSController]  坐标： X：1096.947510  Y：435.206757  Z：-153.424255  FOV:90.000000  角度： 俯仰：1.250731  偏航：169.278717  滚转：-0.013269
-[提示][CSController]  坐标： X：1097.141846  Y：435.075684  Z：-153.420670  FOV:90.000000  角度： 俯仰：1.250345  偏航：169.315933  滚转：-0.013709
-[提示][CSController]  坐标： X：1097.316406  Y：434.957855  Z：-153.417435  FOV:90.000008  角度： 俯仰：1.250000  偏航：169.349380  滚转：-0.014107
-[提示][CSController]  坐标： X：1097.305908  Y：434.964874  Z：-153.417618  FOV:90.000000  角度： 俯仰：1.250021  偏航：169.347366  滚转：-0.014083
-[提示][CSController]  坐标： X：1097.803101  Y：434.629059  Z：-153.408432  FOV:90.000000  角度： 俯仰：1.249050  偏航：169.442612  滚转：-0.015227
-[提示][CSController]  坐标： X：1097.990112  Y：434.502625  Z：-153.404953  FOV:90.000000  角度： 俯仰：1.248690  偏航：169.478424  滚转：-0.015661
-[提示][CSController]  坐标： X：1098.176270  Y：434.376862  Z：-153.401489  FOV:90.000000  角度： 俯仰：1.248334  偏航：169.514053  滚转：-0.016095
-[提示][CSController]  坐标： X：1098.358032  Y：434.253906  Z：-153.398132  FOV:90.000000  角度： 俯仰：1.247989  偏航：169.548859  滚转：-0.016521
-[提示][CSController]  坐标： X：1098.541016  Y：434.130219  Z：-153.394730  FOV:90.000000  角度： 俯仰：1.247644  偏航：169.583878  滚转：-0.016952
-[提示][CSController]  坐标： X：1098.384033  Y：434.236328  Z：-153.397644  FOV:90.000000  角度： 俯仰：1.247940  偏航：169.553848  滚转：-0.016582
-[提示][CSController]  坐标： X：1099.199097  Y：433.685120  Z：-153.382492  FOV:90.000000  角度： 俯仰：1.246419  偏航：169.709778  滚转：-0.018514
-[提示][CSController]  坐标： X：1099.419556  Y：433.535889  Z：-153.378403  FOV:90.000000  角度： 俯仰：1.246014  偏航：169.751968  滚转：-0.019042
-[提示][CSController]  坐标： X：1099.602417  Y：433.412140  Z：-153.375015  FOV:90.000000  角度： 俯仰：1.245681  偏航：169.786926  滚转：-0.019481
-[提示][CSController]  坐标： X：1099.481689  Y：433.493835  Z：-153.377243  FOV:90.000000  角度： 俯仰：1.245901  偏航：169.763855  滚转：-0.019191
-[提示][CSController]  坐标： X：1100.200928  Y：433.006897  Z：-153.363861  FOV:90.000008  角度： 俯仰：1.244602  偏航：169.901367  滚转：-0.020930
-[提示][CSController]  坐标： X：1100.407959  Y：432.866791  Z：-153.359985  FOV:90.000000  角度： 俯仰：1.244233  偏航：169.940918  滚转：-0.021434
-[提示][CSController]  坐标： X：1100.612671  Y：432.728027  Z：-153.356171  FOV:90.000000  角度： 俯仰：1.243870  偏航：169.980072  滚转：-0.021935
-[提示][CSController]  坐标： X：1100.598389  Y：432.737732  Z：-153.356445  FOV:90.000000  角度： 俯仰：1.243895  偏航：169.977341  滚转：-0.021900
-[提示][CSController]  坐标： X：1101.191040  Y：432.336273  Z：-153.345398  FOV:90.000008  角度： 俯仰：1.242854  偏航：170.090561  滚转：-0.023356
-[提示][CSController]  坐标： X：1101.398682  Y：432.195496  Z：-153.341522  FOV:90.000000  角度： 俯仰：1.242493  偏航：170.130249  滚转：-0.023869
-[提示][CSController]  坐标： X：1101.582520  Y：432.070923  Z：-153.338089  FOV:90.000000  角度： 俯仰：1.242174  偏航：170.165375  滚转：-0.024324
-[提示][CSController]  坐标： X：1101.733765  Y：431.968384  Z：-153.335266  FOV:90.000000  角度： 俯仰：1.241913  偏航：170.194260  滚转：-0.024700
-[提示][CSController]  坐标： X：1102.294922  Y：431.588074  Z：-153.324783  FOV:90.000000  角度： 俯仰：1.240952  偏航：170.301422  滚转：-0.026097
-[提示][CSController]  坐标： X：1102.480469  Y：431.462219  Z：-153.321320  FOV:90.000000  角度： 俯仰：1.240636  偏航：170.336868  滚转：-0.026561
-[提示][CSController]  坐标： X：1102.672119  Y：431.332306  Z：-153.317734  FOV:90.000000  角度： 俯仰：1.240311  偏航：170.373459  滚转：-0.027041
-[提示][CSController]  坐标： X：1102.844971  Y：431.215088  Z：-153.314499  FOV:90.000008  角度： 俯仰：1.240019  偏航：170.406479  滚转：-0.027475
-[提示][CSController]  坐标： X：1103.014160  Y：431.100281  Z：-153.311340  FOV:90.000000  角度： 俯仰：1.239733  偏航：170.438797  滚转：-0.027900
-[提示][CSController]  坐标： X：1102.887573  Y：431.186218  Z：-153.313705  FOV:90.000000  角度： 俯仰：1.239947  偏航：170.414597  滚转：-0.027582
-[提示][CSController]  坐标： X：1103.644775  Y：430.672729  Z：-153.299545  FOV:90.000000  角度： 俯仰：1.238677  偏航：170.559158  滚转：-0.029488
-[提示][CSController]  坐标： X：1103.852539  Y：430.531708  Z：-153.295670  FOV:90.000000  角度： 俯仰：1.238331  偏航：170.598846  滚转：-0.030013
-[提示][CSController]  坐标： X：1104.052368  Y：430.396240  Z：-153.291946  FOV:90.000000  角度： 俯仰：1.237999  偏航：170.636963  滚转：-0.030519
-[提示][CSController]  坐标： X：1104.059204  Y：430.391571  Z：-153.291809  FOV:90.000008  角度： 俯仰：1.237987  偏航：170.638290  滚转：-0.030536
-[提示][CSController]  坐标： X：1104.798096  Y：429.890320  Z：-153.277969  FOV:90.000000  角度： 俯仰：1.236765  偏航：170.779343  滚转：-0.032410
-[提示][CSController]  坐标： X：1105.005493  Y：429.749634  Z：-153.274094  FOV:90.000008  角度： 俯仰：1.236424  偏航：170.818924  滚转：-0.032937
-[提示][CSController]  坐标： X：1105.230225  Y：429.597107  Z：-153.269882  FOV:89.999992  角度： 俯仰：1.236054  偏航：170.861832  滚转：-0.033509
-[提示][CSController]  坐标： X：1105.248413  Y：429.584808  Z：-153.269562  FOV:89.999992  角度： 俯仰：1.236025  偏航：170.865295  滚转：-0.033555
-[提示][CSController]  坐标： X：1106.077759  Y：429.022125  Z：-153.254028  FOV:90.000000  角度： 俯仰：1.234666  偏航：171.023590  滚转：-0.035667
-[提示][CSController]  坐标： X：1106.302002  Y：428.870087  Z：-153.249847  FOV:90.000000  角度： 俯仰：1.234300  偏航：171.066376  滚转：-0.036238
-[提示][CSController]  坐标： X：1106.454834  Y：428.766296  Z：-153.246964  FOV:90.000000  角度： 俯仰：1.234050  偏航：171.095581  滚转：-0.036628
-[提示][CSController]  坐标： X：1107.144409  Y：428.298462  Z：-153.234085  FOV:90.000000  角度： 俯仰：1.232925  偏航：171.227203  滚转：-0.038387
-[提示][CSController]  坐标： X：1107.370728  Y：428.145020  Z：-153.229858  FOV:90.000000  角度： 俯仰：1.232557  偏航：171.270401  滚转：-0.038964
-[提示][CSController]  坐标： X：1107.566284  Y：428.012299  Z：-153.226181  FOV:90.000000  角度： 俯仰：1.232238  偏航：171.307739  滚转：-0.039463
-[提示][CSController]  坐标： X：1107.678101  Y：427.936493  Z：-153.224106  FOV:90.000000  角度： 俯仰：1.232055  偏航：171.329071  滚转：-0.039748
-[提示][CSController]  坐标： X：1108.310425  Y：427.507599  Z：-153.212265  FOV:90.000008  角度： 俯仰：1.231023  偏航：171.449783  滚转：-0.041360
-[提示][CSController]  坐标： X：1108.500732  Y：427.378540  Z：-153.208710  FOV:90.000008  角度： 俯仰：1.230712  偏航：171.486130  滚转：-0.041844
-[提示][CSController]  坐标： X：1108.717529  Y：427.231476  Z：-153.204651  FOV:90.000000  角度： 俯仰：1.230358  偏航：171.527512  滚转：-0.042396
-[提示][CSController]  坐标： X：1108.916504  Y：427.096497  Z：-153.200928  FOV:89.999992  角度： 俯仰：1.230032  偏航：171.565521  滚转：-0.042903
-[提示][CSController]  坐标： X：1108.917725  Y：427.095673  Z：-153.200897  FOV:90.000000  角度： 俯仰：1.230030  偏航：171.565750  滚转：-0.042906
-[提示][CSController]  坐标： X：1109.672485  Y：426.583923  Z：-153.186798  FOV:90.000000  角度： 俯仰：1.228792  偏航：171.709885  滚转：-0.044823
-[提示][CSController]  坐标： X：1109.885254  Y：426.439789  Z：-153.182831  FOV:90.000000  角度： 俯仰：1.228441  偏航：171.750488  滚转：-0.045362
-[提示][CSController]  坐标： X：1110.093506  Y：426.298676  Z：-153.178955  FOV:89.999992  角度： 俯仰：1.228098  偏航：171.790253  滚转：-0.045889
-[提示][CSController]  坐标： X：1110.173584  Y：426.244324  Z：-153.177460  FOV:90.000000  角度： 俯仰：1.227966  偏航：171.805573  滚转：-0.046092
-[提示][CSController]  坐标： X：1110.887573  Y：425.760437  Z：-153.164124  FOV:90.000000  角度： 俯仰：1.226783  偏航：171.941956  滚转：-0.047895
-[提示][CSController]  坐标： X：1111.098877  Y：425.617157  Z：-153.160172  FOV:90.000000  角度： 俯仰：1.226431  偏航：171.982361  滚转：-0.048428
-[提示][CSController]  坐标： X：1111.318359  Y：425.468536  Z：-153.156097  FOV:90.000000  角度： 俯仰：1.226065  偏航：172.024277  滚转：-0.048980
-[提示][CSController]  坐标： X：1111.445068  Y：425.382690  Z：-153.153717  FOV:90.000000  角度： 俯仰：1.225853  偏航：172.048492  滚转：-0.049298
-[提示][CSController]  坐标： X：1112.174561  Y：424.888550  Z：-153.140137  FOV:90.000000  角度： 俯仰：1.224627  偏航：172.187912  滚转：-0.051127
-[提示][CSController]  坐标： X：1112.374146  Y：424.753448  Z：-153.136414  FOV:90.000000  角度： 俯仰：1.224289  偏航：172.226059  滚转：-0.051625
-[提示][CSController]  坐标： X：1112.591064  Y：424.606567  Z：-153.132355  FOV:90.000000  角度： 俯仰：1.223921  偏航：172.267532  滚转：-0.052166
-[提示][CSController]  坐标： X：1112.731934  Y：424.511200  Z：-153.129745  FOV:90.000000  角度： 俯仰：1.223682  偏航：172.294464  滚转：-0.052517
-[提示][CSController]  坐标： X：1113.431763  Y：424.037476  Z：-153.116730  FOV:90.000000  角度： 俯仰：1.222484  偏航：172.428299  滚转：-0.054254
-[提示][CSController]  坐标： X：1113.640625  Y：423.896179  Z：-153.112839  FOV:90.000000  角度： 俯仰：1.222124  偏航：172.468231  滚转：-0.054770
-[提示][CSController]  坐标： X：1113.880371  Y：423.733948  Z：-153.108383  FOV:89.999992  角度： 俯仰：1.221709  偏航：172.514099  滚转：-0.055361
-[提示][CSController]  坐标： X：1114.033691  Y：423.630249  Z：-153.105530  FOV:90.000000  角度： 俯仰：1.221442  偏航：172.543442  滚转：-0.055739
-[提示][CSController]  坐标： X：1114.781982  Y：423.124146  Z：-153.091644  FOV:90.000000  角度： 俯仰：1.220133  偏航：172.686630  滚转：-0.057573
-[提示][CSController]  坐标： X：1115.069214  Y：422.929932  Z：-153.086304  FOV:89.999992  角度： 俯仰：1.219625  偏航：172.741608  滚转：-0.058273
-[提示][CSController]  坐标： X：1115.312622  Y：422.765503  Z：-153.081787  FOV:90.000000  角度： 俯仰：1.219193  偏航：172.788193  滚转：-0.058865
-[提示][CSController]  坐标： X：1115.349976  Y：422.740173  Z：-153.081085  FOV:90.000000  角度： 俯仰：1.219127  偏航：172.795380  滚转：-0.058956
-[提示][CSController]  坐标： X：1116.253540  Y：422.129761  Z：-153.064362  FOV:90.000008  角度： 俯仰：1.217502  偏航：172.968399  滚转：-0.061137
-[提示][CSController]  坐标： X：1116.487427  Y：421.971802  Z：-153.060028  FOV:89.999992  角度： 俯仰：1.217077  偏航：173.013214  滚转：-0.061698
-[提示][CSController]  坐标： X：1116.680664  Y：421.841370  Z：-153.056458  FOV:90.000000  角度： 俯仰：1.216724  偏航：173.050217  滚转：-0.062160
-[提示][CSController]  坐标： X：1117.356323  Y：421.385284  Z：-153.043945  FOV:90.000000  角度： 俯仰：1.215477  偏航：173.179733  滚转：-0.063767
-[提示][CSController]  坐标： X：1117.590210  Y：421.227448  Z：-153.039642  FOV:90.000000  角度： 俯仰：1.215041  偏航：173.224579  滚转：-0.064320
-[警告][CameraSystem]ShutDown被调用！
-[提示][ElementManager]已关闭预览
-[提示][SolutionManager]已关闭播放
+[提示][VirtualUser]已触发自动保存（频率：每分钟）
+[提示][VirtualUser]已触发自动保存（频率：每分钟）
+[提示][VirtualUser]接收到新回合信息
+[提示][ProjectManager]项目管理器正在处理消息！
+[警告][ProjectManager]无活跃项目，无法执行自动操作

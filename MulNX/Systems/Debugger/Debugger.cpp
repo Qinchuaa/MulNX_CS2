@@ -1,12 +1,10 @@
 #include "Debugger.hpp"
 
-#include "../KeyTracker/KeyTracker.hpp"
-#include "../MulNXGlobalVars/MulNXGlobalVars.hpp"
-
-#include "../../Core/Cores.hpp"
-#include "../../Systems/ISystems.hpp"
+#include <MulNX/Core/Cores.hpp>
+#include <MulNX/Systems/ISystems.hpp>
 
 #include <bitset>
+
 bool MySaveStringToFile(const std::string& data,
     const std::filesystem::path& filePath) {
     // 强制按二进制打开可避免换行转换

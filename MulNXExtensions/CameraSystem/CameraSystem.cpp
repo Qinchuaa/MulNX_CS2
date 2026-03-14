@@ -2,12 +2,6 @@
 
 #include <MulNX/MulNX.hpp>
 
-bool CameraSystem::tempfunc() {
-    
-
-    return true;
-}
-
 // 摄像机系统
 
 bool CameraSystem::Init() {
