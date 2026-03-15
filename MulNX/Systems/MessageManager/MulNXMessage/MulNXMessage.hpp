@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../../../Base/Base.hpp"
+#include <MulNX/Base/Base.hpp>
 
 namespace MulNX {
 	// MulNX消息基类

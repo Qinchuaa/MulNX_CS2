@@ -2,6 +2,9 @@
 
 #include"../../../CameraDrawer/CameraDrawer.hpp"
 
+#include <yaml-cpp/yaml.h>
+#include <fstream>
+
 
 //拷贝语义版
 void FreeCameraPath::AddKeyframe(const MulNX::Math::CameraKeyFrame& KeyFrame) {
@@ -245,12 +248,14 @@ std::pair<bool, std::string> FreeCameraPath::ReadElementMain(const pugi::xml_nod
 std::pair<bool, std::string> FreeCameraPath::SaveToXML(const std::filesystem::path& FolderPath)const {
     if (FolderPath.empty())return { false,"文件夹路径为空，无法保存元素到XML文件！" };
     
+
     pugi::xml_document XML;
     pugi::xml_node node_ElementMain;
     auto [ok, msg] = this->SaveBase(XML, node_ElementMain);
     if (!ok) return { false,std::move(msg) };
     
     std::filesystem::path FullPath = FolderPath / (this->Name + ".xml");
+    this->SaveToYAML(FolderPath / (this->Name + ".yaml"));
     // 添加注释
     //node_ElementMain.append_child(pugi::node_comment).set_value("采用欧拉角存储角度，但工具实际使用四元数系统，如果你觉得加载速度慢，可以向作者反馈");
 
@@ -283,4 +288,107 @@ std::pair<bool, std::string> FreeCameraPath::SaveToXML(const std::filesystem::pa
     if (!XML.save_file(FullPath.c_str()))return { false,"尝试保存自由摄像机轨道到XML文件失败，无法保存XML文件！ 文件路径：" + FullPath.string() };
     
     return { true,"成功保存自由摄像机轨道到XML文件！ 文件路径：" + FullPath.string() };
+}
+
+std::pair<bool, std::string> FreeCameraPath::ReadFromYAML(const std::filesystem::path& filePath) {
+    try {
+        YAML::Node root = YAML::LoadFile(filePath.string());
+        if (!root.IsMap()) return { false, "YAML文件根节点不是映射类型！ 文件路径：" + filePath.string() };
+
+        // 清空现有数据
+        this->Clear();
+
+        // 读取关键帧
+        if (!root["KeyFrames"] || !root["KeyFrames"].IsSequence()) return { false, "找不到KeyFrames序列！ 文件路径：" + filePath.string() };
+
+        for (const auto& keyframeNode : root["KeyFrames"]) {
+            if (!keyframeNode.IsMap()) continue;
+
+            MulNX::Math::CameraKeyFrame keyframe;
+
+            // 读取时间
+            keyframe.KeyTime = keyframeNode["Time"].as<float>();
+
+            // 读取位置和FOV
+            if (keyframeNode["Position"] && keyframeNode["Position"].IsSequence() && keyframeNode["Position"].size() >= 3) {
+                DirectX::XMFLOAT4 posFov;
+                posFov.x = keyframeNode["Position"][0].as<float>();
+                posFov.y = keyframeNode["Position"][1].as<float>();
+                posFov.z = keyframeNode["Position"][2].as<float>();
+                posFov.w = keyframeNode["FOV"].as<float>();
+                keyframe.SpatialState.PositionAndFOV = DirectX::XMLoadFloat4(&posFov);
+            }
+
+            // 读取旋转（欧拉角）
+            if (keyframeNode["Rotation"] && keyframeNode["Rotation"].IsSequence() && keyframeNode["Rotation"].size() >= 3) {
+                DirectX::XMFLOAT3 euler;
+                euler.x = keyframeNode["Rotation"][0].as<float>(); // Pitch
+                euler.y = keyframeNode["Rotation"][1].as<float>(); // Yaw
+                euler.z = keyframeNode["Rotation"][2].as<float>(); // Roll
+                DirectX::XMFLOAT4 quat;
+                MulNX::Math::CSEulerToQuat(euler, quat);
+                keyframe.SpatialState.RotationQuat = DirectX::XMLoadFloat4(&quat);
+            }
+
+            this->AddKeyframe(std::move(keyframe));
+        }
+
+        return { true, "成功从YAML文件加载自由摄像机轨道信息！ 自由摄像机轨道 名：" + this->Name };
+    } catch (const YAML::Exception& e) {
+        return { false, "YAML解析错误：" + std::string(e.what()) + " 文件路径：" + filePath.string() };
+    } catch (const std::exception& e) {
+        return { false, "读取YAML文件时发生错误：" + std::string(e.what()) + " 文件路径：" + filePath.string() };
+    }
+}
+
+std::pair<bool, std::string> FreeCameraPath::SaveToYAML(const std::filesystem::path& filePath) const {
+    try {
+        YAML::Node root;
+
+        // 添加基本信息（如果需要）
+        // root["Name"] = this->Name;
+
+        // 添加关键帧
+        for (const auto& keyframe : this->CameraKeyFrames) {
+            YAML::Node keyframeNode;
+            keyframeNode["Time"] = keyframe.KeyTime;
+
+            DirectX::XMFLOAT4 posFov = keyframe.SpatialState.GetPositionAndFOV();
+            YAML::Node posNode;
+            posNode.push_back(posFov.x);
+            posNode.push_back(posFov.y);
+            posNode.push_back(posFov.z);
+            posNode.SetStyle(YAML::EmitterStyle::Flow);
+            keyframeNode["Position"] = posNode;
+            keyframeNode["FOV"] = posFov.w;
+
+            DirectX::XMFLOAT3 euler = keyframe.SpatialState.GetRotationEuler();
+            YAML::Node rotNode;
+            rotNode.push_back(euler.x); // Pitch
+            rotNode.push_back(euler.y); // Yaw
+            rotNode.push_back(euler.z); // Roll
+            rotNode.SetStyle(YAML::EmitterStyle::Flow);
+            keyframeNode["Rotation"] = rotNode;
+
+            // 设置关键帧节点为流样式
+            keyframeNode.SetStyle(YAML::EmitterStyle::Flow);
+
+            root["KeyFrames"].push_back(keyframeNode);
+        }
+
+        // 使用Emitter输出，默认块样式
+        YAML::Emitter out;
+        out << root;
+
+        // 保存到文件
+        std::ofstream fout(filePath);
+        if (!fout.is_open()) return { false, "无法打开文件进行写入！ 文件路径：" + filePath.string() };
+
+        fout << out.c_str();
+        fout.close();
+
+        return { true, "成功保存自由摄像机轨道到YAML文件！ 文件路径：" + filePath.string() };
+    } catch (const std::exception& e) {
+        return { false, "保存YAML文件时发生错误：" + std::string(e.what()) + " 文件路径：" + filePath.string() };
+    }
 }

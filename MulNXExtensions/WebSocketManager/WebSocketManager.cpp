@@ -12,6 +12,14 @@ bool WebSocketManager::Init() {
     // 初始化服务器
     this->server.init_asio();
 
+    this->server.set_open_handler([this](ConnectionHandle handle) {
+        this->connectionHandles.insert(handle);
+        });
+
+    this->server.set_close_handler([this](ConnectionHandle handle) {
+        this->connectionHandles.erase(handle);
+        });
+    
     // 注册句柄
     this->server.set_message_handler(
         [this](websocketpp::connection_hdl hdl, Server::message_ptr msg) {
@@ -38,14 +46,23 @@ void WebSocketManager::ProcessMsg(MulNX::Message* Msg) {
     case "WebSocketManager/Post"_hash: {
         MulNX::any_shared_ptr pPayLoad = Msg->asp;
         auto& ios = this->server.get_io_service();
-        ios.post([pPayLoad]() {
-            
-            // auto payLoad = pPayLoad.get<std::string>();
-            // auto conns = this->server.get_connections();
-            // for (auto hdl : conns) {
-            //     this->server.send(hdl, broadcast_msg, websocketpp::frame::opcode::text);
-            // }
+        ios.post([this, pPayLoad]()mutable {
+
+            // 提取要广播的消息内容
+            std::string payLoad = std::move(*pPayLoad.get<std::string>());
+
+            // 遍历所有连接并发送
+            for (auto hdl : connectionHandles) {
+                try {
+                    this->server.send(hdl, payLoad, websocketpp::frame::opcode::text);
+                }
+                catch (const websocketpp::exception& e) {
+                    this->ISys().LogError("网络消息发送失败！内容：" + payLoad);
+                }
+            }
+
             });
+
         break;
     }
     }

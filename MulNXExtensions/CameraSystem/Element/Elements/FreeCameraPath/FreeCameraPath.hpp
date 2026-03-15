@@ -38,6 +38,10 @@ public:
     std::pair<bool, std::string> ReadElementMain(const pugi::xml_node& node_ElementMain)override final;
     //保存到XML文件（虚）
     std::pair<bool, std::string> SaveToXML(const std::filesystem::path& FolderPath)const override final;
+    //从YAML文件加载
+    std::pair<bool, std::string> ReadFromYAML(const std::filesystem::path& filePath);
+    //保存到YAML文件
+    std::pair<bool, std::string> SaveToYAML(const std::filesystem::path& filePath) const;
     
     //非虚函数类
     //增加关键帧，拷贝语义

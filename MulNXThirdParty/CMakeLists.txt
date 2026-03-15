@@ -14,6 +14,12 @@ add_library(MulNXThirdParty
     "minhook/src/hde/hde64.c"
 )
 
+add_subdirectory("yaml-cpp-master")
+
+target_link_libraries(MulNXThirdParty PUBLIC
+    yaml-cpp::yaml-cpp
+)
+
 target_include_directories(MulNXThirdParty PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/asio/include
     ${CMAKE_CURRENT_SOURCE_DIR}/websocketpp
