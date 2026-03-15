@@ -3,21 +3,21 @@ add_library(CameraSystem
     "CameraDrawer/CameraDrawer.cpp"
     "CameraSystemIO/CameraSystemIO.cpp"
 
-    "Element/ElementBase/ElementBase.cpp"
-    "Element/ElementManager/ElementManager.cpp"
-    "Element/ElementManager/ElementDebugger/ElementDebugger.cpp"
-    "Element/Elements/FirstPersonCameraPath/FirstPersonCameraPath.cpp"
-    "Element/Elements/FreeCameraPath/FreeCameraPath.cpp"
-    "Element/Elements/LockedCameraPath/LockedCameraPath.cpp"
+    "Elements/ElementBase.cpp"
+    "ElementManager/ElementManager.cpp"
+    "ElementManager/ElementDebugger/ElementDebugger.cpp"
+    "Elements/FirstPersonCameraPath/FirstPersonCameraPath.cpp"
+    "Elements/FreeCameraPath/FreeCameraPath.cpp"
+    "Elements/LockedCameraPath/LockedCameraPath.cpp"
 
-    "Solution/Solution/Solution.cpp"
-    "Solution/SolutionManager/SolutionManager.cpp"
+    "Solution/Solution.cpp"
+    "SolutionManager/SolutionManager.cpp"
 
-    "Project/Project/Project.cpp"
-    "Project/ProjectManager/ProjectManager.cpp"
+    "Project/Project.cpp"
+    "ProjectManager/ProjectManager.cpp"
 
-    "Workspace/Workspace/Workspace.cpp"
-    "Workspace/WorkspaceManager/WorkspaceManager.cpp"
+    "Workspace/Workspace.cpp"
+    "WorkspaceManager/WorkspaceManager.cpp"
 )
 
 target_link_libraries(CameraSystem PUBLIC

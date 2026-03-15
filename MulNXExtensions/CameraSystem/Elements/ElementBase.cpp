@@ -1,0 +1,117 @@
+﻿#include "ElementBase.hpp"
+
+#include <fstream>
+
+std::string ElementType_EnumToString(const ElementType Type) {
+    switch (Type) {
+    case ElementType::FreeCameraPath:return "FreeCameraPath";
+    case ElementType::FirstPersonCameraPath:return "FirstPersonCameraPath";
+    case ElementType::LockedCameraPath:return "LockedCameraPath";
+    case ElementType::ElementBase:return "ElementBase";
+    default:return "None";
+    }
+}
+
+ElementType ElementType_StringToEnum(const std::string& typeStr) {
+    if (typeStr == "FreeCameraPath")  return ElementType::FreeCameraPath;
+    else if (typeStr == "FirstPersonCameraPath") return ElementType::FirstPersonCameraPath;
+    else if (typeStr == "LockedCameraPath") return ElementType::LockedCameraPath;
+    else if (typeStr == "ElementBase") return ElementType::ElementBase;
+    else return ElementType::None;
+}
+
+ElementType ElementBase::TypeGet_Enum()const {
+    return this->Type;
+}
+
+std::string ElementBase::TypeGet_String()const {
+    return ElementType_EnumToString(this->Type);
+}
+
+std::string ElementBase::GetBaseMsg()const {
+    return "元素名称：" + this->Name +
+        "  元素类型：" + this->TypeGet_String() +
+        "  持续时长：" + std::to_string(this->DurationTime);
+}
+std::string ElementBase::GetName()const {
+    return this->Name;
+}
+void ElementBase::ResetName(const std::string& NewName) {
+    this->Name = NewName;
+}
+
+bool ElementBase::BaseCall(float& OutputTime, CameraSystemIO* IO)const {
+    IO->CurrentElementType = this->Type;
+    OutputTime = IO->ElementTime;
+    switch (IO->PlaybackMode) {
+    case PlaybackMode::Parallel:break;
+    case PlaybackMode::Serial:OutputTime += this->StartTime; break;
+    }
+    //处理边界情况
+    if (OutputTime <= this->StartTime) return false;
+    if (OutputTime >= this->EndTime) return false;
+    return true;
+}
+
+void ElementBase::CloseDraw() {
+    this->IfDraw = false;
+    return;
+}
+bool ElementBase::OpenDraw() {
+    if (!this->Drawable) {
+        return false;
+    }
+    this->IfDraw = true;
+    return true;
+}
+
+bool ElementBase::DrawBase(CameraDrawer* CamDrawer, const float* Matrix, const float WinWidth, const float WinHeight)const {
+    if (!this->IfDraw) {
+        return false;
+    }
+    return this->Draw(CamDrawer, Matrix, WinWidth, WinHeight);
+}
+bool ElementBase::Draw(CameraDrawer* CamDrawer, const float* Matrix, const float WinWidth, const float WinHeight)const {
+    return true;
+}
+
+float ElementBase::GetStartTime()const {
+    return this->StartTime;
+}
+float ElementBase::GetEndTime()const {
+    return this->EndTime;
+}
+float ElementBase::GetDurationTime()const {
+    return this->DurationTime;
+}
+
+std::pair<bool, std::string> ElementBase::Save(const std::filesystem::path& folderPath) {
+    if (this->Name.empty())return { false,"元素名为空，无法保存元素到XML文件！" };
+    std::filesystem::path filePath = folderPath / (this->Name + ".yaml");
+    try {
+        YAML::Node root;
+
+        root["name"] = this->Name;
+        root["type"] = this->TypeGet_String();
+        root["duration"] = this->DurationTime;
+
+        auto [ok, msg] = this->SaveImpl(root);
+        if (!ok)return { false,std::move(msg) + " 文件路径：" + filePath.string() };
+
+        // 使用Emitter输出，默认块样式
+        YAML::Emitter out;
+        out << root;
+
+        // 保存到文件
+        std::ofstream fout(filePath);
+        if (!fout.is_open()) return { false, "无法打开文件进行写入！ 文件路径：" + filePath.string() };
+
+        fout << out.c_str();
+        fout.close();
+
+        return { true,"成功保存" + filePath.string() };
+    }
+    catch (const std::exception& e) {
+        return { false, "保存YAML文件时发生错误：" + std::string(e.what()) + " 文件路径：" + filePath.string() };
+    }
+}

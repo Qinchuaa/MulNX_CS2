@@ -22,18 +22,10 @@
 #include "ICameraSystem.hpp"
 
 #include "CameraDrawer/CameraDrawer.hpp"
-
-#include "Element/Elements.hpp"
-#include "Element/ElementManager/ElementManager.hpp"
-
-#include "Solution/Solution/Solution.hpp"
-#include "Solution/SolutionManager/SolutionManager.hpp"
-
-#include "Project/Project/Project.hpp"
-#include "Project/ProjectManager/ProjectManager.hpp"
-
-#include "Workspace/Workspace/Workspace.hpp"
-#include "Workspace/WorkspaceManager/WorkspaceManager.hpp"
+#include "ElementManager/ElementManager.hpp"
+#include "SolutionManager/SolutionManager.hpp"
+#include "ProjectManager/ProjectManager.hpp"
+#include "WorkspaceManager/WorkspaceManager.hpp"
 
 #include <vector>
 #include <DirectXMath.h>
