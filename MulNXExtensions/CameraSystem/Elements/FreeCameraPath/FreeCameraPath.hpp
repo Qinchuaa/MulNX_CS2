@@ -34,10 +34,6 @@ public:
     bool Draw(CameraDrawer* CamDrawer, const float* Matrix, const float WinWidth, const float WinHeight)const override;
     // 获取详细信息（虚）
     std::string GetMsg()const override;
-    // 加载信息函数（虚），注意这不是创建而是加载
-    std::pair<bool, std::string> ReadElementMain(const pugi::xml_node& node_ElementMain)override;
-    // 从YAML文件加载
-    std::pair<bool, std::string> ReadFromYAML(const std::filesystem::path& filePath);
     
     // 非虚函数类
     // 增加关键帧，拷贝语义
@@ -54,4 +50,5 @@ public:
     const std::vector<MulNX::Math::CameraKeyFrame>& GetAllKeyFrames()const;// 获取所有关键帧
 
     std::pair<bool, std::string> SaveImpl(YAML::Node& root)override;
+    std::pair<bool, std::string> Load(YAML::Node& root)override;
 };

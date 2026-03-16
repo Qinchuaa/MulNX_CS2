@@ -1,8 +1,7 @@
 #include "MulNXGlobalVars.hpp"
 
-#include "../MessageManager/IMessageManager.hpp"
-
-#include "../../Core/Core.hpp"
+#include <MulNX/Core/Core.hpp>
+#include <MulNX/Systems/MessageManager/IMessageManager.hpp>
 
 #include <chrono>
 

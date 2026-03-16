@@ -1,10 +1,7 @@
 #pragma once
 
 #include "MulNXUIContext/MulNXUIContext.hpp"
-
-#include "../../Core/ModuleBase/ModuleBase.hpp"
-
-#include <d3d11.h>
+#include <MulNX/Core/ModuleBase/ModuleBase.hpp>
 
 namespace MulNX {
 	class IUISystem :public ModuleBase {

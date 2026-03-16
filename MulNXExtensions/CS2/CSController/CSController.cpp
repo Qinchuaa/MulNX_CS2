@@ -98,7 +98,8 @@ void CSController::ProcessMsg(MulNX::Message* Msg) {
 
 bool CSController::Init() {
     this->MainMsgChannel = this->ICreateAndGetMessageChannel();
-    this->ISys().SubscribeAsync("Core/ReHook");
+    this->ISys()
+        .SubscribeAsync("Core/ReHook");
     this->NeedThread(3);
     this->NeedUINode = true;
 
@@ -111,12 +112,11 @@ bool CSController::Init() {
         if (textRegion.IsValid()) {
             // 搜索特征码
             const auto& pattern = MulNX::CS2::Signatures::CallIsPlayingDemo;
-            auto Target = textRegion.FindRegion(pattern);
+            auto target = textRegion.FindRegion(pattern);
 
-            if (Target.IsValid()) {
-                auto Guard = Target.ExchangeProtection(PAGE_EXECUTE_READWRITE);
-                this->MyHook = MulNX::Memory::HookEx::Create(Target.Data(), 14);
-                this->MyHook->AddCallback([this](RegContext* Ctx)->void {
+            if (target.IsValid()) {
+                auto Guard = target.ExchangeProtection(PAGE_EXECUTE_READWRITE);
+                this->MyHook = MulNX::Memory::HookEx::Create(target.Data(), 14, [this](RegContext* Ctx)->void {
                     return this->HandleOverrideView((void*)Ctx->rsi);
                     });
                 this->MyHook->Attach();

@@ -109,10 +109,10 @@ public:
     virtual void Refresh() = 0;
     //信息获取函数（虚）
     virtual std::string GetMsg()const = 0;
-    //加载信息函数（虚），注意这不是创建而是加载
-    virtual std::pair<bool, std::string> ReadElementMain(const pugi::xml_node& node_ElementMain) = 0;
 
     std::pair<bool, std::string> Save(const std::filesystem::path& folderPath);
 
     virtual std::pair<bool, std::string> SaveImpl(YAML::Node& root) = 0;
+
+    virtual std::pair<bool, std::string> Load(YAML::Node& root) = 0;
 };

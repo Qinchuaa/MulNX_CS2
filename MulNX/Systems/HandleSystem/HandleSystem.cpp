@@ -1,6 +1,6 @@
 #include "HandleSystem.hpp"
 
-#include "../../Core/Core.hpp"
+#include <MulNX/Core/Core.hpp>
 
 bool MulNX::HandleSystem::Init(){
 	//无需初始化操作

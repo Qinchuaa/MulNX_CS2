@@ -1,9 +1,9 @@
 #include "MessageManager.hpp"
 
-#include "../../Core/Core.hpp"
+#include <MulNX/Core/Core.hpp>
 
 #include "MessageChannel/MessageChannel.hpp"
-#include "../HandleSystem/HandleSystem.hpp"
+#include <MulNX/Systems/HandleSystem/IHandleSystem.hpp>
 
 bool MulNX::MessageManager::Init() {
     this->NeedThread(10);

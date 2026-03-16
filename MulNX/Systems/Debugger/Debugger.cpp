@@ -17,7 +17,6 @@ bool MySaveStringToFile(const std::string& data,
     return out.good();
 }
 bool MulNX::Debugger::Init() {
-    this->MainMsgChannel = this->ICreateAndGetMessageChannel();
     this->ISys()
         .SubscribeAsync("Debugger/SetMaxInfoCount")
         .SubscribeAsync("Debugger/SaveToFile");

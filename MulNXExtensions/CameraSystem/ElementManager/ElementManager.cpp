@@ -172,17 +172,6 @@ bool ElementManager::Element_SaveAll() {
     this->ISys().LogSucc("成功保存所有元素到XML文件！");
     return true;
 }
-bool ElementManager::Element_LoadFromXML_Pre(const std::string& XMLName, const std::filesystem::path& FolderPath) {
-    //检查文件路径和名称存在性
-    if (FolderPath.empty() || XMLName.empty()) {
-        this->ISys().LogError("文件夹路径或XML文件名为空，无法从XML文件加载元素！");
-        return false;
-    }
-    //拼接完整路径
-    std::filesystem::path FullPath = FolderPath / (XMLName + ".xml");
-
-    return this->Element_LoadFromXML_Pre(FullPath);
-}
 bool ElementManager::Element_LoadFromXML_Pre(const std::filesystem::path& FullPath) {
     this->ISys().LogInfo("尝试从XML文件加载元素，文件路径：" + FullPath.string());
     //检查文件本身存在性
@@ -191,92 +180,70 @@ bool ElementManager::Element_LoadFromXML_Pre(const std::filesystem::path& FullPa
         return false;
     }
 
-    //创建临时XML文件
-    pugi::xml_document NewXML;
-    pugi::xml_parse_result result = NewXML.load_file(FullPath.c_str());
+    try {
+        YAML::Node root = YAML::LoadFile(FullPath.string());
 
-    //检验XML文件加载结果
-    if (!result) {
-        this->ISys().LogError("尝试从XML文件加载元素失败，无法加载XML文件！ 文件路径：" + FullPath.string() +
-            "\n     错误描述：" + result.description());
-        return false;
-    }
+        // 获取元素类型
+        std::string NewElementTypeString = root["type"].as<std::string>();
+        ElementType NewElementType = ElementType_StringToEnum(NewElementTypeString);
+        if (static_cast<int>(NewElementType) <= 0) {
+            this->ISys().LogError("尝试从XML文件加载元素失败，不可加载的元素类型！");
+            return false;
+        }
 
-    //获取Element节点
-    pugi::xml_node node_Element = NewXML.child("Element");
-    if (!node_Element) {
-        this->ISys().LogError("尝试从XML文件加载元素失败，XML文件格式错误，找不到根节点！ 文件路径：" + FullPath.string());
-        return false;
-    }
+        // 获取元素名称
+        std::string NewElementName = root["name"].as<std::string>();
+        // 检查元素名是否为空
+        if (NewElementName.empty()) {
+            this->ISys().LogError("尝试从XML文件加载元素失败，元素名称为空！");
+            return false;
+        }
+        // 检查是否存在同名元素
+        if (this->Element_Get<ElementBase>(NewElementName)) {
+            this->ISys().LogError("元素名已占用，无法从XML文件加载元素！ 元素名：" + NewElementName);
+            return false;
+        }
+        // 创建基类指针
+        std::shared_ptr<ElementBase> pElement = nullptr;
+        this->ISys().LogInfo("尝试进行分发，元素类型为 " + NewElementTypeString + " ，文件路径：" + FullPath.string());
+        // 分发到具体类型的加载函数
+        switch (NewElementType) {
+        case ElementType::FreeCameraPath:
+            pElement = std::make_shared<FreeCameraPath>(std::move(NewElementName));
+            break;
+        case ElementType::FirstPersonCameraPath:
+            pElement = std::make_shared<FirstPersonCameraPath>(std::move(NewElementName));
+            break;
+        case ElementType::LockedCameraPath:
+            break;
+        case ElementType::ElementBase:
+            break;
+        case ElementType::None:
+            break;
+        }
 
-    //获取元素类型
-    std::string NewElementTypeString = node_Element.attribute("Type").as_string();
-    ElementType NewElementType = ElementType_StringToEnum(NewElementTypeString);
-    if (static_cast<int>(NewElementType) <= 0) {
-        this->ISys().LogError("尝试从XML文件加载元素失败，不可加载的元素类型！");
-        return false;
+        //判空
+        if (!pElement) {
+            this->ISys().LogError("尝试从XML文件加载元素失败，无法创建指定类型的元素实例！ 元素类型：" + NewElementTypeString);
+            return false;
+        }
+        // 设置元素类型
+        pElement->Type = NewElementType;
+        // 统一加载信息
+        auto [ok, msg] = pElement->Load(root);
+        if (!ok) {
+            this->ISys().LogError(std::move(msg));
+            return false;
+        }
+        pElement->Refresh();
+        pElement->Dirty = false;// 刚刚进入内存，非脏
+        this->ISys().LogSucc(std::move(msg));
+        this->Elements.push_back(std::move(pElement));
+        return true;
     }
-
-    //获取元素名称
-    std::string NewElementName = node_Element.attribute("Name").as_string();
-    //检查元素名是否为空
-    if (NewElementName.empty()) {
-        this->ISys().LogError("尝试从XML文件加载元素失败，元素名称为空！");
-        return false;
+    catch (...) {
+        MulNX::ErrorTerminate("元素加载异常");
     }
-    //检查是否存在同名元素
-    if (this->Element_Get<ElementBase>(NewElementName)) {
-        this->ISys().LogError("元素名已占用，无法从XML文件加载元素！ 元素名：" + NewElementName);
-        return false;
-    }
-    //检查ElementMain节点是否存在，确保加载函数可以直接获取
-    pugi::xml_node node_ElementMain = node_Element.child("ElementMain");
-    if (!node_ElementMain) {
-        this->ISys().LogError("尝试从XML文件加载元素失败，找不到ElementMain节点！ 文件路径：" + FullPath.string());
-        return false;
-    }
-
-
-
-    //创建基类指针
-    std::shared_ptr<ElementBase> pElement = nullptr;
-    this->ISys().LogInfo("尝试进行分发，元素类型为 " + NewElementTypeString + " ，文件路径：" + FullPath.string());
-    //分发到具体类型的加载函数
-    switch (NewElementType) {
-    case ElementType::FreeCameraPath:
-        pElement = std::make_shared<FreeCameraPath>(std::move(NewElementName));
-        break;
-    case ElementType::FirstPersonCameraPath:
-        pElement = std::make_shared<FirstPersonCameraPath>(std::move(NewElementName));
-        break;
-    case ElementType::LockedCameraPath:
-        break;
-    case ElementType::ElementBase:
-        break;
-    case ElementType::None:
-        break;
-    }
-
-    //判空
-    if (!pElement) {
-        this->ISys().LogError("尝试从XML文件加载元素失败，无法创建指定类型的元素实例！ 元素类型：" + NewElementTypeString);
-        return false;
-    }
-    // 设置元素类型
-    pElement->Type = NewElementType;
-    // 重设名称
-    pElement->ResetName(NewElementName);
-    // 统一加载信息
-    auto [ok, msg] = pElement->ReadElementMain(node_ElementMain);
-    if (!ok) {
-        this->ISys().LogError(std::move(msg));
-        return false;
-    }
-    pElement->Refresh();
-    pElement->Dirty = false;// 刚刚进入内存，非脏
-    this->ISys().LogSucc(std::move(msg));
-    this->Elements.push_back(std::move(pElement));
-    return true;
 }
 bool ElementManager::Element_Delete(const std::string& Name) {
     // 安全检查

@@ -5,7 +5,6 @@
 using namespace MulNX::Core;
 
 bool ModuleManager::Init() {
-	this->MainMsgChannel = this->ICreateAndGetMessageChannel();
 	// 后置消息订阅，参见 PackedInit
 	return true;
 }

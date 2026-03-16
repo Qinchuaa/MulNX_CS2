@@ -42,6 +42,8 @@ bool MulNX::ModuleBase::BaseInit() {
         if (!this->HModule.IsValid()) {
             this->HModule = MulNXHandle::CreateHandle();
         }
+
+        this->MainMsgChannel = this->ICreateAndGetMessageChannel();
     }
     catch (...) {
         return false;

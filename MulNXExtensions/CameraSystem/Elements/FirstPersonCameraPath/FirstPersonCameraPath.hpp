@@ -24,8 +24,10 @@ public:
     void Refresh()override final;
     //信息获取函数（虚）
     std::string GetMsg()const override final;
-    //加载信息函数（虚），注意这不是创建而是加载
-    std::pair<bool, std::string> ReadElementMain(const pugi::xml_node& node_ElementMain)override final;
 
     std::pair<bool, std::string> SaveImpl(YAML::Node& root)override;
+
+    std::pair<bool, std::string> Load(YAML::Node& root)override{
+        return { {},{} };
+    }
 };

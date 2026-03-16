@@ -41,16 +41,16 @@ std::string FirstPersonCameraPath::GetMsg()const {
 }
 
 
-std::pair<bool, std::string> FirstPersonCameraPath::ReadElementMain(const pugi::xml_node& node_ElementMain) {
-    pugi::xml_node node_Target = node_ElementMain.child("Target");
-    if (!node_Target)return { false,"找不到Target节点！ 元素名：" + this->Name };
+// std::pair<bool, std::string> FirstPersonCameraPath::ReadElementMain(const pugi::xml_node& node_ElementMain) {
+//     pugi::xml_node node_Target = node_ElementMain.child("Target");
+//     if (!node_Target)return { false,"找不到Target节点！ 元素名：" + this->Name };
     
-    this->TargetPlayerIndexInMap = static_cast<uint8_t>(node_Target.attribute("PlayerIndex").as_int());
-	this->StartTime = node_Target.attribute("StartTime").as_float();
-	this->EndTime = node_Target.attribute("EndTime").as_float();
+//     this->TargetPlayerIndexInMap = static_cast<uint8_t>(node_Target.attribute("PlayerIndex").as_int());
+// 	this->StartTime = node_Target.attribute("StartTime").as_float();
+// 	this->EndTime = node_Target.attribute("EndTime").as_float();
 
-    return { true,"成功读取第一人称摄像机轨道：" + this->Name };
-}
+//     return { true,"成功读取第一人称摄像机轨道：" + this->Name };
+// }
 // std::pair<bool, std::string> FirstPersonCameraPath::SaveToXML(const std::filesystem::path& FolderPath)const {
 //     if (FolderPath.empty())return { false,"文件夹路径为空，无法保存元素到XML文件！" };
     

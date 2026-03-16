@@ -198,7 +198,7 @@ void CameraSystem::MenuElement() {
         ImGui::SameLine();
         // 载入成功则清空输入框
         if (ImGui::Button("载入##元素")) {
-            if (this->EManager.Element_LoadFromXML_Pre(LoadElementName, this->ISys().PathManager()->PathGetFromKey("Elements"))) {
+            if (this->EManager.Element_LoadFromXML_Pre(this->ISys().PathManager()->PathGetFromKey("Elements") / (LoadElementName + ".yaml"))) {
                 LoadElementName.clear();
             }
         }

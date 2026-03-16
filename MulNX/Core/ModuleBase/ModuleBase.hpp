@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../../Base/Base.hpp"
+#include <MulNX/Base/Base.hpp>
 #include "ISys/ISys.hpp"
 
 // 前向声明：MulNXController 位于 MulNXExtensions 命名空间
@@ -42,15 +42,16 @@ namespace MulNX {
         // 线程执行间隔，默认以100Hz基准执行
         std::atomic<int> MyThreadDelta = 10;
 	public:
-		// 主要消息管道指针
-		MulNX::IMessageChannel* MainMsgChannel = nullptr;
 		// 组件句柄
 		MulNXHandle HModule;
 		// 3D抽象层指针
         IAbstractLayer3D* AL3D = nullptr;
         // 调试器指针
         IDebugger* IDebugger = nullptr;
-        
+        // 主要消息管道指针
+        MulNX::IMessageChannel* MainMsgChannel = nullptr;
+        // 自动创建私有消息管道
+        MulNX::IMessageChannel* ICreateAndGetMessageChannel();
     public:
 		// 删除不需要的构造函数
 		ModuleBase(const ModuleBase&) = delete;
@@ -104,8 +105,6 @@ namespace MulNX {
         // UI节点函数，默认空实现
         virtual bool UINodeFunc(MulNXUINode* ThisNode) { return true; }
     protected:
-        // 自动创建私有消息管道
-        MulNX::IMessageChannel* ICreateAndGetMessageChannel();
         // 是否需要UI节点，默认不需要
         bool NeedUINode = false;
         // 指示需要线程，在初始化中创建

@@ -28,15 +28,13 @@ namespace MulNX {
             uint8_t* Target = nullptr;
             void* pCaller = nullptr;
             MulNX::Memory::Asm::Code CodeCaller{};
-            std::vector<std::function<void(RegContext*)>> Callbacks;
-            std::shared_mutex MutexEx;
+            std::function<void(RegContext*)> callback;
             std::vector<uint8_t> RawCmd;
         private:
             static void Dispatch(HookEx* pHookExInstance, RegContext* Ctx);
         public:
             HookEx() = default;
-            static std::unique_ptr<HookEx> Create(uint8_t* Target, int Len);
-            void AddCallback(std::function<void(RegContext*)>&& Callback);
+            static std::unique_ptr<HookEx> Create(uint8_t* Target, int Len, std::function<void(RegContext*)>&& callback);
             void Attach();
 
         };

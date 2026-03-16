@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../../Core/ModuleBase/ModuleBase.hpp"
+#include <MulNX/Core/ModuleBase/ModuleBase.hpp>
 
 #include "MulNXMessage/MulNXMessage.hpp"
 #include "MessageChannel/IMessageChannel.hpp"

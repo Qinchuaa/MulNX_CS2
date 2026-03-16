@@ -203,99 +203,6 @@ void FreeCameraPath::Clear() {
     this->Refresh();
     return;
 }
-std::pair<bool, std::string> FreeCameraPath::ReadElementMain(const pugi::xml_node& node_ElementMain) {
-    // 获取关键帧节点
-    if (!node_ElementMain.child("KeyFrame"))return { false, "找不到关键帧节点！ 自由摄像机轨道 名：" + this->Name };
-    
-    // 在有信息可读取时，先清空自身信息，准备进入读取流程
-    this->Clear();
-    // 读取流程
-    for (const auto& node_KeyFrame : node_ElementMain.children("KeyFrame")) {
-        MulNX::Math::CameraKeyFrame CameraKeyFrame;
-        // 读取时间
-        CameraKeyFrame.KeyTime = node_KeyFrame.attribute("Time").as_float();
-
-        // 读取坐标和FOV
-        DirectX::XMFLOAT4 PositionAndFOV;// = Frame.SpatialState.GetPositionAndFOV();
-
-        PositionAndFOV.x = node_KeyFrame.attribute("Px").as_float();
-        PositionAndFOV.y = node_KeyFrame.attribute("Py").as_float();
-        PositionAndFOV.z = node_KeyFrame.attribute("Pz").as_float();
-        PositionAndFOV.w = node_KeyFrame.attribute("FOV").as_float();
-
-        CameraKeyFrame.SpatialState.PositionAndFOV = DirectX::XMLoadFloat4(&PositionAndFOV);
-
-        // 读取角度
-        // 欧拉角 → 四元数转换
-        DirectX::XMFLOAT3 temEuler{
-            node_KeyFrame.attribute("Pitch").as_float(),
-            node_KeyFrame.attribute("Yaw").as_float(),
-            node_KeyFrame.attribute("Roll").as_float()
-        };
-        DirectX::XMFLOAT4 temQuat;
-        MulNX::Math::CSEulerToQuat(temEuler, temQuat);
-
-        CameraKeyFrame.SpatialState.RotationQuat = DirectX::XMLoadFloat4(&temQuat);
-
-        this->AddKeyframe(std::move(CameraKeyFrame));
-    }
-
-    return { true,"成功从XML文件加载自由摄像机轨道信息！ 自由摄像机轨道 名：" + this->Name };
-}
-
-std::pair<bool, std::string> FreeCameraPath::ReadFromYAML(const std::filesystem::path& filePath) {
-    try {
-        YAML::Node root = YAML::LoadFile(filePath.string());
-        if (!root.IsMap()) return { false, "YAML文件根节点不是映射类型！ 文件路径：" + filePath.string() };
-
-        // 清空现有数据
-        this->Clear();
-
-        // 读取关键帧
-        if (!root["KeyFrames"] || !root["KeyFrames"].IsSequence()) return { false, "找不到KeyFrames序列！ 文件路径：" + filePath.string() };
-
-        for (const auto& keyframeNode : root["KeyFrames"]) {
-            if (!keyframeNode.IsMap()) continue;
-
-            MulNX::Math::CameraKeyFrame keyframe;
-
-            // 读取时间
-            keyframe.KeyTime = keyframeNode["Time"].as<float>();
-
-            // 读取位置和FOV
-            if (keyframeNode["Position"] && keyframeNode["Position"].IsSequence() && keyframeNode["Position"].size() >= 3) {
-                DirectX::XMFLOAT4 posFov;
-                posFov.x = keyframeNode["Position"][0].as<float>();
-                posFov.y = keyframeNode["Position"][1].as<float>();
-                posFov.z = keyframeNode["Position"][2].as<float>();
-                posFov.w = keyframeNode["FOV"].as<float>();
-                keyframe.SpatialState.PositionAndFOV = DirectX::XMLoadFloat4(&posFov);
-            }
-
-            // 读取旋转（欧拉角）
-            if (keyframeNode["Rotation"] && keyframeNode["Rotation"].IsSequence() && keyframeNode["Rotation"].size() >= 3) {
-                DirectX::XMFLOAT3 euler;
-                euler.x = keyframeNode["Rotation"][0].as<float>(); // Pitch
-                euler.y = keyframeNode["Rotation"][1].as<float>(); // Yaw
-                euler.z = keyframeNode["Rotation"][2].as<float>(); // Roll
-                DirectX::XMFLOAT4 quat;
-                MulNX::Math::CSEulerToQuat(euler, quat);
-                keyframe.SpatialState.RotationQuat = DirectX::XMLoadFloat4(&quat);
-            }
-
-            this->AddKeyframe(std::move(keyframe));
-        }
-
-        return { true, "成功从YAML文件加载自由摄像机轨道信息！ 自由摄像机轨道 名：" + this->Name };
-    }
-    catch (const YAML::Exception& e) {
-        return { false, "YAML解析错误：" + std::string(e.what()) + " 文件路径：" + filePath.string() };
-    }
-    catch (const std::exception& e) {
-        return { false, "读取YAML文件时发生错误：" + std::string(e.what()) + " 文件路径：" + filePath.string() };
-    }
-}
-
 std::pair<bool, std::string> FreeCameraPath::SaveImpl(YAML::Node& root) {
     try {
         // 添加关键帧
@@ -336,5 +243,57 @@ std::pair<bool, std::string> FreeCameraPath::SaveImpl(YAML::Node& root) {
     }
     catch (const std::exception& e) {
         return { false, "保存YAML文件时发生错误：" + std::string(e.what()) };
+    }
+}
+
+std::pair<bool, std::string> FreeCameraPath::Load(YAML::Node& root) {
+    try {
+        if (!root.IsMap()) return { false, "YAML文件根节点不是映射类型"};
+
+        // 清空现有数据
+        this->Clear();
+
+        // 读取关键帧
+        if (!root["keyframes"] || !root["keyframes"].IsSequence()) return { false, "找不到keyframes序列！" };
+
+        for (const auto& keyframeNode : root["keyframes"]) {
+            if (!keyframeNode.IsMap()) continue;
+
+            MulNX::Math::CameraKeyFrame keyframe;
+
+            // 读取时间
+            keyframe.KeyTime = keyframeNode["T"].as<float>();
+
+            // 读取位置和FOV
+            if (keyframeNode["P"] && keyframeNode["P"].IsSequence() && keyframeNode["P"].size() >= 3) {
+                DirectX::XMFLOAT4 posFov;
+                posFov.x = keyframeNode["P"][0].as<float>();
+                posFov.y = keyframeNode["P"][1].as<float>();
+                posFov.z = keyframeNode["P"][2].as<float>();
+                posFov.w = keyframeNode["F"].as<float>();
+                keyframe.SpatialState.PositionAndFOV = DirectX::XMLoadFloat4(&posFov);
+            }
+
+            // 读取旋转（欧拉角）
+            if (keyframeNode["R"] && keyframeNode["R"].IsSequence() && keyframeNode["R"].size() >= 3) {
+                DirectX::XMFLOAT3 euler;
+                euler.x = keyframeNode["R"][0].as<float>(); // Pitch
+                euler.y = keyframeNode["R"][1].as<float>(); // Yaw
+                euler.z = keyframeNode["R"][2].as<float>(); // Roll
+                DirectX::XMFLOAT4 quat;
+                MulNX::Math::CSEulerToQuat(euler, quat);
+                keyframe.SpatialState.RotationQuat = DirectX::XMLoadFloat4(&quat);
+            }
+
+            this->AddKeyframe(std::move(keyframe));
+        }
+
+        return { true, "成功从YAML文件加载自由摄像机轨道信息！ 自由摄像机轨道 名：" + this->Name };
+    }
+    catch (const YAML::Exception& e) {
+        return { false, "YAML解析错误：" + std::string(e.what()) };
+    }
+    catch (const std::exception& e) {
+        return { false, "读取YAML文件时发生错误：" + std::string(e.what()) };
     }
 }

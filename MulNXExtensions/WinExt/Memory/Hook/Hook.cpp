@@ -6,22 +6,19 @@
 
 int MyAddable = 0;
 
-void MulNX::Memory::HookEx::Dispatch(HookEx* pHookExInstance, RegContext* Ctx) {
-    std::shared_lock lock(pHookExInstance->MutexEx);
+void MulNX::Memory::HookEx::Dispatch(HookEx* pHookExInstance, RegContext* ctx) {
     if (!pHookExInstance->Enable) {
         return;
     }
-    const auto& CallbacksInstance = pHookExInstance->Callbacks;
-    for (const auto& CallbackInstance : CallbacksInstance) {
-        CallbackInstance(Ctx);
-    }
+    pHookExInstance->callback(ctx);
     return;
 }
 
-std::unique_ptr<MulNX::Memory::HookEx> MulNX::Memory::HookEx::Create(uint8_t* Target, int Len) {
+std::unique_ptr<MulNX::Memory::HookEx> MulNX::Memory::HookEx::Create(uint8_t* Target, int Len, std::function<void(RegContext*)>&& callback) {
     // 首先创建HookEx实例
     auto HookExInstance = std::make_unique<HookEx>();
     HookExInstance->Target = Target;
+    HookExInstance->callback = std::move(callback);
 
     // 复制覆盖处指令
     // 逆向分析已知是14字节
@@ -123,12 +120,6 @@ std::unique_ptr<MulNX::Memory::HookEx> MulNX::Memory::HookEx::Create(uint8_t* Ta
     // 复制机器码到VirtualAlloc分配的内存
     memcpy(HookExInstance->pCaller, HookExInstance->CodeCaller.Data(), HookExInstance->CodeCaller.Size());
     return HookExInstance;
-}
-
-void MulNX::Memory::HookEx::AddCallback(std::function<void(RegContext*)>&& Callback) {
-    std::unique_lock lock(this->MutexEx);
-    this->Callbacks.push_back(std::move(Callback));
-    return;
 }
 
 void MulNX::Memory::HookEx::Attach() {

@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<Element Type="FreeCameraPath" Name="ntest">
-	<ElementMain DurationTime="2.78350067">
-		<KeyFrame Time="102.819923" Px="-448.499512" Py="-1821.08679" Pz="-24.4133911" FOV="90" Pitch="6.46716166" Yaw="99.0722961" Roll="-0" />
-		<KeyFrame Time="103.868607" Px="-420.473755" Py="-1996.64294" Pz="-4.26928711" FOV="72.2679977" Pitch="6.4671607" Yaw="99.0722961" Roll="-0" />
-		<KeyFrame Time="104.763161" Px="-388.848511" Py="-2194.74536" Pz="18.4652653" FOV="56.598999" Pitch="6.4671607" Yaw="99.0722961" Roll="2.14810328e-07" />
-		<KeyFrame Time="105.603424" Px="-359.548218" Py="-2378.24316" Pz="39.5240288" FOV="36.3909988" Pitch="6.4671607" Yaw="99.0722961" Roll="-0" />
-	</ElementMain>
-</Element>

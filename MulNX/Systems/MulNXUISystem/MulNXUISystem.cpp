@@ -11,7 +11,6 @@
 #include <MulNXThirdParty/All_ImGui.hpp>
 
 bool MulNX::UISystem::Init() {
-    this->MainMsgChannel = this->ICreateAndGetMessageChannel();
     this->ISys()
         .SubscribeAsync("UISystem/Start")
         .SubscribeAsync("UISystem/ModulePush");

@@ -114,8 +114,6 @@ public:
     //保存所有元素到XML文件
     bool Element_SaveAll();
     //从XML文件加载元素的预处理函数，内部会创建对应类型的元素，并调用具体加载函数加载信息
-    bool Element_LoadFromXML_Pre(const std::string& XMLName, const std::filesystem::path& FolderPath);
-    //从XML文件加载元素的预处理函数，内部会创建对应类型的元素，并调用具体加载函数加载信息
     bool Element_LoadFromXML_Pre(const std::filesystem::path& FullPath);
     //删除函数元素，返回true表示名称现在可用
     bool Element_Delete(const std::string& Name);

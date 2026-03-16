@@ -1,10 +1,10 @@
 #include "MulNXUINode.hpp"
 
-#include "../MulNXUIContext.hpp"
+#include <MulNX/Core/Core.hpp>
+#include <MulNX/Systems/MulNXUISystem/MulNXUIContext/MulNXUIContext.hpp>
+#include <MulNX/Systems/MessageManager/IMessageManager.hpp>
 
-#include "../../../MessageManager/IMessageManager.hpp"
 
-#include "../../../../Core/Core.hpp"
 
 void MulNXUINode::Draw() {
 	if (this->MyMsgChannel->HasMessage()) {
