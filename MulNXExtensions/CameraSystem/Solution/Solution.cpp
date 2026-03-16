@@ -1,4 +1,6 @@
 #include "Solution.hpp"
+#include <yaml-cpp/yaml.h>
+#include <fstream>
 
 bool Solution::AddElement(const std::shared_ptr<ElementBase> element, const float Offset) {
     //检查重复
@@ -37,58 +39,6 @@ bool Solution::RemoveElementAt(const size_t Index) {
     this->Elements.erase(this->Elements.begin() + Index);
     this->Refresh();
     return true;
-}
-std::pair<bool, std::string> Solution::SaveToXML(const std::filesystem::path& FolderPath) {
-    // 先刷新确保安全有效
-    this->Refresh();
-    // 检查文件路径和名称存在性
-    if (FolderPath.empty())return { false,"文件夹路径为空，无法保存解决方案！" };
-    
-    // 拼接完整路径
-    std::filesystem::path FullPath = FolderPath / (this->Name + ".xml");
-
-    // 创建临时XML文件
-    pugi::xml_document NewXML;
-    // 初始化
-    pugi::xml_node declarationNode = NewXML.prepend_child(pugi::node_declaration);
-    declarationNode.append_attribute("version") = "1.0";
-    declarationNode.append_attribute("encoding") = "utf-8";
-
-    // 开始保存信息
-
-    // 保存Solution节点
-    pugi::xml_node node_Solution = NewXML.append_child("Solution");
-
-    // 保存解决方案名称
-    node_Solution.append_attribute("Name").set_value(this->Name);
-
-    // 保存SolutionMain节点
-    pugi::xml_node node_SolutionMain = node_Solution.append_child("SolutionMain");
-    node_SolutionMain.append_attribute("DurationTime").set_value(this->TotalDurationTime);
-
-    // 保存KeyCheckPack信息
-    pugi::xml_node node_KeyCheckPack = node_SolutionMain.append_child("KeyCheckPack");
-    this->KCPack.WriteXMLNode(node_KeyCheckPack);
-
-
-    // 保存Elements节点
-    pugi::xml_node node_Elements = node_SolutionMain.append_child("Elements");
-    node_Elements.append_attribute("Size").set_value(this->Size_Elements);
-
-    // 保存所有元素
-    for (size_t i = 0; i < this->Size_Elements; ++i) {
-        std::shared_ptr<ElementBase> element = this->Elements[i].Element;
-        if (!element) return { false,"疑似有元素在保存过程中被删除，保存终止！" };
-
-        pugi::xml_node node_Element = node_Elements.append_child("Element");
-        node_Element.append_attribute("Name").set_value(element->Name);
-        node_Element.append_attribute("Offset").set_value(this->Elements[i].Offset);
-    }
-
-    // 保存XML文件到磁盘
-    if (!NewXML.save_file(FullPath.c_str()))return { false,"保存文件失败！路径：" + FullPath.string() };
-    
-    return { true,"保存成功  解决方案名：" + this->Name + "  元素个数：" + std::to_string(this->Size_Elements) };
 }
 
 void Solution::Refresh() {
@@ -269,4 +219,43 @@ void Solution::SetKeyCheckPack(const MulNX::KeyCheckPack& KCPack) {
     this->KCPack.Refresh();
     this->Dirty = true;
     return;
+}
+
+std::pair<bool, std::string> Solution::Save(const std::filesystem::path& folderPath) {
+    // 先刷新确保安全有效
+    this->Refresh();
+    // 检查文件路径和名称存在性
+    if (folderPath.empty()) return { false, "文件夹路径为空，无法保存解决方案！" };
+
+    // 拼接完整路径
+    std::filesystem::path filePath = folderPath / (this->Name + ".yaml");
+
+    try {
+        YAML::Node root;
+
+        root["name"] = this->Name;
+        root["duration"] = this->TotalDurationTime;
+        root["KCP"] = this->KCPack;
+        root["size"] = this->Size_Elements;
+
+        YAML::Node elementsNode = root["elements"];
+        for (size_t i = 0; i < this->Size_Elements; ++i) {
+            std::shared_ptr<ElementBase> element = this->Elements[i].Element;
+            if (!element) return { false, "疑似有元素在保存过程中被删除，保存终止！" };
+
+            YAML::Node elemNode;
+            elemNode["name"] = element->Name;
+            elemNode["offset"] = this->Elements[i].Offset;
+            elementsNode.push_back(elemNode);
+        }
+
+        std::ofstream fout(filePath);
+        fout << root;
+        fout.close();
+
+        return { true, "保存成功  解决方案名：" + this->Name + "  元素个数：" + std::to_string(this->Size_Elements) };
+    }
+    catch (const std::exception& e) {
+        return { false, "保存失败：" + std::string(e.what()) };
+    }
 }

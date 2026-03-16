@@ -260,7 +260,7 @@ void CameraSystem::MenuSolution() {
         ImGui::SameLine();
         // 载入成功则清空输入框
         if (ImGui::Button("载入解决方案")) {
-            if (this->SManager.Solution_LoadFromXML(LoadSolutionName, this->ISys().PathManager()->PathGetFromKey("Solutions"))) {
+            if (this->SManager.Solution_LoadFromXML(this->ISys().PathManager()->PathGetFromKey("Solutions") / (LoadSolutionName + ".yaml"))) {
                 this->ISys().LogSucc(("加载解决方案成功：" + LoadSolutionName).c_str());
                 LoadSolutionName.clear();
             }

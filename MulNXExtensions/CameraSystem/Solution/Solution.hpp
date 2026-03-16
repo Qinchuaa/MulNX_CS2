@@ -62,8 +62,7 @@ public:
     //移除指定位置的元素
     bool RemoveElementAt(const size_t Index);
 
-    //将解决方案保存到XML文件(序列化，反序列化在SolutionManager)
-    std::pair<bool, std::string> SaveToXML(const std::filesystem::path& FolderPath);
+    std::pair<bool, std::string> Save(const std::filesystem::path& folderPath);
 
     //清空数据
     void Clear();

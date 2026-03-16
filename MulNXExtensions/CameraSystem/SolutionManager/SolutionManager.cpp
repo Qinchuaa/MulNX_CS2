@@ -87,7 +87,7 @@ bool SolutionManager::Solution_SaveAll() {
         if (!solution->Dirty) {
             continue;//不脏不需保存
         }
-        auto [ok, msg] = solution->SaveToXML(SolutionFolderPath);
+        auto [ok, msg] = solution->Save(SolutionFolderPath);
         if (!ok) {
             this->ISys().LogError(msg);
             return false;
@@ -97,181 +97,113 @@ bool SolutionManager::Solution_SaveAll() {
     this->ISys().LogSucc("成功保存所有解决方案到XML文件！");
     return true;
 }
-bool SolutionManager::Solution_LoadFromXML(const std::string& XMLName, const std::filesystem::path& FolderPath) {
-    //检查文件路径和名称存在性
-    if (FolderPath.empty() || XMLName.empty()) {
-        this->ISys().LogError("文件夹路径或XML文件名为空，无法从XML文件加载解决方案！");
-        return false;
-    }
-
-    //拼接完整路径
-    std::filesystem::path FullPath = FolderPath / (XMLName + ".xml");
-
-    return this->Solution_LoadFromXML(FullPath);
-}
 bool SolutionManager::Solution_LoadFromXML(const std::filesystem::path& FullPath) {
-    //输出调试信息
-    this->ISys().LogInfo("尝试从XML文件加载解决方案，文件路径：" + FullPath.string());
-
-    //检查文件本身存在性
+    // 输出调试信息
+    this->ISys().LogInfo("尝试从yaml文件加载解决方案，文件路径：" + FullPath.string());
+    // 检查文件本身存在性
     if (!std::filesystem::exists(FullPath)) {
-        this->ISys().LogError("XML文件不存在！文件路径：" + FullPath.string());
+        this->ISys().LogError("yaml文件不存在！文件路径：" + FullPath.string());
         return false;
     }
+    try {
+        YAML::Node root = YAML::LoadFile(FullPath.string());
+        // 获取解决方案名称并检查是否为空
+        std::string NewSolutionName = root["name"].as<std::string>();
 
-    //创建临时XML文件
-    pugi::xml_document NewXML;
-
-    //打开XML文件并检验结果
-    pugi::xml_parse_result result = NewXML.load_file(FullPath.c_str());
-    if (!result) {
-        this->ISys().LogError(
-            "尝试从XML文件加载解决方案失败，无法加载XML文件！ 文件路径：" + FullPath.string() +
-            "\n     错误描述：" + result.description());
-        return false;
-    }
-
-    //开始获取信息
-
-    //获取Solution节点
-    pugi::xml_node node_Solution = NewXML.child("Solution");
-    if (!node_Solution) {
-        this->ISys().LogError("尝试从XML文件加载解决方案失败，XML文件格式错误，找不到根节点！ 文件路径：" + FullPath.string());
-        return false;
-    }
-
-    //获取解决方案名称并检查是否为空
-    std::string NewSolutionName = node_Solution.attribute("Name").as_string();
-    if (NewSolutionName.empty()) {
-        this->ISys().LogError("尝试从XML文件加载解决方案失败，解决方案名称为空！");
-        return false;
-    }
-
-    //检查是否存在同名解决方案
-    if (this->Solution_Get(NewSolutionName)) {
-        this->ISys().LogError("解决方案名已占用，无法从XML文件加载解决方案！ 解决方案名：" + std::move(NewSolutionName));
-        return false;
-    }
-
-    //获取SolutionMain节点
-    pugi::xml_node node_SolutionMain = node_Solution.child("SolutionMain");
-    if (!node_SolutionMain) {
-        this->ISys().LogError("尝试从XML文件加载解决方案失败，找不到SolutionMain节点！ 文件路径：" + FullPath.string());
-        return false;
-    }
-    //获取KeyCheckPack节点
-    pugi::xml_node node_KeyCheckPack = node_SolutionMain.child("KeyCheckPack");
-    if (!node_KeyCheckPack) {
-        this->ISys().LogError("尝试从XML文件加载解决方案失败，找不到KeyCheckPack节点！ 文件路径：" + FullPath.string());
-        return false;
-    }
-    //制作解决方案
-    std::unique_ptr<Solution>NewSolution = std::make_unique<Solution>(NewSolutionName);
-    if (!NewSolution->KCPack.ReadXMLNode(node_KeyCheckPack)) {
-        this->ISys().LogError("尝试从XML文件加载解决方案失败，在解析KeyCheckPack节点时发生了错误！ 文件路径：" + FullPath.string());
-        return false;
-    }
-
-    //获取持续时长信息
-    float TargetDurationTime = node_SolutionMain.attribute("DurationTime").as_float();
-
-    //获取Elements节点
-    pugi::xml_node node_Elements = node_SolutionMain.child("Elements");
-    if (!node_Elements) {
-        this->ISys().LogError("找不到Elements节点！ 解决方案名：" + std::move(NewSolutionName));
-        return false;
-    }
-
-    //获取Elements信息
-
-    //元素总量
-    size_t AllCount = node_Elements.attribute("Size").as_ullong();
-    //检验完整性
-    if (node_Elements.select_nodes("Element").size() != AllCount) {
-        this->ISys().LogError("不安全的解决方案！实际元素数量与XML文件描述不符！ 解决方案名：" + std::move(NewSolutionName));
-        return false;
-    }
-
-    //成功元素个数
-    size_t SuccessCount = 0;
-    //加载失败元素索引
-    std::vector<size_t>ErrorElementsIndexs{};
-    //加载失败元素名称
-    std::vector<std::string>ErrorElementsNames{};
-
-    //获取第一个Element节点并检验
-    pugi::xml_node node_Element = node_Elements.child("Element");
-    if (!node_Element) {
-        this->ISys().LogError("找不到Element节点！ 解决方案名：" + std::move(NewSolutionName));
-        return false;
-    }
-
-    //读取流程，已经在前面检验过不会越界
-    for (size_t Index = 0; Index < AllCount; node_Element = node_Element.next_sibling("Element"), ++Index) {
-        //获取元素名称
-        std::string NewElementName = node_Element.attribute("Name").as_string();
-        //得到元素指针
-        std::shared_ptr<ElementBase> element = this->EManager->Element_Get<ElementBase>(NewElementName);
-        //检验是否找到元素
-        if (!element) {//未找到元素
-            //输出错误信息
-            this->ISys().LogError("找不到目标元素   元素名：" + NewElementName);
-            //记录加载失败的元素的索引
-            ErrorElementsIndexs.push_back(Index);
-            //记录加载失败的元素的名称
-            ErrorElementsNames.push_back(std::move(NewElementName));
-            continue;
+        if (NewSolutionName.empty()) {
+            this->ISys().LogError("尝试从yaml文件加载解决方案失败，解决方案名称为空！");
+            return false;
         }
-        else {
-            //获取元素偏移
-            float ElementOffset = node_Element.attribute("Offset").as_float();
-            //尝试创建带有时间偏移的弱引用指针并添加进新解决方案并判断是否成功
-            if (!NewSolution->AddElement(element, ElementOffset)) {
-                //如果失败
-                //输出错误信息
-                this->ISys().LogError("无法添加元素到解决方案，可能是元素已存在于解决方案中   元素名：" + NewElementName);
-                //记录加载失败的元素的索引
-                ErrorElementsIndexs.push_back(Index);
-                //记录加载失败的元素的名称
+
+        // 检查是否存在同名解决方案
+        if (this->Solution_Get(NewSolutionName)) {
+            this->ISys().LogError("解决方案名已占用，无法从yaml文件加载解决方案！ 解决方案名：" + std::move(NewSolutionName));
+            return false;
+        }
+
+        // 制作解决方案
+        auto newSolution = std::make_unique<Solution>(NewSolutionName);
+        newSolution->KCPack = root["KCP"].as<MulNX::KeyCheckPack>();
+
+        // 获取持续时长信息
+        float TargetDurationTime = root["duration"].as<float>();
+        // 元素总量
+        size_t AllCount = root["size"].as<size_t>();
+        if (root["elements"].size() != AllCount) {
+            this->ISys().LogError("不安全的解决方案！实际元素数量与文件描述不符！ 解决方案名：" + std::move(NewSolutionName));
+            return false;
+        }
+        // 成功元素个数
+        size_t SuccessCount = 0;
+        // 加载失败元素索引
+        std::vector<size_t>ErrorElementsIndexs{};
+        // 加载失败元素名称
+        std::vector<std::string>ErrorElementsNames{};
+
+        // 读取流程
+        size_t index = 0;
+        for (const auto& nodeElement : root["elements"]) {
+            ++index;
+            // 获取元素名称
+            std::string NewElementName = nodeElement["name"].as<std::string>();
+            // 得到元素指针
+            std::shared_ptr<ElementBase> element = this->EManager->Element_Get<ElementBase>(NewElementName);
+            // 检验是否找到元素
+            if (!element) {
+                this->ISys().LogError("找不到目标元素   元素名：" + NewElementName);
+                // 记录加载失败的元素的索引和名称
+                ErrorElementsIndexs.push_back(index);
                 ErrorElementsNames.push_back(std::move(NewElementName));
                 continue;
             }
-            else {
-                //成功则输出成功信息
-                this->ISys().LogSucc("成功添加元素到解决方案   元素名：" + std::move(NewElementName));
+            // 获取元素偏移
+            float ElementOffset = nodeElement["offset"].as<float>();
+            // 尝试创建带有时间偏移的弱引用指针并添加进新解决方案并判断是否成功
+            if (!newSolution->AddElement(element, ElementOffset)) {
+                this->ISys().LogError("无法添加元素到解决方案，可能是元素已存在于解决方案中   元素名：" + NewElementName);
+                // 记录加载失败的元素的索引和名称
+                ErrorElementsIndexs.push_back(index);
+                ErrorElementsNames.push_back(std::move(NewElementName));
+                continue;
+            }
+            // 成功则输出成功信息
+            this->ISys().LogSucc("成功添加元素到解决方案   元素名：" + std::move(NewElementName));
+            // 增加计数
+            ++SuccessCount;
+        }
+
+        // 刷新
+        newSolution->Refresh();
+        // 去除脏标记
+        newSolution->Dirty = false;
+        // 检验时间关系
+        if (newSolution->TotalDurationTime != TargetDurationTime) {
+            this->ISys().LogWarning("该解决方案实际持续时长与预估持续时长不同，可能出现问题");
+        }
+
+        // 复查加载个数
+        if (AllCount == SuccessCount) {
+            this->ISys().LogSucc("成功从XML文件加载解决方案！ 解决方案名：" + std::move(NewSolutionName) + "  共包含元素个数：" + std::to_string(AllCount));
+        }
+        else {
+            this->ISys().LogWarning("从XML文件加载了解决方案：" + std::move(NewSolutionName) + "  理论包含元素个数：" + std::to_string(AllCount));
+            size_t ErrorCount = AllCount - SuccessCount;
+            this->ISys().LogWarning("但实际上加载成功元素个数：" + std::to_string(SuccessCount) + " 以下是加载失败的" + std::to_string(ErrorCount) + "个元素");
+            for (size_t i = 0; i < ErrorCount; ++i) {
+                this->ISys().LogWarning("编号：" + std::to_string(ErrorElementsIndexs[i]) + "  名称：" + ErrorElementsNames[i]);
             }
         }
-        //增加计数
-        ++SuccessCount;
-    }
-
-    //刷新
-    NewSolution->Refresh();
-    //去除脏标记
-    NewSolution->Dirty = false;
-    //检验时间关系
-    if (NewSolution->TotalDurationTime != TargetDurationTime) {
-        this->ISys().LogWarning("该解决方案实际持续时长与预估持续时长不同，可能出现问题");
-    }
-
-    //复查加载个数
-    if (AllCount == SuccessCount) {
-        this->ISys().LogSucc("成功从XML文件加载解决方案！ 解决方案名：" + std::move(NewSolutionName) + "  共包含元素个数：" + std::to_string(AllCount));
-    }
-    else {
-        this->ISys().LogWarning("从XML文件加载了解决方案：" + std::move(NewSolutionName) + "  理论包含元素个数：" + std::to_string(AllCount));
-        size_t ErrorCount = AllCount - SuccessCount;
-        this->ISys().LogWarning("但实际上加载成功元素个数：" + std::to_string(SuccessCount) + " 以下是加载失败的" + std::to_string(ErrorCount) + "个元素");
-        for (size_t i = 0; i < ErrorCount; ++i) {
-            this->ISys().LogWarning("编号：" + std::to_string(ErrorElementsIndexs[i]) + "  名称：" + ErrorElementsNames[i]);
-        }
-    }
 
 
-    //添加进解决方案组
-    this->Solutions.push_back(std::move(NewSolution));
-    this->ISys().LogSucc("---------------------");
-    return true;
+        // 添加进解决方案组
+        this->Solutions.push_back(std::move(newSolution));
+        this->ISys().LogLine();
+        return true;
+    }
+    catch (const YAML::Exception& e) {
+        this->ISys().LogError("在加载yaml时遇到异常：" + std::string(e.what()));
+        return false;
+    }
 }
 std::vector<std::unique_ptr<Solution>>::iterator SolutionManager::Solution_GetIterator(const std::string& Name) {
     return std::find_if(this->Solutions.begin(), this->Solutions.end(),
@@ -454,7 +386,7 @@ void SolutionManager::Solution_DebugWindow() {
         }
 
         if (ImGui::Button("保存到XML文件")) {
-            auto [ok, msg] = this->CurrentSolution->SaveToXML(this->ISys().PathManager()->PathGetFromKey("Solutions"));
+            auto [ok, msg] = this->CurrentSolution->Save(this->ISys().PathManager()->PathGetFromKey("Solutions"));
             if (ok) {
                 this->ISys().LogSucc(std::move(msg));
             }
