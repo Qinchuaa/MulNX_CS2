@@ -8,3 +8,6 @@
 *.zip binary
 *.exe binary
 *.dll binary
+
+.venv/** linguist-vendored
+MulNXThirdParty/** linguist-vendored
