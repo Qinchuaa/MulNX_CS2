@@ -27,5 +27,5 @@ public:
 	}
 
 	//保存配置文件
-    std::pair<bool, std::string> SaveConfigToXML(const std::filesystem::path& FolderPath);
+    std::pair<bool, std::string> Save(const std::filesystem::path& FolderPath);
 };

@@ -24,9 +24,6 @@ namespace MulNX {
 
 		std::string GetMsg()const;
 		void Refresh();
-		bool WriteXMLNode(pugi::xml_node& node_KeyCheckPack);
-		bool ReadXMLNode(pugi::xml_node& node_KeyCheckPack);
-
 	};
 
 	class KeyState {

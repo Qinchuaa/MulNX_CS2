@@ -97,7 +97,7 @@ bool SolutionManager::Solution_SaveAll() {
     this->ISys().LogSucc("成功保存所有解决方案到XML文件！");
     return true;
 }
-bool SolutionManager::Solution_LoadFromXML(const std::filesystem::path& FullPath) {
+bool SolutionManager::Solution_Load(const std::filesystem::path& FullPath) {
     // 输出调试信息
     this->ISys().LogInfo("尝试从yaml文件加载解决方案，文件路径：" + FullPath.string());
     // 检查文件本身存在性
@@ -193,7 +193,6 @@ bool SolutionManager::Solution_LoadFromXML(const std::filesystem::path& FullPath
                 this->ISys().LogWarning("编号：" + std::to_string(ErrorElementsIndexs[i]) + "  名称：" + ErrorElementsNames[i]);
             }
         }
-
 
         // 添加进解决方案组
         this->Solutions.push_back(std::move(newSolution));

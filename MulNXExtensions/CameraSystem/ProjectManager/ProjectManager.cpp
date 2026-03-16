@@ -176,144 +176,68 @@ bool ProjectManager::Project_Apply(const std::shared_ptr<Project> Project) {
     }
     //获取元素文件夹路径
     std::filesystem::path ElementsPath = this->ISys().PathManager()->PathGetFromKey("Elements");
-    std::vector<std::string>ElementXMLs = this->Core->IPCer().GetFileNamesByPath(ElementsPath);
+    std::vector<std::string>Elements = this->Core->IPCer().GetFileNamesByPath(ElementsPath);
     //遍历加载元素
-    for (const std::string& ElementXML : ElementXMLs) {
-        this->EManager->Element_LoadFromXML_Pre(ElementsPath / ElementXML);
+    for (const std::string& Element : Elements) {
+        this->EManager->Element_LoadFromXML_Pre(ElementsPath / Element);
     }
     //获取解决方案文件夹路径
     std::filesystem::path SolutionsPath = this->ISys().PathManager()->PathGetFromKey("Solutions");
-    std::vector<std::string>SolutionXMLs = this->Core->IPCer().GetFileNamesByPath(SolutionsPath);
+    std::vector<std::string>Solutions = this->Core->IPCer().GetFileNamesByPath(SolutionsPath);
     //遍历加载解决方案
-    for (const std::string& SolutionXML : SolutionXMLs) {
-        this->SManager->Solution_LoadFromXML(SolutionsPath / SolutionXML);
+    for (const std::string& Solution : Solutions) {
+        this->SManager->Solution_Load(SolutionsPath / Solution);
     }
     this->ActiveProject = Project;
     this->ISys().LogSucc("已切换至项目" + Project->Name);
-    this->ISys().LogSucc("尝试加载元素总数：" + std::to_string(ElementXMLs.size()));
-    this->ISys().LogSucc("尝试加载解决方案总数：" + std::to_string(SolutionXMLs.size()));
+    this->ISys().LogSucc("尝试加载元素总数：" + std::to_string(Elements.size()));
+    this->ISys().LogSucc("尝试加载解决方案总数：" + std::to_string(Solutions.size()));
     this->ISys().LogSucc("成功加载元素总数：" + std::to_string(this->EManager->Elements.size()));
     this->ISys().LogSucc("成功加载解决方案总数：" + std::to_string(this->SManager->Solutions.size()));
     return true;
 }
-bool ProjectManager::Project_LoadFromXML(const std::filesystem::path& ProjectPath, const std::string& XMLName) {
-    //检查文件路径和名称存在性
-    if (ProjectPath.empty() || XMLName.empty()) {
-        this->ISys().LogError("文件夹路径或XML文件名为空，无法从XML文件加载项目！");
+bool ProjectManager::Project_LoadFromXML(const std::filesystem::path& ProjectPath, const std::string& yamlName) {
+    // 检查文件路径和名称存在性
+    if (ProjectPath.empty() || yamlName.empty()) {
+        this->ISys().LogError("文件夹路径或文件名为空，无法从文件加载项目！");
         return false;
     }
 
-    //拼接完整路径
-    std::filesystem::path FullPath = ProjectPath / (XMLName + ".xml");
+    // 拼接完整路径
+    std::filesystem::path FullPath = ProjectPath / (yamlName + ".yaml");
 
-    //输出调试信息
-    this->ISys().LogInfo("尝试从XML文件加载项目，文件路径：" + FullPath.string());
+    // 输出调试信息
+    this->ISys().LogInfo("尝试从文件加载项目，文件路径：" + FullPath.string());
 
-    //检查文件本身存在性
+    // 检查文件本身存在性
     if (!std::filesystem::exists(FullPath)) {
-        this->ISys().LogError("XML文件不存在！文件路径：" + FullPath.string());
+        this->ISys().LogError("文件不存在！文件路径：" + FullPath.string());
         return false;
     }
 
-    //创建临时XML文件
-    pugi::xml_document LoadXML;
+    try {
+        YAML::Node root = YAML::LoadFile(FullPath.string());
+        std::string loadProjectName = root["name"].as<std::string>();
+        //检查是否存在同名项目
+        if (this->Project_Get(loadProjectName)) {
+            this->ISys().LogError("项目名已占用，无法从XML文件加载项目！ 项目名：" + std::move(loadProjectName));
+            return false;
+        }
+        auto loadProject = std::make_shared<Project>(loadProjectName);
+        loadProject->KCPack = root["KCP"].as<MulNX::KeyCheckPack>();
+        loadProject->OnNewRound = root["OnNewRound"].as<std::vector<std::string>>();
 
-    //打开XML文件并检验结果
-    pugi::xml_parse_result result = LoadXML.load_file(FullPath.c_str());
-    if (!result) {
-        this->ISys().LogError("尝试从XML文件加载项目失败，无法加载XML文件！ 文件路径：" + FullPath.string()
-            + "\n错误描述：" + result.description());
-        return false;
-    }
+        loadProject->Refresh();
+        this->ISys().LogSucc("成功从文件加载项目：" + loadProjectName);
 
-    //开始获取信息
-    //获取Project节点
-    pugi::xml_node node_Project = LoadXML.child("Project");
-    if (!node_Project) {
-        this->ISys().LogError("尝试从XML文件加载项目失败，XML文件格式错误，找不到根节点！ 文件路径：" + FullPath.string());
+        //添加进项目组
+        this->Projects.push_back(std::move(loadProject));
+        return true;
+    }
+    catch (const YAML::Exception& e) {
+        this->ISys().LogError("在加载项目时出现问题：" + std::string(e.what()));
         return false;
     }
-    //获取项目名称
-    std::string LoadProjectName = node_Project.attribute("Name").as_string();
-    if (LoadProjectName.empty()) {
-        this->ISys().LogError("尝试从XML文件加载项目失败，项目名称为空！");
-        return false;
-    }
-    //检查是否存在同名项目
-    if (this->Project_Get(LoadProjectName)) {
-        this->ISys().LogError("项目名已占用，无法从XML文件加载项目！ 项目名：" + std::move(LoadProjectName));
-        return false;
-    }
-    //获取KeyCheckPack节点
-    pugi::xml_node node_KeyCheckPack = node_Project.child("KeyCheckPack");
-    if (!node_KeyCheckPack) {
-        this->ISys().LogError("尝试从XML文件加载项目失败，找不到KeyCheckPack节点！ 文件路径：" + FullPath.string());
-        return false;
-    }
-    //制作项目
-    std::shared_ptr<Project>LoadProject = std::make_shared<Project>(LoadProjectName);
-
-    //加载KeyCheckPack
-    if (!LoadProject->KCPack.ReadXMLNode(node_KeyCheckPack)) {
-        this->ISys().LogError("尝试从XML文件加载项目失败，在解析KeyCheckPack节点时发生了错误！ 文件路径：" + FullPath.string());
-        return false;
-    }
-
-    //获取Config节点
-    pugi::xml_node node_Config = node_Project.child("Config");
-    if (!node_Config) {
-        this->ISys().LogError("找不到Config节点！ 项目名：" + std::move(LoadProjectName));
-        return false;
-    }
-    //获取AutoPlay节点
-    pugi::xml_node node_AutoPlay = node_Config.child("AutoPlay");
-    if (!node_AutoPlay) {
-        this->ISys().LogError("找不到AutoPlay节点！ 项目名：" + std::move(LoadProjectName));
-        return false;
-    }
-    //获取OnNewRound节点
-    pugi::xml_node node_OnNewRound = node_AutoPlay.child("OnNewRound");
-    if (!node_OnNewRound) {
-        this->ISys().LogError("找不到OnNewRound节点！ 项目名：" + std::move(LoadProjectName));
-        return false;
-    }
-    //获取OnNewRound信息
-    for (const auto& node_Solution : node_OnNewRound.children("Solution")) {
-        //获取解决方案名称
-        std::string LoadSolutionName = node_Solution.attribute("Name").as_string();
-        LoadProject->OnNewRound.push_back(std::move(LoadSolutionName));
-    }
-    //获取OnRoundStart节点
-    pugi::xml_node node_OnRoundStart = node_AutoPlay.child("OnRoundStart");
-    if (!node_OnRoundStart) {
-        this->ISys().LogError("找不到OnRoundStart节点！ 项目名：" + std::move(LoadProjectName));
-        return false;
-    }
-    //获取OnRoundStart信息
-    for (const auto& node_Solution : node_OnRoundStart.children("Solution")) {
-        //获取解决方案名称
-        std::string LoadSolutionName = node_Solution.attribute("Name").as_string();
-        LoadProject->OnRoundStart.push_back(std::move(LoadSolutionName));
-    }
-    //获取OnRoundEnd节点
-    pugi::xml_node node_OnRoundEnd = node_AutoPlay.child("OnRoundEnd");
-    if (!node_OnRoundEnd) {
-        this->ISys().LogError("找不到OnRoundEnd节点！ 项目名：" + std::move(LoadProjectName));
-        return false;
-    }
-    //获取OnRoundEnd信息
-    for (const auto& node_Solution : node_OnRoundEnd.children("Solution")) {
-        //获取解决方案名称
-        std::string LoadSolutionName = node_Solution.attribute("Name").as_string();
-        LoadProject->OnRoundEnd.push_back(std::move(LoadSolutionName));
-    }
-
-    LoadProject->Refresh();
-    this->ISys().LogSucc("成功从XML文件加载项目：" + LoadProjectName);
-
-    //添加进项目组
-    this->Projects.push_back(std::move(LoadProject));
-    return true;
 }
 
 

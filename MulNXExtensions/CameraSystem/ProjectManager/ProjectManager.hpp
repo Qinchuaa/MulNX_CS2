@@ -1,9 +1,8 @@
 #pragma once
 
 #include "ProjectConfig.hpp"
-#include "../Project/Project.hpp"
-
 #include <MulNX/MulNX.hpp>
+#include <MulNXExtensions/CameraSystem/Project/Project.hpp>
 
 class ElementManager;
 class SolutionManager;
@@ -23,11 +22,6 @@ public:
     std::shared_ptr<Project> ControllingProject = nullptr;
     //当前活跃对象
     std::shared_ptr<Project> ActiveProject = nullptr;
-
-    //bool PushBackElement(const std::string& ElementName);
-    //bool PushBackSolution(const std::string& SolutionName);
-    //bool PushBackElement(std::string&& ElementName);
-    //bool PushBackSolution(std::string&& SolutionName);
 private:
     //数据存储
     std::vector<std::shared_ptr<Project>> Projects{};

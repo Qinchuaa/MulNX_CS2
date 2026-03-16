@@ -5,7 +5,6 @@
 
 #include <MulNXExtensions/CameraSystem/CameraSystemIO/CameraSystemIO.hpp>
 
-#include <MulNXThirdParty/All_pugixml.hpp>
 #include <yaml-cpp/yaml.h>
 #include <MulNXThirdParty/All_ImGui.hpp>
 

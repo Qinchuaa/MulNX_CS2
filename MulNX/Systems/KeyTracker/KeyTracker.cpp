@@ -1,7 +1,5 @@
 #include "KeyTracker.hpp"
 
-#include <MulNXThirdParty/All_pugixml.hpp>
-
 #include <unordered_map>
 #include <Windows.h>
 
@@ -43,34 +41,6 @@ void MulNX::KeyCheckPack::Refresh() {
     this->Usable = this->vkCode && this->ComboClick;
     return;
 }
-
-bool MulNX::KeyCheckPack::WriteXMLNode(pugi::xml_node& node_KeyCheckPack) {
-    this->Refresh();
-    node_KeyCheckPack.append_attribute("Usable").set_value(this->Usable ? 1 : 0);
-    node_KeyCheckPack.append_attribute("Ctrl").set_value(this->Ctrl ? 1 : 0);
-    node_KeyCheckPack.append_attribute("Shift").set_value(this->Shift ? 1 : 0);
-    node_KeyCheckPack.append_attribute("Alt").set_value(this->Alt ? 1 : 0);
-    node_KeyCheckPack.append_attribute("Key").set_value(this->vkCode);
-    node_KeyCheckPack.append_attribute("ComboClick").set_value(this->ComboClick);
-    return true;
-}
-bool MulNX::KeyCheckPack::ReadXMLNode(pugi::xml_node& node_KeyCheckPack) {
-    try {
-        this->Usable = node_KeyCheckPack.attribute("Usable").as_bool();
-        this->Ctrl = node_KeyCheckPack.attribute("Ctrl").as_bool();
-        this->Shift = node_KeyCheckPack.attribute("Shift").as_bool();
-        this->Alt = node_KeyCheckPack.attribute("Alt").as_bool();
-        this->vkCode = static_cast<unsigned char>(node_KeyCheckPack.attribute("Key").as_uint());
-        this->ComboClick = static_cast<unsigned char>(node_KeyCheckPack.attribute("ComboClick").as_uint());
-    }
-    catch (...) {
-        return false;
-    }
-    this->Refresh();
-    return true;
-}
-
-
 
 bool MulNX::KeyTracker::Init() {
     this->NeedThread(3);
