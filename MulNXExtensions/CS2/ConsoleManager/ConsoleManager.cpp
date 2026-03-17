@@ -1,13 +1,10 @@
 #include "ConsoleManager.hpp"
 
-#include "../GameSettingsManager/GameSettingsManager.hpp"
-#include "../GameCfgManager/GameCfgManager.hpp"
-
 #include <MulNX/MulNX.hpp>
-
+#include <MulNX/Base/UI/UI.hpp>
 #include <MulNXExtensions/MiniMap/MiniMap.hpp>
-
-#include <MulNXThirdParty/All_ImGui.hpp>
+#include <MulNXExtensions/CS2/GameSettingsManager/GameSettingsManager.hpp>
+#include <MulNXExtensions/CS2/GameCfgManager/GameCfgManager.hpp>
 
 bool ConsoleManager::Init() {
     this->NeedUINode = true;

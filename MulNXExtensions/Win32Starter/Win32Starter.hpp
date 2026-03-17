@@ -1,7 +1,7 @@
 #pragma once
 
 #include <MulNX/MulNX.hpp>
-#include <MulNXThirdParty/All_ImGui.hpp>
+#include <MulNX/Base/UI/UI.hpp>
 
 #include <d3d11.h>
 

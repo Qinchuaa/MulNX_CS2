@@ -1,7 +1,10 @@
 #include "HookManager.hpp"
 
 #include <MulNX/MulNX.hpp>
-#include <MulNXThirdParty/All_ImGui.hpp>
+#include <MulNX/Base/CharUtility/CharUtility.hpp>
+#include <MulNX/Base/UI/UI.hpp>
+#include <MulNXThirdParty/imgui_d11/imgui_impl_dx11.h>
+#include <MulNXThirdParty/imgui_d11/imgui_impl_win32.h>
 #pragma comment(lib,"d3d11.lib")
 #include <chrono>
 

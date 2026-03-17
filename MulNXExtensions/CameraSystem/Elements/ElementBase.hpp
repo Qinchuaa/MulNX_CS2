@@ -1,13 +1,8 @@
 #pragma once
 
 #include <MulNX/MulNX.hpp>
-
-
 #include <MulNXExtensions/CameraSystem/CameraSystemIO/CameraSystemIO.hpp>
-
 #include <yaml-cpp/yaml.h>
-#include <MulNXThirdParty/All_ImGui.hpp>
-
 #include <string>
 #include <filesystem>
 

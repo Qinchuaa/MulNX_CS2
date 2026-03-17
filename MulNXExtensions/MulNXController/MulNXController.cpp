@@ -2,7 +2,7 @@
 
 #include <MulNX/MulNX.hpp>
 #include <MulNX/Systems/Debugger/Debugger.hpp>
-#include <MulNXThirdParty/All_ImGui.hpp>
+#include <MulNX/Base/UI/UI.hpp>
 
 bool MulNXController::UINodeFunc(MulNXUINode* ThisNode) {
     static bool debugMode = this->GlobalVars->DebugMode;

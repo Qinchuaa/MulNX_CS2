@@ -6,6 +6,8 @@
 
 #include "IMessageManager.hpp"
 #include "MessageChannel/MessageChannel.hpp"
+#include <unordered_map>
+
 namespace MulNX {
     class MsgMeta {
     public:

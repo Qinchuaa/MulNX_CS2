@@ -1,5 +1,6 @@
 #pragma once
 
+#include <MulNX/Base/Math/Math.hpp>
 #include <MulNX/Core/ModuleBase/ModuleBase.hpp>
 
 //1到10为玩家，0为本地

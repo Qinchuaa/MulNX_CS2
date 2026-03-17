@@ -3,6 +3,7 @@
 #include <cstdint>
 #include <string>
 #include <source_location>
+#include <MulNX/Base/Hash/Hash.hpp>
 
 using GameTime_t = float;
 // 摄像机系统输入输出前置声明

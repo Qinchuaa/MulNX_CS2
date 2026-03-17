@@ -1,5 +1,4 @@
-add_library(MulNXExtensions
-    "Win32Starter/Win32Starter.cpp"
+add_library(MulNXExtensions INTERFACE
 )
 
 add_subdirectory("CS2")
@@ -10,7 +9,7 @@ add_subdirectory("VirtualUser")
 add_subdirectory("MulNXController")
 add_subdirectory("WebSocketManager")
 
-target_link_libraries(MulNXExtensions PUBLIC
+target_link_libraries(MulNXExtensions INTERFACE
     MulNX
     WinExt
     MulNXCS2Ext

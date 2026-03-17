@@ -1,7 +1,7 @@
 #include "CameraSystem.hpp"
 
 #include <MulNX/MulNX.hpp>
-
+#include <MulNX/Base/UI/UI.hpp>
 // 摄像机系统
 
 bool CameraSystem::Init() {

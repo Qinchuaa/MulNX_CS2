@@ -1,14 +1,14 @@
 #include "MulNXUISystem.hpp"
 
+#include <MulNX/Base/UI/UI.hpp>
+#include <MulNX/Core/Core.hpp>
+
 #include "../MessageManager/IMessageManager.hpp"
-#include "../IPCer/IPCer.hpp"
 #include "../HandleSystem/HandleSystem.hpp"
 #include "../KeyTracker/KeyTracker.hpp"
 #include "../MulNXGlobalVars/MulNXGlobalVars.hpp"
 
-#include "../../Core/Core.hpp"
-
-#include <MulNXThirdParty/All_ImGui.hpp>
+#include <Windows.h>
 
 bool MulNX::UISystem::Init() {
     this->ISys()

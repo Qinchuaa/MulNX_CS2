@@ -1,10 +1,8 @@
 #include "VirtualUser.hpp"
 
 #include <MulNX/MulNX.hpp>
-
+#include <MulNX/Base/UI/UI.hpp>
 #include <MulNXExtensions/CameraSystem/ICameraSystem.hpp>
-
-#include <MulNXThirdParty/All_ImGui.hpp>
 
 bool VirtualUser::Init() {
     this->CameraSystem = this->Core->ModuleManager()->FindModule<ICameraSystem>("CameraSystem");

@@ -1,10 +1,8 @@
 #include "GameSettingsManager.hpp"
 
-#include "../CSController/CSController.hpp"
-
 #include <MulNX/MulNX.hpp>
-
-#include <MulNXThirdParty/All_ImGui.hpp>
+#include <MulNX/Base/UI/UI.hpp>
+#include <MulNXExtensions/CS2/CSController/CSController.hpp>
 
 bool GameSettingsManager::UINodeFunc(MulNXUINode* ThisNode) {
     if (ImGui::Button("一键修复数字切人bug")) {

@@ -1,8 +1,8 @@
 #include "ModuleBase.hpp"
 
+#include <MulNX/Base/UI/UI.hpp>
 #include <MulNX/Core/Cores.hpp>
 #include <MulNX/Systems/ISystems.hpp>
-#include <MulNXThirdParty/All_ImGui.hpp>
 
 MulNX::ModuleBase::~ModuleBase() {
     this->CloseMyThread();

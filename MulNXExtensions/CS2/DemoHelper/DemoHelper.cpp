@@ -1,10 +1,7 @@
 #include "DemoHelper.hpp"
 
 #include <MulNX/MulNX.hpp>
-
-#include <MulNXThirdParty/All_ImGui.hpp>
-
-
+#include <MulNX/Base/UI/UI.hpp>
 
 static std::atomic<int> ClickCount = 0;
 

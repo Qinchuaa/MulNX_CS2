@@ -1,8 +1,7 @@
 #pragma once
 
+#include <MulNX/Base/UI/UI.hpp>
 #include <MulNX/MulNX.hpp>
-
-#include <MulNXThirdParty/All_ImGui.hpp>
 
 class CameraModel {
 public:

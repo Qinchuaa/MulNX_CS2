@@ -1,6 +1,8 @@
 #pragma once
 
-#include <MulNX/Base/Base.hpp>
+#include <MulNX/Base/MulNXHandle/MulNXHandle.hpp>
+#include <shared_mutex>
+#include <thread>
 #include "ISys/ISys.hpp"
 
 // 前向声明：MulNXController 位于 MulNXExtensions 命名空间

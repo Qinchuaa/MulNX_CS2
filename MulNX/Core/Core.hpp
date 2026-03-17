@@ -1,7 +1,8 @@
 #pragma once
 // 整个系统的核心，负责所有子模块的生命周期管理，初始化，主循环调用等
 // 同时提供各子模块的接口访问
-#include "../Base/Base.hpp"
+#include <MulNX/Config/Config.hpp>
+#include <Memory>
 
 namespace MulNX {
     namespace Core {

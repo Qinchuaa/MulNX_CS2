@@ -1,8 +1,7 @@
 #include"GameCfgManager.hpp"
 
 #include <MulNX/MulNX.hpp>
-
-#include <MulNXThirdParty/All_ImGui.hpp>
+#include <MulNX/Base/UI/UI.hpp>
 
 bool GameCfgManager::Init() {
     //基础服务

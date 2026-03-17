@@ -1,10 +1,8 @@
 #include "MiniMap.hpp"
 
 #include <MulNX/MulNX.hpp>
-
+#include <MulNX/Base/UI/UI.hpp>
 #include <MulNXExtensions/CS2/MulNXCS2Ext.hpp>
-
-#include <MulNXThirdParty/All_ImGui.hpp>
 
 #include <algorithm>
 #include <string>

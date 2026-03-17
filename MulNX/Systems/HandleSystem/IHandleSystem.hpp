@@ -1,7 +1,7 @@
 #pragma once
 
 #include <MulNX/Core/ModuleBase/ModuleBase.hpp>
-
+#include <MulNX/Base/any_smart_ptr/any_smart_ptr.hpp>
 namespace MulNX {
 	class IHandleSystem :public ModuleBase {
 	public:

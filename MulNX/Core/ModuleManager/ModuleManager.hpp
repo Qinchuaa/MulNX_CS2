@@ -2,6 +2,7 @@
 
 #include <MulNX/Core/ModuleBase/ModuleBase.hpp>
 
+#include <unordered_map>
 #include <map>
 
 class ModuleInfo {

@@ -1,6 +1,7 @@
 #pragma once
 
-#include <MulNX/Base/Base.hpp>
+#include <MulNX/Base/any_smart_ptr/any_smart_ptr.hpp>
+#include <MulNX/Config/Config.hpp>
 
 namespace MulNX {
 	// MulNX消息基类

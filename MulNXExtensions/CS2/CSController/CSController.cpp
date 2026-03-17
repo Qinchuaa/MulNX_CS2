@@ -1,11 +1,10 @@
 #include "CSController.hpp"
 
-#include "../Signatures.hpp"
-
 #include <MulNX/MulNX.hpp>
+#include <MulNX/Base/UI/UI.hpp>
+#include <MulNXExtensions/CS2/Signatures.hpp>
 #include <MulNXExtensions/CameraSystem/CameraSystemIO/CameraSystemIO.hpp>
 #include <MulNXThirdParty/All_cs2_dumper.hpp>
-#include <MulNXThirdParty/All_ImGui.hpp>
 #include <MulNXThirdParty/All_MinHook.hpp>
 
 void CSController::HandleOverrideView(void* ThisCViewSetup) {

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "IHandleSystem.hpp"
-
+#include <unordered_map>
 namespace MulNX {
 	// 句柄系统用于全局提供句柄标识，中转any_unique_ptr资源
 	class HandleSystem final :public IHandleSystem {

@@ -1,6 +1,7 @@
 #pragma once
 
-#include "../MulNXMessage/MulNXMessage.hpp"
+#include <MulNX/Base/MulNXHandle/MulNXHandle.hpp>
+#include <MulNX/Config/Config.hpp>
 
 namespace MulNX {
 	class IMessageChannel {

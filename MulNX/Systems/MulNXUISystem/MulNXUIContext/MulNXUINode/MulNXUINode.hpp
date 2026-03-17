@@ -1,7 +1,7 @@
 #pragma once
 
-#include <MulNX/Base/Base.hpp>
 #include <MulNX/Systems/HandleSystem/IHandleSystem.hpp>
+#include <functional>
 
 class MulNXUIContext;
 

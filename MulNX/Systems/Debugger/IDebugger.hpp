@@ -1,6 +1,7 @@
 #pragma once
 
 #include <MulNX/Core/ModuleBase/ModuleBase.hpp>
+#include <functional>
 
 namespace MulNX {
 	class Debugger;
