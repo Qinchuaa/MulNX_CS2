@@ -54,6 +54,8 @@ namespace MulNX {
         MulNX::IMessageChannel* MainMsgChannel = nullptr;
         // 自动创建私有消息管道
         MulNX::IMessageChannel* ICreateAndGetMessageChannel();
+        // 用于指示UI不应该再发送消息
+        std::atomic<bool> UIBusy = false;
     public:
 		// 删除不需要的构造函数
 		ModuleBase(const ModuleBase&) = delete;
@@ -77,7 +79,7 @@ namespace MulNX {
 		// 线程主循环，执行组件线程逻辑
         virtual void ThreadMain() {};
 		// 消息处理函数，只需处理即可，消息会由入口点释放
-        virtual void ProcessMsg(MulNX::Message* Msg) {};
+        virtual void ProcessMsg(MulNX::Message& Msg) {};
 
 		// 基本函数：
 

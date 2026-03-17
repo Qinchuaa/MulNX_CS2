@@ -85,8 +85,8 @@ void CSController::VirtualMain() {
     this->EntryProcessMsg();
     return;
 }
-void CSController::ProcessMsg(MulNX::Message* Msg) {
-    switch (Msg->type) {
+void CSController::ProcessMsg(MulNX::Message& Msg) {
+    switch (Msg.type) {
     case "Core/ReHook"_hash: {
         this->ISys().LogSucc("已完成Hook重载！");
         break;
@@ -114,9 +114,9 @@ bool CSController::Init() {
             auto target = textRegion.FindRegion(pattern);
 
             if (target.IsValid()) {
-                auto Guard = target.ExchangeProtection(PAGE_EXECUTE_READWRITE);
-                this->MyHook = MulNX::Memory::HookEx::Create(target.Data(), 14, [this](RegContext* Ctx)->void {
-                    return this->HandleOverrideView((void*)Ctx->rsi);
+                //auto Guard = target.ExchangeProtection(PAGE_EXECUTE_READWRITE);
+                this->MyHook = MulNX::Memory::HookEx::Create(target.Data(), 14, [this](RegContext* ctx)->void {
+                    return this->HandleOverrideView((void*)ctx->rsi);
                     });
                 this->MyHook->Attach();
             }

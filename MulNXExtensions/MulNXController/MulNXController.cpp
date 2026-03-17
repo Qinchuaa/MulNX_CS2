@@ -110,10 +110,10 @@ bool MulNXController::Init() {
     return true;
 }
 
-void MulNXController::ProcessMsg(MulNX::Message* Msg) {
-    switch (Msg->type) {
+void MulNXController::ProcessMsg(MulNX::Message& Msg) {
+    switch (Msg.type) {
     case "ModuleManager/ModuleInfo/Response"_hash: {
-        auto* pInfo = Msg->asp.get<ModuleInfo>();
+        auto* pInfo = Msg.asp.get<ModuleInfo>();
         this->ISys().LogInfo("检测到以下注册模块");
         for (auto& [Name, Handle] : pInfo->Info) {
             this->ISys().LogInfo(Name);

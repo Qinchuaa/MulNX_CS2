@@ -5,7 +5,6 @@ void MulNX::Message::Clear() {
     this->asp = MulNX::any_shared_ptr();
     this->p1.i = 0;
 	this->p1.i = 0;
-	this->pMsgChannel = nullptr;
 
 	return;
 }

@@ -26,7 +26,7 @@ namespace MulNX {
 			std::unordered_map<std::string, MulNXHandle> NameToHandleMap;
 		public:
 			bool Init()override;
-			void ProcessMsg(MulNX::Message* Msg)override;
+			void ProcessMsg(MulNX::Message& Msg)override;
 			void VirtualMain()override;
 
 			// 注册模块，需要传入模块指针和名称，以及优先级，从1开始，数字越小优先级越高

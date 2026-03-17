@@ -57,7 +57,7 @@ public:
     bool Init()override;
     bool UINodeFunc(MulNXUINode* node)override;
     void VirtualMain()override;
-    void ProcessMsg(MulNX::Message* Msg)override;
+    void ProcessMsg(MulNX::Message& Msg)override;
     void ThreadMain()override;
     // 核心任务
     std::atomic<int> GetMsgResult = 0;

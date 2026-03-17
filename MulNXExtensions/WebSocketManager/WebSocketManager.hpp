@@ -15,7 +15,7 @@ class WebSocketManager final :public IWebSocketManager {
     std::set<ConnectionHandle, std::owner_less<ConnectionHandle>>connectionHandles;
 public:
     bool Init()override;
-    void ProcessMsg(MulNX::Message* Msg)override;
+    void ProcessMsg(MulNX::Message& Msg)override;
     void VirtualMain()override;
     void ThreadMain()override;
 };

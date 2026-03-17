@@ -13,7 +13,7 @@ namespace MulNX {
 	public:
 		bool Init()override;
 
-		void ProcessMsg(MulNX::Message* Msg)override;
+		void ProcessMsg(MulNX::Message& Msg)override;
 
 		std::shared_mutex& GetMutex()override { return this->UIMutex; }
 		

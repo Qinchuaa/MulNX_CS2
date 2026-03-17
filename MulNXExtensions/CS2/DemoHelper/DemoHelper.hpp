@@ -16,10 +16,8 @@ public:
     bool Init()override;
 
     void VirtualMain()override;
-    void ProcessMsg(MulNX::Message* Msg)override;
+    void ProcessMsg(MulNX::Message& Msg)override;
     bool UINodeFunc(MulNXUINode* node)override;
-
-    void HandleUICommand(MulNX::Message* Msg);
     //void HandleUICommand(MulNXMessage* Msg);
 
     bool MarkTime();

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <MulNX/Systems/HandleSystem/IHandleSystem.hpp>
+#include <MulNX/Systems/MessageManager/IMessageManager.hpp>
 #include <functional>
 
 class MulNXUIContext;
@@ -9,21 +10,18 @@ class MulNXUINode {
 public:
 	std::string name{};
     std::function<void(MulNXUINode*)>MyFunc = nullptr;
+    MulNX::IMessageManager* pMsgManager = nullptr;
 
 	// 按照线程管理进行成员分类
 
     // 初始化即可
     MulNXHandle hSelf{};
     MulNXHandle HModule{};
-	MulNX::IMessageChannel* OwnerMsgChannel = nullptr;
-	MulNX::IMessageChannel* MyMsgChannel = nullptr;
 
 	// 跨线程数据
 
 	bool Active = true;
-	bool WaitingResponse = false;
-	//std::atomic<MulNX::Message*>pUpdateData = nullptr;
-
+    std::atomic<bool>* buzy = nullptr;
 
 	MulNXUIContext* MainContext = nullptr;
 
@@ -34,13 +32,11 @@ public:
     MulNXUINode& operator=(MulNXUINode&&) = default;
 
 	void Draw();
-	bool SendToOwner(MulNX::Message&& Msg);
-	MulNX::Message CreateMsg(int SubType);
-	MulNXHandle CreateStringHandle(std::string&& Str);
 
     bool CallUINode(std::string&& Name);
     bool SetNextUINode(std::string&& Name);
+    bool PublishAsync(MulNX::Message&& Msg);
 
-    static MulNXUINode Create(const MulNX::ModuleBase* const MB);
+    static MulNXUINode Create(MulNX::ModuleBase* MB);
     static bool CreateAndRegiste(MulNX::ModuleBase* const MB, std::string&& Name, std::function<void(MulNXUINode*)>MyFunc);
 };

@@ -41,10 +41,10 @@ void WebSocketManager::VirtualMain() {
     this->EntryProcessMsg();
 }
 
-void WebSocketManager::ProcessMsg(MulNX::Message* Msg) {
-    switch (Msg->type) {
+void WebSocketManager::ProcessMsg(MulNX::Message& Msg) {
+    switch (Msg.type) {
     case "WebSocketManager/Post"_hash: {
-        MulNX::any_shared_ptr pPayLoad = Msg->asp;
+        MulNX::any_shared_ptr pPayLoad = Msg.asp;
         auto& ios = this->server.get_io_service();
         ios.post([this, pPayLoad]()mutable {
 

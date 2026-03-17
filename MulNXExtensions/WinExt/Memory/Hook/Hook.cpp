@@ -135,5 +135,8 @@ void MulNX::Memory::HookEx::Attach() {
     }
 
     // 覆盖原位置
+    DWORD old;
+    VirtualProtect(this->Target, Code.Size(), PAGE_EXECUTE_READWRITE, &old);
     memcpy(this->Target, Code.Data(), Code.Size());
+    VirtualProtect(this->Target, Code.Size(), old, &old);
 }

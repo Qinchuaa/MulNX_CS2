@@ -8,9 +8,9 @@ bool ModuleManager::Init() {
 	// 后置消息订阅，参见 PackedInit
 	return true;
 }
-void ModuleManager::ProcessMsg(MulNX::Message* Msg) {
+void ModuleManager::ProcessMsg(MulNX::Message& Msg) {
 	std::unique_lock lock(this->GetMutex());
-	switch (Msg->type) {
+	switch (Msg.type) {
 	case "ModuleManager/ModuleInfo/Request"_hash: {
 		auto [pInfo, raw] = MulNX::make_any_shared<ModuleInfo>();
 		

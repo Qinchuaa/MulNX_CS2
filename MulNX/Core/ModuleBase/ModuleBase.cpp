@@ -146,9 +146,10 @@ void MulNX::ModuleBase::EntryProcessMsg() {
         MulNX::Message Msg{};
         while (Channel->PullMessage(Msg)) {
             this->BaseProcessMsg(&Msg);
-            this->ProcessMsg(&Msg);
+            this->ProcessMsg(Msg);
         }
     }
+    this->UIBusy.store(false, std::memory_order_release);
     return;
 }
 

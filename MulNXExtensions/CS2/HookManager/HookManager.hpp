@@ -50,7 +50,7 @@ public:
     bool Init()override;
     void StartAll()override;
     void ThreadMain()override;
-    void ProcessMsg(MulNX::Message* Msg)override;
+    void ProcessMsg(MulNX::Message& Msg)override;
 
     DWORD CreateHook();//创建Hook   
 };

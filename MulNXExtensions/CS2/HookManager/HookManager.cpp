@@ -63,8 +63,8 @@ void HookManager::ThreadMain() {
 	}
 }
 
-void HookManager::ProcessMsg(MulNX::Message* Msg) {
-	switch (Msg->type) {
+void HookManager::ProcessMsg(MulNX::Message& Msg) {
+	switch (Msg.type) {
 
 	}
 	return;

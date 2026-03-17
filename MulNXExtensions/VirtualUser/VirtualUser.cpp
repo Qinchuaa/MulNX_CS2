@@ -69,12 +69,12 @@ void VirtualUser::VirtualMain() {
     return;
 }
 
-void VirtualUser::ProcessMsg(MulNX::Message* Msg) {
+void VirtualUser::ProcessMsg(MulNX::Message& Msg) {
     if (!this->Running)return;
-    switch (Msg->type) {
+    switch (Msg.type) {
     case "Game/NewRound"_hash: {
         this->ISys().LogInfo("接收到新回合信息");
-        this->CameraSystem->CallSolution(*Msg);
+        this->CameraSystem->CallSolution(Msg);
         break;
     }
     case "CameraSystem/Play/Shutdown"_hash: {
@@ -100,7 +100,7 @@ void VirtualUser::ProcessMsg(MulNX::Message* Msg) {
 #endif // _DEBUG
     case "Command/SpecPlayer"_hash: {
         this->CameraSystem->ShutDown();
-        this->AL3D->SpecPlayer(Msg->p1.i);
+        this->AL3D->SpecPlayer(Msg.p1.i);
         break;
     }
     default: {

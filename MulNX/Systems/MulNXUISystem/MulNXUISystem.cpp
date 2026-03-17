@@ -18,16 +18,16 @@ bool MulNX::UISystem::Init() {
     return true;
 }
 
-void MulNX::UISystem::ProcessMsg(MulNX::Message* Msg) {
-    switch (Msg->type) {
+void MulNX::UISystem::ProcessMsg(MulNX::Message& Msg) {
+    switch (Msg.type) {
     case "UISystem/Start"_hash: {
-        std::string* pStr = Msg->asp.get<std::string>();
+        std::string* pStr = Msg.asp.get<std::string>();
         this->UIContext.EntryDraw = std::move(*pStr);
         this->UISystemRunning = true;
         break;
     }
     case "UISystem/ModulePush"_hash: {
-        MulNXUINode* node = Msg->asp.get<MulNXUINode>();
+        MulNXUINode* node = Msg.asp.get<MulNXUINode>();
         this->UIContext.AddUINode(node->hSelf, std::move(*node));
         this->ISys().LogSucc("接收到一个UI节点");
         break;

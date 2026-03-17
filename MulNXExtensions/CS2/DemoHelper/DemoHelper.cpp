@@ -8,8 +8,9 @@ static std::atomic<int> ClickCount = 0;
 bool DemoHelper::UINodeFunc(MulNXUINode* node) {
     auto ReadData = this->Data.load(std::memory_order_acquire);
 	ImGui::Text("第一个异步模块");
-	if (ImGui::Button("标记当前时间")) {
-        node->SendToOwner(node->CreateMsg(0x101));
+    if (ImGui::Button("标记当前时间")) {
+        MulNX::Message msg("DemoHelper/MarkTime"_hash);
+        node->PublishAsync(std::move(msg));
 	}
 	ImGui::Text("目前，时间列表容器是");
 	ImGui::SameLine();
@@ -23,9 +24,9 @@ bool DemoHelper::UINodeFunc(MulNXUINode* node) {
 			ImGui::SameLine();
 			std::string str = "跳转##" + std::to_string(time);
 			if (ImGui::Button(str.c_str())) {
-                MulNX::Message Msg = node->CreateMsg(0x102);
+                MulNX::Message Msg("DemoHelper/JumpTIme"_hash);
 				Msg.p1.f = time;
-                node->SendToOwner(std::move(Msg));
+                node->PublishAsync(std::move(Msg));
 			}
 		}
 	}
@@ -36,37 +37,27 @@ bool DemoHelper::UINodeFunc(MulNXUINode* node) {
 
 bool DemoHelper::Init() {
 	this->MainMsgChannel = this->ICreateAndGetMessageChannel();
-	this->ISys()
-		.SubscribeAsync("UISystem/UICommand");
+    this->ISys()
+        .SubscribeAsync("DemoHelper/MarkTime")
+        .SubscribeAsync("DemoHelper/JumpTIme")
+        ;
 
     this->NeedUINode = true;
     return true;
 }
 
-void DemoHelper::ProcessMsg(MulNX::Message* Msg) {
-	switch (Msg->type) {
-        case "UISystem/UICommand"_hash: {
-		this->ISys().LogSucc("测试成功");
-		this->HandleUICommand(Msg);
-		Msg->pMsgChannel->PushMessage(MulNX::Message("UISystem/ModuleResponse"_hash));
-		break;
-	}
-	}
-}
-
-void DemoHelper::HandleUICommand(MulNX::Message* Msg) {
-	switch (Msg->p2.i) {
-	case 0x101: {
-		this->MarkTime();
-		ClickCount++;
-		break;
-	}
-	case 0x102: {
-		float data = Msg->p1.f;
-		std::string str = "跳转到" + std::to_string(data);
-		this->ISys().LogInfo(str);
-	}
-		
+void DemoHelper::ProcessMsg(MulNX::Message& Msg) {
+	switch (Msg.type) {
+    case "DemoHelper/MarkTime"_hash: {
+        this->MarkTime();
+        ClickCount++;
+        break;
+    }
+    case "DemoHelper/JumpTIme"_hash: {
+        float data = Msg.p1.f;
+        std::string str = "跳转到" + std::to_string(data);
+        this->ISys().LogInfo(str);
+    }
 	}
 }
 

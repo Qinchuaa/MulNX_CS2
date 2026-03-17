@@ -23,10 +23,10 @@ bool MulNX::Debugger::Init() {
     this->NeedUINode = true;
     return true;
 }
-void MulNX::Debugger::ProcessMsg(MulNX::Message* Msg) {
-    switch (Msg->type) {
+void MulNX::Debugger::ProcessMsg(MulNX::Message& Msg) {
+    switch (Msg.type) {
     case "Debugger/SetMaxInfoCount"_hash: {
-        this->ResetMaxMsgCount(Msg->p1.i);
+        this->ResetMaxMsgCount(Msg.p1.i);
     }
     case "Debugger/SaveToFile"_hash: {
         this->SaveToFile();

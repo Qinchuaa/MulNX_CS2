@@ -26,7 +26,6 @@ void CoreStarterBase::RegisterMainDrawWith(std::function<void(MulNXUINode*)>&& M
 	// 注册主窗口UI上下文
     auto [UINode, pUINode] = MulNX::make_any_shared<MulNXUINode>();
 	pUINode->name = "MainDraw";
-	pUINode->MyMsgChannel = this->ICreateAndGetMessageChannel();
 	pUINode->MyFunc = MainDrawFunc;
 	MulNX::Message Msg("UISystem/ModulePush"_hash);
     Msg.asp = std::move(UINode);
