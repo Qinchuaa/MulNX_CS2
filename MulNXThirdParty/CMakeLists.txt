@@ -15,9 +15,11 @@ add_library(MulNXThirdParty
 )
 
 add_subdirectory("yaml-cpp-master")
+add_subdirectory("zydis")
 
 target_link_libraries(MulNXThirdParty PUBLIC
     yaml-cpp::yaml-cpp
+    Zydis::Zydis
 )
 
 target_include_directories(MulNXThirdParty PUBLIC

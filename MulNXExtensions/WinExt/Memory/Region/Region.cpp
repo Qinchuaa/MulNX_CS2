@@ -48,13 +48,6 @@ MulNX::Memory::Region MulNX::Memory::Region::FindRegion(const Pattern& pattern) 
     return Region::InValid();//未找到匹配
 }
 
-bool MulNX::Memory::Region::SameSizeSwap(const Asm::Code& Source) {
-    if (this->GetSize() != Source.Size()) {
-        throw "Size Error";
-    }
-    memcpy(static_cast<void*>(this->Data()), Source.Data(), Source.Size());
-    return true;
-}
 bool MulNX::Memory::Region::TryResize(size_t NewSize) {
     if (this->Size < NewSize) {
         // 不能扩大

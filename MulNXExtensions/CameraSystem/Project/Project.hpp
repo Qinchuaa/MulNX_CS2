@@ -31,8 +31,8 @@ public:
     //刷新项目信息
     void Refresh();
 
-    //保存项目到XML文件（加载在ProjectManager）
-    std::pair<bool, std::string> SaveToXML(const std::filesystem::path& FolderPath);
+    //保存项目到文件（加载在ProjectManager）
+    std::pair<bool, std::string> Save(const std::filesystem::path& FolderPath);
 
     //获取项目描述
     std::string GetDescription()const {

@@ -95,7 +95,7 @@ void ElementManager::ElementDebugWindow() {
         if (this->CurrentElement->Drawable) {
             ImGui::Checkbox("绘制", &this->CurrentElement->IfDraw);
         }
-        if (ImGui::Button("保存到XML文件")) {
+        if (ImGui::Button("保存到磁盘")) {
             auto path = this->ISys().PathManager()->PathGetFromKey("Elements");
             auto [ok, msg] = this->CurrentElement->Save(path);
             if (ok) {
@@ -169,14 +169,14 @@ bool ElementManager::Element_SaveAll() {
             return false;
         }
     }
-    this->ISys().LogSucc("成功保存所有元素到XML文件！");
+    this->ISys().LogSucc("成功保存所有元素到磁盘！");
     return true;
 }
-bool ElementManager::Element_LoadFromXML_Pre(const std::filesystem::path& FullPath) {
-    this->ISys().LogInfo("尝试从XML文件加载元素，文件路径：" + FullPath.string());
+bool ElementManager::Element_Load_Pre(const std::filesystem::path& FullPath) {
+    this->ISys().LogInfo("尝试从磁盘文件加载元素，文件路径：" + FullPath.string());
     //检查文件本身存在性
     if (!std::filesystem::exists(FullPath)) {
-        this->ISys().LogError("XML文件不存在！文件路径：" + FullPath.string());
+        this->ISys().LogError("磁盘文件不存在！文件路径：" + FullPath.string());
         return false;
     }
 
@@ -187,7 +187,7 @@ bool ElementManager::Element_LoadFromXML_Pre(const std::filesystem::path& FullPa
         std::string NewElementTypeString = root["type"].as<std::string>();
         ElementType NewElementType = ElementType_StringToEnum(NewElementTypeString);
         if (static_cast<int>(NewElementType) <= 0) {
-            this->ISys().LogError("尝试从XML文件加载元素失败，不可加载的元素类型！");
+            this->ISys().LogError("尝试从磁盘文件加载元素失败，不可加载的元素类型！");
             return false;
         }
 
@@ -195,12 +195,12 @@ bool ElementManager::Element_LoadFromXML_Pre(const std::filesystem::path& FullPa
         std::string NewElementName = root["name"].as<std::string>();
         // 检查元素名是否为空
         if (NewElementName.empty()) {
-            this->ISys().LogError("尝试从XML文件加载元素失败，元素名称为空！");
+            this->ISys().LogError("尝试从磁盘文件加载元素失败，元素名称为空！");
             return false;
         }
         // 检查是否存在同名元素
         if (this->Element_Get<ElementBase>(NewElementName)) {
-            this->ISys().LogError("元素名已占用，无法从XML文件加载元素！ 元素名：" + NewElementName);
+            this->ISys().LogError("元素名已占用，无法从磁盘文件加载元素！ 元素名：" + NewElementName);
             return false;
         }
         // 创建基类指针
@@ -224,7 +224,7 @@ bool ElementManager::Element_LoadFromXML_Pre(const std::filesystem::path& FullPa
 
         //判空
         if (!pElement) {
-            this->ISys().LogError("尝试从XML文件加载元素失败，无法创建指定类型的元素实例！ 元素类型：" + NewElementTypeString);
+            this->ISys().LogError("尝试从磁盘文件加载元素失败，无法创建指定类型的元素实例！ 元素类型：" + NewElementTypeString);
             return false;
         }
         // 设置元素类型

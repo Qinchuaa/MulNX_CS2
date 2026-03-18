@@ -94,7 +94,7 @@ bool SolutionManager::Solution_SaveAll() {
         }
         this->ISys().LogSucc(msg);
     }
-    this->ISys().LogSucc("成功保存所有解决方案到XML文件！");
+    this->ISys().LogSucc("成功保存所有解决方案到文件！");
     return true;
 }
 bool SolutionManager::Solution_Load(const std::filesystem::path& FullPath) {
@@ -183,10 +183,10 @@ bool SolutionManager::Solution_Load(const std::filesystem::path& FullPath) {
 
         // 复查加载个数
         if (AllCount == SuccessCount) {
-            this->ISys().LogSucc("成功从XML文件加载解决方案！ 解决方案名：" + std::move(NewSolutionName) + "  共包含元素个数：" + std::to_string(AllCount));
+            this->ISys().LogSucc("成功从磁盘文件加载解决方案！ 解决方案名：" + std::move(NewSolutionName) + "  共包含元素个数：" + std::to_string(AllCount));
         }
         else {
-            this->ISys().LogWarning("从XML文件加载了解决方案：" + std::move(NewSolutionName) + "  理论包含元素个数：" + std::to_string(AllCount));
+            this->ISys().LogWarning("从磁盘文件加载了解决方案：" + std::move(NewSolutionName) + "  理论包含元素个数：" + std::to_string(AllCount));
             size_t ErrorCount = AllCount - SuccessCount;
             this->ISys().LogWarning("但实际上加载成功元素个数：" + std::to_string(SuccessCount) + " 以下是加载失败的" + std::to_string(ErrorCount) + "个元素");
             for (size_t i = 0; i < ErrorCount; ++i) {
@@ -384,7 +384,7 @@ void SolutionManager::Solution_DebugWindow() {
             this->ISys().LogSucc("成功清空解决方案所有元素");
         }
 
-        if (ImGui::Button("保存到XML文件")) {
+        if (ImGui::Button("保存到磁盘文件")) {
             auto [ok, msg] = this->CurrentSolution->Save(this->ISys().PathManager()->PathGetFromKey("Solutions"));
             if (ok) {
                 this->ISys().LogSucc(std::move(msg));

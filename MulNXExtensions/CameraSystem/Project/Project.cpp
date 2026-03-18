@@ -16,7 +16,7 @@ void Project::Refresh() {
     return;
 }
 
-std::pair<bool, std::string> Project::SaveToXML(const std::filesystem::path& FolderPath) {
+std::pair<bool, std::string> Project::Save(const std::filesystem::path& FolderPath) {
     try {
         YAML::Node root;
         //检查文件路径和名称存在性

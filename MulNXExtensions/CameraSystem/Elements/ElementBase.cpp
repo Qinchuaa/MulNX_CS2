@@ -86,7 +86,7 @@ float ElementBase::GetDurationTime()const {
 }
 
 std::pair<bool, std::string> ElementBase::Save(const std::filesystem::path& folderPath) {
-    if (this->Name.empty())return { false,"元素名为空，无法保存元素到XML文件！" };
+    if (this->Name.empty())return { false,"元素名为空，无法保存元素到磁盘文件！" };
     std::filesystem::path filePath = folderPath / (this->Name + ".yaml");
     try {
         YAML::Node root;

@@ -6,10 +6,6 @@
 #include <thread>
 #include <chrono>
 
-namespace pugi {
-	class xml_node;
-}
-
 namespace MulNX {
 	//Usable Ctrl Shift Alt 虚拟键码 连击数
 	class KeyCheckPack {

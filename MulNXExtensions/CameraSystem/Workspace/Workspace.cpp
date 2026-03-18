@@ -30,7 +30,7 @@ std::pair<bool, std::string> Workspace::Save(const std::filesystem::path& Folder
         fout << root;
         fout.close();
 
-        return { true,"成功保存工作区配置文件到XML文件！ 文件路径：" + FullPath.string() };
+        return { true,"成功保存工作区配置文件到文件！ 文件路径：" + FullPath.string() };
     }
     catch (const YAML::Exception& e) {
         return { false,"在尝试保存工作区时发生异常：" + std::string(e.what()) };

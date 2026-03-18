@@ -48,19 +48,7 @@ namespace MulNX {
 
             RegInfo get_reg_info(Reg r);
 
-            class Code {
-                std::vector<uint8_t> code;
-                friend class Assembler;
-            public:
-                size_t Size()const;
-                uint8_t* Data();
-                const uint8_t* Data() const;       // const accessor for read-only users
-
-                Code() = default;
-
-                Code& push_back(std::vector<uint8_t>&& code);
-                Code& push_back(Code&& code);
-            };
+            using Code = std::vector<uint8_t>;
 
             class Assembler {
                 Code Asm{};
@@ -101,7 +89,7 @@ namespace MulNX {
                 Assembler& sub(Reg dst, int32_t imm);            // sub dst, imm (符号扩展)
                 Assembler& sub(Mem dst, int32_t imm);            // sub [dst], imm (符号扩展)
 
-                Code&& Release();
+                Code Release();
             };
         }
     }

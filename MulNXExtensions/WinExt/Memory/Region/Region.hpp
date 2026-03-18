@@ -32,7 +32,6 @@ namespace MulNX {
             bool TryResize(size_t NewSize);
 
             Region FindRegion(const Pattern& pattern)const;
-            bool SameSizeSwap(const Asm::Code& AsmCode);
         };
     }
 }

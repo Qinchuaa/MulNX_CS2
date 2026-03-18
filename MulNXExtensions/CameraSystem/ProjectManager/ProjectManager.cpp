@@ -130,7 +130,7 @@ bool ProjectManager::Project_Save() {
     this->SManager->Solution_SaveAll();
     //保存项目到磁盘
     std::filesystem::path Path = this->ISys().PathManager()->PathGetFromKey("CurrentWorkspace") / this->ActiveProject->Name;
-    auto [ok, msg] = this->ActiveProject->SaveToXML(Path);
+    auto [ok, msg] = this->ActiveProject->Save(Path);
     if (ok) {
         this->ISys().LogSucc(std::move(msg));
         return true;
@@ -150,7 +150,7 @@ bool ProjectManager::Project_Save() {
 //	for (const auto& Project : this->Projects) {
 //		std::filesystem::path Path = this->Core->IPCer().PathGet_CurrentWorkspace() / Project->Name;
 //		std::string Ruselt;
-//		if (Project->SaveToXML(Path, Ruselt)) {
+//		if (Project->Save(Path, Ruselt)) {
 //			this->ISys().LogSucc(Ruselt);
 //		}
 //		else {
@@ -158,7 +158,7 @@ bool ProjectManager::Project_Save() {
 //			return false;
 //		}
 //	}
-//	this->ISys().LogSucc("成功保存所有项目到XML文件！");
+//	this->ISys().LogSucc("成功保存所有项目到文件！");
 //	return true;
 //}
 bool ProjectManager::Project_Apply(const std::shared_ptr<Project> Project) {
@@ -179,7 +179,7 @@ bool ProjectManager::Project_Apply(const std::shared_ptr<Project> Project) {
     std::vector<std::string>Elements = this->Core->IPCer().GetFileNamesByPath(ElementsPath);
     //遍历加载元素
     for (const std::string& Element : Elements) {
-        this->EManager->Element_LoadFromXML_Pre(ElementsPath / Element);
+        this->EManager->Element_Load_Pre(ElementsPath / Element);
     }
     //获取解决方案文件夹路径
     std::filesystem::path SolutionsPath = this->ISys().PathManager()->PathGetFromKey("Solutions");
@@ -196,7 +196,7 @@ bool ProjectManager::Project_Apply(const std::shared_ptr<Project> Project) {
     this->ISys().LogSucc("成功加载解决方案总数：" + std::to_string(this->SManager->Solutions.size()));
     return true;
 }
-bool ProjectManager::Project_LoadFromXML(const std::filesystem::path& ProjectPath, const std::string& yamlName) {
+bool ProjectManager::Project_Load(const std::filesystem::path& ProjectPath, const std::string& yamlName) {
     // 检查文件路径和名称存在性
     if (ProjectPath.empty() || yamlName.empty()) {
         this->ISys().LogError("文件夹路径或文件名为空，无法从文件加载项目！");
@@ -220,7 +220,7 @@ bool ProjectManager::Project_LoadFromXML(const std::filesystem::path& ProjectPat
         std::string loadProjectName = root["name"].as<std::string>();
         //检查是否存在同名项目
         if (this->Project_Get(loadProjectName)) {
-            this->ISys().LogError("项目名已占用，无法从XML文件加载项目！ 项目名：" + std::move(loadProjectName));
+            this->ISys().LogError("项目名已占用，无法从文件加载项目！ 项目名：" + std::move(loadProjectName));
             return false;
         }
         auto loadProject = std::make_shared<Project>(loadProjectName);

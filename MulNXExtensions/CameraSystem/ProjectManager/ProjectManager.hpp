@@ -70,8 +70,8 @@ public:
     //bool Project_SaveAll();
     //切换项目，重载解决方案和元素（删除先删解决方案再删元素，加载先加载元素再加载解决方案）
     bool Project_Apply(const std::shared_ptr<Project> Project);
-    //从XML文件加载项目
-    bool Project_LoadFromXML(const std::filesystem::path& ProjectPath, const std::string& XMLName);
+    //从文件加载项目
+    bool Project_Load(const std::filesystem::path& ProjectPath, const std::string& Name);
 
 
 

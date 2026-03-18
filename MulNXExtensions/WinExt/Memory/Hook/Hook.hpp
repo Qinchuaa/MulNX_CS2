@@ -44,7 +44,7 @@ namespace MulNX {
             
             uint8_t* hookTarget = nullptr;
             size_t overrideSize = 0;
-            std::vector<uint8_t> hookTargetRawCode;
+            MulNX::Memory::Asm::Code hookTargetRawCode;
             MulNX::Memory::Asm::Code jumperAsmCode{};
         private:
             static void Dispatch(HookEx* pHookExInstance, RegContext* ctx);

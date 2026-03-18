@@ -60,7 +60,7 @@ bool WorkspaceManager::Workspace_Set(const std::string& Name) {
     if (!ProjectsNames.empty()) {
         for (const auto& ProjectName : ProjectsNames) {
             std::filesystem::path ProjectPath = PathManager->PathGetFromKey("CurrentWorkspace") / ProjectName;
-            this->PManager->Project_LoadFromXML(ProjectPath, ProjectName);
+            this->PManager->Project_Load(ProjectPath, ProjectName);
         }
     }
     return true;

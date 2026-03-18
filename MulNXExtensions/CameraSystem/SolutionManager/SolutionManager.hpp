@@ -69,9 +69,9 @@ public:
 
     //创建解决方案
     bool Solution_Create(const std::string& Name);
-    //保存所有解决方案到XML文件
+    //保存所有解决方案到文件
     bool Solution_SaveAll();
-    //从XML文件加载解决方案（反序列化，序列化在Solution）
+    //从文件加载解决方案（反序列化，序列化在Solution）
     bool Solution_Load(const std::filesystem::path& FullPath);
     //获取解决方案对应的迭代器
     std::vector<std::unique_ptr<Solution>>::iterator Solution_GetIterator(const std::string& Name);

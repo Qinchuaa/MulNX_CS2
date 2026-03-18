@@ -113,7 +113,7 @@ bool CSController::Init() {
             auto target = textRegion.FindRegion(pattern);
 
             if (target.IsValid()) {
-                this->MyHook = MulNX::Memory::HookEx::Create(target.Data(), 14, [this](RegContext* ctx)->void {
+                this->MyHook = MulNX::Memory::HookEx::Create(target.Data(), 16, [this](RegContext* ctx)->void {
                     return this->HandleOverrideView((void*)ctx->rsi);
                     });
                 this->MyHook->Attach();
