@@ -13,14 +13,6 @@ MulNX::Memory::Region::Region(uintptr_t Base, size_t Size) :
     }
     this->Protection = mbi.Protect;
 }
-MulNX::Memory::Region::ProtectionGuard MulNX::Memory::Region::ExchangeProtection(DWORD NewProtect) {
-    if (!this->IsValid()) return ProtectionGuard::Invalid();
-    if (!VirtualProtect(reinterpret_cast<LPVOID>(this->Base), this->RawSize, NewProtect, &this->OldProtection))
-        return ProtectionGuard::Invalid();
-
-    this->Protection = NewProtect;
-    return ProtectionGuard(this);
-}
 
 std::optional<uint8_t*> MulNX::Memory::Region::FindHead(const uint8_t* Begin, const uint8_t Byte)const {
     for (const uint8_t* Current = Begin; Current < this->End(); ++Current) {

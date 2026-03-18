@@ -14,12 +14,10 @@ bool CoreStarterBase::SystemInit(MulNX::Core::Core* pCore) {
     return true;
 }
 
-void CoreStarterBase::StartUIWith(std::string&& EntryName) {
-	// UI系统主界面初始化
-	auto [StartString, pStartString] = MulNX::make_any_shared<std::string>(std::move(EntryName));
-	MulNX::Message StartMsg("UISystem/Start"_hash);
-	StartMsg.asp = std::move(StartString);
-	this->ISys().PublishAsync(std::move(StartMsg));
+void CoreStarterBase::StartUIWith(std::string&& entryName) {
+    // UI系统主界面初始化
+    auto msg = MulNX::Message::Create<std::string>("UISystem/Start"_hash, std::move(entryName));
+    this->ISys().PublishAsync(std::move(msg));
 }
 
 void CoreStarterBase::RegisterMainDrawWith(std::function<void(MulNXUINode*)>&& MainDrawFunc) {

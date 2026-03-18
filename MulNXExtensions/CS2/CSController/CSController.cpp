@@ -114,7 +114,6 @@ bool CSController::Init() {
             auto target = textRegion.FindRegion(pattern);
 
             if (target.IsValid()) {
-                //auto Guard = target.ExchangeProtection(PAGE_EXECUTE_READWRITE);
                 this->MyHook = MulNX::Memory::HookEx::Create(target.Data(), 14, [this](RegContext* ctx)->void {
                     return this->HandleOverrideView((void*)ctx->rsi);
                     });

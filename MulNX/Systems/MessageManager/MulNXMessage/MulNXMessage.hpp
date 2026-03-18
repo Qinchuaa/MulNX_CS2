@@ -4,7 +4,7 @@
 #include <MulNX/Config/Config.hpp>
 
 namespace MulNX {
-	// MulNX消息基类
+	// MulNX消息
 	class Message {
 	public:
 		// 消息类型，用于区分消息

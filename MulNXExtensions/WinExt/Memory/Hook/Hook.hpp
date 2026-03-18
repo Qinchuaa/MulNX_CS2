@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../Assembler/Assembler.hpp"
+#include <MulNXExtensions/WinExt/Memory/Assembler/Assembler.hpp>
 
 #include <cstdint>
 #include <functional>
@@ -23,20 +23,37 @@ struct HookInfo {
 namespace MulNX {
     namespace Memory {
         class HookEx {
-            // using CallBack = void(*)(HookEx*, RegContext*);
-            bool Enable = true;
-            uint8_t* Target = nullptr;
-            void* pCaller = nullptr;
-            MulNX::Memory::Asm::Code CodeCaller{};
+            enum class Result :uint8_t {
+                Attached,
+                AttachSuccess,
+                AttachError,
+
+                Detached,
+                DetachSuccess,
+                DetachError
+            };
+
+            const static size_t allocSize = 1000;
+
+            bool attached = false;
             std::function<void(RegContext*)> callback;
-            std::vector<uint8_t> RawCmd;
+            size_t threadNumInAsm = 0;
+
+            void* pAsmDispatcher = nullptr;
+            MulNX::Memory::Asm::Code dispatcherAsmCode{};
+            
+            uint8_t* hookTarget = nullptr;
+            size_t overrideSize = 0;
+            std::vector<uint8_t> hookTargetRawCode;
+            MulNX::Memory::Asm::Code jumperAsmCode{};
         private:
-            static void Dispatch(HookEx* pHookExInstance, RegContext* Ctx);
+            static void Dispatch(HookEx* pHookExInstance, RegContext* ctx);
         public:
             HookEx() = default;
+            ~HookEx();
             static std::unique_ptr<HookEx> Create(uint8_t* Target, int Len, std::function<void(RegContext*)>&& callback);
-            void Attach();
-
+            Result Attach();
+            Result Detach();
         };
     }
 }

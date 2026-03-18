@@ -15,21 +15,7 @@ namespace MulNX {
             size_t Size = 0;
             const size_t RawSize;
             DWORD Protection = 0;// 当前保护属性
-            DWORD OldProtection = 0;// 交换保护时保存旧属性
         public:
-            class ProtectionGuard {
-            private:
-                Region* pRegion = nullptr;
-                bool Valid = false;
-                ProtectionGuard() = default;
-            public:
-                ProtectionGuard(Region* Region);
-                ~ProtectionGuard();
-
-                bool IsValid()const;
-                static ProtectionGuard Invalid() { return MulNX::Memory::Region::ProtectionGuard(); }
-            };
-            friend class ProtectionGuard;
             std::optional<uint8_t*> FindHead(const uint8_t* Begin, const uint8_t Byte)const;
             bool MatchPattern(const uint8_t* Address, const Pattern& Pattern)const;
         public:
@@ -43,7 +29,6 @@ namespace MulNX {
             uint8_t* Data() { return reinterpret_cast<uint8_t*>(Base); }
             bool IsValid() const { return Base != 0 && Size != 0; }
             DWORD protection() const { return Protection; }
-            ProtectionGuard ExchangeProtection(DWORD NewProtect);
             bool TryResize(size_t NewSize);
 
             Region FindRegion(const Pattern& pattern)const;

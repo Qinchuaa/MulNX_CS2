@@ -13,11 +13,9 @@ void ModuleManager::ProcessMsg(MulNX::Message& Msg) {
 	switch (Msg.type) {
 	case "ModuleManager/ModuleInfo/Request"_hash: {
 		auto [pInfo, raw] = MulNX::make_any_shared<ModuleInfo>();
-		
-		for (auto& [Name, Handle] : this->NameToHandleMap) {
+		for (const auto& [Name, Handle] : this->NameToHandleMap) {
 			raw->Info.push_back(std::make_pair(Name, Handle));
 		}
-
 		MulNX::Message msg("ModuleManager/ModuleInfo/Response"_hash);
         msg.asp = std::move(pInfo);
         this->ISys().PublishAsync(std::move(msg));
@@ -99,7 +97,7 @@ bool ModuleManager::PackedInit() {
 
 void ModuleManager::PackedVirtualMain() {
 	std::shared_lock lock(this->GetMutex());
-    for (auto& [Priority, hModule] : this->PriorityToHandleMap) {
+    for (const auto& [Priority, hModule] : this->PriorityToHandleMap) {
         auto* pModule = this->Modules[hModule].get();
         if (!pModule->HasParent()) {
             pModule->EntryVirtualMain();
