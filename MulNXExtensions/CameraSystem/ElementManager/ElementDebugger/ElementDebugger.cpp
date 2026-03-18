@@ -86,7 +86,7 @@ void ElementDebugger::DebugMenu_FreeCameraPath(FreeCameraPath* const FreeCamPath
         ImGui::SliderFloat3("位置", &tempPositionAndFOV.x, -2000.0, 2000, 0);
         ImGui::SliderFloat("俯仰角", &tempRotationEuler.x, -89.0, 89.0);
         ImGui::SliderFloat("偏航角", &tempRotationEuler.y, -179.0, 179.0);
-        ImGui::SliderFloat("滚转角", &tempRotationEuler.z, -40, 40);
+        ImGui::SliderFloat("滚转角", &tempRotationEuler.z, -179.0, 179.0);
         ImGui::SliderFloat("FOV", &tempPositionAndFOV.w, 10, 170);
 
         this->CamDrawer->DrawCamera(DirectX::XMFLOAT3{ tempPositionAndFOV.x,tempPositionAndFOV.y ,tempPositionAndFOV.z }, tempRotationEuler, "目标摄像机关键帧");
