@@ -1,7 +1,6 @@
 #include "WebSocketManager.hpp"
 
 bool WebSocketManager::Init() {
-    this->MainMsgChannel = this->ICreateAndGetMessageChannel();
     this->ISys()
         .SubscribeAsync("WebSocketManager/Post");
 
@@ -69,17 +68,20 @@ void WebSocketManager::ProcessMsg(MulNX::Message& Msg) {
 }
 
 void WebSocketManager::ThreadMain() {
-    try {
-        while (!this->GlobalVars->SystemReady.load(std::memory_order_acquire)) {
-            std::this_thread::sleep_for(std::chrono::milliseconds(1));
+    while (this->MyThreadRunning) {
+        try {
+            while (!this->GlobalVars->SystemReady.load(std::memory_order_acquire)) {
+                std::this_thread::sleep_for(std::chrono::milliseconds(1));
+            }
+            this->server.listen(this->port);
+            this->server.start_accept();
+            this->ISys().LogSucc("正在监听端口：" + std::to_string(port));
+            // 阻塞调用
+            this->server.run();
         }
-        this->server.listen(this->port);
-        this->server.start_accept();
-        this->ISys().LogSucc("正在监听端口：" + std::to_string(port));
-        // 阻塞调用
-        this->server.run();
-    }
-    catch (const std::exception& e) {
-        MulNX::ErrorTerminate("网络功能启动失败！\n" + *e.what());
+        catch (const std::exception& e) {
+            MulNX::ErrorTerminate("网络功能启动失败！\n" + *e.what());
+        }
+        std::this_thread::sleep_for(std::chrono::milliseconds(this->MyThreadDelta));
     }
 }

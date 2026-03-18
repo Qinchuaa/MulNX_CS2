@@ -36,7 +36,6 @@ bool DemoHelper::UINodeFunc(MulNXUINode* node) {
 }
 
 bool DemoHelper::Init() {
-	this->MainMsgChannel = this->ICreateAndGetMessageChannel();
     this->ISys()
         .SubscribeAsync("DemoHelper/MarkTime")
         .SubscribeAsync("DemoHelper/JumpTIme")

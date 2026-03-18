@@ -7,6 +7,7 @@
 #include "IMessageManager.hpp"
 #include "MessageChannel/MessageChannel.hpp"
 #include <unordered_map>
+#include <MulNXThirdParty/queue/concurrentqueue.h>
 
 namespace MulNX {
     class MsgMeta {
@@ -21,6 +22,7 @@ namespace MulNX {
         // 存储类
         std::unordered_map<MulNX::MsgType, MsgMeta>MsgMap{};
         std::unordered_map<MulNXHandle, std::unique_ptr<MessageChannel>>Channels;
+        moodycamel::ConcurrentQueue<MulNX::Message>sharedBuffer;
     public:
         bool Init()override;
         void ThreadMain()override;

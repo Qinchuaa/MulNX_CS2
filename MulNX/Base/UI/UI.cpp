@@ -16,3 +16,21 @@ bool MulNX::UI::SliderInt(const char* label, std::atomic<int>& av, int v_min, in
     }
     return changed;
 }
+
+MulNX::UI::RAIIWindow::RAIIWindow(const char* name, std::atomic<bool>& showWindow) {
+    this->showed = showWindow.load(std::memory_order_acquire);
+    if (this->showed) {
+        bool open = this->showed;
+        ImGui::Begin(name, &open);
+        showWindow.store(open, std::memory_order_release);
+    }
+}
+MulNX::UI::RAIIWindow::~RAIIWindow() {
+    if (this->showed) {
+        ImGui::End();
+    }   
+}
+
+MulNX::UI::RAIIWindow::operator bool()const {
+    return this->showed;
+}

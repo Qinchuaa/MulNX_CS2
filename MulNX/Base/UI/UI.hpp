@@ -8,5 +8,14 @@ namespace MulNX {
     namespace UI {
         bool SliderFloat(const char* label, std::atomic<float>& av, float v_min, float v_max, const char* format, ImGuiSliderFlags flags);
         bool SliderInt(const char* label, std::atomic<int>& av, int v_min, int v_max, const char* format, ImGuiSliderFlags flags);
+
+        class RAIIWindow {
+            bool showed;
+        public:
+            RAIIWindow() = delete;
+            RAIIWindow(const char* name, std::atomic<bool>& showWindow);
+            ~RAIIWindow();
+            explicit operator bool() const;
+        };
     }
 }

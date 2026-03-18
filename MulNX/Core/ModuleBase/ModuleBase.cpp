@@ -43,7 +43,7 @@ bool MulNX::ModuleBase::BaseInit() {
             this->HModule = MulNXHandle::CreateHandle();
         }
 
-        this->MainMsgChannel = this->ICreateAndGetMessageChannel();
+        this->MainMsgChannel = this->IMsgManager->GetMessageChannel(this->IMsgManager->CreateMessageChannel());
     }
     catch (...) {
         return false;
@@ -60,12 +60,10 @@ bool MulNX::ModuleBase::CreateUINode() {
         UINode.MyFunc = [this](MulNXUINode* ThisNode) {
             return this->UINodeFunc(ThisNode);
             };
-        // 创建UI消息并设置句柄
-        MulNX::Message Msg("UISystem/ModulePush"_hash);
-        auto [pNode, raw] = MulNX::make_any_shared<MulNXUINode>(std::move(UINode));
-        Msg.asp = std::move(pNode);
+        // 创建UI消息
+        auto msg = MulNX::Message::Create<MulNXUINode>("UISystem/ModulePush"_hash, std::move(UINode));
         // 发送UI消息
-        this->ISys().PublishAsync(std::move(Msg));
+        this->ISys().PublishAsync(std::move(msg));
     }
     catch (...) {
         return false;
@@ -118,12 +116,7 @@ bool MulNX::ModuleBase::CreateThread() {
             //先设置线程处于启动状态
             this->MyThreadRunning = true;
             //打开线程
-            this->MyThread = std::thread([this]() {
-                while (this->MyThreadRunning) {
-                    this->ThreadMain();
-                    std::this_thread::sleep_for(std::chrono::milliseconds(this->MyThreadDelta));
-                }
-                });
+            this->MyThread = std::thread([this]() {this->ThreadMain();});
             //如果成功返回成功
             return true;
         }
@@ -151,10 +144,6 @@ void MulNX::ModuleBase::EntryProcessMsg() {
     }
     this->UIBusy.store(false, std::memory_order_release);
     return;
-}
-
-MulNX::IMessageChannel* MulNX::ModuleBase::ICreateAndGetMessageChannel() {
-    return this->IMsgManager->GetMessageChannel(this->IMsgManager->CreateMessageChannel());
 }
 
 void MulNX::ModuleBase::SetParent(MulNXHandle hModule) {

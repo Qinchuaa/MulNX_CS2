@@ -49,8 +49,9 @@ void CSController::HandleOverrideView(void* ThisCViewSetup) {
 }
 
 bool CSController::UINodeFunc(MulNXUINode* node) {
-    ImGui::Begin("CS摄像机控制");
-
+    auto w = MulNX::UI::RAIIWindow("摄像机控制", this->ShowWindow);
+    if (!w)return true;
+    
     auto roll = this->atoRoll.load(std::memory_order_acquire);
     if (ImGui::SliderFloat("roll调整", &roll, -179, 179)) {
         this->atoRoll.store(roll, std::memory_order_release);
@@ -63,8 +64,6 @@ bool CSController::UINodeFunc(MulNXUINode* node) {
         this->atoRoll.store(0, std::memory_order_release);
         *pGlobalFOV = 0;
     }
-
-    ImGui::End();
 
     return true;
 }
@@ -96,7 +95,7 @@ void CSController::ProcessMsg(MulNX::Message& Msg) {
 }
 
 bool CSController::Init() {
-    this->MainMsgChannel = this->ICreateAndGetMessageChannel();
+    this->ShowWindow = true;
     this->ISys()
         .SubscribeAsync("Core/ReHook");
     this->NeedThread(3);
@@ -221,7 +220,10 @@ int CSController::GameRulesUpdate() {
 }
 
 void CSController::ThreadMain() {
-    this->GetMsgResult = this->TryGetMsg();
+    while (this->MyThreadRunning) {
+        this->GetMsgResult = this->TryGetMsg();
+        std::this_thread::sleep_for(std::chrono::milliseconds(this->MyThreadDelta));
+    }
     return;
 }
 int CSController::TryGetMsg() {

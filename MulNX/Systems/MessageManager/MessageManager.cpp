@@ -1,9 +1,8 @@
 #include "MessageManager.hpp"
-
-#include <MulNX/Core/Core.hpp>
-
 #include "MessageChannel/MessageChannel.hpp"
+#include <MulNX/Core/Core.hpp>
 #include <MulNX/Systems/HandleSystem/IHandleSystem.hpp>
+#include <MulNX/Systems/MulNXGlobalVars/MulNXGlobalVars.hpp>
 
 bool MulNX::MessageManager::Init() {
     this->NeedThread(10);
@@ -27,20 +26,7 @@ MulNX::IMessageChannel* MulNX::MessageManager::GetMessageChannel(const MulNXHand
 }
 
 bool MulNX::MessageManager::Publish(Message&& Msg) {
-    std::unique_lock lock(this->GetMutex());
-	// 检查是否存在管道订阅者
-    auto& SubscriberVector = this->MsgMap[Msg.type].Subscribers;// 获取订阅者容器，这里不可能是空指针
-    size_t size = SubscriberVector.size();
-    if (size == 0)return false;
-    --size;
-    // 按需复制
-	for (size_t Index=0; Index <size; ++Index) {
-        // 其他订阅者使用克隆的消息
-        SubscriberVector[Index]->PushMessage(Message(Msg));
-    }
-    // 最后一个订阅者获得原始消息
-    SubscriberVector[size]->PushMessage(std::move(Msg));
-    return true;
+    return this->sharedBuffer.enqueue(std::move(Msg));
 }
 bool MulNX::MessageManager::Subscribe(MessageChannel* const pChannel, const std::string& Type) {
     MulNX::MsgType hashed = MulNX::HashString(Type);
@@ -64,17 +50,39 @@ bool MulNX::MessageManager::Subscribe(MessageChannel* const pChannel, const std:
 
 bool MulNX::MessageManager::NextMsg() {
     std::unique_lock lock(this->GetMutex());//只有切换消息时加锁，而等待组件处理消息时不加锁，不阻塞发布订阅
+    MulNX::Message Msg;
+    if (this->sharedBuffer.try_dequeue(Msg)) {
+        // 检查是否存在管道订阅者
+        auto& SubscriberVector = this->MsgMap[Msg.type].Subscribers;// 获取订阅者容器，这里不可能是空指针
+        size_t size = SubscriberVector.size();
+        if (size == 0)return false;
+        --size;
+        // 按需复制
+        for (size_t Index = 0; Index < size; ++Index) {
+            // 其他订阅者使用克隆的消息
+            SubscriberVector[Index]->PushMessage(Message(Msg));
+        }
+        // 最后一个订阅者获得原始消息
+        SubscriberVector[size]->PushMessage(std::move(Msg));
+        return true;
+    }
     return false;
 }
 
 
 void MulNX::MessageManager::ThreadMain() {
-	if (this->NextMsg()) {
-		// 有消息在处理,快速轮询
-		this->SetMyThreadDelta(1);
-	}
-	else {
-		// 没有消息在处理，降低轮询频率
-		this->SetMyThreadDelta(10);
-	}
+    while (!this->GlobalVars->SystemReady.load(std::memory_order_acquire)) {
+        std::this_thread::sleep_for(std::chrono::milliseconds(1));
+    }
+    this->ISys().LogInfo("消息派发开始！");
+    while (this->MyThreadRunning) {
+        if (this->NextMsg()) {
+            // 有消息在处理,快速轮询
+            this->SetMyThreadDelta(1);
+        }
+        else {
+            // 没有消息在处理，降低轮询频率
+            this->SetMyThreadDelta(10);
+        }
+    }
 }

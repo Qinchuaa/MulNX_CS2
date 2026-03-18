@@ -52,8 +52,6 @@ namespace MulNX {
         IDebugger* IDebugger = nullptr;
         // 主要消息管道指针
         MulNX::IMessageChannel* MainMsgChannel = nullptr;
-        // 自动创建私有消息管道
-        MulNX::IMessageChannel* ICreateAndGetMessageChannel();
         // 用于指示UI不应该再发送消息
         std::atomic<bool> UIBusy = false;
     public:

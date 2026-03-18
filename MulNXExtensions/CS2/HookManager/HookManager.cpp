@@ -15,52 +15,58 @@ bool HookManager::Init() {
     return true;
 }
 void HookManager::StartAll() {
-	this->MainMsgChannel = this->ICreateAndGetMessageChannel();
 	this->ReHook = true;
     this->NeedThread(250);
-    this->ThreadMain();// 手动执行一次Hook
+    this->CheckHook();// 手动执行一次Hook
+}
+
+void HookManager::CheckHook() {
+    this->EntryProcessMsg();
+
+    if (this->GuardPleaseAction) {
+        AllowReHook = true;
+        this->GuardPleaseAction = false;
+        this->ISys().LogInfo("检测到D3D11波动，等待用户手动ReHook");
+    }
+    // 检查是否超时：正在等待CheckBack且超过2秒未收到回复
+    if (AllowReHook) {
+        if (this->KT->CheckComboClick(VK_INSERT, 2)) {
+            ReHook = true;
+            AllowReHook = false;
+        }
+    }
+    if (ReHook) {
+        // std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+        // 执行重新Hook逻辑
+        // 先清理Hook
+        this->hkPresent.Clear();
+        this->hkRelease.Clear();
+
+
+        // 重置状态
+        this->d3dInited = false;
+        this->NeedReHook = true;
+
+        // 延迟重新创建Hook
+        std::this_thread::sleep_for(std::chrono::seconds(1));
+        this->CreateHook();
+
+        //发送重新Hook消息
+        MulNX::Message Msg("Core/ReHook"_hash);
+        this->ISys().PublishAsync(std::move(Msg));
+
+        ReHook = false;
+
+        // UI系统主界面初始化
+        this->StartUIWith("MainDraw");
+    }
 }
 
 void HookManager::ThreadMain() {
-	this->EntryProcessMsg();
-
-	if (this->GuardPleaseAction) {
-		AllowReHook = true;
-		this->GuardPleaseAction = false;
-		this->ISys().LogInfo("检测到D3D11波动，等待用户手动ReHook");
-	}
-	// 检查是否超时：正在等待CheckBack且超过2秒未收到回复
-	if (AllowReHook) {
-		if (this->KT->CheckComboClick(VK_INSERT, 2)) {
-			ReHook = true;
-			AllowReHook = false;
-		}
-	}
-	if (ReHook) {
-		// std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-		// 执行重新Hook逻辑
-		// 先清理Hook
-		this->hkPresent.Clear();
-		this->hkRelease.Clear();
-		
-
-		// 重置状态
-		this->d3dInited = false;
-		this->NeedReHook = true;
-
-		// 延迟重新创建Hook
-		std::this_thread::sleep_for(std::chrono::seconds(1));
-		this->CreateHook();
-
-		//发送重新Hook消息
-		MulNX::Message Msg("Core/ReHook"_hash);
-		this->ISys().PublishAsync(std::move(Msg));
-
-		ReHook = false;
-
-		// UI系统主界面初始化
-		this->StartUIWith("MainDraw");
-	}
+    while (this->MyThreadRunning) {
+        this->CheckHook();
+        std::this_thread::sleep_for(std::chrono::milliseconds(this->MyThreadDelta));
+    }
 }
 
 void HookManager::ProcessMsg(MulNX::Message& Msg) {

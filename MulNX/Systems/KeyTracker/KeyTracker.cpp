@@ -48,7 +48,11 @@ bool MulNX::KeyTracker::Init() {
 }
 
 void MulNX::KeyTracker::ThreadMain() {
-    this->UpdateKeysState();
+    while (this->MyThreadRunning) {
+        this->UpdateKeysState();
+        std::this_thread::sleep_for(std::chrono::milliseconds(this->MyThreadDelta));
+    }
+    
 }
 
 bool MulNX::KeyTracker::UpdateKeysState() {

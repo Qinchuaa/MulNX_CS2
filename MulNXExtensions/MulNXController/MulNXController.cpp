@@ -51,7 +51,6 @@ bool MulNXController::UINodeFunc(MulNXUINode* ThisNode) {
 }
 
 bool MulNXController::Init() {
-    this->MainMsgChannel = this->ICreateAndGetMessageChannel();
     this->ISys()
         .SubscribeAsync("ModuleManager/ModuleInfo/Response");
     this->NeedUINode = true;

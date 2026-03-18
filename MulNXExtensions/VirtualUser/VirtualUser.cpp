@@ -8,7 +8,6 @@ bool VirtualUser::Init() {
     this->CameraSystem = this->Core->ModuleManager()->FindModule<ICameraSystem>("CameraSystem");
     this->Running = true;
 
-    this->MainMsgChannel = this->ICreateAndGetMessageChannel();
     this->ISys()
 #ifdef _DEBUG
         .SubscribeAsync("Core/Tick30min")

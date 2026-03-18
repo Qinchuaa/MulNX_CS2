@@ -49,6 +49,7 @@ private:
 public:
     bool Init()override;
     void StartAll()override;
+    void CheckHook();
     void ThreadMain()override;
     void ProcessMsg(MulNX::Message& Msg)override;
 
