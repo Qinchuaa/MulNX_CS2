@@ -16,7 +16,24 @@ ProjectManager::~ProjectManager() {
 
 //项目管理器基本函数
 
+bool ProjectManager::UINodeFunc(MulNXUINode* node) {
+    if (this->ShowWindow.load(std::memory_order_acquire)) {
+        //项目调试窗口
+        this->Project_DebugWindow();
+        if (this->OpenProjectKCPackDebugWindow) {
+            //项目按键绑定调试窗口
+            this->Project_KCPack_DebugWindow();
+        }
+        if (this->OpenProjectNameDebugWindow) {
+            //项目名称调试窗口
+            this->Project_Name_DebugWindow();
+        }
+    }
+    return true;
+}
+
 bool ProjectManager::Init() {
+    this->NeedUINode = true;
     auto* PathManager = this->ISys().PathManager();
     if (PathManager->CreateKey("CurrentProject", {},
         [this](MulNX::PathManager* PathManager)->bool {
@@ -285,7 +302,7 @@ void ProjectManager::Project_ShowInLine(std::shared_ptr<Project> Project) {
     ImGui::SameLine();
     if (ImGui::Button(Project->Name.c_str())) {
         this->ControllingProject = Project;
-        this->OpenProjectDebugWindows = true;
+        this->ShowWindow.store(true, std::memory_order_release);
     }
 
     return;
@@ -297,28 +314,10 @@ void ProjectManager::Project_ShowAllInLines() {
     }
 }
 
-
-
-void ProjectManager::Windows() {
-    if (this->OpenProjectDebugWindows) {
-        //项目调试窗口
-        this->Project_DebugWindow();
-        if (this->OpenProjectKCPackDebugWindow) {
-            //项目按键绑定调试窗口
-            this->Project_KCPack_DebugWindow();
-        }
-        if (this->OpenProjectNameDebugWindow) {
-            //项目名称调试窗口
-            this->Project_Name_DebugWindow();
-        }
-    }
-    return;
-}
-
 void ProjectManager::Project_DebugWindow() {
-    //打开窗口
-    ImGui::Begin("项目调试", &this->OpenProjectDebugWindows);
-    //检查当前是否操作解决方案
+    auto w = MulNX::UI::RAIIWindow("项目调试", this->ShowWindow);
+    if (!w)return;
+    // 检查当前操作项目
     if (this->ControllingProject) {
         ImGui::Text("当前操作项目：");
         ImGui::SameLine();
@@ -331,8 +330,7 @@ void ProjectManager::Project_DebugWindow() {
         }
         if (ImGui::Button("卸载当前项目")) {
             this->Project_Delete(this->ControllingProject->Name);
-            this->OpenProjectDebugWindows = false;
-            ImGui::End();
+            this->ShowWindow.store(false, std::memory_order_release);
             return;
         }
         if (ImGui::Button("修改按键绑定")) {
@@ -385,9 +383,8 @@ void ProjectManager::Project_DebugWindow() {
         ImGui::Text("当前未选择任何项目");
     }
     if (ImGui::Button("关闭项目调试页面")) {
-        this->OpenProjectDebugWindows = false;
+        this->ShowWindow.store(false, std::memory_order_release);
     }
-    ImGui::End();
 }
 void ProjectManager::Project_KCPack_DebugWindow() {
     ImGui::Begin("按键绑定##Project", &this->OpenProjectKCPackDebugWindow);

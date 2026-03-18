@@ -24,9 +24,6 @@ private:
     Solution* CurrentSolution = nullptr;
     ////////////////////////////////////////
     //操作调试窗口
-public:
-    //是否打开解决方案调试窗口
-    bool OpenSolutionDebugWindow = false;
 private:
     //是否打开解决方案按键绑定调试窗口
     bool OpenSolutionKCPackDebugWindow = false;
@@ -53,16 +50,18 @@ public:
 
     ////////////////////////////////////////
 
-    //解决方案管理器基本函数
-    //初始化函数
+    // 解决方案管理器基本函数
+    // 初始化函数
     bool Init()override;
-    //依赖注入
+    // UI绘制
+    bool UINodeFunc(MulNXUINode* node)override;
+    // 依赖注入
     void InjectDependence(CameraDrawer* CamDrawer, ElementManager* EManager, ProjectManager* PManager);
-    //逻辑主函数
+    // 逻辑主函数
     void VirtualMain();
-    //遍历，用于迭代处理每个解决方案
+    // 遍历，用于迭代处理每个解决方案
     void Traversal();
-    //刷新，更深层次的遍历，主要用于清理失效元素
+    // 刷新，更深层次的遍历，主要用于清理失效元素
     void Refresh();
 
 
@@ -92,10 +91,6 @@ public:
     void Solution_ShowInLine(Solution* solution);
     //按行展示所有解决方案
     void Solution_ShowAllInLines();
-
-
-    //解决方案调试相关所有窗口
-    void Windows();
 private:
     //解决方案调试窗口及菜单
     void Solution_DebugWindow();

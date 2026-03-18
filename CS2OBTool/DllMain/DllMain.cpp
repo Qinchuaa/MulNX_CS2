@@ -44,6 +44,9 @@ static void MainDraw(MulNXUINode* node) {
     node->CallUINode("GameCfgManager");
     node->CallUINode("MiniMap");
     node->CallUINode("CSController");
+    node->CallUINode("ElementManager");
+    node->CallUINode("SolutionManager");
+    node->CallUINode("ProjectManager");
 }
 
 BOOL APIENTRY DllMain(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserved) {

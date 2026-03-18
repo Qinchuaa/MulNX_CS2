@@ -2,13 +2,15 @@ cmake_minimum_required(VERSION 3.31)
 
 # 项目定义
 project("MulNX_CS2")
+# 版本定义
+add_definitions(-DMulNXVersion=\"B0.1.0C0.3.2\")
 
 # 启用 LTO（仅 Release 配置）
 include(CheckIPOSupported)
 check_ipo_supported(RESULT IPO?)
 if(IPO?)
     set(CMAKE_INTERPROCEDURAL_OPTIMIZATION_CONFIG Release)
-    message(STATUS "IPO/LTO 在 Release 模式下可用")
+    message(STATUS "IPO/LTO 在 Release 模式可用")
 else()
     message(WARNING "IPO/LTO 不支持！")
 endif()

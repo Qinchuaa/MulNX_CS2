@@ -8,6 +8,7 @@
 //解决方案管理器
 
 bool SolutionManager::Init() {
+    this->NeedUINode = true;
     auto* PathManager = this->ISys().PathManager();
     if (PathManager->CreateKey("Solutions", "Solutions",
         [this](MulNX::PathManager* PathManager)->bool {
@@ -322,7 +323,7 @@ void SolutionManager::Solution_ShowInLine(Solution* solution) {
     ImGui::SameLine();
     if (ImGui::Button(solution->Name.c_str())) {
         this->CurrentSolution = solution;
-        this->OpenSolutionDebugWindow = true;
+        this->ShowWindow.store(true, std::memory_order_release);
     }
     ImGui::SameLine();
     ImGui::Text(("   元素数量：" + std::to_string(solution->Size_Elements) + "   总时长：" + std::to_string(solution->TotalDurationTime)).data());
@@ -338,8 +339,8 @@ void SolutionManager::Solution_ShowAllInLines() {
 
 //调试窗口及菜单
 
-void SolutionManager::Windows() {
-    if (this->OpenSolutionDebugWindow) {
+bool SolutionManager::UINodeFunc(MulNXUINode* node) {
+    if (this->ShowWindow.load(std::memory_order_acquire)) {
         this->Solution_DebugWindow();
         if (this->OpenSolutionKCPackDebugWindow) {
             this->Solution_KCPack_DebugWindow();
@@ -348,10 +349,10 @@ void SolutionManager::Windows() {
             this->Solution_Name_DebugWindow();
         }
     }
-
+    return true;
 }
 void SolutionManager::Solution_DebugWindow() {
-    ImGui::Begin("解决方案调试", &this->OpenSolutionDebugWindow);
+    auto w = MulNX::UI::RAIIWindow("解决方案调试", this->ShowWindow);
     // 检查当前是否操作解决方案
     if (this->CurrentSolution) {
         ImGui::Text(("当前操作解决方案名称：" + this->CurrentSolution->Name + "   元素数量：" + std::to_string(this->CurrentSolution->Size_Elements) + "   总时长：" + std::to_string(this->CurrentSolution->GetMsg().empty() ? 0.0f : this->CurrentSolution->TotalDurationTime)).data());
@@ -461,10 +462,8 @@ void SolutionManager::Solution_DebugWindow() {
     }
 
     if (ImGui::Button("关闭调试页面")) {
-        this->OpenSolutionDebugWindow = false;
+        this->ShowWindow.store(false, std::memory_order_release);
     }
-
-    ImGui::End();
 }
 void SolutionManager::Solution_KCPack_DebugWindow() {
     ImGui::Begin("按键绑定", &this->OpenSolutionKCPackDebugWindow);

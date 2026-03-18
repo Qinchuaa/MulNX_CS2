@@ -35,34 +35,35 @@ public:
     ~ElementManager();
 
     ElementConfig Config{};
-    //使用智能指针存储多态对象，以存储不同类型的元素
+    // 使用智能指针存储多态对象，以存储不同类型的元素
     std::vector<std::shared_ptr<ElementBase>> Elements;
 
-    //预览相关
+    // 预览相关
 
-    //预览时间偏移
+    // 预览时间偏移
     float Preview_TimeSchema{};
-    //预览结束时间点
+    // 预览结束时间点
     float Preview_EndTime{};
-    //当前预览元素指针
+    // 当前预览元素指针
     std::shared_ptr<ElementBase> Preview_CurrentElement;
-    //是否处于预览状态
+    // 是否处于预览状态
     bool OnPreview = false;
 
 
 
-    //元素管理器基本函数
+    // 元素管理器基本函数
 
-    //初始化
+    // 初始化
     bool Init()override;
-    //依赖注入
+    // 依赖注入
     void InjectDependence(CameraDrawer* CamDrawer, SolutionManager* SManager, ProjectManager* PManager);
-
-    //逻辑主函数
+    // UI
+    bool UINodeFunc(MulNXUINode* node)override;
+    // 逻辑主函数
     void VirtualMain()override;
 
 
-    //通用基础函数：
+    // 通用基础函数：
 
     //获取元素对应的迭代器（Element基类）
     std::vector<std::shared_ptr<ElementBase>>::iterator Element_GetIterator(const std::string_view Name);
@@ -141,16 +142,4 @@ public:
     void Preview_SetPreviewSchema(const float Time);
     //预览Call
     bool Preview_Call(CameraSystemIO* IO);
-
-
-    //元素调试相关所有窗口
-    void Windows();
-    //是否打开元素调试窗口
-    bool OpenElementDebugWindow = false;
-    //元素调试窗口
-    void ElementDebugWindow();
-    //自由摄像机轨道特化函数：
-    //绘制自由摄像机轨道
-
-
 };

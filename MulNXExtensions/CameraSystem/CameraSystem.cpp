@@ -55,9 +55,6 @@ bool CameraSystem::Init() {
 }
 
 bool CameraSystem::UINodeFunc(MulNXUINode* ThisNode) {
-    this->EManager.Windows();
-    this->SManager.Windows();
-    this->PManager.Windows();
     // 顶部：工作区信息（始终显示）
     ImGui::BeginChild("工作区面板", ImVec2(0, 150), true); {
         // 工作区状态
@@ -206,7 +203,7 @@ void CameraSystem::MenuElement() {
     // 展示修改元素
     if (ImGui::CollapsingHeader("元素列表")) {
         // 输出是否打开了元素调试窗口
-        ImGui::Text(("元素调试窗口状态：" + std::string(this->EManager.OpenElementDebugWindow ? "打开" : "关闭")).c_str());
+        ImGui::Text(("元素调试窗口状态：" + std::string(this->EManager.ShowWindow.load(std::memory_order_acquire) ? "打开" : "关闭")).c_str());
         // 使用迭代器遍历所有元素
         for (const auto& element : this->EManager.Elements) {
             this->EManager.Element_ShowInLine(element);
@@ -272,7 +269,7 @@ void CameraSystem::MenuSolution() {
     // 展示修改解决方案
     if (ImGui::CollapsingHeader("解决方案列表")) {
         // 输出是否打开了解决方案调试窗口
-        ImGui::Text(("解决方案调试窗口状态：" + std::string(this->SManager.OpenSolutionDebugWindow ? "打开" : "关闭")).c_str());
+        ImGui::Text(("解决方案调试窗口状态：" + std::string(this->SManager.ShowWindow.load(std::memory_order_acquire) ? "打开" : "关闭")).c_str());
         this->SManager.Solution_ShowAllInLines();
     }
 
@@ -300,7 +297,7 @@ void CameraSystem::MenuProject() {
     // 展示修改项目
     if (ImGui::CollapsingHeader("项目列表")) {
         // 输出是否打开了项目调试窗口
-        ImGui::Text(("项目调试窗口状态：" + std::string(this->PManager.OpenProjectDebugWindows ? "打开" : "关闭")).c_str());
+        ImGui::Text(("项目调试窗口状态：" + std::string(this->PManager.ShowWindow.load(std::memory_order_acquire) ? "打开" : "关闭")).c_str());
         this->PManager.Project_ShowAllInLines();
     }
 

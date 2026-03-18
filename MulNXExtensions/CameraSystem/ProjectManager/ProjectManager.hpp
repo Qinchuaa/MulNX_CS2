@@ -12,20 +12,16 @@ class ProjectManager final :public MulNX::ModuleBase {
 private:
     ElementManager* EManager = nullptr;
     SolutionManager* SManager = nullptr;
-public:
-    bool OpenProjectDebugWindows = false;
-private:
+
     bool OpenProjectKCPackDebugWindow = false;
     bool OpenProjectNameDebugWindow = false;
+
+    std::vector<std::shared_ptr<Project>> Projects{};
 public:
     //当前操作项目指针（操作对象）
     std::shared_ptr<Project> ControllingProject = nullptr;
     //当前活跃对象
     std::shared_ptr<Project> ActiveProject = nullptr;
-private:
-    //数据存储
-    std::vector<std::shared_ptr<Project>> Projects{};
-public:
 
     ProjectConfig Config{};
 
@@ -37,15 +33,15 @@ public:
     //项目管理器基本函数
     //初始化函数
 
-    //初始化
+    // 初始化
     bool Init()override;
-    //依赖注入
+    // UI
+    bool UINodeFunc(MulNXUINode* node)override;
+    // 依赖注入
     void InjectDependence(ElementManager* EManager, SolutionManager* SManager);
-
-    //逻辑主函数
+    // 逻辑主函数
     void VirtualMain()override;
-
-    //遍历
+    // 遍历
     void Traversal();
 
 
@@ -83,10 +79,6 @@ public:
     void Project_ShowInLine(std::shared_ptr<Project> Project);
     //一次展示所有项目信息到每一行
     void Project_ShowAllInLines();
-
-
-    //项目调试相关所有窗口
-    void Windows();
 private:
     //项目调试窗口及菜单
     void Project_DebugWindow();
