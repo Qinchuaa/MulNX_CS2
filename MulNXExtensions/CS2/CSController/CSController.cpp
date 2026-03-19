@@ -7,6 +7,37 @@
 #include <MulNXThirdParty/All_cs2_dumper.hpp>
 #include <MulNXThirdParty/All_MinHook.hpp>
 
+uintptr_t GetBaseEntity(int index, uintptr_t client) {
+    auto entListBase = *reinterpret_cast<std::uintptr_t*>(client + cs2_dumper::offsets::client_dll::dwEntityList);
+    if (entListBase == 0) {
+        return 0;
+    }
+
+    auto entitylistbase = *reinterpret_cast<std::uintptr_t*>(entListBase + 0x8 * (index >> 9) + 16);
+    if (entitylistbase == 0) {
+        return 0;
+    }
+
+    return *reinterpret_cast<std::uintptr_t*>(entitylistbase + (0x70 * (index & 0x1FF)));
+}
+
+
+uintptr_t GetBaseEntityFromHandle(uint32_t uHandle, uintptr_t client) {
+    auto entListBase = *reinterpret_cast<std::uintptr_t*>(client + cs2_dumper::offsets::client_dll::dwEntityList);
+    if (entListBase == 0) {
+        return 0;
+    }
+
+    const int nIndex = uHandle & 0x7FFF;
+
+    auto entitylistbase = *reinterpret_cast<std::uintptr_t*>(entListBase + 8 * (nIndex >> 9) + 16);
+    if (entitylistbase == 0) {
+        return 0;
+    }
+
+    return *reinterpret_cast<std::uintptr_t*>(entitylistbase + 0x70 * (nIndex & 0x1FF));
+}
+
 void CSController::HandleOverrideView(void* ThisCViewSetup) {
     // 定位关键数据
     int* pWidth = (int*)((unsigned char*)ThisCViewSetup + 0x434);
@@ -102,7 +133,6 @@ bool CSController::Init() {
     this->NeedUINode = true;
 
     this->GetModules();
-    this->Catch();
     
     if (this->Modules.client.Valid) {
         // 搜索 .text 段
@@ -125,7 +155,7 @@ bool CSController::Init() {
 }
 
 void CSController::GetModules() {
-    this->Modules.client = MulNX::Memory::DllModule(L"client.dll");
+    this->Modules.client = CS2::Module::Client(L"client.dll");
     this->Modules.engine2 = MulNX::Memory::DllModule(L"engine2.dll");
     this->Modules.tier0 = MulNX::Memory::DllModule(L"tier0.dll");
 
@@ -140,17 +170,14 @@ void CSController::GetModules() {
 
     //this->LocalPlayer.pGlobalFOV = this->CvarSystem.GetCvar("fov_cs_debug")->GetPtr<float>();
     this->LocalPlayer.pGlobalFOV = &this->outFOV;
-}
 
-void CSController::Catch() {
-    // 本地工作
     // 获取本地视图投影矩阵
     this->LocalPlayer.ViewMatrix = reinterpret_cast<float*>(this->Modules.client.GetBaseAddress() + cs2_dumper::offsets::client_dll::dwViewMatrix);
     // 获取本地欧拉角
     this->LocalPlayer.ViewAngles = reinterpret_cast<DirectX::XMFLOAT3*>(this->Modules.client.GetBaseAddress() + cs2_dumper::offsets::client_dll::dwViewAngles);
-
-    return;
 }
+
+
 int CSController::BasicUpdate() {
     // 获取EntityList
     if (!MulNX::Memory::Read(this->Modules.client.GetBaseAddress() + cs2_dumper::offsets::client_dll::dwEntityList, this->EntityList.Address)) {
@@ -174,6 +201,42 @@ int CSController::BasicUpdate() {
         this->ISys().PublishAsync(std::move(Msg));
         OldRoundStartCount = this->CSGameRules.m_nRoundStartCount;
     }
+
+    auto highestEntityIndex = this->Modules.client.dwGameEntitySystem_highestEntityIndex();
+    for (int i = 1;i < highestEntityIndex;++i) {
+        
+        
+        
+    };
+
+
+    // for (int i = 0;i <= this->Modules.client.dwGameEntitySystem_highestEntityIndex();i++) {
+    //     auto entity = this->GetBaseEntity(i);
+    //     if (entity == 0) {
+    //         continue;
+    //     }
+
+    //     auto pClassInfo = entity->pClassInfo();
+    //     if (pClassInfo == 0) {
+    //         continue;
+    //     }
+
+
+    //     auto pName = pClassInfo->pName();
+    //     if (pName == 0) {
+    //         continue;
+    //     }
+    //     auto zname = std::string(pName);
+
+    //     if (zname.find("smokegrenade") != std::string::npos && zname.find("weapon") == std::string::npos) {
+    //         // 找到了
+    //         *entity->As<CS2::C_SmokeGrenadeProjectile>()->bDidSmokeEffect() = false;
+    //         *entity->As<CS2::C_SmokeGrenadeProjectile>()->bSmokeEffectSpawned() = false;
+    //         *entity->As<CS2::C_SmokeGrenadeProjectile>()->nSmokeEffectTickBegin() = 0;
+    //     }
+    // }
+
+    
 
     return 0;
 }

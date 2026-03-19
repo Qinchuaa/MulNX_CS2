@@ -13,6 +13,7 @@ add_library(MulNXCS2Ext
     "CSController/GlobalVars/GlobalVars.cpp"
     "CSController/LocalPlayer/LocalPlayer.cpp"
     "CSCOntroller/PlantedC4/PlantedC4.cpp"
+    "CSCOntroller/List/List.cpp"
 
     "ConsoleManager/ConsoleManager.cpp"
     "DemoHelper/DemoHelper.cpp"

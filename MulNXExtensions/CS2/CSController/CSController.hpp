@@ -9,10 +9,23 @@
 #include "GlobalVars/GlobalVars.hpp"
 #include "PlantedC4/PlantedC4.hpp"
 #include "LocalPlayer/LocalPlayer.hpp"
+#include "List/C_BaseEntity.hpp"
+
+namespace CS2{
+    namespace Module {
+        class Client :public MulNX::Memory::DllModule {
+        public:
+            using MulNX::Memory::DllModule::DllModule;
+
+            uintptr_t dwGameEntitySystem() { return *reinterpret_cast<uintptr_t*>(this->GetBaseAddress() + cs2_dumper::offsets::client_dll::dwGameEntitySystem); }
+            int dwGameEntitySystem_highestEntityIndex() { return *reinterpret_cast<int*>(this->dwGameEntitySystem() + cs2_dumper::offsets::client_dll::dwGameEntitySystem_highestEntityIndex); }
+        };
+    }
+}
 
 class C_Modules {
 public:
-    MulNX::Memory::DllModule client{};
+    CS2::Module::Client client{};
     MulNX::Memory::DllModule engine2{};
     MulNX::Memory::DllModule tier0{};
 };
@@ -64,7 +77,6 @@ public:
     int TryGetMsg();
     // 子任务集合
     void GetModules();
-    void Catch();
     int BasicUpdate();
     int EntityListUpdate();
     int GameRulesUpdate();
@@ -96,4 +108,9 @@ public:
     C_CSGameRules GetCSGameRules();
 
     void HandleAimAtEntity(int AimTargetIndexInMap);
+
+    // 常常用于获取控制器
+    CS2::C_BaseEntity* GetBaseEntity(int Index);
+    // 常常用于获取Pawn对象
+    CS2::C_BaseEntity* GetBaseEntityFromHandle(uint32_t Handle);
 };
