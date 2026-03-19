@@ -113,10 +113,10 @@ bool MulNX::ModuleBase::CreateThread() {
         if (this->MyThreadRunning) return true;
         //尝试创建线程
         try {
-            //先设置线程处于启动状态
-            this->MyThreadRunning = true;
             //打开线程
             this->MyThread = std::thread([this]() {this->ThreadMain();});
+            //设置线程处于启动状态
+            this->MyThreadRunning = true;
             //如果成功返回成功
             return true;
         }

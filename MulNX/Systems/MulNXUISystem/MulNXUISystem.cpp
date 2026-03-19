@@ -45,7 +45,7 @@ int MulNX::UISystem::Render() {
 
     this->FrameBefore();
 
-    if (this->KT->CheckComboClick(VK_INSERT, 3)) {
+    if (this->KT->CheckComboClick(VK_INSERT, 1)) {
         this->UIContext.Active = !this->UIContext.Active;
     }
     if (this->UIContext.Active) {

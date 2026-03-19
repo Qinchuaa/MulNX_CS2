@@ -21,6 +21,7 @@ add_library(WinExt STATIC
     "Memory/Pattern/Pattern.cpp"
     "Memory/Region/Region.cpp"
     "Memory/Hook/Hook.cpp"
+    "Memory/Hook/FixAddress.cpp"
     "Memory/Memory.cpp"
 )
 

@@ -14,6 +14,7 @@ public:
 private:
     std::atomic<bool>GuardPleaseAction = false;
 
+    std::unique_ptr<MulNX::Memory::HookEx> hkPre = nullptr;
     // Hook Present
     using Present_t = HRESULT __stdcall(IDXGISwapChain* swapChain, UINT syncInterval, UINT flags);
     MulNX::Base::HookUtility::HookUtility<Present_t>& hkPresent = MulNX::Base::HookUtility::HookUtility<Present_t>::GetInstance();

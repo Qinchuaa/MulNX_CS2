@@ -47,11 +47,13 @@ namespace MulNX {
             MulNX::Memory::Asm::Code hookTargetRawCode;
             MulNX::Memory::Asm::Code jumperAsmCode{};
         private:
+            static std::vector<uint8_t> FixRIPRelativeInstructions(const std::vector<uint8_t>& raw_code,
+                uintptr_t old_base, uintptr_t new_base);
             static void Dispatch(HookEx* pHookExInstance, RegContext* ctx);
         public:
             HookEx() = default;
             ~HookEx();
-            static std::unique_ptr<HookEx> Create(uint8_t* Target, int Len, std::function<void(RegContext*)>&& callback);
+            static std::unique_ptr<HookEx> Create(uint8_t* Target, int Len, bool extraStackAdjust, std::function<void(RegContext*)>&& callback);
             Result Attach();
             Result Detach();
         };

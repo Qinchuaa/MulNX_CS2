@@ -207,7 +207,7 @@ bool IPCer::OpenCS2() {
     this->Core->ConfigManager().Config_SetCS2Path(this->PathGet_cs2_exe());
     this->Core->ConfigManager().Config_Save(this->PathGet_Configs());
     //构建参数
-    std::wstring parameters = L"-insecure -worldwide -window -novid";
+    std::wstring parameters = L"-insecure -worldwide -windowed -novid -allow_third_party_software";
 
     HINSTANCE result = ShellExecuteW(
         NULL,                                       // 父窗口句柄

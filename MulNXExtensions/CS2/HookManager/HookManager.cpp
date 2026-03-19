@@ -28,9 +28,8 @@ void HookManager::CheckHook() {
         this->GuardPleaseAction = false;
         this->ISys().LogInfo("检测到D3D11波动，等待用户手动ReHook");
     }
-    // 检查是否超时：正在等待CheckBack且超过2秒未收到回复
     if (AllowReHook) {
-        if (this->KT->CheckComboClick(VK_INSERT, 2)) {
+        if (this->KT->CheckComboClick(VK_INSERT, 3)) {
             ReHook = true;
             AllowReHook = false;
         }
@@ -108,7 +107,14 @@ DWORD HookManager::CreateHook() {
 			auto pVtable = (void***)(this->pSwapChain);
 			auto Vtable = *pVtable;
 
-			this->hkRelease.SetTarget(Vtable[2]);
+            // 经检验，单版本可以手动适配，但不够普适，故不切换
+            // uint8_t* targetPr = (uint8_t*)Vtable[2]+5;
+            // this->hkPre = MulNX::Memory::HookEx::Create(targetPr, （覆盖字节）, true, [this](RegContext* ctx)->void {
+            //     this->MyPresent((IDXGISwapChain*)ctx->rcx, ctx->rdx, ctx->r8);
+            //     });
+            // this->hkPre->Attach();
+
+            this->hkRelease.SetTarget(Vtable[2]);
 			this->hkRelease.SetMyFunction([this](auto&&... args) {
 				return this->MyRelease(std::forward<decltype(args)>(args)...); });
 			this->hkRelease.CreateAndEnable();
