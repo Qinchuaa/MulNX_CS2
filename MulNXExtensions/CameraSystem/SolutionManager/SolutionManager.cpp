@@ -326,7 +326,7 @@ void SolutionManager::Solution_ShowInLine(Solution* solution) {
         this->ShowWindow.store(true, std::memory_order_release);
     }
     ImGui::SameLine();
-    ImGui::Text(("   元素数量：" + std::to_string(solution->Size_Elements) + "   总时长：" + std::to_string(solution->TotalDurationTime)).data());
+    ImGui::Text(("   元素数量：" + std::to_string(solution->Elements.size()) + "   总时长：" + std::to_string(solution->TotalDurationTime)).data());
 
 }
 void SolutionManager::Solution_ShowAllInLines() {
@@ -355,7 +355,7 @@ void SolutionManager::Solution_DebugWindow() {
     auto w = MulNX::UI::RAIIWindow("解决方案调试", this->ShowWindow);
     // 检查当前是否操作解决方案
     if (this->CurrentSolution) {
-        ImGui::Text(("当前操作解决方案名称：" + this->CurrentSolution->Name + "   元素数量：" + std::to_string(this->CurrentSolution->Size_Elements) + "   总时长：" + std::to_string(this->CurrentSolution->GetMsg().empty() ? 0.0f : this->CurrentSolution->TotalDurationTime)).data());
+        ImGui::Text(("当前操作解决方案名称：" + this->CurrentSolution->Name + "   元素数量：" + std::to_string(this->CurrentSolution->Elements.size()) + "   总时长：" + std::to_string(this->CurrentSolution->GetMsg().empty() ? 0.0f : this->CurrentSolution->TotalDurationTime)).data());
         if (ImGui::Button("打印解决方案信息到调试窗口")) {
             this->ISys().LogLine();
             this->ISys().LogInfo(this->CurrentSolution->GetMsg());
@@ -423,13 +423,10 @@ void SolutionManager::Solution_DebugWindow() {
         ImGui::Separator();
         ImGui::Separator();
 
-
-
-
         static int IndexForReset = 0;
         static int PreIndex = -1;
         ImGui::InputInt("要调整的本解决方案的元素", &IndexForReset);
-        if (0 <= IndexForReset && IndexForReset < this->CurrentSolution->Size_Elements) {
+        if (0 <= IndexForReset && IndexForReset < this->CurrentSolution->Elements.size()) {
             std::shared_ptr<ElementBase> element = this->CurrentSolution->Elements.at(IndexForReset).Element;
             if (element) {
                 const float& Offset = this->CurrentSolution->Elements.at(IndexForReset).Offset;
@@ -451,7 +448,7 @@ void SolutionManager::Solution_DebugWindow() {
 
         }
         else {
-            ImGui::Text("索引无效！请输入 0 到 %d 之间的值", this->CurrentSolution->Size_Elements - 1);
+            ImGui::Text("索引无效！请输入 0 到 %d 之间的值", this->CurrentSolution->Elements.size() - 1);
         }
         PreIndex = IndexForReset;
     }

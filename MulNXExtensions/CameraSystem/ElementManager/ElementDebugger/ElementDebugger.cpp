@@ -34,7 +34,7 @@ void ElementDebugger::DebugMenus(ElementBase* const pElement) {
 //FreeCameeraPath
 
 void ElementDebugger::DebugMenu_FreeCameraPath(FreeCameraPath* const FreeCamPath) {
-    ImGui::Text(FreeCamPath->GetMsg().c_str());
+    ImGui::TextUnformatted(FreeCamPath->GetMsg().c_str());
 
     if (ImGui::Button("添加关键帧") || this->KT->CheckComboClick(VK_CAPITAL, 1)) {
         MulNX::Math::CameraKeyFrame Frame;

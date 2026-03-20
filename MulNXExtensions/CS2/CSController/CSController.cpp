@@ -7,37 +7,6 @@
 #include <MulNXThirdParty/All_cs2_dumper.hpp>
 #include <MulNXThirdParty/All_MinHook.hpp>
 
-uintptr_t GetBaseEntity(int index, uintptr_t client) {
-    auto entListBase = *reinterpret_cast<std::uintptr_t*>(client + cs2_dumper::offsets::client_dll::dwEntityList);
-    if (entListBase == 0) {
-        return 0;
-    }
-
-    auto entitylistbase = *reinterpret_cast<std::uintptr_t*>(entListBase + 0x8 * (index >> 9) + 16);
-    if (entitylistbase == 0) {
-        return 0;
-    }
-
-    return *reinterpret_cast<std::uintptr_t*>(entitylistbase + (0x70 * (index & 0x1FF)));
-}
-
-
-uintptr_t GetBaseEntityFromHandle(uint32_t uHandle, uintptr_t client) {
-    auto entListBase = *reinterpret_cast<std::uintptr_t*>(client + cs2_dumper::offsets::client_dll::dwEntityList);
-    if (entListBase == 0) {
-        return 0;
-    }
-
-    const int nIndex = uHandle & 0x7FFF;
-
-    auto entitylistbase = *reinterpret_cast<std::uintptr_t*>(entListBase + 8 * (nIndex >> 9) + 16);
-    if (entitylistbase == 0) {
-        return 0;
-    }
-
-    return *reinterpret_cast<std::uintptr_t*>(entitylistbase + 0x70 * (nIndex & 0x1FF));
-}
-
 void CSController::HandleOverrideView(void* ThisCViewSetup) {
     // 定位关键数据
     int* pWidth = (int*)((unsigned char*)ThisCViewSetup + 0x434);
@@ -201,43 +170,131 @@ int CSController::BasicUpdate() {
         this->ISys().PublishAsync(std::move(Msg));
         OldRoundStartCount = this->CSGameRules.m_nRoundStartCount;
     }
+#ifdef _DEBUG
+    for (int i = 0;i <= this->Modules.client.dwGameEntitySystem_highestEntityIndex();i++) {
+        auto entity = this->GetBaseEntity(i);
+        if (entity == 0) {
+            continue;
+        }
 
-    auto highestEntityIndex = this->Modules.client.dwGameEntitySystem_highestEntityIndex();
-    for (int i = 1;i < highestEntityIndex;++i) {
+        auto pClassInfo = entity->pClassInfo();
+        if (pClassInfo == 0) {
+            continue;
+        }
+
+
+        auto pName = pClassInfo->pName();
+        if (pName == 0) {
+            continue;
+        }
+        auto zname = std::string(pName);
+
+        if (zname.find("smokegrenade") != std::string::npos && zname.find("weapon") == std::string::npos) {
+            // 找到了
+            *entity->As<CS2::C_SmokeGrenadeProjectile>()->bDidSmokeEffect() = false;
+            *entity->As<CS2::C_SmokeGrenadeProjectile>()->bSmokeEffectSpawned() = false;
+            *entity->As<CS2::C_SmokeGrenadeProjectile>()->nSmokeEffectTickBegin() = 0;
+
+            auto pOrigin = (*entity->pGameSceneNode())->vecAbsOrigin();
+
+            // auto view = std::make_shared<Views>();
+            // view->OriginX = pOrigin->x;
+            // view->OriginY = pOrigin->y;
+            // view->OriginZ = pOrigin->z;
+            // view->FOV = 90;
+            // view->AnglesX = 0;
+            // view->AnglesY = 0;
+            // view->AnglesZ = 0;
+            // this->ViewToGame.store(view);
+        }
+    }
+
+    for (int i = 0;i <= this->Modules.client.dwGameEntitySystem_highestEntityIndex();i++) {
+        auto entity = this->GetBaseEntity(i);
+        if (entity == 0) {
+            continue;
+        }
+        auto hPawn = *entity->As<CS2::CBasePlayerController>()->hPawn();
+        if (!hPawn.Valid()) {
+            continue;
+        }
+        auto* pawn = this->GetBaseEntity(hPawn.GetIndexInEntityList());
+        if (!pawn) {
+            continue;
+        }
+        auto t = std::string(pawn->pClassInfo()->pName());
+        if (t.find("layer") == std::string::npos) {
+            continue;
+        }
+        auto* pPlayerRot = (*pawn->pGameSceneNode())->angAbsRotation();
+        auto* pPlayerRot2 = (*pawn->pGameSceneNode())->angRotation();
+        auto* pPlayerRot3 = (*pawn->pGameSceneNode())->angWrappedLocalRotation();
+
+        auto** ppWeaponServices = pawn->As<CS2::C_BasePlayerPawn>()->pWeaponServices();
+        if (!ppWeaponServices) {
+            continue;
+        }
+        auto pWeaponServices = *ppWeaponServices;
+        if (!pWeaponServices) {
+            continue;
+        }
+        auto phWeapon = pWeaponServices->hActiveWeapon();
+        if (!phWeapon || reinterpret_cast<uintptr_t>(phWeapon) == 0xFFFFFFFFFFFFFFFF) {
+            continue;
+        }
+        CS2::CHandle<CS2::C_BasePlayerWeapon> hWeapon = *phWeapon;
+        if (!hWeapon.Valid()) {
+            continue;
+        }
+        auto weapon = this->GetBaseEntity(hWeapon.GetIndexInEntityList());
+        if (!weapon) {
+            continue;
+        }
         
-        
-        
-    };
+        auto pGameSceneNode = *weapon->pGameSceneNode();
+        if (!pGameSceneNode) {
+            continue;
+        }
+        char* pName = weapon->pClassInfo()->pName();
+        auto* pWeaponPos = pGameSceneNode->vecAbsOrigin();
+        auto* pWeaponRot = pGameSceneNode->angAbsRotation();
+        auto* pWeaponRot2 = pGameSceneNode->angRotation();
+        auto* pWeaponRot3 = pGameSceneNode->angWrappedLocalRotation();
+        auto* pbDebugAbsOriginChanges = pGameSceneNode->bDebugAbsOriginChanges();
+        *pbDebugAbsOriginChanges = true;
+        if (!pWeaponPos || !pWeaponRot) {
+            continue;
+        }
+        DirectX::XMFLOAT3 pos = *pWeaponPos;
+        DirectX::XMFLOAT3 rot = *pWeaponRot;
+    }
+#endif
 
+    //C_Entity& Entity = this->Entitys[i];
+    //Entity.Controller.Address = this->GetEntityControllerFromIndex(i);//这里其实只访问了第一个地址段
+    //if (!Entity.Controller.Address)continue;
 
-    // for (int i = 0;i <= this->Modules.client.dwGameEntitySystem_highestEntityIndex();i++) {
-    //     auto entity = this->GetBaseEntity(i);
-    //     if (entity == 0) {
-    //         continue;
-    //     }
-
-    //     auto pClassInfo = entity->pClassInfo();
-    //     if (pClassInfo == 0) {
-    //         continue;
-    //     }
-
-
-    //     auto pName = pClassInfo->pName();
-    //     if (pName == 0) {
-    //         continue;
-    //     }
-    //     auto zname = std::string(pName);
-
-    //     if (zname.find("smokegrenade") != std::string::npos && zname.find("weapon") == std::string::npos) {
-    //         // 找到了
-    //         *entity->As<CS2::C_SmokeGrenadeProjectile>()->bDidSmokeEffect() = false;
-    //         *entity->As<CS2::C_SmokeGrenadeProjectile>()->bSmokeEffectSpawned() = false;
-    //         *entity->As<CS2::C_SmokeGrenadeProjectile>()->nSmokeEffectTickBegin() = 0;
-    //     }
+    //Entity.IndexInEntityList = i;
+    //MulNX::Memory::Read(Entity.Controller.Address + cs2_dumper::schemas::client_dll::CBasePlayerController::m_hPawn, Entity.Controller.hPawn);
+    //if (Entity.Controller.hPawn == 0xFFFFFFFF)continue;
+    // Entity.Pawn.Address = this->GetEntityPawnFromHandle(Entity.Controller.hPawn);
+    // if (!Entity.Pawn.Address)continue;
+    // MulNX::Memory::Read(Entity.Pawn.Address + cs2_dumper::schemas::client_dll::C_BaseEntity::m_iTeamNum, Entity.Pawn.m_iTeamNum);
+    // MulNX::Memory::Read(Entity.Pawn.Address + cs2_dumper::schemas::client_dll::C_BaseEntity::m_iHealth, Entity.Pawn.m_iHealth);
+    // MulNX::Memory::Read(Entity.Pawn.Address + cs2_dumper::schemas::client_dll::C_BasePlayerPawn::m_vOldOrigin, Entity.Pawn.m_vOldOrigin);
+    // MulNX::Memory::Read(Entity.Pawn.Address + cs2_dumper::schemas::client_dll::C_BasePlayerPawn::m_iHideHUD, Entity.Pawn.m_iHideHUD);
+    // if (!MulNX::Memory::Read(Entity.Pawn.Address + cs2_dumper::schemas::client_dll::C_CSPlayerPawn::m_angEyeAngles, Entity.Pawn.m_angEyeAngles)) {
+    //     continue;
     // }
+    // //获取GameSecneNode
+    // MulNX::Memory::Read(Entity.Pawn.Address + cs2_dumper::schemas::client_dll::C_BaseEntity::m_pGameSceneNode, Entity.Pawn.GameSceneNode.Address);
+    // //获取位置和视角信息
+    // MulNX::Memory::Read(Entity.Pawn.GameSceneNode.Address + cs2_dumper::schemas::client_dll::CGameSceneNode::m_vecAbsOrigin, Entity.Pawn.GameSceneNode.Position);
+    // MulNX::Memory::Read(Entity.Pawn.GameSceneNode.Address + cs2_dumper::schemas::client_dll::CGameSceneNode::m_angAbsRotation, Entity.Pawn.GameSceneNode.RotationEuler);
 
+    // MulNX::Memory::ReadString(Entity.Controller.Address + cs2_dumper::schemas::client_dll::CBasePlayerController::m_iszPlayerName,
+    //     Entity.Controller.m_iszPlayerName, sizeof(Entity.Controller.m_iszPlayerName));
     
-
     return 0;
 }
 int CSController::EntityListUpdate() {
@@ -284,7 +341,10 @@ int CSController::GameRulesUpdate() {
 
 void CSController::ThreadMain() {
     while (this->MyThreadRunning) {
-        this->GetMsgResult = this->TryGetMsg();
+        MulNX::Base::SEHCall([this]()->void {
+            this->GetMsgResult = this->TryGetMsg();
+            });
+        
         std::this_thread::sleep_for(std::chrono::milliseconds(this->MyThreadDelta));
     }
     return;

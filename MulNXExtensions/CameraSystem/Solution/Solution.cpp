@@ -68,11 +68,8 @@ void Solution::Refresh() {
         }
     }
 
-    //更新大小
-    this->Size_Elements = Elements.size();
-
     //更新后判空
-    if (!this->Size_Elements) {
+    if (this->Elements.empty()) {
         this->SafeUse = false;
         this->StartTime = 0;
         this->EndTime = 0;
@@ -126,7 +123,7 @@ std::string Solution::GetMsg() {
         << "\n详细信息："
         << "\n";
 
-    for (size_t i = 0; i < this->Size_Elements; ++i) {
+    for (size_t i = 0; i < this->Elements.size(); ++i) {
         std::shared_ptr<ElementBase> Element = this->Elements.at(i).Element;
         if (Element) {
             oss << i << ".  "
@@ -186,7 +183,7 @@ bool Solution::Call(CameraSystemIO* IO) {
             return false;//无插值结果
         }
         IO->PlaybackMode = PlaybackMode::Serial;
-        for (size_t i = 0; i < this->Size_Elements; ++i) {
+        for (size_t i = 0; i < this->Elements.size(); ++i) {
             //这里用减法得到相对于元素的时间
             //尝试该元素插值，如果有结果则代表可以应用
             //这里传入的时间已经是相对时间
@@ -204,7 +201,7 @@ bool Solution::Call(CameraSystemIO* IO) {
         //}
         IO->ElementTime = IO->SolutionTime;
         IO->PlaybackMode = PlaybackMode::Parallel;
-        for (size_t i = 0; i < this->Size_Elements; ++i) {
+        for (size_t i = 0; i < this->Elements.size(); ++i) {
 
             bResult = bResult || this->Elements[i].Element->Call(IO);
         }
@@ -236,10 +233,10 @@ std::pair<bool, std::string> Solution::Save(const std::filesystem::path& folderP
         root["name"] = this->Name;
         root["duration"] = this->TotalDurationTime;
         root["KCP"] = this->KCPack;
-        root["size"] = this->Size_Elements;
+        root["size"] = this->Elements.size();
 
         YAML::Node elementsNode = root["elements"];
-        for (size_t i = 0; i < this->Size_Elements; ++i) {
+        for (size_t i = 0; i < this->Elements.size(); ++i) {
             std::shared_ptr<ElementBase> element = this->Elements[i].Element;
             if (!element) return { false, "疑似有元素在保存过程中被删除，保存终止！" };
 
@@ -253,7 +250,7 @@ std::pair<bool, std::string> Solution::Save(const std::filesystem::path& folderP
         fout << root;
         fout.close();
 
-        return { true, "保存成功  解决方案名：" + this->Name + "  元素个数：" + std::to_string(this->Size_Elements) };
+        return { true, "保存成功  解决方案名：" + this->Name + "  元素个数：" + std::to_string(this->Elements.size()) };
     }
     catch (const std::exception& e) {
         return { false, "保存失败：" + std::string(e.what()) };

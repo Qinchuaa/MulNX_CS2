@@ -24,9 +24,6 @@ private:
 
     //存储元素的指针，允许调用不同元素的同一个Call函数（多态，内部实现不同）
     std::vector<ElementWithOffset> Elements;
-    //元素个数
-    size_t Size_Elements{};
-
 
     //开始时间
     float StartTime{};
