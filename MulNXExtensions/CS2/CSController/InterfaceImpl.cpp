@@ -17,7 +17,15 @@ float CSController::GetTime()const {
     float time = 0;
     uintptr_t GlobalVarsPointer = this->CSGlobalVars.GetCurrentTimePointer();
     time = MulNX::Memory::Read<float>(GlobalVarsPointer);
-    return time;
+    static float timeBuffer = time;
+    if (timeBuffer < time) {
+        timeBuffer = time;
+    }
+    // 这个延迟是因为CS2的demo系统，它的时间阅读有时候会出现回跳，这里简单过滤一下
+    else if (timeBuffer - time > 0.025f) {
+        timeBuffer = time;
+    }
+    return timeBuffer;
 }
 
 float CSController::GetWinWidth()const {
