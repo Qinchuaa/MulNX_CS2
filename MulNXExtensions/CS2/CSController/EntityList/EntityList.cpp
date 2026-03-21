@@ -25,13 +25,7 @@ uintptr_t C_EntityList::Address = 0;
 uintptr_t C_EntityList::GetEntityBaseFromIndex(int Index) {
     // 通过索引的高23位（Index >> 9）计算段基址在dwEntityList中的偏移
     // 公式：目标地址 = dwEntityList + (段索引 * 8) + 16
-    uintptr_t BaseEntity;
-    if (MulNX::Memory::Read(C_EntityList::Address + 0x8 * (Index >> 9) + 0x10, BaseEntity)) {
-        return BaseEntity;
-    }
-    else {
-        return 0;
-    }
+    return MulNX::Memory::Read<uintptr_t>(C_EntityList::Address + 0x8 * (Index >> 9) + 0x10);
 }
 
 // 根据索引获取Controller对象
@@ -42,13 +36,7 @@ uintptr_t C_EntityList::GetEntityControllerFromIndex(int Index) {
     if (!entitylistbase) return 0;
     // 使用索引的低9位（Index & 0x1FF）计算段内偏移
     // 每个Controller占用0x78字节，通过乘法定位具体位置
-    uintptr_t Controller;
-    if (MulNX::Memory::Read(entitylistbase + (0x70 * (Index & 0x1FF)), Controller)) {
-        return Controller;
-    }
-    else {
-        return 0;
-    }
+    return MulNX::Memory::Read<uintptr_t>(entitylistbase + (0x70 * (Index & 0x1FF)));
 }
 
 // 根据实体句柄(uHandle)获取Pawn对象
@@ -61,13 +49,7 @@ uintptr_t C_EntityList::GetEntityPawnFromHandle(uint32_t uHandle) {
     if (!entitylistbase) return 0;
     // 使用索引的低9位计算段内偏移（与获取Controller方式相同）
     // Pawn对象同样占用0x78字节空间
-    uintptr_t Pawn;
-    if (MulNX::Memory::Read(entitylistbase + (0x70 * (nIndex & 0x1FF)), Pawn)) {
-        return Pawn;
-    }
-    else {
-        return 0;
-    }
+    return MulNX::Memory::Read<uintptr_t>(entitylistbase + (0x70 * (nIndex & 0x1FF)));
 }
 
 
@@ -99,22 +81,20 @@ void C_EntityList::Update() {
         if (!Entity.Controller.Address)continue;
 
         Entity.IndexInEntityList = i;
-        MulNX::Memory::Read(Entity.Controller.Address + cs2_dumper::schemas::client_dll::CBasePlayerController::m_hPawn, Entity.Controller.hPawn);
+        Entity.Controller.hPawn = MulNX::Memory::Read<uint32_t>(Entity.Controller.Address + cs2_dumper::schemas::client_dll::CBasePlayerController::m_hPawn);
         if (Entity.Controller.hPawn == 0xFFFFFFFF)continue;
         Entity.Pawn.Address = this->GetEntityPawnFromHandle(Entity.Controller.hPawn);
         if (!Entity.Pawn.Address)continue;
-        MulNX::Memory::Read(Entity.Pawn.Address + cs2_dumper::schemas::client_dll::C_BaseEntity::m_iTeamNum, Entity.Pawn.m_iTeamNum);
-        MulNX::Memory::Read(Entity.Pawn.Address + cs2_dumper::schemas::client_dll::C_BaseEntity::m_iHealth, Entity.Pawn.m_iHealth);
-        MulNX::Memory::Read(Entity.Pawn.Address + cs2_dumper::schemas::client_dll::C_BasePlayerPawn::m_vOldOrigin, Entity.Pawn.m_vOldOrigin);
-        MulNX::Memory::Read(Entity.Pawn.Address + cs2_dumper::schemas::client_dll::C_BasePlayerPawn::m_iHideHUD, Entity.Pawn.m_iHideHUD);
-        if (!MulNX::Memory::Read(Entity.Pawn.Address + cs2_dumper::schemas::client_dll::C_CSPlayerPawn::m_angEyeAngles, Entity.Pawn.m_angEyeAngles)) {
-            continue;
-        }
+        Entity.Pawn.m_iTeamNum = MulNX::Memory::Read<int>(Entity.Pawn.Address + cs2_dumper::schemas::client_dll::C_BaseEntity::m_iTeamNum);
+        Entity.Pawn.m_iHealth = MulNX::Memory::Read<int>(Entity.Pawn.Address + cs2_dumper::schemas::client_dll::C_BaseEntity::m_iHealth);
+        Entity.Pawn.m_vOldOrigin = MulNX::Memory::Read<DirectX::XMFLOAT3>(Entity.Pawn.Address + cs2_dumper::schemas::client_dll::C_BasePlayerPawn::m_vOldOrigin);
+        Entity.Pawn.m_iHideHUD = MulNX::Memory::Read<uint32_t>(Entity.Pawn.Address + cs2_dumper::schemas::client_dll::C_BasePlayerPawn::m_iHideHUD);
+        Entity.Pawn.m_angEyeAngles = MulNX::Memory::Read<DirectX::XMFLOAT3>(Entity.Pawn.Address + cs2_dumper::schemas::client_dll::C_CSPlayerPawn::m_angEyeAngles);
         //获取GameSecneNode
-        MulNX::Memory::Read(Entity.Pawn.Address + cs2_dumper::schemas::client_dll::C_BaseEntity::m_pGameSceneNode, Entity.Pawn.GameSceneNode.Address);
+        Entity.Pawn.GameSceneNode.Address = MulNX::Memory::Read<uintptr_t>(Entity.Pawn.Address + cs2_dumper::schemas::client_dll::C_BaseEntity::m_pGameSceneNode);
         //获取位置和视角信息
-        MulNX::Memory::Read(Entity.Pawn.GameSceneNode.Address + cs2_dumper::schemas::client_dll::CGameSceneNode::m_vecAbsOrigin, Entity.Pawn.GameSceneNode.Position);
-        MulNX::Memory::Read(Entity.Pawn.GameSceneNode.Address + cs2_dumper::schemas::client_dll::CGameSceneNode::m_angAbsRotation, Entity.Pawn.GameSceneNode.RotationEuler);
+        Entity.Pawn.GameSceneNode.Position = MulNX::Memory::Read<DirectX::XMFLOAT3>(Entity.Pawn.GameSceneNode.Address + cs2_dumper::schemas::client_dll::CGameSceneNode::m_vecAbsOrigin);
+        Entity.Pawn.GameSceneNode.RotationEuler = MulNX::Memory::Read<DirectX::XMFLOAT3>(Entity.Pawn.GameSceneNode.Address + cs2_dumper::schemas::client_dll::CGameSceneNode::m_angAbsRotation);
 
         MulNX::Memory::ReadString(Entity.Controller.Address + cs2_dumper::schemas::client_dll::CBasePlayerController::m_iszPlayerName,
             Entity.Controller.m_iszPlayerName, sizeof(Entity.Controller.m_iszPlayerName));

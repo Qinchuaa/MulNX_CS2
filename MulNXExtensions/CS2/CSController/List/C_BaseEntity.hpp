@@ -15,7 +15,7 @@ namespace CS2 {
 
     class C_ClassInfo {
     public:
-        char* pName() { return *reinterpret_cast<char**>(reinterpret_cast<uintptr_t>(this) + 0x20); }
+        char** pName() { return reinterpret_cast<char**>(reinterpret_cast<uintptr_t>(this) + 0x20); }
     };
 
     class CGameSceneNode {
@@ -26,6 +26,7 @@ namespace CS2 {
         DirectX::XMFLOAT3* angRotation() { return reinterpret_cast<DirectX::XMFLOAT3*>(reinterpret_cast<uintptr_t>(this) + cs2_dumper::schemas::client_dll::CGameSceneNode::m_angRotation); }
         DirectX::XMFLOAT3* vecWrappedLocalOrigin() { return reinterpret_cast<DirectX::XMFLOAT3*>(reinterpret_cast<uintptr_t>(this) + cs2_dumper::schemas::client_dll::CGameSceneNode::m_vecWrappedLocalOrigin); }
         DirectX::XMFLOAT3* angWrappedLocalRotation() { return reinterpret_cast<DirectX::XMFLOAT3*>(reinterpret_cast<uintptr_t>(this) + cs2_dumper::schemas::client_dll::CGameSceneNode::m_angWrappedLocalRotation); }
+        DirectX::XMFLOAT3* vRenderOrigin() { return reinterpret_cast<DirectX::XMFLOAT3*>(reinterpret_cast<uintptr_t>(this) + cs2_dumper::schemas::client_dll::CGameSceneNode::m_vRenderOrigin); }
         bool* bDebugAbsOriginChanges() { return reinterpret_cast<bool*>(reinterpret_cast<uintptr_t>(this) + cs2_dumper::schemas::client_dll::CGameSceneNode::m_bDebugAbsOriginChanges); }
     };
 
@@ -35,7 +36,7 @@ namespace CS2 {
         requires std::derived_from<T, CS2::C_BaseEntity>
         T* As() { return reinterpret_cast<T*>(this); }
 
-        C_ClassInfo* pClassInfo() { return *reinterpret_cast<C_ClassInfo**>(reinterpret_cast<uintptr_t>(this) + 0x10); }
+        C_ClassInfo** pClassInfo() { return reinterpret_cast<C_ClassInfo**>(reinterpret_cast<uintptr_t>(this) + 0x10); }
         CGameSceneNode** pGameSceneNode() { return reinterpret_cast<CGameSceneNode**>(reinterpret_cast<uintptr_t>(this) + cs2_dumper::schemas::client_dll::C_BaseEntity::m_pGameSceneNode); }
     };
 
@@ -69,6 +70,7 @@ namespace CS2 {
         int32_t* nSmokeEffectTickBegin() { return reinterpret_cast<int32_t*>(reinterpret_cast<uintptr_t>(this) + cs2_dumper::schemas::client_dll::C_SmokeGrenadeProjectile::m_nSmokeEffectTickBegin); }
         bool* bDidSmokeEffect() { return reinterpret_cast<bool*>(reinterpret_cast<uintptr_t>(this) + cs2_dumper::schemas::client_dll::C_SmokeGrenadeProjectile::m_bDidSmokeEffect); }
         bool* bSmokeEffectSpawned() { return reinterpret_cast<bool*>(reinterpret_cast<uintptr_t>(this) + cs2_dumper::schemas::client_dll::C_SmokeGrenadeProjectile::m_bSmokeEffectSpawned); }
+        DirectX::XMFLOAT3* vSmokeColor() { return reinterpret_cast<DirectX::XMFLOAT3*>(reinterpret_cast<uintptr_t>(this) + cs2_dumper::schemas::client_dll::C_SmokeGrenadeProjectile::m_vSmokeColor); }
 
     };
 
@@ -103,7 +105,17 @@ namespace CS2 {
         CPlayer_WeaponServices** pWeaponServices() { return reinterpret_cast<CPlayer_WeaponServices**>(reinterpret_cast<uintptr_t>(this) + cs2_dumper::schemas::client_dll::C_BasePlayerPawn::m_pWeaponServices); }
     };
 
+    class C_CSPlayerPawnBase :public C_BasePlayerPawn {
+    public:
+
+    };
+
     
+    class C_CSPlayerPawn :public C_CSPlayerPawnBase {
+    public:
+        DirectX::XMFLOAT3* angEyeAngles() { return reinterpret_cast<DirectX::XMFLOAT3*>(reinterpret_cast<uintptr_t>(this) + cs2_dumper::schemas::client_dll::C_CSPlayerPawn::m_angEyeAngles); }
+    };
+
     class CBasePlayerController :public C_BaseEntity {
     public:
 

@@ -7,6 +7,16 @@
 #include <MulNXThirdParty/All_cs2_dumper.hpp>
 #include <MulNXThirdParty/All_MinHook.hpp>
 
+DirectX::XMFLOAT3 BonePos(uintptr_t addr, int32_t index) {
+    int32_t d = 32 * index;
+    uintptr_t address = *reinterpret_cast<uintptr_t*>(addr + cs2_dumper::schemas::client_dll::C_BaseEntity::m_pGameSceneNode);
+    if (!address)return {};
+    auto BoneArray = cs2_dumper::schemas::client_dll::CSkeletonInstance::m_modelState + 0x80;
+    address = *reinterpret_cast<uintptr_t*>(address + BoneArray);
+    if (!address)return {};
+    return *reinterpret_cast<DirectX::XMFLOAT3*>(address + d);
+}
+
 void CSController::HandleOverrideView(void* ThisCViewSetup) {
     // 定位关键数据
     int* pWidth = (int*)((unsigned char*)ThisCViewSetup + 0x434);
@@ -65,6 +75,40 @@ bool CSController::UINodeFunc(MulNXUINode* node) {
         *pGlobalFOV = 0;
     }
 
+#ifdef _DEBUG
+    int highestEntityIndex = *this->Modules.client.dwGameEntitySystem_highestEntityIndex();
+    for (int i = 0;i <= highestEntityIndex;i++) {
+        auto entity = this->Modules.client.GetBaseEntity(i);
+        if (entity == 0) {
+            continue;
+        }
+        auto hPawn = *entity->As<CS2::CBasePlayerController>()->hPawn();
+        if (!hPawn.Valid()) {
+            continue;
+        }
+        auto* pawn = this->Modules.client.GetBaseEntity(hPawn.GetIndexInEntityList());
+        if (!pawn) {
+            continue;
+        }
+        // DirectX::XMFLOAT3 pos5 = BonePos(reinterpret_cast<uintptr_t>(pawn), 5);
+        // DirectX::XMFLOAT3 pos6 = BonePos(reinterpret_cast<uintptr_t>(pawn), 6);
+        // DirectX::XMFLOAT3 pos7 = BonePos(reinterpret_cast<uintptr_t>(pawn), 7);
+        // DirectX::XMFLOAT3 pos8 = BonePos(reinterpret_cast<uintptr_t>(pawn), 8);
+
+        // DirectX::XMFLOAT2 D5, D6, D7, D8;
+
+        // MulNX::Math::XMWorldToScreen(pos5, D5, this->GetViewMatrix(), 1920, 1080);
+        // MulNX::Math::XMWorldToScreen(pos6, D6, this->GetViewMatrix(), 1920, 1080);
+        // MulNX::Math::XMWorldToScreen(pos7, D7, this->GetViewMatrix(), 1920, 1080);
+        // MulNX::Math::XMWorldToScreen(pos8, D8, this->GetViewMatrix(), 1920, 1080);
+
+        // ImGui::GetBackgroundDrawList()->AddLine({ D5.x,D5.y }, { D6.x,D6.y }, IM_COL32(255, 0, 0, 255));
+        // ImGui::GetBackgroundDrawList()->AddLine({ D6.x,D6.y }, { D7.x,D7.y }, IM_COL32(255, 0, 0, 255));
+        // ImGui::GetBackgroundDrawList()->AddLine({ D7.x,D7.y }, { D8.x,D8.y }, IM_COL32(255, 0, 0, 255));
+    }
+
+
+#endif
     return true;
 }
 
@@ -149,17 +193,11 @@ void CSController::GetModules() {
 
 int CSController::BasicUpdate() {
     // 获取EntityList
-    if (!MulNX::Memory::Read(this->Modules.client.GetBaseAddress() + cs2_dumper::offsets::client_dll::dwEntityList, this->EntityList.Address)) {
-        return -1;
-    }
+    this->EntityList.Address = MulNX::Memory::Read<uintptr_t>(this->Modules.client.GetBaseAddress() + cs2_dumper::offsets::client_dll::dwEntityList);
     // 获取CS2全局变量
-    if (!MulNX::Memory::Read(this->Modules.client.GetBaseAddress() + cs2_dumper::offsets::client_dll::dwGlobalVars, this->CSGlobalVars.Address)) {
-        return -2;
-    }
+    this->CSGlobalVars.Address = MulNX::Memory::Read<uintptr_t>(this->Modules.client.GetBaseAddress() + cs2_dumper::offsets::client_dll::dwGlobalVars);
     //获取本地控制器
-    if (!MulNX::Memory::Read(this->Modules.client.GetBaseAddress() + cs2_dumper::offsets::client_dll::dwLocalPlayerController, this->LocalPlayer.Entity.Controller.Address)) {
-        return -1001;
-    }
+    this->LocalPlayer.Entity.Controller.Address = MulNX::Memory::Read<uintptr_t>(this->Modules.client.GetBaseAddress() + cs2_dumper::offsets::client_dll::dwLocalPlayerController);
     if (int result = this->LocalPlayer.Update()) {
         return result;
     }
@@ -171,8 +209,8 @@ int CSController::BasicUpdate() {
         OldRoundStartCount = this->CSGameRules.m_nRoundStartCount;
     }
 #ifdef _DEBUG
-    for (int i = 0;i <= this->Modules.client.dwGameEntitySystem_highestEntityIndex();i++) {
-        auto entity = this->GetBaseEntity(i);
+    for (int i = 0;i <= *this->Modules.client.dwGameEntitySystem_highestEntityIndex();i++) {
+        auto entity = this->Modules.client.GetBaseEntity(i);
         if (entity == 0) {
             continue;
         }
@@ -183,7 +221,7 @@ int CSController::BasicUpdate() {
         }
 
 
-        auto pName = pClassInfo->pName();
+        auto pName = *((*pClassInfo)->pName());
         if (pName == 0) {
             continue;
         }
@@ -191,9 +229,29 @@ int CSController::BasicUpdate() {
 
         if (zname.find("smokegrenade") != std::string::npos && zname.find("weapon") == std::string::npos) {
             // 找到了
-            *entity->As<CS2::C_SmokeGrenadeProjectile>()->bDidSmokeEffect() = false;
-            *entity->As<CS2::C_SmokeGrenadeProjectile>()->bSmokeEffectSpawned() = false;
-            *entity->As<CS2::C_SmokeGrenadeProjectile>()->nSmokeEffectTickBegin() = 0;
+            //*entity->As<CS2::C_SmokeGrenadeProjectile>()->bDidSmokeEffect() = false;
+            //*entity->As<CS2::C_SmokeGrenadeProjectile>()->bSmokeEffectSpawned() = false;
+            //*entity->As<CS2::C_SmokeGrenadeProjectile>()->nSmokeEffectTickBegin() = 0;
+            auto color = entity->As<CS2::C_SmokeGrenadeProjectile>()->vSmokeColor();
+            static float x = 1;
+            static float y = 1;
+            static float z = 1;
+            x += 1;
+            if (x > 200) {
+                y += 1;
+                x = 1;
+            }
+            if (y > 200) {
+                z += 1;
+                y = 1;
+            }
+            if (z > 200) {
+                z = 1;
+            }
+
+            color->x = x;
+            color->y = y;
+            color->z = z;
 
             auto pOrigin = (*entity->pGameSceneNode())->vecAbsOrigin();
 
@@ -209,92 +267,78 @@ int CSController::BasicUpdate() {
         }
     }
 
-    for (int i = 0;i <= this->Modules.client.dwGameEntitySystem_highestEntityIndex();i++) {
-        auto entity = this->GetBaseEntity(i);
-        if (entity == 0) {
-            continue;
-        }
-        auto hPawn = *entity->As<CS2::CBasePlayerController>()->hPawn();
-        if (!hPawn.Valid()) {
-            continue;
-        }
-        auto* pawn = this->GetBaseEntity(hPawn.GetIndexInEntityList());
-        if (!pawn) {
-            continue;
-        }
-        auto t = std::string(pawn->pClassInfo()->pName());
-        if (t.find("layer") == std::string::npos) {
-            continue;
-        }
-        auto* pPlayerRot = (*pawn->pGameSceneNode())->angAbsRotation();
-        auto* pPlayerRot2 = (*pawn->pGameSceneNode())->angRotation();
-        auto* pPlayerRot3 = (*pawn->pGameSceneNode())->angWrappedLocalRotation();
+    // int highestEntityIndex = *this->Modules.client.dwGameEntitySystem_highestEntityIndex();
+    // for (int i = 0;i <= highestEntityIndex;i++) {
+    //     auto entity = this->Modules.client.GetBaseEntity(i);
+    //     if (entity == 0) {
+    //         continue;
+    //     }
+    //     auto hPawn = *entity->As<CS2::CBasePlayerController>()->hPawn();
+    //     if (!hPawn.Valid()) {
+    //         continue;
+    //     }
+    //     auto* pawn = this->Modules.client.GetBaseEntity(hPawn.GetIndexInEntityList());
+    //     if (!pawn) {
+    //         continue;
+    //     }
+    //     auto* pRot = pawn->As<CS2::C_CSPlayerPawn>()->angEyeAngles();
+    //     auto t = std::string(*(*pawn->pClassInfo())->pName());
+    //     if (t.find("layer") == std::string::npos) {
+    //         continue;
+    //     }
+    //     auto* pPlayerRot = (*pawn->pGameSceneNode())->angAbsRotation();
+    //     auto* pPlayerRot2 = (*pawn->pGameSceneNode())->angRotation();
+    //     auto* pPlayerRot3 = (*pawn->pGameSceneNode())->angWrappedLocalRotation();
 
-        auto** ppWeaponServices = pawn->As<CS2::C_BasePlayerPawn>()->pWeaponServices();
-        if (!ppWeaponServices) {
-            continue;
-        }
-        auto pWeaponServices = *ppWeaponServices;
-        if (!pWeaponServices) {
-            continue;
-        }
-        auto phWeapon = pWeaponServices->hActiveWeapon();
-        if (!phWeapon || reinterpret_cast<uintptr_t>(phWeapon) == 0xFFFFFFFFFFFFFFFF) {
-            continue;
-        }
-        CS2::CHandle<CS2::C_BasePlayerWeapon> hWeapon = *phWeapon;
-        if (!hWeapon.Valid()) {
-            continue;
-        }
-        auto weapon = this->GetBaseEntity(hWeapon.GetIndexInEntityList());
-        if (!weapon) {
-            continue;
-        }
+    //     auto** ppWeaponServices = pawn->As<CS2::C_BasePlayerPawn>()->pWeaponServices();
+    //     if (!ppWeaponServices) {
+    //         continue;
+    //     }
+    //     auto pWeaponServices = *ppWeaponServices;
+    //     if (!pWeaponServices) {
+    //         continue;
+    //     }
+    //     auto phWeapon = pWeaponServices->hActiveWeapon();
+    //     if (!phWeapon || reinterpret_cast<uintptr_t>(phWeapon) == 0xFFFFFFFFFFFFFFFF) {
+    //         continue;
+    //     }
+    //     CS2::CHandle<CS2::C_BasePlayerWeapon> hWeapon = *phWeapon;
+    //     if (!hWeapon.Valid()) {
+    //         continue;
+    //     }
+    //     auto weapon = this->Modules.client.GetBaseEntity(hWeapon.GetIndexInEntityList());
+    //     if (!weapon) {
+    //         continue;
+    //     }
         
-        auto pGameSceneNode = *weapon->pGameSceneNode();
-        if (!pGameSceneNode) {
-            continue;
-        }
-        char* pName = weapon->pClassInfo()->pName();
-        auto* pWeaponPos = pGameSceneNode->vecAbsOrigin();
-        auto* pWeaponRot = pGameSceneNode->angAbsRotation();
-        auto* pWeaponRot2 = pGameSceneNode->angRotation();
-        auto* pWeaponRot3 = pGameSceneNode->angWrappedLocalRotation();
-        auto* pbDebugAbsOriginChanges = pGameSceneNode->bDebugAbsOriginChanges();
-        *pbDebugAbsOriginChanges = true;
-        if (!pWeaponPos || !pWeaponRot) {
-            continue;
-        }
-        DirectX::XMFLOAT3 pos = *pWeaponPos;
-        DirectX::XMFLOAT3 rot = *pWeaponRot;
-    }
-#endif
+    //     auto pGameSceneNode = *weapon->pGameSceneNode();
+    //     if (!pGameSceneNode) {
+    //         continue;
+    //     }
+    //     char* pName = *(*weapon->pClassInfo())->pName();
+    //     auto* pWeaponPos = pGameSceneNode->vecAbsOrigin();
 
-    //C_Entity& Entity = this->Entitys[i];
-    //Entity.Controller.Address = this->GetEntityControllerFromIndex(i);//这里其实只访问了第一个地址段
-    //if (!Entity.Controller.Address)continue;
+    //     if (!pWeaponPos) {
+    //         continue;
+    //     }
+    //     DirectX::XMFLOAT3 pos = *pWeaponPos;
+    //     DirectX::XMFLOAT3 rot = *pRot;
 
-    //Entity.IndexInEntityList = i;
-    //MulNX::Memory::Read(Entity.Controller.Address + cs2_dumper::schemas::client_dll::CBasePlayerController::m_hPawn, Entity.Controller.hPawn);
-    //if (Entity.Controller.hPawn == 0xFFFFFFFF)continue;
-    // Entity.Pawn.Address = this->GetEntityPawnFromHandle(Entity.Controller.hPawn);
-    // if (!Entity.Pawn.Address)continue;
-    // MulNX::Memory::Read(Entity.Pawn.Address + cs2_dumper::schemas::client_dll::C_BaseEntity::m_iTeamNum, Entity.Pawn.m_iTeamNum);
-    // MulNX::Memory::Read(Entity.Pawn.Address + cs2_dumper::schemas::client_dll::C_BaseEntity::m_iHealth, Entity.Pawn.m_iHealth);
-    // MulNX::Memory::Read(Entity.Pawn.Address + cs2_dumper::schemas::client_dll::C_BasePlayerPawn::m_vOldOrigin, Entity.Pawn.m_vOldOrigin);
-    // MulNX::Memory::Read(Entity.Pawn.Address + cs2_dumper::schemas::client_dll::C_BasePlayerPawn::m_iHideHUD, Entity.Pawn.m_iHideHUD);
-    // if (!MulNX::Memory::Read(Entity.Pawn.Address + cs2_dumper::schemas::client_dll::C_CSPlayerPawn::m_angEyeAngles, Entity.Pawn.m_angEyeAngles)) {
-    //     continue;
+    //     auto zipaiView = std::make_shared<Views>();
+    //     zipaiView->AnglesX = 89.0f;
+    //     zipaiView->AnglesY = rot.y;
+    //     zipaiView->AnglesZ = rot.z;
+
+    //     zipaiView->OriginX = pos.x;
+    //     zipaiView->OriginY = pos.y;
+    //     zipaiView->OriginZ = pos.z + 120.0f;
+
+    //     zipaiView->FOV = 90.0f;
+
+    //     //this->ViewToGame.store(zipaiView);
+    //     //this->GlobalVars->CampathPlaying = true;
     // }
-    // //获取GameSecneNode
-    // MulNX::Memory::Read(Entity.Pawn.Address + cs2_dumper::schemas::client_dll::C_BaseEntity::m_pGameSceneNode, Entity.Pawn.GameSceneNode.Address);
-    // //获取位置和视角信息
-    // MulNX::Memory::Read(Entity.Pawn.GameSceneNode.Address + cs2_dumper::schemas::client_dll::CGameSceneNode::m_vecAbsOrigin, Entity.Pawn.GameSceneNode.Position);
-    // MulNX::Memory::Read(Entity.Pawn.GameSceneNode.Address + cs2_dumper::schemas::client_dll::CGameSceneNode::m_angAbsRotation, Entity.Pawn.GameSceneNode.RotationEuler);
-
-    // MulNX::Memory::ReadString(Entity.Controller.Address + cs2_dumper::schemas::client_dll::CBasePlayerController::m_iszPlayerName,
-    //     Entity.Controller.m_iszPlayerName, sizeof(Entity.Controller.m_iszPlayerName));
-    
+#endif 
     return 0;
 }
 int CSController::EntityListUpdate() {
@@ -334,17 +378,20 @@ int CSController::EntityListUpdate() {
     return 0;
 }
 int CSController::GameRulesUpdate() {
-    MulNX::Memory::Read(this->Modules.client.GetBaseAddress() + cs2_dumper::offsets::client_dll::dwGameRules, this->CSGameRules.Address);
+    this->CSGameRules.Address = MulNX::Memory::Read<uintptr_t>(this->Modules.client.GetBaseAddress() + cs2_dumper::offsets::client_dll::dwGameRules);
     this->CSGameRules.Update();
     return 0;
 }
 
 void CSController::ThreadMain() {
     while (this->MyThreadRunning) {
-        MulNX::Base::SEHCall([this]()->void {
+        try {
             this->GetMsgResult = this->TryGetMsg();
-            });
-        
+        }
+        catch (const std::runtime_error& e) {
+            this->ISys().LogWarning("在更新数据时捕获到异常：" + std::string(e.what()));
+        }
+
         std::this_thread::sleep_for(std::chrono::milliseconds(this->MyThreadDelta));
     }
     return;
@@ -366,9 +413,9 @@ int CSController::TryGetMsg() {
     }
 
     uintptr_t ppPlantedC4;
-    MulNX::Memory::Read(this->Modules.client.GetBaseAddress() + cs2_dumper::offsets::client_dll::dwPlantedC4, ppPlantedC4);
+    ppPlantedC4 = MulNX::Memory::Read<uintptr_t>(this->Modules.client.GetBaseAddress() + cs2_dumper::offsets::client_dll::dwPlantedC4);
     if (ppPlantedC4) {
-        MulNX::Memory::Read(ppPlantedC4, this->PlantedC4.Address);
+        this->PlantedC4.Address=MulNX::Memory::Read<uintptr_t>(ppPlantedC4);
         this->PlantedC4.Update();
     }
 
@@ -394,23 +441,14 @@ void CSController::HandleFreeCameraPath(const CameraSystemIO* const IO) {
     }
 #endif // _DEBUG
     auto view = std::make_shared<Views>();
-    //this->LocalPlayer.SetPosition(PosAndFOV);
     view->OriginX = PosAndFOV.x;
     view->OriginY = PosAndFOV.y;
     view->OriginZ = PosAndFOV.z;
-    //this->LocalPlayer.SetFOV(PosAndFOV.w);
     view->FOV = PosAndFOV.w;
-    //this->LocalPlayer.SetViewAngle(RotEuler);
     view->AnglesX = RotEuler.x;
     view->AnglesY = RotEuler.y;
     view->AnglesZ = RotEuler.z;
     this->ViewToGame.store(view);
-    // if (this->LocalPlayer.Entity.Pawn.m_pObserverServices.m_iObserverMode == 4) {
-        
-    // }
-    // else {
-    //     this->Execute("spec_mode 4");
-    // }
 }
 void CSController::HandleFirstPersonCameraPath(const CameraSystemIO* const IO) {
     static uint8_t LastIndex = 0xFFFF;

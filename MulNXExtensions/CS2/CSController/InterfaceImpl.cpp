@@ -16,7 +16,7 @@ MulNX::Math::View CSController::GetView()const {
 float CSController::GetTime()const {
     float time = 0;
     uintptr_t GlobalVarsPointer = this->CSGlobalVars.GetCurrentTimePointer();
-    MulNX::Memory::Read<float>(GlobalVarsPointer, time);
+    time = MulNX::Memory::Read<float>(GlobalVarsPointer);
     return time;
 }
 

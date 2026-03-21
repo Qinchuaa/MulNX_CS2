@@ -14,49 +14,47 @@
 
 namespace MulNX {
     namespace Memory {
-        // 安全访问，避免访问冲突，可能在关闭游戏时报错，正常，因为本程序本身被中断了，来不及执行后面的内容
+        class AccessError :public std::runtime_error {
+        public:
+            explicit AccessError(const std::string& msg)
+                : std::runtime_error(msg) {}
+        };
+
         template<typename T>
-        inline bool Read(const uintptr_t Address, T& Value) {
+        static bool ReadImpl(uintptr_t address, T& target) {
             __try {
-                Value = *reinterpret_cast<T*>(Address);
+                target = *reinterpret_cast<T*>(address);
                 return true;
             }
             __except (EXCEPTION_EXECUTE_HANDLER) {
                 return false;
             }
         }
-        // 安全访问，避免访问冲突，可能在关闭游戏时报错，正常，因为本程序本身被中断了，来不及执行后面的内容
+
         template<typename T>
-        inline bool Read(const T* Address, T& Value) {
-            __try {
-                Value = *Address;
-                return true;
+        T Read(uintptr_t address) {
+            T target;
+            if (!ReadImpl(address, target)) {
+                throw AccessError("access error");
             }
-            __except (EXCEPTION_EXECUTE_HANDLER) {
-                return false;
+            else {
+                return target;
             }
         }
-        // 安全访问，避免访问冲突，可能在关闭游戏时报错，正常，因为本程序本身被中断了，来不及执行后面的内容
         template<typename T>
-        inline bool Read(const uintptr_t Address, std::atomic<T>& Value) {
+        T Read(T* address) {
+            bool allRight = true;
             __try {
-                Value.store(*reinterpret_cast<T*>(Address));
-                return true;
+                return *address;
             }
             __except (EXCEPTION_EXECUTE_HANDLER) {
-                return false;
+                allRight = false;
+            }
+            if (allRight == false) {
+                throw AccessError("access error");
             }
         }
-        // 安全访问，避免访问冲突，可能在关闭游戏时报错，正常，因为本程序本身被中断了，来不及执行后面的内容
-        template<typename T>
-        inline T Read(const uintptr_t Address) {
-            __try {
-                return *reinterpret_cast<T*>(Address);
-            }
-            __except (EXCEPTION_EXECUTE_HANDLER) {
-                return T{};
-            }
-        }
+
         // 安全写入，避免访问冲突，可能在关闭游戏时报错，正常，因为本程序本身被中断了，来不及执行后面的内容
         template<typename T>
         inline bool Write(T* Address, const T& Value) {
@@ -79,6 +77,7 @@ namespace MulNX {
                 return false;
             }
         }
+
         // 安全读取字符串（ANSI/UTF-8），逐字节读取直到遇到空字符或达到缓冲大小
         bool ReadString(const uintptr_t Address, char* Buffer, size_t BufferSize);
         // 安全读取宽字符串（UTF-16），逐字符读取直到遇到空字符或达到缓冲字符数

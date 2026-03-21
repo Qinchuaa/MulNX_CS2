@@ -15,7 +15,6 @@ DirectX::XMFLOAT3 C_Pawn::GetOriginPos()const {
     return this->GameSceneNode.Position;
 }
 DirectX::XMFLOAT3 C_Pawn::GetEyePos()const {
-    DirectX::XMFLOAT3 ViewOffset;
-    MulNX::Memory::Read(this->Address + cs2_dumper::schemas::client_dll::C_BaseModelEntity::m_vecViewOffset, ViewOffset);
+    auto ViewOffset = MulNX::Memory::Read<DirectX::XMFLOAT3>(this->Address + cs2_dumper::schemas::client_dll::C_BaseModelEntity::m_vecViewOffset);
     return this->GetOriginPos() + ViewOffset;
 }

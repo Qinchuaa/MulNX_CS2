@@ -7,7 +7,7 @@ public:
     uintptr_t Address;
 
     bool m_bBombTicking; // bool
-    bool m_nBombSite; // int32
+    int m_nBombSite; // int32
     //constexpr std::ptrdiff_t m_nSourceSoundscapeHash = 0x1168; // int32
     //constexpr std::ptrdiff_t m_entitySpottedState = 0x1170; // EntitySpottedState_t
     //constexpr std::ptrdiff_t m_flNextGlow = 0x1188; // GameTime_t
