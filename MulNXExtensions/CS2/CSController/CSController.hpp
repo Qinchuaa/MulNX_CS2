@@ -16,20 +16,20 @@ namespace CS2 {
         class Client :public MulNX::Memory::DllModule {
         public:
             using MulNX::Memory::DllModule::DllModule;
-
-            uintptr_t* dwGameEntitySystem() { return reinterpret_cast<uintptr_t*>(this->GetBaseAddress() + cs2_dumper::offsets::client_dll::dwGameEntitySystem); }
-            int* dwGameEntitySystem_highestEntityIndex() { return reinterpret_cast<int*>(*this->dwGameEntitySystem() + cs2_dumper::offsets::client_dll::dwGameEntitySystem_highestEntityIndex); }
+            uintptr_t dwEntityList() { return MulNX::MRead<uintptr_t>(this->GetBaseAddress() + cs2_dumper::offsets::client_dll::dwEntityList); }
+            uintptr_t dwGameEntitySystem() { return MulNX::MRead<uintptr_t>(this->GetBaseAddress() + cs2_dumper::offsets::client_dll::dwGameEntitySystem); }
+            int dwGameEntitySystem_highestEntityIndex() { return MulNX::MRead<int>(this->dwGameEntitySystem() + cs2_dumper::offsets::client_dll::dwGameEntitySystem_highestEntityIndex); }
             // 常常用于获取控制器
             CS2::C_BaseEntity* GetBaseEntity(int index) {
-                uintptr_t entListBase = *reinterpret_cast<uintptr_t*>(this->GetBaseAddress() + cs2_dumper::offsets::client_dll::dwEntityList);
+                uintptr_t entListBase = MulNX::MRead<uintptr_t>(this->GetBaseAddress() + cs2_dumper::offsets::client_dll::dwEntityList);
                 if (entListBase == 0) {
                     return 0;
                 }
-                uintptr_t entityListBase = *reinterpret_cast<uintptr_t*>(entListBase + 0x8 * (index >> 9) + 0x10);
+                uintptr_t entityListBase = MulNX::MRead<uintptr_t>(entListBase + 0x8 * (index >> 9) + 0x10);
                 if (entityListBase == 0) {
                     return 0;
                 }
-                return *reinterpret_cast<CS2::C_BaseEntity**>(entityListBase + (0x70 * (index & 0x1FF)));
+                return MulNX::MRead<CS2::C_BaseEntity*>(entityListBase + (0x70 * (index & 0x1FF)));
             }
             // 常常用于获取Pawn对象
             CS2::C_BaseEntity* GetBaseEntityFromHandle(uint32_t uHandle) {
@@ -58,8 +58,18 @@ public:
     float FOV = 90.0f;
 };
 
+class ControlSmoke {
+public:
+    std::atomic<bool> Enbale = false;
+    std::atomic<bool> Show = true;
+    std::atomic<float> R = 127;
+    std::atomic<float> G = 127;
+    std::atomic<float> B = 127;
+};
+
 class CSController final :public MulNX::IAbstractLayer3D {
 private:
+    ControlSmoke controlSomke{};
     std::atomic<std::shared_ptr<Views>> ViewToGame = nullptr;
     std::atomic<float> outFOV;
     std::atomic<float> atoRoll = 0;

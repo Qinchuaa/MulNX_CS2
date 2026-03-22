@@ -7,8 +7,6 @@
 #include <MulNXThirdParty/All_cs2_dumper.hpp>
 #include <MulNXThirdParty/All_MinHook.hpp>
 
-using namespace MulNX::Memory::ReadWrite;
-
 DirectX::XMFLOAT3 BonePos(uintptr_t addr, int32_t index) {
     int32_t d = 32 * index;
     uintptr_t pGameSceneNode = *reinterpret_cast<uintptr_t*>(addr + cs2_dumper::schemas::client_dll::C_BaseEntity::m_pGameSceneNode);
@@ -79,8 +77,15 @@ bool CSController::UINodeFunc(MulNXUINode* node) {
         this->atoRoll.store(0, std::memory_order_release);
         *pGlobalFOV = 0;
     }
+    if (ImGui::CollapsingHeader("烟雾弹控制")) {
+        MulNX::UI::Checkbox("启用烟雾弹控制", this->controlSomke.Enbale);
+        MulNX::UI::Checkbox("烟雾显示", this->controlSomke.Show);
+        MulNX::UI::SliderFloat("色彩R", this->controlSomke.R,0,255);
+        MulNX::UI::SliderFloat("色彩G", this->controlSomke.G,0,255);
+        MulNX::UI::SliderFloat("色彩B", this->controlSomke.B,0,255);
+    }
 #ifdef _DEBUG
-    int highestEntityIndex = *this->Modules.client.dwGameEntitySystem_highestEntityIndex();
+    int highestEntityIndex = this->Modules.client.dwGameEntitySystem_highestEntityIndex();
     for (int i = 0;i <= highestEntityIndex;i++) {
         auto entity = this->Modules.client.GetBaseEntity(i);
         if (entity == 0) {
@@ -192,11 +197,11 @@ bool CSController::Init() {
 
 int CSController::BasicUpdate() {
     // 获取EntityList
-    this->EntityList.Address = MRead<uintptr_t>(this->Modules.client.GetBaseAddress() + cs2_dumper::offsets::client_dll::dwEntityList);
+    this->EntityList.Address = MulNX::MRead<uintptr_t>(this->Modules.client.GetBaseAddress() + cs2_dumper::offsets::client_dll::dwEntityList);
     // 获取CS2全局变量
-    this->CSGlobalVars.Address = MRead<uintptr_t>(this->Modules.client.GetBaseAddress() + cs2_dumper::offsets::client_dll::dwGlobalVars);
+    this->CSGlobalVars.Address = MulNX::MRead<uintptr_t>(this->Modules.client.GetBaseAddress() + cs2_dumper::offsets::client_dll::dwGlobalVars);
     //获取本地控制器
-    this->LocalPlayer.Entity.Controller.Address = MRead<uintptr_t>(this->Modules.client.GetBaseAddress() + cs2_dumper::offsets::client_dll::dwLocalPlayerController);
+    this->LocalPlayer.Entity.Controller.Address = MulNX::MRead<uintptr_t>(this->Modules.client.GetBaseAddress() + cs2_dumper::offsets::client_dll::dwLocalPlayerController);
     if (int result = this->LocalPlayer.Update()) {
         return result;
     }
@@ -207,8 +212,7 @@ int CSController::BasicUpdate() {
         this->ISys().PublishAsync(std::move(Msg));
         OldRoundStartCount = this->CSGameRules.m_nRoundStartCount;
     }
-#ifdef _DEBUG
-    for (int i = 0;i <= *this->Modules.client.dwGameEntitySystem_highestEntityIndex();i++) {
+    for (int i = 0;i <= this->Modules.client.dwGameEntitySystem_highestEntityIndex();i++) {
         auto entity = this->Modules.client.GetBaseEntity(i);
         if (entity == 0) {
             continue;
@@ -220,27 +224,30 @@ int CSController::BasicUpdate() {
         }
 
 
-        auto pName = *((*pClassInfo)->pName());
+        auto pName = MulNX::MRead(((MulNX::MRead(pClassInfo))->pName()));
         if (pName == 0) {
             continue;
         }
         auto zname = std::string(pName);
 
         if (zname.find("smokegrenade") != std::string::npos && zname.find("weapon") == std::string::npos) {
-            // 找到了
-            MWrite(entity->As<CS2::C_SmokeGrenadeProjectile>()->bDidSmokeEffect(), false);
-            //*entity->As<CS2::C_SmokeGrenadeProjectile>()->bSmokeEffectSpawned() = false;
-            //*entity->As<CS2::C_SmokeGrenadeProjectile>()->nSmokeEffectTickBegin() = 0;
-            auto color = entity->As<CS2::C_SmokeGrenadeProjectile>()->vSmokeColor();
-            static float x = 255;
-            static float y = 1;
-            static float z = 255;
-
-            color->x = x;
-            color->y = y;
-            color->z = z;
-
-            auto pOrigin = (*entity->pGameSceneNode())->vecAbsOrigin();
+            if (this->controlSomke.Enbale.load(std::memory_order_acquire)) {
+                if (this->controlSomke.Show.load(std::memory_order_acquire) == true) {
+                    auto* color = entity->As<CS2::C_SmokeGrenadeProjectile>()->vSmokeColor();
+                    DirectX::XMFLOAT3 pushIn{
+                        this->controlSomke.R.load(std::memory_order_acquire) ,
+                        this->controlSomke.G.load(std::memory_order_acquire) ,
+                        this->controlSomke.B.load(std::memory_order_acquire) };
+                    MulNX::MWrite(color, pushIn);
+                }
+                else {
+                    MulNX::MWrite(entity->As<CS2::C_SmokeGrenadeProjectile>()->bDidSmokeEffect(), false);
+                    MulNX::MWrite(entity->As<CS2::C_SmokeGrenadeProjectile>()->bSmokeEffectSpawned(), false);
+                    MulNX::MWrite(entity->As<CS2::C_SmokeGrenadeProjectile>()->nSmokeEffectTickBegin(), 0);
+                }
+            }
+        
+            //auto pOrigin = (*entity->pGameSceneNode())->vecAbsOrigin();
 
             // auto view = std::make_shared<Views>();
             // view->OriginX = pOrigin->x;
@@ -253,6 +260,7 @@ int CSController::BasicUpdate() {
             // this->ViewToGame.store(view);
         }
     }
+#ifdef _DEBUG
 
     // int highestEntityIndex = *this->Modules.client.dwGameEntitySystem_highestEntityIndex();
     // for (int i = 0;i <= highestEntityIndex;i++) {
@@ -389,13 +397,13 @@ int CSController::TryGetMsg() {
     if (Result) {
         return Result;
     }
-    this->CSGameRules.Address = MRead<uintptr_t>(this->Modules.client.GetBaseAddress() + cs2_dumper::offsets::client_dll::dwGameRules);
+    this->CSGameRules.Address = MulNX::MRead<uintptr_t>(this->Modules.client.GetBaseAddress() + cs2_dumper::offsets::client_dll::dwGameRules);
     this->CSGameRules.Update();
 
     uintptr_t ppPlantedC4;
-    ppPlantedC4 = MRead<uintptr_t>(this->Modules.client.GetBaseAddress() + cs2_dumper::offsets::client_dll::dwPlantedC4);
+    ppPlantedC4 = MulNX::MRead<uintptr_t>(this->Modules.client.GetBaseAddress() + cs2_dumper::offsets::client_dll::dwPlantedC4);
     if (ppPlantedC4) {
-        this->PlantedC4.Address = MRead<uintptr_t>(ppPlantedC4);
+        this->PlantedC4.Address = MulNX::MRead<uintptr_t>(ppPlantedC4);
         this->PlantedC4.Update();
     }
 

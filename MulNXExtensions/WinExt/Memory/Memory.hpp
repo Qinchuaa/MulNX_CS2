@@ -95,4 +95,5 @@ namespace MulNX {
         // 安全读取宽字符串（UTF-16），逐字符读取直到遇到空字符或达到缓冲字符数
         bool ReadWString(const uintptr_t Address, wchar_t* Buffer, size_t BufferCount);
     }
+    using namespace Memory::ReadWrite;
 }
