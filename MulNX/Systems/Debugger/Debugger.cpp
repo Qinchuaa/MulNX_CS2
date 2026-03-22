@@ -1,5 +1,6 @@
 #include "Debugger.hpp"
 
+#include <MulNX/Base/UI/UI.hpp>
 #include <MulNX/Core/Cores.hpp>
 #include <MulNX/Systems/ISystems.hpp>
 
@@ -144,9 +145,56 @@ void MulNX::Debugger::AddError(const std::string& NewMsg) {
 }
 
 bool MulNX::Debugger::UINodeFunc(MulNXUINode* ThisNode) {
-    if (!this->ShowWindow)return true;
+    auto w = MulNX::UI::RAIIWindow("调试器", this->ShowWindow);
+    if (!w)return true;
     std::shared_lock lock(this->GetMutex());
-    this->ShowFunc(this);
+
+    // 在标签页内创建一个子窗口
+    ImVec2 childSize = ImGui::GetContentRegionAvail();
+    childSize.y -= ImGui::GetStyle().ItemSpacing.y; // 留出一点空间
+
+    // 开始子窗口，占据标签页的剩余空间
+    ImGui::BeginChild("信息", childSize, true, ImGuiWindowFlags_HorizontalScrollbar);
+
+    // 使用虚拟列表优化性能
+    ImGuiListClipper clipper;
+    clipper.Begin(static_cast<int>(this->DebugMsg.size()));
+    while (clipper.Step()) {
+        for (int i = clipper.DisplayStart; i < clipper.DisplayEnd; i++) {
+            const auto& msg = this->DebugMsg[i];
+
+            // 根据消息类型着色
+            if (msg.find(this->Info) == 0) {
+                ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(50, 50, 255, 255));
+            }
+            else if (msg.find(this->Succ) == 0) {
+                ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(0, 100, 0, 255));
+            }
+            else if (msg.find(this->Warning) == 0) {
+                ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(255, 100, 0, 255));
+            }
+            else if (msg.find(this->Error) == 0) {
+                ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(255, 50, 50, 255));
+            }
+            else {
+                ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(0, 0, 0, 255));
+            }
+
+            ImGui::TextUnformatted(msg.c_str());
+
+            // 弹出
+            ImGui::PopStyleColor();
+        }
+    }
+
+    // 自动滚动到最新消息
+    if (this->NeedAutoScroll) {
+        ImGui::SetScrollHereY(1.0f);
+        this->NeedAutoScroll = false;
+    }
+
+    // 结束子窗口
+    ImGui::EndChild();
     return true;
 }
 void MulNX::Debugger::ShowStream() {

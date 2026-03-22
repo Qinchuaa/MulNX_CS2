@@ -22,8 +22,6 @@ namespace MulNX {
 		const std::string Succ = "[成功]";
 		const std::string Warning = "[警告]";
 		const std::string Error = "[错误]";
-
-		std::function<void(Debugger*)> ShowFunc = nullptr;
 	public:
 		
 		bool NeedAutoScroll = false;
@@ -41,10 +39,6 @@ namespace MulNX {
 		void AddSucc(const std::string& NewMsg)override;
 		void AddWarning(const std::string& NewMsg)override;
 		void AddError(const std::string& NewMsg)override;
-
-		void SetShowFunc(std::function<void(Debugger*)>Func)override {
-			this->ShowFunc = Func;
-		}
 	private:
         void ResetMaxMsgCount(const int Max);
         void SaveToFile();

@@ -1,5 +1,7 @@
 #include "CSController.hpp"
 
+using namespace MulNX::Memory::ReadWrite;
+
 bool CSController::ExecuteCommand(const std::string& cmd) {
     this->executor(0, cmd.c_str(), 1);
     return true;
@@ -16,7 +18,7 @@ MulNX::Math::View CSController::GetView()const {
 float CSController::GetTime()const {
     float time = 0;
     uintptr_t GlobalVarsPointer = this->CSGlobalVars.GetCurrentTimePointer();
-    time = MulNX::Memory::Read<float>(GlobalVarsPointer);
+    time = MRead<float>(GlobalVarsPointer);
     static float timeBuffer = time;
     if (timeBuffer < time) {
         timeBuffer = time;

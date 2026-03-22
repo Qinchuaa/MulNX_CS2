@@ -16,6 +16,14 @@ bool MulNX::UI::SliderInt(const char* label, std::atomic<int>& av, int v_min, in
     }
     return changed;
 }
+bool MulNX::UI::Checkbox(const char* label, std::atomic<bool>& av) {
+    bool v = av.load(std::memory_order_relaxed);
+    bool changed = ImGui::Checkbox(label, &v);
+    if (changed) {
+        av.store(v, std::memory_order_relaxed);
+    }
+    return changed;
+}
 
 MulNX::UI::RAIIWindow::RAIIWindow(const char* name, std::atomic<bool>& showWindow) {
     this->showed = showWindow.load(std::memory_order_acquire);

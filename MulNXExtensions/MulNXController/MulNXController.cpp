@@ -9,13 +9,8 @@ bool MulNXController::UINodeFunc(MulNXUINode* ThisNode) {
     if (ImGui::Checkbox("调试模式（Debug Mode），提供更多功能，但可能影响性能和稳定性", &debugMode)) {
         this->GlobalVars->DebugMode = debugMode;
     }
-    if (ImGui::Button("打开调试器")) {
-        this->IDebugger->ShowWindow = true;
-    }
-    ImGui::SameLine();
-    if (ImGui::Button("关闭调试器")) {
-        this->IDebugger->ShowWindow = false;
-    }
+    MulNX::UI::Checkbox("调试器窗口", this->IDebugger->ShowWindow);
+    
     if (ImGui::Button("保存调试日志到文件")) {
         MulNX::Message Msg("Debugger/SaveToFile"_hash);
         this->ISys().PublishAsync(std::move(Msg));
@@ -54,57 +49,6 @@ bool MulNXController::Init() {
     this->ISys()
         .SubscribeAsync("ModuleManager/ModuleInfo/Response");
     this->NeedUINode = true;
-
-    this->IDebugger->SetShowFunc([](MulNX::Debugger* This)->void {
-        ImGui::Begin("调试器");
-        // 在标签页内创建一个子窗口
-        ImVec2 childSize = ImGui::GetContentRegionAvail();
-        childSize.y -= ImGui::GetStyle().ItemSpacing.y; // 留出一点空间
-
-        // 开始子窗口，占据标签页的剩余空间
-        ImGui::BeginChild("信息", childSize, true, ImGuiWindowFlags_HorizontalScrollbar);
-
-        // 使用虚拟列表优化性能
-        ImGuiListClipper clipper;
-        clipper.Begin(static_cast<int>(This->DebugMsg.size()));
-        while (clipper.Step()) {
-            for (int i = clipper.DisplayStart; i < clipper.DisplayEnd; i++) {
-                const auto& msg = This->DebugMsg[i];
-
-                // 根据消息类型着色
-                if (msg.find(This->Info) == 0) {
-                    ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(50, 50, 255, 255));
-                }
-                else if (msg.find(This->Succ) == 0) {
-                    ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(0, 100, 0, 255));
-                }
-                else if (msg.find(This->Warning) == 0) {
-                    ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(255, 100, 0, 255));
-                }
-                else if (msg.find(This->Error) == 0) {
-                    ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(255, 50, 50, 255));
-                }
-                else {
-                    ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(0, 0, 0, 255));
-                }
-
-                ImGui::TextUnformatted(msg.c_str());
-
-                //弹出
-                ImGui::PopStyleColor();
-            }
-        }
-
-        // 自动滚动到最新消息
-        if (This->NeedAutoScroll) {
-            ImGui::SetScrollHereY(1.0f);
-            This->NeedAutoScroll = false;
-        }
-
-        // 结束子窗口
-        ImGui::EndChild();
-        ImGui::End();
-        });
 
     return true;
 }

@@ -53,9 +53,6 @@ bool GameSettingsManager::UINodeFunc(MulNXUINode* ThisNode) {
 
         if (ImGui::TreeNode("渲染设置")) {
             ImGui::SliderInt("X光", this->GameSettings.ScreenSettings.spec_show_xray, 0, 100);
-            static bool bESP = this->GameSettings.ScreenSettings.ESPBox.load();
-            ImGui::Checkbox("方框透视", &bESP);
-            this->GameSettings.ScreenSettings.ESPBox = bESP;
             if (ImGui::TreeNode("景深控制")) {
 
                 ImGui::Checkbox("启用景深", this->dof.r_dof_override);
@@ -193,30 +190,4 @@ void GameSettingsManager::SettingGraphInt(const char* Label, int* V, const int& 
 
 void GameSettingsManager::VirtualMain() {
 
-	if (this->GameSettings.ScreenSettings.ESPBox) {
-		this->ESPDraw();
-	}
-}
-
-
-void GameSettingsManager::ESPDraw() {
-	for (int i = 1;  i <= 10; ++i) {
-		const DirectX::XMFLOAT3 EyePos3D = this->AL3D->GetPlayerMsg(i).EyePosition;
-		const DirectX::XMFLOAT3 OriginPos3D = this->AL3D->GetPlayerMsg(i).Position;
-
-		DirectX::XMFLOAT2 EyePos2D{};
-		DirectX::XMFLOAT2 OriginPos2D{};
-
-		MulNX::Math::XMWorldToScreen(EyePos3D, EyePos2D, this->AL3D->GetViewMatrix(), this->AL3D->GetWinWidth(), this->AL3D->GetWinHeight());
-		MulNX::Math::XMWorldToScreen(OriginPos3D, OriginPos2D, this->AL3D->GetViewMatrix(), this->AL3D->GetWinWidth(), this->AL3D->GetWinHeight());
-
-		const float hight{ ::abs(EyePos2D.y - OriginPos2D.y) * 1.25f };
-		const float width{ hight / 2.f };
-		const float x = EyePos2D.x - (width / 2.f);
-		const float y = EyePos2D.y - (width / 2.5f);
-
-		ImGui::GetBackgroundDrawList()->AddRect(ImVec2(x, y), ImVec2(x + width, y + hight), ImColor(0, 255, 0, 255), 0.0f, 0, 1.5f);
-	}
-
-	return;
 }

@@ -25,15 +25,11 @@ static void MainDraw(MulNXUINode* node) {
             node->CallUINode("GameSettingsManager");
             ImGui::EndTabItem();
         }
-        if (ImGui::BeginTabItem("控制台")) {
+        if (ImGui::BeginTabItem("游戏增强")) {
             node->CallUINode("ConsoleManager");
             ImGui::EndTabItem();
         }
-        if (ImGui::BeginTabItem("Demo助手")) {
-            node->CallUINode("DemoHelper");
-            ImGui::EndTabItem();
-        }
-        if (ImGui::BeginTabItem("MulNX框架控制器")) {
+        if (ImGui::BeginTabItem("MulNX控制")) {
             node->CallUINode("MulNXController");
             ImGui::EndTabItem();
         }
@@ -47,6 +43,7 @@ static void MainDraw(MulNXUINode* node) {
     node->CallUINode("ElementManager");
     node->CallUINode("SolutionManager");
     node->CallUINode("ProjectManager");
+    node->CallUINode("DemoHelper");
 }
 
 BOOL APIENTRY DllMain(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserved) {

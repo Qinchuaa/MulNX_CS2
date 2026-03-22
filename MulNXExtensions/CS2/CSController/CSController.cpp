@@ -7,14 +7,16 @@
 #include <MulNXThirdParty/All_cs2_dumper.hpp>
 #include <MulNXThirdParty/All_MinHook.hpp>
 
+using namespace MulNX::Memory::ReadWrite;
+
 DirectX::XMFLOAT3 BonePos(uintptr_t addr, int32_t index) {
     int32_t d = 32 * index;
-    uintptr_t address = *reinterpret_cast<uintptr_t*>(addr + cs2_dumper::schemas::client_dll::C_BaseEntity::m_pGameSceneNode);
-    if (!address)return {};
-    auto BoneArray = cs2_dumper::schemas::client_dll::CSkeletonInstance::m_modelState + 0x80;
-    address = *reinterpret_cast<uintptr_t*>(address + BoneArray);
-    if (!address)return {};
-    return *reinterpret_cast<DirectX::XMFLOAT3*>(address + d);
+    uintptr_t pGameSceneNode = *reinterpret_cast<uintptr_t*>(addr + cs2_dumper::schemas::client_dll::C_BaseEntity::m_pGameSceneNode);
+    if (!pGameSceneNode)return {};
+    auto BoneArraySchema = cs2_dumper::schemas::client_dll::CSkeletonInstance::m_modelState + 0x80;
+    uintptr_t BoneArray = *reinterpret_cast<uintptr_t*>(pGameSceneNode + BoneArraySchema);
+    if (!pGameSceneNode)return {};
+    return *reinterpret_cast<DirectX::XMFLOAT3*>(BoneArray + d);
 }
 
 void CSController::HandleOverrideView(void* ThisCViewSetup) {
@@ -59,9 +61,12 @@ void CSController::HandleOverrideView(void* ThisCViewSetup) {
 }
 
 bool CSController::UINodeFunc(MulNXUINode* node) {
-    auto w = MulNX::UI::RAIIWindow("摄像机控制", this->ShowWindow);
+    if (this->ESPDraw.load(std::memory_order_acquire)) {
+        this->ESP();
+    }
+    auto w = MulNX::UI::RAIIWindow("快捷操作", this->ShowWindow);
     if (!w)return true;
-    
+
     auto roll = this->atoRoll.load(std::memory_order_acquire);
     if (ImGui::SliderFloat("roll调整", &roll, -179, 179)) {
         this->atoRoll.store(roll, std::memory_order_release);
@@ -74,7 +79,6 @@ bool CSController::UINodeFunc(MulNXUINode* node) {
         this->atoRoll.store(0, std::memory_order_release);
         *pGlobalFOV = 0;
     }
-
 #ifdef _DEBUG
     int highestEntityIndex = *this->Modules.client.dwGameEntitySystem_highestEntityIndex();
     for (int i = 0;i <= highestEntityIndex;i++) {
@@ -145,8 +149,27 @@ bool CSController::Init() {
     this->NeedThread(3);
     this->NeedUINode = true;
 
-    this->GetModules();
-    
+    this->Modules.client = CS2::Module::Client(L"client.dll");
+    this->Modules.engine2 = MulNX::Memory::DllModule(L"engine2.dll");
+    this->Modules.tier0 = MulNX::Memory::DllModule(L"tier0.dll");
+
+    this->Source2EngineToClient001 =
+        this->Modules.engine2.GetProcAddressT<void* (const char*, int*)>("CreateInterface")
+        ("Source2EngineToClient001", nullptr);
+    this->executor = IVClass::Assume(this->Source2EngineToClient001)->GetVFunc<void(int, const char*, int)>(49);
+
+    this->CvarSystem.Address =
+        (uintptr_t)this->Modules.tier0.GetProcAddressT<void* (const char*, int*)>("CreateInterface")
+        ("VEngineCvar007", nullptr);
+
+    //this->LocalPlayer.pGlobalFOV = this->CvarSystem.GetCvar("fov_cs_debug")->GetPtr<float>();
+    this->LocalPlayer.pGlobalFOV = &this->outFOV;
+
+    // 获取本地视图投影矩阵
+    this->LocalPlayer.ViewMatrix = reinterpret_cast<float*>(this->Modules.client.GetBaseAddress() + cs2_dumper::offsets::client_dll::dwViewMatrix);
+    // 获取本地欧拉角
+    this->LocalPlayer.ViewAngles = reinterpret_cast<DirectX::XMFLOAT3*>(this->Modules.client.GetBaseAddress() + cs2_dumper::offsets::client_dll::dwViewAngles);
+
     if (this->Modules.client.Valid) {
         // 搜索 .text 段
         auto textRegion = this->Modules.client.GetTextRegion();
@@ -167,37 +190,13 @@ bool CSController::Init() {
     return true;
 }
 
-void CSController::GetModules() {
-    this->Modules.client = CS2::Module::Client(L"client.dll");
-    this->Modules.engine2 = MulNX::Memory::DllModule(L"engine2.dll");
-    this->Modules.tier0 = MulNX::Memory::DllModule(L"tier0.dll");
-
-    this->Source2EngineToClient001 =
-        this->Modules.engine2.GetProcAddressT<void* (const char*, int*)>("CreateInterface")
-        ("Source2EngineToClient001", nullptr);
-    this->executor = IVClass::Assume(this->Source2EngineToClient001)->GetVFunc<void(int, const char*, int)>(49);
-    
-    this->CvarSystem.Address =
-        (uintptr_t)this->Modules.tier0.GetProcAddressT<void* (const char*, int*)>("CreateInterface")
-        ("VEngineCvar007", nullptr);
-
-    //this->LocalPlayer.pGlobalFOV = this->CvarSystem.GetCvar("fov_cs_debug")->GetPtr<float>();
-    this->LocalPlayer.pGlobalFOV = &this->outFOV;
-
-    // 获取本地视图投影矩阵
-    this->LocalPlayer.ViewMatrix = reinterpret_cast<float*>(this->Modules.client.GetBaseAddress() + cs2_dumper::offsets::client_dll::dwViewMatrix);
-    // 获取本地欧拉角
-    this->LocalPlayer.ViewAngles = reinterpret_cast<DirectX::XMFLOAT3*>(this->Modules.client.GetBaseAddress() + cs2_dumper::offsets::client_dll::dwViewAngles);
-}
-
-
 int CSController::BasicUpdate() {
     // 获取EntityList
-    this->EntityList.Address = MulNX::Memory::Read<uintptr_t>(this->Modules.client.GetBaseAddress() + cs2_dumper::offsets::client_dll::dwEntityList);
+    this->EntityList.Address = MRead<uintptr_t>(this->Modules.client.GetBaseAddress() + cs2_dumper::offsets::client_dll::dwEntityList);
     // 获取CS2全局变量
-    this->CSGlobalVars.Address = MulNX::Memory::Read<uintptr_t>(this->Modules.client.GetBaseAddress() + cs2_dumper::offsets::client_dll::dwGlobalVars);
+    this->CSGlobalVars.Address = MRead<uintptr_t>(this->Modules.client.GetBaseAddress() + cs2_dumper::offsets::client_dll::dwGlobalVars);
     //获取本地控制器
-    this->LocalPlayer.Entity.Controller.Address = MulNX::Memory::Read<uintptr_t>(this->Modules.client.GetBaseAddress() + cs2_dumper::offsets::client_dll::dwLocalPlayerController);
+    this->LocalPlayer.Entity.Controller.Address = MRead<uintptr_t>(this->Modules.client.GetBaseAddress() + cs2_dumper::offsets::client_dll::dwLocalPlayerController);
     if (int result = this->LocalPlayer.Update()) {
         return result;
     }
@@ -229,25 +228,13 @@ int CSController::BasicUpdate() {
 
         if (zname.find("smokegrenade") != std::string::npos && zname.find("weapon") == std::string::npos) {
             // 找到了
-            //*entity->As<CS2::C_SmokeGrenadeProjectile>()->bDidSmokeEffect() = false;
+            MWrite(entity->As<CS2::C_SmokeGrenadeProjectile>()->bDidSmokeEffect(), false);
             //*entity->As<CS2::C_SmokeGrenadeProjectile>()->bSmokeEffectSpawned() = false;
             //*entity->As<CS2::C_SmokeGrenadeProjectile>()->nSmokeEffectTickBegin() = 0;
             auto color = entity->As<CS2::C_SmokeGrenadeProjectile>()->vSmokeColor();
-            static float x = 1;
+            static float x = 255;
             static float y = 1;
-            static float z = 1;
-            x += 1;
-            if (x > 200) {
-                y += 1;
-                x = 1;
-            }
-            if (y > 200) {
-                z += 1;
-                y = 1;
-            }
-            if (z > 200) {
-                z = 1;
-            }
+            static float z = 255;
 
             color->x = x;
             color->y = y;
@@ -310,7 +297,7 @@ int CSController::BasicUpdate() {
     //     if (!weapon) {
     //         continue;
     //     }
-        
+
     //     auto pGameSceneNode = *weapon->pGameSceneNode();
     //     if (!pGameSceneNode) {
     //         continue;
@@ -377,11 +364,6 @@ int CSController::EntityListUpdate() {
     }
     return 0;
 }
-int CSController::GameRulesUpdate() {
-    this->CSGameRules.Address = MulNX::Memory::Read<uintptr_t>(this->Modules.client.GetBaseAddress() + cs2_dumper::offsets::client_dll::dwGameRules);
-    this->CSGameRules.Update();
-    return 0;
-}
 
 void CSController::ThreadMain() {
     while (this->MyThreadRunning) {
@@ -407,23 +389,18 @@ int CSController::TryGetMsg() {
     if (Result) {
         return Result;
     }
-    Result = this->GameRulesUpdate();
-    if (Result) {
-        return Result;
-    }
+    this->CSGameRules.Address = MRead<uintptr_t>(this->Modules.client.GetBaseAddress() + cs2_dumper::offsets::client_dll::dwGameRules);
+    this->CSGameRules.Update();
 
     uintptr_t ppPlantedC4;
-    ppPlantedC4 = MulNX::Memory::Read<uintptr_t>(this->Modules.client.GetBaseAddress() + cs2_dumper::offsets::client_dll::dwPlantedC4);
+    ppPlantedC4 = MRead<uintptr_t>(this->Modules.client.GetBaseAddress() + cs2_dumper::offsets::client_dll::dwPlantedC4);
     if (ppPlantedC4) {
-        this->PlantedC4.Address=MulNX::Memory::Read<uintptr_t>(ppPlantedC4);
+        this->PlantedC4.Address = MRead<uintptr_t>(ppPlantedC4);
         this->PlantedC4.Update();
     }
 
 
     this->CSGlobalVars.Update();
-
-    this->CurrentTime = this->CSGlobalVars.CurrentTime;
-
     this->GlobalVars->InGamePlaying = true;
 
     return 0;

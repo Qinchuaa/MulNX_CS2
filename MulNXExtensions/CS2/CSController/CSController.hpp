@@ -11,7 +11,7 @@
 #include "LocalPlayer/LocalPlayer.hpp"
 #include "List/C_BaseEntity.hpp"
 
-namespace CS2{
+namespace CS2 {
     namespace Module {
         class Client :public MulNX::Memory::DllModule {
         public:
@@ -75,12 +75,15 @@ private:
     C_CSGameRules CSGameRules{};
     C_LocalPlayer LocalPlayer{};
 
-    std::atomic<float>CurrentTime = 0.0f;
     // 索引映射（小地图<->游戏实体列表）
     std::shared_mutex IndexMapMtx{};
     std::unordered_map<int, int>IndexInMap_To_IndexInEntityList_Map{};
     int GetIndexInEntityListFromIndexInMap(int IndexInMap);
+
+    void ESP();
 public:
+    std::atomic<bool> ESPDraw = false;
+    
     std::unique_ptr<MulNX::Memory::HookEx> MyHook = nullptr;
     void HandleOverrideView(void* ThisCViewSetup);
     //bool UINodeFunc(MulNXUINode* ThisNode)override;
@@ -93,10 +96,8 @@ public:
     std::atomic<int> GetMsgResult = 0;
     int TryGetMsg();
     // 子任务集合
-    void GetModules();
     int BasicUpdate();
     int EntityListUpdate();
-    int GameRulesUpdate();
 
 
     // 核心接口

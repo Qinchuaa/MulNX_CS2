@@ -7,8 +7,6 @@
 class ScreenSettings {
 public:
     int* spec_show_xray = nullptr;
-    std::atomic<bool> ESPBox = false;
-
     bool operator==(const ScreenSettings&)const = default;
 };
 
@@ -85,6 +83,4 @@ public:
 
     void SettingGraphFloat(const char* Label, float* V, const float& min, const float& max);
     void SettingGraphInt(const char* Label, int* V, const int& min, const int& max);
-
-    void ESPDraw();
 };

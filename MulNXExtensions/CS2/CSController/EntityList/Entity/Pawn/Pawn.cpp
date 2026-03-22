@@ -2,6 +2,8 @@
 #include <MulNXThirdParty/All_cs2_dumper.hpp>
 #include <MulNXExtensions/WinExt/WinExt.hpp>
 
+using namespace MulNX::Memory::ReadWrite;
+
 std::ostringstream C_Pawn::GetMsg()const {
     std::ostringstream oss;
     //oss << this->GameSceneNode.GetMsg().str() << " 阵营:" << this->m_iTeamNum;
@@ -15,6 +17,6 @@ DirectX::XMFLOAT3 C_Pawn::GetOriginPos()const {
     return this->GameSceneNode.Position;
 }
 DirectX::XMFLOAT3 C_Pawn::GetEyePos()const {
-    auto ViewOffset = MulNX::Memory::Read<DirectX::XMFLOAT3>(this->Address + cs2_dumper::schemas::client_dll::C_BaseModelEntity::m_vecViewOffset);
+    auto ViewOffset = MRead<DirectX::XMFLOAT3>(this->Address + cs2_dumper::schemas::client_dll::C_BaseModelEntity::m_vecViewOffset);
     return this->GetOriginPos() + ViewOffset;
 }

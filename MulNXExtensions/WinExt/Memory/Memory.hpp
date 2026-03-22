@@ -14,70 +14,82 @@
 
 namespace MulNX {
     namespace Memory {
-        class AccessError :public std::runtime_error {
-        public:
-            explicit AccessError(const std::string& msg)
-                : std::runtime_error(msg) {}
-        };
+        namespace ReadWrite {
+            class AccessError :public std::runtime_error {
+            public:
+                explicit AccessError(const std::string& msg)
+                    : std::runtime_error(msg) {}
+            };
 
-        template<typename T>
-        static bool ReadImpl(uintptr_t address, T& target) {
-            __try {
-                target = *reinterpret_cast<T*>(address);
-                return true;
-            }
-            __except (EXCEPTION_EXECUTE_HANDLER) {
-                return false;
-            }
-        }
+            class bad_memory_read :public AccessError {
+            public:
+                explicit bad_memory_read(const std::string& msg)
+                    : AccessError(msg) {}
+            };
 
-        template<typename T>
-        T Read(uintptr_t address) {
-            T target;
-            if (!ReadImpl(address, target)) {
-                throw AccessError("access error");
-            }
-            else {
-                return target;
-            }
-        }
-        template<typename T>
-        T Read(T* address) {
-            bool allRight = true;
-            __try {
-                return *address;
-            }
-            __except (EXCEPTION_EXECUTE_HANDLER) {
-                allRight = false;
-            }
-            if (allRight == false) {
-                throw AccessError("access error");
-            }
-        }
+            class bad_memory_write :public AccessError {
+            public:
+                explicit bad_memory_write(const std::string& msg)
+                    : AccessError(msg) {}
+            };
 
-        // 安全写入，避免访问冲突，可能在关闭游戏时报错，正常，因为本程序本身被中断了，来不及执行后面的内容
-        template<typename T>
-        inline bool Write(T* Address, const T& Value) {
-            __try {
-                *Address = Value;
-                return true;
+            template<typename T>
+            static bool ReadImpl(uintptr_t address, T& target) {
+                __try {
+                    target = *reinterpret_cast<T*>(address);
+                    return true;
+                }
+                __except (EXCEPTION_EXECUTE_HANDLER) {
+                    return false;
+                }
             }
-            __except (EXCEPTION_EXECUTE_HANDLER) {
-                return false;
-            }
-        }
-        // 安全写入，避免访问冲突，可能在关闭游戏时报错，正常，因为本程序本身被中断了，来不及执行后面的内容
-        template<typename T>
-        inline bool Write(const uintptr_t Address, const T& Value) {
-            __try {
-                *reinterpret_cast<T*>(Address) = Value;
-                return true;
-            }
-            __except (EXCEPTION_EXECUTE_HANDLER) {
-                return false;
-            }
-        }
 
+            template<typename T>
+            T MRead(uintptr_t address) {
+                T target;
+                if (!ReadImpl(address, target)) {
+                    throw bad_memory_read("access error");
+                }
+                else {
+                    return target;
+                }
+            }
+            template<typename T>
+            T MRead(T* address) {
+                T target;
+                if (!ReadImpl(reinterpret_cast<uintptr_t>(address), target)) {
+                    throw bad_memory_read("access error");
+                }
+                else {
+                    return target;
+                }
+            }
+
+            template<typename T>
+            static bool WriteImpl(uintptr_t address, const T& value) {
+                __try {
+                    *reinterpret_cast<T*>(address) = value;
+                    return true;
+                }
+                __except (EXCEPTION_EXECUTE_HANDLER) {
+                    return false;
+                }
+            }
+
+            template<typename T>
+            void MWrite(uintptr_t address, const T& value) {
+                if (!WriteImpl(address, value)) {
+                    throw bad_memory_write("access error");
+                }
+            }
+
+            template<typename T>
+            void MWrite(T* address, const T& value) {
+                if (!WriteImpl(reinterpret_cast<uintptr_t>(address), value)) {
+                    throw bad_memory_write("access error");
+                }
+            }
+        }
         // 安全读取字符串（ANSI/UTF-8），逐字节读取直到遇到空字符或达到缓冲大小
         bool ReadString(const uintptr_t Address, char* Buffer, size_t BufferSize);
         // 安全读取宽字符串（UTF-16），逐字符读取直到遇到空字符或达到缓冲字符数
