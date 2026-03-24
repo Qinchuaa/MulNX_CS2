@@ -121,82 +121,25 @@ bool SolutionManager::Solution_Load(const std::filesystem::path& FullPath) {
             this->ISys().LogError("解决方案名已占用，无法从yaml文件加载解决方案！ 解决方案名：" + std::move(NewSolutionName));
             return false;
         }
-
-        // 制作解决方案
-        auto newSolution = std::make_unique<Solution>(NewSolutionName);
-        newSolution->KCPack = root["KCP"].as<MulNX::KeyCheckPack>();
-
         // 获取持续时长信息
         float TargetDurationTime = root["duration"].as<float>();
-        // 元素总量
-        size_t AllCount = root["size"].as<size_t>();
-        if (root["elements"].size() != AllCount) {
-            this->ISys().LogError("不安全的解决方案！实际元素数量与文件描述不符！ 解决方案名：" + std::move(NewSolutionName));
+        // 制作解决方案
+        auto newSolution = std::make_unique<Solution>(NewSolutionName);
+        auto [ok, msg] = newSolution->Load(root, this->EManager);
+        
+        if (!ok) {
+            this->ISys().LogError(std::move(msg));
             return false;
         }
-        // 成功元素个数
-        size_t SuccessCount = 0;
-        // 加载失败元素索引
-        std::vector<size_t>ErrorElementsIndexs{};
-        // 加载失败元素名称
-        std::vector<std::string>ErrorElementsNames{};
 
-        // 读取流程
-        size_t index = 0;
-        for (const auto& nodeElement : root["elements"]) {
-            ++index;
-            // 获取元素名称
-            std::string NewElementName = nodeElement["name"].as<std::string>();
-            // 得到元素指针
-            std::shared_ptr<ElementBase> element = this->EManager->Element_Get<ElementBase>(NewElementName);
-            // 检验是否找到元素
-            if (!element) {
-                this->ISys().LogError("找不到目标元素   元素名：" + NewElementName);
-                // 记录加载失败的元素的索引和名称
-                ErrorElementsIndexs.push_back(index);
-                ErrorElementsNames.push_back(std::move(NewElementName));
-                continue;
-            }
-            // 获取元素偏移
-            float ElementOffset = nodeElement["offset"].as<float>();
-            // 尝试创建带有时间偏移的弱引用指针并添加进新解决方案并判断是否成功
-            if (!newSolution->AddElement(element, ElementOffset)) {
-                this->ISys().LogError("无法添加元素到解决方案，可能是元素已存在于解决方案中   元素名：" + NewElementName);
-                // 记录加载失败的元素的索引和名称
-                ErrorElementsIndexs.push_back(index);
-                ErrorElementsNames.push_back(std::move(NewElementName));
-                continue;
-            }
-            // 成功则输出成功信息
-            this->ISys().LogSucc("成功添加元素到解决方案   元素名：" + std::move(NewElementName));
-            // 增加计数
-            ++SuccessCount;
-        }
-
-        // 刷新
-        newSolution->Refresh();
-        // 去除脏标记
-        newSolution->Dirty = false;
         // 检验时间关系
         if (newSolution->TotalDurationTime != TargetDurationTime) {
             this->ISys().LogWarning("该解决方案实际持续时长与预估持续时长不同，可能出现问题");
         }
 
-        // 复查加载个数
-        if (AllCount == SuccessCount) {
-            this->ISys().LogSucc("成功从磁盘文件加载解决方案！ 解决方案名：" + std::move(NewSolutionName) + "  共包含元素个数：" + std::to_string(AllCount));
-        }
-        else {
-            this->ISys().LogWarning("从磁盘文件加载了解决方案：" + std::move(NewSolutionName) + "  理论包含元素个数：" + std::to_string(AllCount));
-            size_t ErrorCount = AllCount - SuccessCount;
-            this->ISys().LogWarning("但实际上加载成功元素个数：" + std::to_string(SuccessCount) + " 以下是加载失败的" + std::to_string(ErrorCount) + "个元素");
-            for (size_t i = 0; i < ErrorCount; ++i) {
-                this->ISys().LogWarning("编号：" + std::to_string(ErrorElementsIndexs[i]) + "  名称：" + ErrorElementsNames[i]);
-            }
-        }
-
         // 添加进解决方案组
         this->Solutions.push_back(std::move(newSolution));
+        this->ISys().LogSucc(std::move(msg));
         this->ISys().LogLine();
         return true;
     }
@@ -276,35 +219,6 @@ bool SolutionManager::Solution_ClearAll() {
 }
 
 //功能
-
-void SolutionManager::Solution_ShowMsg(const std::string& Name) {
-    Solution* solution = this->Solution_Get(Name);
-    if (!solution) {
-        this->ISys().LogError("未找到解决方案：" + Name);
-        return;
-    }
-    if (!solution->SafeUse) {
-        this->ISys().LogError("不安全的解决方案：" + Name);
-        return;
-    }
-    this->ISys().LogLine();
-    this->ISys().LogInfo(solution->GetMsg());
-    this->ISys().LogLine();
-}
-void SolutionManager::Solution_ShowAll() {
-    size_t Size = this->Solutions.size();
-    if (Size) {
-        this->ISys().LogLine();
-        for (size_t i = 0; i < Size; ++i) {
-            this->ISys().LogInfo(" |解决方案编号：" + std::to_string(i) + "   解决方案名称：" + this->Solutions[i]->Name);
-        }
-        this->ISys().LogLine();
-    }
-    else {
-        this->ISys().LogError("没有找到任何解决方案正存储在内存中！");
-        return;
-    }
-}
 const std::vector<std::string> SolutionManager::Solution_GetNames()const {
     std::vector<std::string> SolutionsNames;
     if (this->Solutions.empty())return SolutionsNames;
@@ -321,9 +235,35 @@ void SolutionManager::Solution_ShowInLine(Solution* solution) {
     }
     ImGui::Text("|解决方案名称：");
     ImGui::SameLine();
-    if (ImGui::Button(solution->Name.c_str())) {
-        this->CurrentSolution = solution;
-        this->ShowWindow.store(true, std::memory_order_release);
+    if (ImGui::Selectable(solution->Name.data(), false, ImGuiSelectableFlags_AllowDoubleClick)) {
+        if (ImGui::IsMouseDoubleClicked(0)) {
+            this->CurrentSolution = solution;
+            this->ShowWindow.store(true, std::memory_order_release);
+        }
+    }
+    if (ImGui::BeginPopupContextItem(("右键菜单" + solution->Name).c_str())) {
+        if (ImGui::MenuItem("复制名称")) {
+            ImGui::SetClipboardText(solution->Name.c_str());
+        }
+        if (ImGui::MenuItem("保存到磁盘")) {
+            auto path = this->ISys().PathManager()->PathGetFromKey("Solutions");
+            auto [ok, msg] = solution->Save(path);
+            if (ok) {
+                this->ISys().LogSucc(std::move(msg));
+            }
+            else {
+                this->ISys().LogError(std::move(msg));
+            }
+        }
+        if (ImGui::MenuItem("打印信息调试窗口")) {
+            this->ISys().LogLine();
+            this->ISys().LogInfo(solution->GetMsg());
+            this->ISys().LogLine();
+        }
+        if (ImGui::MenuItem("删除")) {
+            this->Solution_Delete(solution->Name);
+        }
+        ImGui::EndPopup();
     }
     ImGui::SameLine();
     ImGui::Text(("   元素数量：" + std::to_string(solution->Elements.size()) + "   总时长：" + std::to_string(solution->TotalDurationTime)).data());
@@ -356,11 +296,6 @@ void SolutionManager::Solution_DebugWindow() {
     // 检查当前是否操作解决方案
     if (this->CurrentSolution) {
         ImGui::Text(("当前操作解决方案名称：" + this->CurrentSolution->Name + "   元素数量：" + std::to_string(this->CurrentSolution->Elements.size()) + "   总时长：" + std::to_string(this->CurrentSolution->GetMsg().empty() ? 0.0f : this->CurrentSolution->TotalDurationTime)).data());
-        if (ImGui::Button("打印解决方案信息到调试窗口")) {
-            this->ISys().LogLine();
-            this->ISys().LogInfo(this->CurrentSolution->GetMsg());
-            this->ISys().LogLine();
-        }
 
         static std::string NewElementName = "";
         ImGui::InputText("新元素名称", &NewElementName);
@@ -383,23 +318,6 @@ void SolutionManager::Solution_DebugWindow() {
         if (ImGui::Button("清空所有元素")) {
             this->CurrentSolution->Clear();
             this->ISys().LogSucc("成功清空解决方案所有元素");
-        }
-
-        if (ImGui::Button("保存到磁盘文件")) {
-            auto [ok, msg] = this->CurrentSolution->Save(this->ISys().PathManager()->PathGetFromKey("Solutions"));
-            if (ok) {
-                this->ISys().LogSucc(std::move(msg));
-            }
-            else {
-                this->ISys().LogError(std::move(msg));
-            }
-        }
-
-        if (ImGui::Button("删除当前解决方案")) {
-            this->Solution_Delete(this->CurrentSolution);
-            this->OpenSolutionKCPackDebugWindow = false;
-            ImGui::End();
-            return;
         }
 
         if (ImGui::Button("激活当前解决方案")) {
@@ -452,14 +370,8 @@ void SolutionManager::Solution_DebugWindow() {
         }
         PreIndex = IndexForReset;
     }
-
-
     else {
         ImGui::Text("当前未选择任何解决方案");
-    }
-
-    if (ImGui::Button("关闭调试页面")) {
-        this->ShowWindow.store(false, std::memory_order_release);
     }
 }
 void SolutionManager::Solution_KCPack_DebugWindow() {

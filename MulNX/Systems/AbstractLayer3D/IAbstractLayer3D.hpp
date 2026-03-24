@@ -49,5 +49,6 @@ namespace MulNX {
         virtual D_Player& GetPlayerMsg(int Index) = 0;
 
         virtual bool SpecPlayer(int Index) = 0;
-	};
+        virtual void spec_goto_ex(const DirectX::XMFLOAT3& pos, const DirectX::XMFLOAT3& rot) = 0;
+    };
 }

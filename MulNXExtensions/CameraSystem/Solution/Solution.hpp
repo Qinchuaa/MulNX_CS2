@@ -60,6 +60,7 @@ public:
     bool RemoveElementAt(const size_t Index);
 
     std::pair<bool, std::string> Save(const std::filesystem::path& folderPath);
+    std::pair<bool, std::string> Load(YAML::Node& root, ElementManager* elementManager);
 
     //清空数据
     void Clear();

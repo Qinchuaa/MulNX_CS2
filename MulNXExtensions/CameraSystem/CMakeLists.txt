@@ -5,7 +5,6 @@ add_library(CameraSystem
 
     "Elements/ElementBase.cpp"
     "ElementManager/ElementManager.cpp"
-    "ElementManager/ElementDebugger/ElementDebugger.cpp"
     "Elements/FirstPersonCameraPath/FirstPersonCameraPath.cpp"
     "Elements/FreeCameraPath/FreeCameraPath.cpp"
     "Elements/LockedCameraPath/LockedCameraPath.cpp"

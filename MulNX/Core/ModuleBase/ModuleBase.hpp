@@ -33,8 +33,6 @@ namespace MulNX {
         MulNX::Core::Core* Core = nullptr;
 		// 全局变量指针
 		MulNX::GlobalVars* GlobalVars = nullptr;
-		// 按键追踪器指针
-		MulNX::KeyTracker* KT = nullptr;
         // 运行标志
         std::atomic<bool> Running = false;
         // 线程对象成员
@@ -44,6 +42,8 @@ namespace MulNX {
         // 线程执行间隔，默认以100Hz基准执行
         std::atomic<int> MyThreadDelta = 10;
 	public:
+        // 按键追踪器指针
+		MulNX::KeyTracker* KT = nullptr;
 		// 组件句柄
 		MulNXHandle HModule;
 		// 3D抽象层指针

@@ -19,75 +19,75 @@ void CSController::HandleOverrideView(void* ThisCViewSetup) {
     // 加载来自摄像机系统的View
     auto view = this->ViewToGame.load(std::memory_order_acquire);
     // 如果处于摄像机轨道播放中
-    // if (this->GlobalVars->CampathPlaying.load(std::memory_order_acquire)) {
-    //     if (view != nullptr) {
-    //         pViewOrigin[0] = view->OriginX;
-    //         pViewOrigin[1] = view->OriginY;
-    //         pViewOrigin[2] = view->OriginZ;
+    if (this->GlobalVars->CampathPlaying.load(std::memory_order_acquire)) {
+        if (view != nullptr) {
+            pViewOrigin[0] = view->OriginX;
+            pViewOrigin[1] = view->OriginY;
+            pViewOrigin[2] = view->OriginZ;
 
-    //         pViewAngles[0] = view->AnglesX;
-    //         pViewAngles[1] = view->AnglesY;
-    //         pViewAngles[2] = view->AnglesZ;
+            pViewAngles[0] = view->AnglesX;
+            pViewAngles[1] = view->AnglesY;
+            pViewAngles[2] = view->AnglesZ;
 
-    //         if (view->FOV > 0.01f) {
-    //             *pFov = view->FOV;
-    //         }
-
-    //         this->atoRoll.store(view->AnglesZ, std::memory_order_release);
-    //     }
-    //     return;
-    // }
-    // // 记录关键数据
-    // if (*pFov < 0.01f) {
-    //     this->outFOV.store(90.0f, std::memory_order_release);
-    // }
-    // else {
-    //     this->outFOV.store(*pFov, std::memory_order_release);
-    // }
-    // pViewAngles[2] = this->atoRoll.load(std::memory_order_acquire);
-
-    try {
-        for (int i = 0;i <= this->Modules.client.dwGameEntitySystem_highestEntityIndex();i++) {
-            auto entity = this->Modules.client.GetBaseEntity(i);
-            if (entity == 0) {
-                continue;
+            if (view->FOV > 0.01f) {
+                *pFov = view->FOV;
             }
-            auto hPawn = MulNX::MRead(entity->As<CS2::CBasePlayerController>()->hPawn());
-            if (!hPawn.Valid()) {
-                continue;
-            }
-            auto* pawn = this->Modules.client.GetBaseEntity(hPawn.GetIndexInEntityList());
-            if (!pawn) {
-                continue;
-            }
-            auto* pGameSceneNode = MulNX::MRead(pawn->pGameSceneNode());
-            if (!pGameSceneNode)continue;
-            auto* bones = MulNX::MRead(static_cast<CS2::CSkeletonInstance*>(pGameSceneNode)->unkBoneArray());
-            if (!bones)continue;
 
-            MulNX::TransInfo info;
-            info.pMatrix = this->GetViewMatrix();
-            info.windowHeight = 1080;
-            info.windowWidth = 1920;
-
-            DirectX::XMFLOAT3 pos15 = MulNX::MRead(bones->at(15));
-            DirectX::XMFLOAT3 pos16 = MulNX::MRead(bones->at(16));
-
-            DirectX::XMFLOAT3 euler;
-            MulNX::Math::CSDirToEuler(pos16 - pos15, euler);
-
-            pViewOrigin[0] = pos15.x;
-            pViewOrigin[1] = pos15.y;
-            pViewOrigin[2] = pos15.z;
-
-            pViewAngles[0] = euler.x;
-            pViewAngles[1] = euler.y;
-            break;
+            this->atoRoll.store(view->AnglesZ, std::memory_order_release);
         }
+        return;
     }
-    catch (const std::runtime_error& e) {
-        this->ISys().LogWarning("捕获到在应用自拍杆时发生的异常");
+    // 记录关键数据
+    if (*pFov < 0.01f) {
+        this->outFOV.store(90.0f, std::memory_order_release);
     }
+    else {
+        this->outFOV.store(*pFov, std::memory_order_release);
+    }
+    pViewAngles[2] = this->atoRoll.load(std::memory_order_acquire);
+
+    // try {
+    //     for (int i = 0;i <= this->Modules.client.dwGameEntitySystem_highestEntityIndex();i++) {
+    //         auto entity = this->Modules.client.GetBaseEntity(i);
+    //         if (entity == 0) {
+    //             continue;
+    //         }
+    //         auto hPawn = MulNX::MRead(entity->As<CS2::CBasePlayerController>()->hPawn());
+    //         if (!hPawn.Valid()) {
+    //             continue;
+    //         }
+    //         auto* pawn = this->Modules.client.GetBaseEntity(hPawn.GetIndexInEntityList());
+    //         if (!pawn) {
+    //             continue;
+    //         }
+    //         auto* pGameSceneNode = MulNX::MRead(pawn->pGameSceneNode());
+    //         if (!pGameSceneNode)continue;
+    //         auto* bones = MulNX::MRead(static_cast<CS2::CSkeletonInstance*>(pGameSceneNode)->unkBoneArray());
+    //         if (!bones)continue;
+
+    //         MulNX::TransInfo info;
+    //         info.pMatrix = this->GetViewMatrix();
+    //         info.windowHeight = 1080;
+    //         info.windowWidth = 1920;
+
+    //         DirectX::XMFLOAT3 pos15 = MulNX::MRead(bones->at(15));
+    //         DirectX::XMFLOAT3 pos16 = MulNX::MRead(bones->at(16));
+
+    //         DirectX::XMFLOAT3 euler;
+    //         MulNX::Math::CSDirToEuler(pos16 - pos15, euler);
+
+    //         pViewOrigin[0] = pos15.x;
+    //         pViewOrigin[1] = pos15.y;
+    //         pViewOrigin[2] = pos15.z;
+
+    //         pViewAngles[0] = euler.x;
+    //         pViewAngles[1] = euler.y;
+    //         break;
+    //     }
+    // }
+    // catch (const std::runtime_error& e) {
+    //     this->ISys().LogWarning("捕获到在应用自拍杆时发生的异常");
+    // }
 
     return;
 }
@@ -118,29 +118,29 @@ bool CSController::UINodeFunc(MulNXUINode* node) {
 #ifdef _DEBUG
     try {
         for (int i = 0;i <= this->Modules.client.dwGameEntitySystem_highestEntityIndex();i++) {
-            auto entity = this->Modules.client.GetBaseEntity(i);
-            if (entity == 0) {
+            auto* pEntity = this->Modules.client.GetBaseEntity(i);
+            if (pEntity == nullptr) {
                 continue;
             }
-            auto hPawn = MulNX::MRead(entity->As<CS2::CBasePlayerController>()->hPawn());
+            auto hPawn = MulNX::MRead(pEntity->As<CS2::CBasePlayerController>()->hPawn());
             if (!hPawn.Valid()) {
                 continue;
             }
-            auto* pawn = this->Modules.client.GetBaseEntity(hPawn.GetIndexInEntityList());
-            if (!pawn) {
+            auto* pPawn = this->Modules.client.GetBaseEntity(hPawn.GetIndexInEntityList());
+            if (!pPawn) {
                 continue;
             }
-            auto* pGameSceneNode = MulNX::MRead(pawn->pGameSceneNode());
+            auto* pGameSceneNode = MulNX::MRead(pPawn->pGameSceneNode());
             if (!pGameSceneNode)continue;
             auto* bones = MulNX::MRead(static_cast<CS2::CSkeletonInstance*>(pGameSceneNode)->unkBoneArray());
             if (!bones)continue;
 
             MulNX::TransInfo info;
             info.pMatrix = this->GetViewMatrix();
-            info.windowHeight = 1080;
-            info.windowWidth = 1920;
+            info.windowHeight = this->GetWinHeight();
+            info.windowWidth = this->GetWinWidth();
 
-            for (int i = 0;i < 30;++i) {
+            for (int i = 0;i < 34;++i) {
                 DirectX::XMFLOAT3 pos = MulNX::MRead(bones->at(i));
                 MulNX::UI::DrawWorldPoint(pos, info, std::to_string(i).c_str());
             }
@@ -169,6 +169,14 @@ int CSController::GetIndexInEntityListFromIndexInMap(int IndexInMap) {
 
 void CSController::VirtualMain() {
     this->EntryProcessMsg();
+    //RECT rect;
+    //GetClientRect(GetActiveWindow(), &rect);
+    //int width = rect.right - rect.left;
+    //int height = rect.bottom - rect.top;
+    
+    //this->AL3DCurrentWindowHeight = height;
+    //this->AL3DCurrentWindowWidth = width;
+
     return;
 }
 void CSController::ProcessMsg(MulNX::Message& Msg) {

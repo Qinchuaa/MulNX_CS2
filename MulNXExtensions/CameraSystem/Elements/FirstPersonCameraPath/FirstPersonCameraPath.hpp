@@ -30,4 +30,6 @@ public:
     std::pair<bool, std::string> Load(YAML::Node& root)override{
         return { {},{} };
     }
+
+    void DebugUI(CameraDrawer* CamDrawer, ElementManager* EManager)override;
 };

@@ -2,7 +2,6 @@
 
 #include <MulNX/MulNX.hpp>
 #include <MulNXExtensions/CameraSystem/Elements/Elements.hpp>
-#include <MulNXExtensions/CameraSystem/ElementManager/ElementDebugger/ElementDebugger.hpp>
 #include "ElementConfig.hpp"
 
 #include <filesystem>
@@ -20,15 +19,9 @@ private:
     SolutionManager* SManager = nullptr;
     ProjectManager* PManager = nullptr;
 
-    // 独占元素调试器
-    std::unique_ptr<ElementDebugger> elementDebugger = nullptr;
-
     // 当前操作的元素指针
     std::shared_ptr<ElementBase> CurrentElement = nullptr;
-
 public:
-    ElementManager();
-
     ElementConfig Config{};
     // 使用智能指针存储多态对象，以存储不同类型的元素
     std::vector<std::shared_ptr<ElementBase>> Elements;
@@ -107,21 +100,19 @@ public:
         return true;
     }
 
-    //保存所有元素到磁盘文件
+    // 保存所有元素到磁盘文件
     bool Element_SaveAll();
-    //从磁盘文件加载元素的预处理函数，内部会创建对应类型的元素，并调用具体加载函数加载信息
-    bool Element_Load_Pre(const std::filesystem::path& FullPath);
-    //删除函数元素，返回true表示名称现在可用
-    bool Element_Delete(const std::string& Name);
-    //清空所有元素
+    // 从磁盘文件加载元素的预处理函数，内部会创建对应类型的元素，并调用具体加载函数加载信息
+    bool Element_Load(const std::filesystem::path& FullPath);
+    // 删除函数元素，返回true表示名称现在可用
+    bool Element_Delete(const std::string Name);
+    // 清空所有元素
     bool Element_ClearAll();
-    //展示单个元素信息在一行上
+    // 展示单个元素信息在一行上
     void Element_ShowInLine(const std::shared_ptr<ElementBase> element);
-    //展示所有元素信息（编号、名称）到调试窗口
-    void Element_ShowAll();
-    //展示某个元素的详细信息到调试窗口
+    // 展示某个元素的详细信息到调试窗口
     void Element_ShowMsgToDebugMenu(const std::shared_ptr<ElementBase> element);
-    //获取元素名称容器
+    // 获取元素名称容器
     std::vector<std::string> Element_GetNames()const;
 
 

@@ -1,6 +1,8 @@
-﻿#include"FirstPersonCameraPath.hpp"
+﻿#include "FirstPersonCameraPath.hpp"
 
-#include<sstream>
+#include <MulNX/Base/UI/UI.hpp>
+#include <MulNXExtensions/CameraSystem/ElementManager/ElementManager.hpp>
+#include <sstream>
 
 bool FirstPersonCameraPath::Call(CameraSystemIO* IO)const {
     //如果不在理论影响范围内，应当直接返回而不做任何修改
@@ -75,4 +77,29 @@ std::string FirstPersonCameraPath::GetMsg()const {
 
 std::pair<bool, std::string> FirstPersonCameraPath::SaveImpl(YAML::Node& node) {
     return { {},{} };
+}
+
+void FirstPersonCameraPath::DebugUI(CameraDrawer* CamDrawer, ElementManager* EManager) {
+    ImGui::Text(this->GetMsg().c_str());
+    ImGui::Separator();
+    static int TargetPlayerIndex = this->TargetPlayerIndexInMap;
+    ImGui::SliderInt("目标玩家索引", &TargetPlayerIndex, 0, 10);
+    if (ImGui::Button("应用索引")) {
+        this->TargetPlayerIndexInMap = static_cast<uint8_t>(TargetPlayerIndex);
+        this->Refresh();
+    }
+    static float StartBuffer;
+    ImGui::InputFloat("开始时间", &StartBuffer);
+    static float EndBuffer;
+    ImGui::InputFloat("结束时间", &EndBuffer);
+    if (ImGui::Button("应用时间")) {
+        this->StartTime = StartBuffer;
+        this->EndTime = EndBuffer;
+        this->Refresh();
+    }
+    if (ImGui::Button("测试切换")) {
+        EManager->AL3D->SpecPlayer(this->TargetPlayerIndexInMap);
+    }
+
+    return;
 }

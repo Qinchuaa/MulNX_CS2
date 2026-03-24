@@ -38,13 +38,12 @@ void MulNX::UISystem::ProcessMsg(MulNX::Message& Msg) {
 int MulNX::UISystem::Render() {
     std::unique_lock lock(this->UIMtx);
     this->EntryProcessMsg();
-
     if (!this->UISystemRunning) {
         return 0;
     }
-
+    
     this->FrameBefore();
-
+    MulNX::SetUIStyle();
     if (this->KT->CheckComboClick(VK_INSERT, 1)) {
         this->UIContext.Active = !this->UIContext.Active;
     }

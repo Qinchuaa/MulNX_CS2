@@ -62,20 +62,19 @@ public:
 
 
 public:
-
     //ID相关
 
-    //获取枚举类型
+    // 获取枚举类型
     ElementType TypeGet_Enum()const;
-    //获取字符串类型
+    // 获取字符串类型
     std::string TypeGet_String()const;
 
 
-    //获取基本信息
+    // 获取基本信息
     std::string GetBaseMsg()const;
-    //获取名字
+    // 获取名字
     std::string GetName()const;
-    //重设名字
+    // 重设名字
     void ResetName(const std::string& NewName);
 
 
@@ -84,24 +83,24 @@ public:
     float GetEndTime()const;
     float GetDurationTime()const;
 
-    //析构函数（虚）
+    // 析构函数（虚）
     virtual ~ElementBase() = default;
-    //调用函数（虚）（Mode:0为默认，1自动减去头时间）
+    // 调用函数（虚）（Mode:0为默认，1自动减去头时间）
     virtual bool Call(CameraSystemIO* IO)const = 0;
-    //通用Call，用于时间变换，基类型绑定等
+    // 通用Call，用于时间变换，基类型绑定等
     bool BaseCall(float& OutputTime, CameraSystemIO* IO)const;
 
-    //关闭绘制
+    // 关闭绘制
     void CloseDraw();
-    //尝试打开绘制接口
+    // 尝试打开绘制接口
     bool OpenDraw();
-    //绘制函数入口
+    // 绘制函数入口
     bool DrawBase(CameraDrawer* CamDrawer, const float* Matrix, const float WinWidth, const float WinHeight)const;
-    //绘制函数（虚），各个元素按需实现
+    // 绘制函数（虚），各个元素按需实现
     virtual bool Draw(CameraDrawer* CamDrawer, const float* Matrix, const float WinWidth, const float WinHeight)const;
-    //刷新状态（虚）
+    // 刷新状态（虚）
     virtual void Refresh() = 0;
-    //信息获取函数（虚）
+    // 信息获取函数（虚）
     virtual std::string GetMsg()const = 0;
 
     std::pair<bool, std::string> Save(const std::filesystem::path& folderPath);
@@ -109,4 +108,6 @@ public:
     virtual std::pair<bool, std::string> SaveImpl(YAML::Node& root) = 0;
 
     virtual std::pair<bool, std::string> Load(YAML::Node& root) = 0;
+
+    virtual void DebugUI(CameraDrawer* CamDrawer, ElementManager* EManager) = 0;
 };

@@ -1,4 +1,5 @@
 #include "Solution.hpp"
+#include <MulNXExtensions/CameraSystem/ElementManager/ElementManager.hpp>
 #include <yaml-cpp/yaml.h>
 #include <fstream>
 
@@ -255,4 +256,41 @@ std::pair<bool, std::string> Solution::Save(const std::filesystem::path& folderP
     catch (const std::exception& e) {
         return { false, "保存失败：" + std::string(e.what()) };
     }
+}
+std::pair<bool, std::string> Solution::Load(YAML::Node& root, ElementManager* elementManager) {
+    this->KCPack = root["KCP"].as<MulNX::KeyCheckPack>();
+    // 获取解决方案名称并检查是否为空
+    this->Name = root["name"].as<std::string>();
+    // 获取持续时长信息
+    float TargetDurationTime = root["duration"].as<float>();
+    // 元素总量
+    size_t AllCount = root["size"].as<size_t>();
+    if (root["elements"].size() != AllCount) {
+        return { false,(std::string("不安全的解决方案！实际元素数量与文件描述不符！ 解决方案名：") + this->Name) };
+    }
+
+    // 读取流程
+    for (const auto& nodeElement : root["elements"]) {
+        // 获取元素名称
+        std::string NewElementName = nodeElement["name"].as<std::string>();
+        // 得到元素指针
+        std::shared_ptr<ElementBase> element = elementManager->Element_Get<ElementBase>(NewElementName);
+        // 检验是否找到元素
+        if (!element) {
+            return { false,"找不到目标元素   元素名：" + NewElementName };
+        }
+        // 获取元素偏移
+        float ElementOffset = nodeElement["offset"].as<float>();
+        // 尝试创建带有时间偏移的弱引用指针并添加进新解决方案并判断是否成功
+        if (!this->AddElement(element, ElementOffset)) {
+            return { false,"无法添加元素到解决方案   元素名：" + NewElementName + "  解决方案名：" + this->Name };
+        }
+    }
+
+    // 刷新
+    this->Refresh();
+    // 去除脏标记
+    this->Dirty = false;
+
+    return { true,"解决方案加载成功" };
 }

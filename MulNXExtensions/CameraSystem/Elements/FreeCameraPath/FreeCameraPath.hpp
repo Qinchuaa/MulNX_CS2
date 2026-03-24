@@ -17,7 +17,6 @@ public:
     static constexpr ElementType TemplateType = ElementType::FreeCameraPath;
     // 额外数据存储
     std::vector<MulNX::Math::CameraKeyFrame> CameraKeyFrames{};
-    size_t Size_Frames = 0;
     // 构造函数
     explicit FreeCameraPath(const std::string& name) : 
         ElementBase(name) {
@@ -51,4 +50,6 @@ public:
 
     std::pair<bool, std::string> SaveImpl(YAML::Node& root)override;
     std::pair<bool, std::string> Load(YAML::Node& root)override;
+
+    void DebugUI(CameraDrawer* CamDrawer, ElementManager* EManager)override;
 };

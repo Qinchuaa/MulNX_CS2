@@ -196,7 +196,7 @@ bool ProjectManager::Project_Apply(const std::shared_ptr<Project> Project) {
     std::vector<std::string>Elements = this->Core->IPCer().GetFileNamesByPath(ElementsPath);
     //遍历加载元素
     for (const std::string& Element : Elements) {
-        this->EManager->Element_Load_Pre(ElementsPath / Element);
+        this->EManager->Element_Load(ElementsPath / Element);
     }
     //获取解决方案文件夹路径
     std::filesystem::path SolutionsPath = this->ISys().PathManager()->PathGetFromKey("Solutions");

@@ -119,6 +119,7 @@ public:
     float GetWinHeight()const override;
     bool SpecPlayer(int IndexInMap)override;
     D_Player& GetPlayerMsg(int Index)override;
+    void spec_goto_ex(const DirectX::XMFLOAT3& pos, const DirectX::XMFLOAT3& rot)override;
 
     // CameraSystemIO的处理
 

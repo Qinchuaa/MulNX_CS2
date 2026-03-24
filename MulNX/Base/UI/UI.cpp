@@ -59,7 +59,7 @@ bool MulNX::UI::DrawWorldPoint(const DirectX::XMFLOAT3& pos, const TransInfo& in
     auto drawList = ImGui::GetBackgroundDrawList();
     drawList->AddCircleFilled({D2.x,D2.y}, 3.0f, IM_COL32(0, 0, 0, 255));
     if (label) {
-        drawList->AddText({ D2.x,D2.y + 20 }, IM_COL32(0, 0, 0, 255), label);
+        drawList->AddText({ D2.x + 2,D2.y + 2 }, IM_COL32(0, 0, 0, 255), label);
     }
     return true;
 }

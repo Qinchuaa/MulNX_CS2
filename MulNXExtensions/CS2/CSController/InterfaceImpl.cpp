@@ -44,3 +44,7 @@ D_Player& CSController::GetPlayerMsg(int Index) {
     //std::shared_lock lock(this->GetMtx());
     return this->AL3DGameData.Players[Index];
 }
+void CSController::spec_goto_ex(const DirectX::XMFLOAT3& pos, const DirectX::XMFLOAT3& rot) {
+    this->ExecuteCommand(std::format("spec_goto {} {} {} {} {}", pos.x, pos.y, pos.z, rot.x, rot.y));
+    this->atoRoll.store(rot.z, std::memory_order_release);
+}

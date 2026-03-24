@@ -1,73 +1,25 @@
 #include "ElementManager.hpp"
 #include <MulNX/MulNX.hpp>
-#include "ElementDebugger/ElementDebugger.hpp"
 #include <MulNXExtensions/CameraSystem/CameraDrawer/CameraDrawer.hpp>
 #include <MulNXExtensions/CameraSystem/SolutionManager/SolutionManager.hpp>
 #include <MulNXExtensions/CameraSystem/ProjectManager/ProjectManager.hpp>
 
-ElementManager::ElementManager() {
-    this->elementDebugger = std::make_unique<ElementDebugger>();
-}
-
 bool ElementManager::UINodeFunc(MulNXUINode* node) {
     auto w = MulNX::UI::RAIIWindow("元素调试", this->ShowWindow);
     if (!w)return true;
-
-    //检查当前是否有操作元素
+    // 检查当前是否有操作元素
     if (this->CurrentElement) {
-        ImGui::Text(("当前操作元素名称：" + this->CurrentElement->Name + "   元素类型：" + this->CurrentElement->TypeGet_String() + "   持续时长：" + std::to_string(this->CurrentElement->DurationTime)).c_str());
-
-        if (ImGui::Button("打印元素信息到调试窗口")) {
-            this->Element_ShowMsgToDebugMenu(this->CurrentElement);
-        }
-
-        if (this->CurrentElement->Drawable) {
-            ImGui::Checkbox("绘制", &this->CurrentElement->IfDraw);
-        }
-        if (ImGui::Button("保存到磁盘")) {
-            auto path = this->ISys().PathManager()->PathGetFromKey("Elements");
-            auto [ok, msg] = this->CurrentElement->Save(path);
-            if (ok) {
-                this->ISys().LogSucc(std::move(msg));
-            }
-            else {
-                this->ISys().LogError(std::move(msg));
-            }
-        }
-        if (ImGui::Button("删除当前元素")) {
-            this->Element_Delete(this->CurrentElement->Name);
-            this->CurrentElement = nullptr;
-            return true;
-        }
-
-        ImGui::Separator();
-        ImGui::Separator();
-        ImGui::Separator();
-
-        //根据元素类型调用不同的调试菜单
-        this->elementDebugger->DebugMenus(this->CurrentElement.get());
-
+        // 根据元素类型调用不同的调试菜单
+        this->CurrentElement->DebugUI(this->CamDrawer, this);
     }
-    //如果没有操作元素
+    // 如果没有操作元素
     else {
         ImGui::Text("当前未选择任何元素");
     }
-
-    ImGui::Separator();
-    ImGui::Separator();
-    ImGui::Separator();
-
-    if (ImGui::Button("关闭调试页面")) {
-        this->ShowWindow.store(false, std::memory_order_release);
-    }
-
-    //关闭窗口
     return true;
 }
 //元素管理器基本函数
 bool ElementManager::Init() {
-    this->elementDebugger->SetName("ElementDebugger");
-    this->elementDebugger->EntryInit(this->Core);
     this->NeedUINode = true;
 
     auto* PathManager = this->ISys().PathManager();
@@ -86,30 +38,24 @@ void ElementManager::InjectDependence(CameraDrawer* CamDrawer, SolutionManager* 
     this->CamDrawer = CamDrawer;
     this->SManager = SManager;
     this->PManager = PManager;
-
-    this->elementDebugger->InjectDependence(this->CamDrawer, this);
 }
 void ElementManager::VirtualMain() {
-    size_t Size = this->Elements.size();
-    if (Size) {
-        //通过迭代器绘制所有可以绘制的元素
-        for (auto& elem : this->Elements) {
-            elem->DrawBase(this->CamDrawer, this->AL3D->GetViewMatrix(), this->AL3D->GetWinWidth(), this->AL3D->GetWinHeight());
-        }
+    for (auto& elem : this->Elements) {
+        elem->DrawBase(this->CamDrawer, this->AL3D->GetViewMatrix(), this->AL3D->GetWinWidth(), this->AL3D->GetWinHeight());
     }
 
     if (this->OnPreview) {
-        auto IO = std::make_unique<CameraSystemIO>();
-        IO->ElementTime = this->AL3D->GetTime();
-        IO->FrameGameTime = this->AL3D->GetTime();
-        if (this->Preview_Call(IO.get())) {
+        CameraSystemIO IO;
+        IO.ElementTime = this->AL3D->GetTime();
+        IO.FrameGameTime = this->AL3D->GetTime();
+        if (this->Preview_Call(&IO)) {
             //自由摄像机轨道预览
             if (this->Preview_CurrentElement->Type == ElementType::FreeCameraPath) {
                 if (this->Config.PreviewOverride) {
-                    this->AL3D->CameraSystemIOOverride(IO.get());
+                    this->AL3D->CameraSystemIOOverride(&IO);
                 }
                 else if (this->Config.PreviewDraw) {
-                    this->CamDrawer->DrawFrameCamera(IO->Frame, "预览摄像机");
+                    this->CamDrawer->DrawFrameCamera(IO.Frame, "预览摄像机");
                 }
             }
         }
@@ -149,9 +95,9 @@ bool ElementManager::Element_SaveAll() {
     this->ISys().LogSucc("成功保存所有元素到磁盘！");
     return true;
 }
-bool ElementManager::Element_Load_Pre(const std::filesystem::path& FullPath) {
+bool ElementManager::Element_Load(const std::filesystem::path& FullPath) {
     this->ISys().LogInfo("尝试从磁盘文件加载元素，文件路径：" + FullPath.string());
-    //检查文件本身存在性
+    // 检查文件本身存在性
     if (!std::filesystem::exists(FullPath)) {
         this->ISys().LogError("磁盘文件不存在！文件路径：" + FullPath.string());
         return false;
@@ -199,7 +145,7 @@ bool ElementManager::Element_Load_Pre(const std::filesystem::path& FullPath) {
             break;
         }
 
-        //判空
+        // 判空
         if (!pElement) {
             this->ISys().LogError("尝试从磁盘文件加载元素失败，无法创建指定类型的元素实例！ 元素类型：" + NewElementTypeString);
             return false;
@@ -222,36 +168,36 @@ bool ElementManager::Element_Load_Pre(const std::filesystem::path& FullPath) {
         MulNX::ErrorTerminate("元素加载异常");
     }
 }
-bool ElementManager::Element_Delete(const std::string& Name) {
+bool ElementManager::Element_Delete(const std::string Name) {
     // 安全检查
     if (Name.empty()) {
         this->ISys().LogError("尝试删除空名称的元素！");
         return false;
     }
 
-    //获取迭代器
+    // 获取迭代器
     auto it = this->Element_GetIterator(Name);
-    //判空
+    // 判空
     if (it == this->Elements.end()) {
         this->ISys().LogError("未找到指定名称的元素：" + Name);
         return false;
     }
 
-    //检查是否正在预览此元素
+    // 检查是否正在预览此元素
     if (this->Preview_CurrentElement && this->Preview_CurrentElement->Name == Name) {
         this->Preview_Disable(); // 禁用预览
     }
 
-    //检查是否当前正在操作此元素
+    // 检查是否当前正在操作此元素
     if (this->CurrentElement && this->CurrentElement->Name == Name) {
         this->CurrentElement = nullptr;
     }
 
-    //先标记为需要清理
+    // 先标记为需要清理
     it->get()->NeedBeDelete = true;
-    //通过迭代器删除元素
+    // 通过迭代器删除元素
     Elements.erase(it);
-    //添加刷新信息
+    // 添加刷新信息
     this->SManager->NeedRefresh = true;
 
     this->ISys().LogSucc("成功删除元素：" + Name);
@@ -269,7 +215,7 @@ bool ElementManager::Element_ClearAll() {
     // 清空当前操作元素
     this->CurrentElement = nullptr;
     // 把所有元素标记为需要清理并从Elements中释放
-    for (std::shared_ptr<ElementBase> elem : this->Elements) {
+    for (auto& elem : this->Elements) {
         elem->NeedBeDelete = true;
     }
     this->Elements.clear();
@@ -280,39 +226,48 @@ bool ElementManager::Element_ClearAll() {
 }
 void ElementManager::Element_ShowInLine(const std::shared_ptr<ElementBase> element) {
     if (!element) {
-        this->ISys().LogError("元素指针为空，无法展示信息！");
         return;
     }
     ImGui::Text("|元素名称：");
     ImGui::SameLine();
 
-    // 可复制的名称：双击复制到剪贴板
     if (ImGui::Selectable(element->Name.data(), false, ImGuiSelectableFlags_AllowDoubleClick)) {
         if (ImGui::IsMouseDoubleClicked(0)) {
-            ImGui::SetClipboardText(element->Name.c_str());
+            this->CurrentElement = element;
+            this->ShowWindow.store(true, std::memory_order_release);
         }
     }
-    ImGui::SameLine();
 
-    if (ImGui::Button(("编辑##" + element->Name).c_str())) {
-        this->CurrentElement = element;
-        this->ShowWindow.store(true, std::memory_order_release);
+    if (ImGui::BeginPopupContextItem(("右键菜单" + element->Name).c_str())) {
+        if (ImGui::MenuItem("复制名称")) {
+            ImGui::SetClipboardText(element->Name.c_str());
+        }
+        if (element->Drawable) {
+            ImGui::Checkbox("绘制", &element->IfDraw);
+        }
+        if (ImGui::MenuItem("打印元素信息到调试窗口")) {
+            this->Element_ShowMsgToDebugMenu(element);
+        }
+        if (ImGui::MenuItem("保存到磁盘")) {
+            auto path = this->ISys().PathManager()->PathGetFromKey("Elements");
+            auto [ok, msg] = element->Save(path);
+            if (ok) {
+                this->ISys().LogSucc(std::move(msg));
+            }
+            else {
+                this->ISys().LogError(std::move(msg));
+            }
+        }
+        if (ImGui::MenuItem("删除元素")) {
+            this->Element_Delete(element->Name);
+        }
+        ImGui::EndPopup();
     }
+
     ImGui::SameLine();
     ImGui::Text(("   元素类型：" + element->TypeGet_String() + "   持续时长：" + std::to_string(element->DurationTime)).c_str());
 }
-void ElementManager::Element_ShowAll() {
-    size_t Size = this->Elements.size();
-    if (Size == 0) {
-        this->ISys().LogError("没有找到任何元素正存储在内存中！");
-        return;
-    }
-    this->ISys().LogLine();
-    for (size_t i = 0; i < Size; ++i) {
-        this->ISys().LogInfo(" |元素编号：" + std::to_string(i) + "   元素名称：" + this->Elements.at(i).get()->Name);
-    }
-    this->ISys().LogLine();
-}
+
 void ElementManager::Element_ShowMsgToDebugMenu(const std::shared_ptr<ElementBase> element) {
     this->ISys().LogLine();
     this->ISys().LogInfo("元素名称：" + element->Name);
