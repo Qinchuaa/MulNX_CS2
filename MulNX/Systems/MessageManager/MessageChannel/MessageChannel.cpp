@@ -1,5 +1,5 @@
 #include "MessageChannel.hpp"
-#include "../MessageManager.hpp"
+#include <MulNX/Systems/MessageManager/MessageManager.hpp>
 
 MulNX::MessageChannel::MessageChannel(MessageManager* MsgManager) {
 	this->MsgManager = MsgManager;
@@ -10,23 +10,13 @@ MulNX::IMessageChannel& MulNX::MessageChannel::Subscribe(const std::string& MsgT
 	return *this;
 }
 bool MulNX::MessageChannel::PullMessage(Message& OutMsg) {
-	std::unique_lock lock(this->ChannelMutex);
-	if (!this->Messages.empty()) {
-		OutMsg = std::move(this->Messages.front());
-		this->Messages.pop_front();
-		return true;
-	}
-	this->bHasMessage = false;
-	return false;
+    return this->Messages.try_dequeue(OutMsg);
 }
 bool MulNX::MessageChannel::PushMessage(Message&& Msg) {
-	std::unique_lock lock(this->ChannelMutex);
-	this->Messages.push_back(std::move(Msg));
-	this->bHasMessage.store(true);
-	return true;
+    return this->Messages.enqueue(std::move(Msg));
 }
 bool MulNX::MessageChannel::HasMessage()const {
-	return this->bHasMessage.load();
+    return this->Messages.size_approx();
 }
 
 MulNXHandle MulNX::MessageChannel::GetHandle()const {

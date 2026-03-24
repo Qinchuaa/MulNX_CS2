@@ -34,7 +34,7 @@ private:
     //解决方案时间偏移
     float SolutionOffset = 0;
     //播放模式
-    PlaybackMode Playmode = PlaybackMode::Serial;
+    PlaybackMode Playmode = PlaybackMode::Orchestration;
 
     //按键检测包
     MulNX::KeyCheckPack KCPack{};

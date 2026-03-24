@@ -1,10 +1,8 @@
 #pragma once
 
+#include <MulNX/MulNX.hpp>
 #include <MulNXExtensions/CameraSystem/Elements/Elements.hpp>
 
-#include <MulNX/MulNX.hpp>
-
-class ElementManager;
 class IAbstractLayer3D;
 class CameraDrawer;
 
@@ -14,6 +12,7 @@ private:
     CameraDrawer* CamDrawer = nullptr;
     ElementManager* EManager = nullptr;
 
+   
     //初始化
     bool Init()override;
     // 依赖注入
@@ -27,4 +26,6 @@ private:
     void DebugMenu_FreeCameraPath(FreeCameraPath* const FreeCamPath);
     //第一人称视角轨道调试菜单
     void DebugMenu_FirstPersonCameraPath(FirstPersonCameraPath* const FirstPersonCameraPath);
+public:
+    ~ElementDebugger() = default;
 };

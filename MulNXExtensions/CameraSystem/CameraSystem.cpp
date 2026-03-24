@@ -178,13 +178,6 @@ void CameraSystem::MenuElement() {
                 CreateElementName.clear();
             }
         }
-        ////调试模式下解锁更多元素类型的创建
-  //      if (this->Core->GlobalVars().DebugMode) {
-  //          
-  //      }
-  //      else {
-        //	ImGui::Text("打开调试模式以解锁更多元素类型的创建功能");
-  //      }
     }
     // 载入元素
     if (ImGui::CollapsingHeader("元素载入")) {
@@ -362,7 +355,7 @@ bool CameraSystem::CallProject(const std::string& ProjectName) {
     return true;
 }
 bool CameraSystem::CallSolution(const std::string& SolutionName) {
-    if (this->SManager.Playing_SetSolution(SolutionName, PlaybackMode::Serial)) {
+    if (this->SManager.Playing_SetSolution(SolutionName, PlaybackMode::Orchestration)) {
         this->SManager.Playing_Enable();
         return true;
     }

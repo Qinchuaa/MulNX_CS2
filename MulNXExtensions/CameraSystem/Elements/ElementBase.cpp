@@ -44,8 +44,8 @@ bool ElementBase::BaseCall(float& OutputTime, CameraSystemIO* IO)const {
     IO->CurrentElementType = this->Type;
     OutputTime = IO->ElementTime;
     switch (IO->PlaybackMode) {
-    case PlaybackMode::Parallel:break;
-    case PlaybackMode::Serial:OutputTime += this->StartTime; break;
+    case PlaybackMode::Activation:break;
+    case PlaybackMode::Orchestration:OutputTime += this->StartTime; break;
     }
     //处理边界情况
     if (OutputTime <= this->StartTime) return false;

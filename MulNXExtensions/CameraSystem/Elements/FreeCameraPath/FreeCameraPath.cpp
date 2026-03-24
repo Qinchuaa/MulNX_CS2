@@ -155,9 +155,9 @@ bool FreeCameraPath::Draw(CameraDrawer* CamDrawer, const float* Matrix, const fl
             DirectX::XMFLOAT2 prevScreenPos, currentScreenPos;
 
             // 使用CameraDrawer中的转换方法
-            MulNX::Math::XMWorldToScreen(prevPosition, prevScreenPos, Matrix, WinWidth, WinHeight);
+            MulNX::Math::WorldToScreen(prevPosition, prevScreenPos, Matrix, WinWidth, WinHeight);
 
-            MulNX::Math::XMWorldToScreen(Frame.SpatialState.GetPosition(), currentScreenPos, Matrix, WinWidth, WinHeight);
+            MulNX::Math::WorldToScreen(Frame.SpatialState.GetPosition(), currentScreenPos, Matrix, WinWidth, WinHeight);
 
             // 绘制连线
             drawList->AddLine(

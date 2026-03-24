@@ -47,7 +47,7 @@ void SolutionManager::Traversal() {
     for (const auto& pSolution : this->Solutions) {
         //快捷键播放处理
         if (this->KT->CheckWithPack(pSolution->KCPack)) {
-            this->Playing_SetSolution(pSolution.get(), PlaybackMode::Serial);//设置播放，偏移时间轴播放
+            this->Playing_SetSolution(pSolution.get(), PlaybackMode::Orchestration);//设置播放，偏移时间轴播放
             this->Playing_Enable();//启动播放
         }
         //后续其它任务待补充
@@ -402,15 +402,15 @@ void SolutionManager::Solution_DebugWindow() {
             return;
         }
 
-        if (ImGui::Button("激活当前解决方案（并行，自定义偏移无效）")) {
-            this->Playing_SetSolution(this->CurrentSolution, PlaybackMode::Parallel);
+        if (ImGui::Button("激活当前解决方案")) {
+            this->Playing_SetSolution(this->CurrentSolution, PlaybackMode::Activation);
             this->Playing_Enable();
         }
-        if (ImGui::Button("按组合模式生成时间偏移")) {
+        if (ImGui::Button("按激活模式生成时间偏移")) {
             this->CurrentSolution->TimeLineGenerate();
         }
-        if (ImGui::Button("播放当前解决方案（串行，元素按解决方案指定偏移进行播放，元素本身时间头被忽略）")) {
-            this->Playing_SetSolution(this->CurrentSolution, PlaybackMode::Serial);
+        if (ImGui::Button("播放当前解决方案（在编排模式下可用）")) {
+            this->Playing_SetSolution(this->CurrentSolution, PlaybackMode::Orchestration);
             this->Playing_Enable();
         }
 
@@ -601,11 +601,11 @@ bool SolutionManager::Playing_SetSolution(Solution* const solution, const Playba
     this->Playmode = Playmode;
     solution->Playmode = Playmode;
     switch (Playmode) {
-    case PlaybackMode::Serial:
+    case PlaybackMode::Orchestration:
         this->Playing_SetTimeSchema(this->AL3D->GetTime());//偏移时间轴播放
         this->ISys().LogInfo("偏移时间轴播放，偏移时间设置为：" + std::to_string(this->AL3D->GetTime()));
         break;
-    case PlaybackMode::Parallel:
+    case PlaybackMode::Activation:
         this->Playing_SetTimeSchema(0);
         break;
     }

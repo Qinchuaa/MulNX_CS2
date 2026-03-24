@@ -6,10 +6,7 @@
 #include <MulNXExtensions/CameraSystem/ProjectManager/ProjectManager.hpp>
 
 ElementManager::ElementManager() {
-    this->ElementDebugger = new class ElementDebugger();
-}
-ElementManager::~ElementManager() {
-    delete this->ElementDebugger;
+    this->elementDebugger = std::make_unique<ElementDebugger>();
 }
 
 bool ElementManager::UINodeFunc(MulNXUINode* node) {
@@ -39,8 +36,7 @@ bool ElementManager::UINodeFunc(MulNXUINode* node) {
         }
         if (ImGui::Button("删除当前元素")) {
             this->Element_Delete(this->CurrentElement->Name);
-            this->NeedUpdateCurrentElement = true;
-            this->UpdateCurrentElement();
+            this->CurrentElement = nullptr;
             return true;
         }
 
@@ -49,7 +45,7 @@ bool ElementManager::UINodeFunc(MulNXUINode* node) {
         ImGui::Separator();
 
         //根据元素类型调用不同的调试菜单
-        this->ElementDebugger->DebugMenus(this->CurrentElement.get());
+        this->elementDebugger->DebugMenus(this->CurrentElement.get());
 
     }
     //如果没有操作元素
@@ -70,8 +66,8 @@ bool ElementManager::UINodeFunc(MulNXUINode* node) {
 }
 //元素管理器基本函数
 bool ElementManager::Init() {
-    this->ElementDebugger->SetName("ElementDebugger");
-    this->ElementDebugger->EntryInit(this->Core);
+    this->elementDebugger->SetName("ElementDebugger");
+    this->elementDebugger->EntryInit(this->Core);
     this->NeedUINode = true;
 
     auto* PathManager = this->ISys().PathManager();
@@ -91,17 +87,9 @@ void ElementManager::InjectDependence(CameraDrawer* CamDrawer, SolutionManager* 
     this->SManager = SManager;
     this->PManager = PManager;
 
-    this->ElementDebugger->InjectDependence(this->CamDrawer, this);
-}
-void ElementManager::UpdateCurrentElement() {
-    if (this->NeedUpdateCurrentElement) {
-        this->CurrentElement = this->Element_Get<ElementBase>(this->CurrentElementName);
-        this->NeedUpdateCurrentElement = false;
-    }
+    this->elementDebugger->InjectDependence(this->CamDrawer, this);
 }
 void ElementManager::VirtualMain() {
-    this->UpdateCurrentElement();
-
     size_t Size = this->Elements.size();
     if (Size) {
         //通过迭代器绘制所有可以绘制的元素
@@ -257,8 +245,6 @@ bool ElementManager::Element_Delete(const std::string& Name) {
     //检查是否当前正在操作此元素
     if (this->CurrentElement && this->CurrentElement->Name == Name) {
         this->CurrentElement = nullptr;
-        this->CurrentElementName = "";
-        this->NeedUpdateCurrentElement = true;
     }
 
     //先标记为需要清理
@@ -272,24 +258,22 @@ bool ElementManager::Element_Delete(const std::string& Name) {
     return true;
 }
 bool ElementManager::Element_ClearAll() {
-    //检查是否有元素
+    // 检查是否有元素
     if (this->Elements.empty()) {
         this->ISys().LogWarning("当前没有任何元素，跳过清空操作！");
         return true;
     }
-    //禁用预览
+    // 禁用预览
     this->Preview_Disable();
     this->Preview_CurrentElement = nullptr;
-    //清空当前操作元素
+    // 清空当前操作元素
     this->CurrentElement = nullptr;
-    this->CurrentElementName = "";
-    this->NeedUpdateCurrentElement = true;
-    //把所有元素标记为需要清理并从Elements中释放
+    // 把所有元素标记为需要清理并从Elements中释放
     for (std::shared_ptr<ElementBase> elem : this->Elements) {
         elem->NeedBeDelete = true;
     }
     this->Elements.clear();
-    //添加刷新信息
+    // 添加刷新信息
     this->SManager->NeedRefresh = true;
     this->ISys().LogSucc("成功清空所有元素！");
     return true;
@@ -301,9 +285,17 @@ void ElementManager::Element_ShowInLine(const std::shared_ptr<ElementBase> eleme
     }
     ImGui::Text("|元素名称：");
     ImGui::SameLine();
-    if (ImGui::Button(element->Name.data())) {
-        this->CurrentElementName = element->Name;
-        this->NeedUpdateCurrentElement = true;
+
+    // 可复制的名称：双击复制到剪贴板
+    if (ImGui::Selectable(element->Name.data(), false, ImGuiSelectableFlags_AllowDoubleClick)) {
+        if (ImGui::IsMouseDoubleClicked(0)) {
+            ImGui::SetClipboardText(element->Name.c_str());
+        }
+    }
+    ImGui::SameLine();
+
+    if (ImGui::Button(("编辑##" + element->Name).c_str())) {
+        this->CurrentElement = element;
         this->ShowWindow.store(true, std::memory_order_release);
     }
     ImGui::SameLine();
@@ -380,7 +372,7 @@ bool ElementManager::Preview_Call(CameraSystemIO* IO) {
             this->Preview_Disable();
             return false;
         }
-        IO->PlaybackMode = PlaybackMode::Serial;
+        IO->PlaybackMode = PlaybackMode::Orchestration;
         IO->ElementTime = SchemaedTime;
         return this->Preview_CurrentElement->Call(IO);
     }

@@ -42,16 +42,16 @@ void CameraModel::Move(const DirectX::XMFLOAT3& TargetPoint) {
 }
 
 void CameraModel::ToScreen(const float* const pMatrix, const float WinWidth, const float WinHeight) {
-    MulNX::Math::XMWorldToScreen(this->Origin, this->Origin2D, pMatrix, WinWidth, WinHeight);
+    MulNX::Math::WorldToScreen(this->Origin, this->Origin2D, pMatrix, WinWidth, WinHeight);
 
-    MulNX::Math::XMWorldToScreen(this->Lens[0], this->Lens2D[0], pMatrix, WinWidth, WinHeight);
-    MulNX::Math::XMWorldToScreen(this->Lens[1], this->Lens2D[1], pMatrix, WinWidth, WinHeight);
-    MulNX::Math::XMWorldToScreen(this->Lens[2], this->Lens2D[2], pMatrix, WinWidth, WinHeight);
-    MulNX::Math::XMWorldToScreen(this->Lens[3], this->Lens2D[3], pMatrix, WinWidth, WinHeight);
+    MulNX::Math::WorldToScreen(this->Lens[0], this->Lens2D[0], pMatrix, WinWidth, WinHeight);
+    MulNX::Math::WorldToScreen(this->Lens[1], this->Lens2D[1], pMatrix, WinWidth, WinHeight);
+    MulNX::Math::WorldToScreen(this->Lens[2], this->Lens2D[2], pMatrix, WinWidth, WinHeight);
+    MulNX::Math::WorldToScreen(this->Lens[3], this->Lens2D[3], pMatrix, WinWidth, WinHeight);
 
-    MulNX::Math::XMWorldToScreen(this->X, this->X2D, pMatrix, WinWidth, WinHeight);
-    MulNX::Math::XMWorldToScreen(this->Y, this->Y2D, pMatrix, WinWidth, WinHeight);
-    MulNX::Math::XMWorldToScreen(this->Z, this->Z2D, pMatrix, WinWidth, WinHeight);
+    MulNX::Math::WorldToScreen(this->X, this->X2D, pMatrix, WinWidth, WinHeight);
+    MulNX::Math::WorldToScreen(this->Y, this->Y2D, pMatrix, WinWidth, WinHeight);
+    MulNX::Math::WorldToScreen(this->Z, this->Z2D, pMatrix, WinWidth, WinHeight);
 }
 
 void CameraModel::Draw(const char* Label) {

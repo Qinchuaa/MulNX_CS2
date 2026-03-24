@@ -536,7 +536,7 @@ bool ProjectManager::Playing_AutoCall(const MulNX::Message& Msg) {
             return false;
         }
         int temp = rand() % OnNewRound.size();
-        return this->SManager->Playing_SetSolution(OnNewRound[temp], PlaybackMode::Serial);
+        return this->SManager->Playing_SetSolution(OnNewRound[temp], PlaybackMode::Orchestration);
     }
     case "Game/RoundEnd"_hash: {
         const std::vector<std::string>& OnEnd = this->ActiveProject->OnRoundEnd;
@@ -545,7 +545,7 @@ bool ProjectManager::Playing_AutoCall(const MulNX::Message& Msg) {
             return false;
         }
         int temp = rand() % OnEnd.size();
-        return this->SManager->Playing_SetSolution(OnEnd[temp], PlaybackMode::Serial);
+        return this->SManager->Playing_SetSolution(OnEnd[temp], PlaybackMode::Orchestration);
     }
     }
     return false;

@@ -187,7 +187,7 @@ void MulNX::Math::CSDirToEuler(const DirectX::XMFLOAT3& Dir, DirectX::XMFLOAT3& 
 }
 
 
-bool MulNX::Math::XMWorldToScreen(const DirectX::XMFLOAT3& pWorldPos, DirectX::XMFLOAT2& pScreenPos, const float* pMatrixPtr, const float pWinWidth, const float pWinHeight)
+bool MulNX::Math::WorldToScreen(const DirectX::XMFLOAT3& pWorldPos, DirectX::XMFLOAT2& pScreenPos, const float* pMatrixPtr, const float pWinWidth, const float pWinHeight)
 {
 	if (!pMatrixPtr) return false;
 

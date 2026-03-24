@@ -9,8 +9,8 @@ void CSController::ESP() {
         DirectX::XMFLOAT2 EyePos2D{};
         DirectX::XMFLOAT2 OriginPos2D{};
 
-        MulNX::Math::XMWorldToScreen(EyePos3D, EyePos2D, this->AL3D->GetViewMatrix(), this->AL3D->GetWinWidth(), this->AL3D->GetWinHeight());
-        MulNX::Math::XMWorldToScreen(OriginPos3D, OriginPos2D, this->AL3D->GetViewMatrix(), this->AL3D->GetWinWidth(), this->AL3D->GetWinHeight());
+        MulNX::Math::WorldToScreen(EyePos3D, EyePos2D, this->AL3D->GetViewMatrix(), this->AL3D->GetWinWidth(), this->AL3D->GetWinHeight());
+        MulNX::Math::WorldToScreen(OriginPos3D, OriginPos2D, this->AL3D->GetViewMatrix(), this->AL3D->GetWinWidth(), this->AL3D->GetWinHeight());
 
         const float hight{ ::abs(EyePos2D.y - OriginPos2D.y) * 1.25f };
         const float width{ hight / 2.f };

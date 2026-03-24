@@ -2,10 +2,10 @@
 
 #include <MulNX/MulNX.hpp>
 
-//播放模式，分并行和串行两种
+// 播放模式：激活模式与编排模式
 enum class PlaybackMode {
-	Parallel,	//并行模式（元素按照游戏原初时间线播放）
-	Serial		//串行模式（元素按照被分配的相对时间进行播放）
+    Activation,     // 激活模式（元素按照游戏原初时间线播放）
+    Orchestration   // 编排模式（元素按照被分配的相对时间进行播放）
 };
 
 //基元素类型

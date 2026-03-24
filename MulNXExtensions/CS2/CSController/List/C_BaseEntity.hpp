@@ -11,6 +11,8 @@ namespace CS2 {
         CHandle(uint32_t handle) :handle(handle) {}
         int GetIndexInEntityList() { return this->handle & 0x7FFF; }
         bool Valid() { return this->handle != 0xFFFFFFFF; }
+
+        CHandle() :handle(0xFFFFFFFF) {}
     };
 
     class C_ClassInfo {
@@ -28,6 +30,18 @@ namespace CS2 {
         DirectX::XMFLOAT3* angWrappedLocalRotation() { return reinterpret_cast<DirectX::XMFLOAT3*>(reinterpret_cast<uintptr_t>(this) + cs2_dumper::schemas::client_dll::CGameSceneNode::m_angWrappedLocalRotation); }
         DirectX::XMFLOAT3* vRenderOrigin() { return reinterpret_cast<DirectX::XMFLOAT3*>(reinterpret_cast<uintptr_t>(this) + cs2_dumper::schemas::client_dll::CGameSceneNode::m_vRenderOrigin); }
         bool* bDebugAbsOriginChanges() { return reinterpret_cast<bool*>(reinterpret_cast<uintptr_t>(this) + cs2_dumper::schemas::client_dll::CGameSceneNode::m_bDebugAbsOriginChanges); }
+    };
+
+    class BoneArray {
+        constexpr static int32_t unkSize = 32;
+    public:
+        DirectX::XMFLOAT3* at(int32_t index) { return reinterpret_cast<DirectX::XMFLOAT3*>(reinterpret_cast<uintptr_t>(this) + index * unkSize); }
+    };
+    
+    class CSkeletonInstance :public CGameSceneNode {
+        constexpr static uintptr_t unkSchema = 0x80;
+    public:
+        BoneArray** unkBoneArray() { return reinterpret_cast<BoneArray**>(reinterpret_cast<uintptr_t>(this) + cs2_dumper::schemas::client_dll::CSkeletonInstance::m_modelState + unkSchema); }
     };
 
     class C_BaseEntity {

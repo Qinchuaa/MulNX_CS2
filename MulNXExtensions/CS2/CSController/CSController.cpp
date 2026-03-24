@@ -7,54 +7,88 @@
 #include <MulNXThirdParty/All_cs2_dumper.hpp>
 #include <MulNXThirdParty/All_MinHook.hpp>
 
-DirectX::XMFLOAT3 BonePos(uintptr_t addr, int32_t index) {
-    int32_t d = 32 * index;
-    uintptr_t pGameSceneNode = *reinterpret_cast<uintptr_t*>(addr + cs2_dumper::schemas::client_dll::C_BaseEntity::m_pGameSceneNode);
-    if (!pGameSceneNode)return {};
-    auto BoneArraySchema = cs2_dumper::schemas::client_dll::CSkeletonInstance::m_modelState + 0x80;
-    uintptr_t BoneArray = *reinterpret_cast<uintptr_t*>(pGameSceneNode + BoneArraySchema);
-    if (!pGameSceneNode)return {};
-    return *reinterpret_cast<DirectX::XMFLOAT3*>(BoneArray + d);
-}
-
 void CSController::HandleOverrideView(void* ThisCViewSetup) {
     // 定位关键数据
-    int* pWidth = (int*)((unsigned char*)ThisCViewSetup + 0x434);
-    int* pHeight = (int*)((unsigned char*)ThisCViewSetup + 0x43C);
+    int* pWidth = (int*)((char*)ThisCViewSetup + 0x434);
+    int* pHeight = (int*)((char*)ThisCViewSetup + 0x43C);
 
-    float* pFov = (float*)((unsigned char*)ThisCViewSetup + 0x498);
-    float* pViewOrigin = (float*)((unsigned char*)ThisCViewSetup + 0x4a0);
-    float* pViewAngles = (float*)((unsigned char*)ThisCViewSetup + 0x4b8);
+    float* pFov = (float*)((char*)ThisCViewSetup + 0x498);
+    float* pViewOrigin = (float*)((char*)ThisCViewSetup + 0x4a0);
+    float* pViewAngles = (float*)((char*)ThisCViewSetup + 0x4b8);
 
     // 加载来自摄像机系统的View
     auto view = this->ViewToGame.load(std::memory_order_acquire);
     // 如果处于摄像机轨道播放中
-    if (this->GlobalVars->CampathPlaying.load(std::memory_order_acquire)) {
-        if (view != nullptr) {
-            pViewOrigin[0] = view->OriginX;
-            pViewOrigin[1] = view->OriginY;
-            pViewOrigin[2] = view->OriginZ;
+    // if (this->GlobalVars->CampathPlaying.load(std::memory_order_acquire)) {
+    //     if (view != nullptr) {
+    //         pViewOrigin[0] = view->OriginX;
+    //         pViewOrigin[1] = view->OriginY;
+    //         pViewOrigin[2] = view->OriginZ;
 
-            pViewAngles[0] = view->AnglesX;
-            pViewAngles[1] = view->AnglesY;
-            pViewAngles[2] = view->AnglesZ;
+    //         pViewAngles[0] = view->AnglesX;
+    //         pViewAngles[1] = view->AnglesY;
+    //         pViewAngles[2] = view->AnglesZ;
 
-            if (view->FOV > 0.01f) {
-                *pFov = view->FOV;
+    //         if (view->FOV > 0.01f) {
+    //             *pFov = view->FOV;
+    //         }
+
+    //         this->atoRoll.store(view->AnglesZ, std::memory_order_release);
+    //     }
+    //     return;
+    // }
+    // // 记录关键数据
+    // if (*pFov < 0.01f) {
+    //     this->outFOV.store(90.0f, std::memory_order_release);
+    // }
+    // else {
+    //     this->outFOV.store(*pFov, std::memory_order_release);
+    // }
+    // pViewAngles[2] = this->atoRoll.load(std::memory_order_acquire);
+
+    try {
+        for (int i = 0;i <= this->Modules.client.dwGameEntitySystem_highestEntityIndex();i++) {
+            auto entity = this->Modules.client.GetBaseEntity(i);
+            if (entity == 0) {
+                continue;
             }
+            auto hPawn = MulNX::MRead(entity->As<CS2::CBasePlayerController>()->hPawn());
+            if (!hPawn.Valid()) {
+                continue;
+            }
+            auto* pawn = this->Modules.client.GetBaseEntity(hPawn.GetIndexInEntityList());
+            if (!pawn) {
+                continue;
+            }
+            auto* pGameSceneNode = MulNX::MRead(pawn->pGameSceneNode());
+            if (!pGameSceneNode)continue;
+            auto* bones = MulNX::MRead(static_cast<CS2::CSkeletonInstance*>(pGameSceneNode)->unkBoneArray());
+            if (!bones)continue;
 
-            this->atoRoll.store(view->AnglesZ, std::memory_order_release);
+            MulNX::TransInfo info;
+            info.pMatrix = this->GetViewMatrix();
+            info.windowHeight = 1080;
+            info.windowWidth = 1920;
+
+            DirectX::XMFLOAT3 pos15 = MulNX::MRead(bones->at(15));
+            DirectX::XMFLOAT3 pos16 = MulNX::MRead(bones->at(16));
+
+            DirectX::XMFLOAT3 euler;
+            MulNX::Math::CSDirToEuler(pos16 - pos15, euler);
+
+            pViewOrigin[0] = pos15.x;
+            pViewOrigin[1] = pos15.y;
+            pViewOrigin[2] = pos15.z;
+
+            pViewAngles[0] = euler.x;
+            pViewAngles[1] = euler.y;
+            break;
         }
-        return;
     }
-    // 记录关键数据
-    if (*pFov < 0.01f) {
-        this->outFOV.store(90.0f, std::memory_order_release);
+    catch (const std::runtime_error& e) {
+        this->ISys().LogWarning("捕获到在应用自拍杆时发生的异常");
     }
-    else {
-        this->outFOV.store(*pFov, std::memory_order_release);
-    }
-    pViewAngles[2] = this->atoRoll.load(std::memory_order_acquire);
+
     return;
 }
 
@@ -65,10 +99,7 @@ bool CSController::UINodeFunc(MulNXUINode* node) {
     auto w = MulNX::UI::RAIIWindow("快捷操作", this->ShowWindow);
     if (!w)return true;
 
-    auto roll = this->atoRoll.load(std::memory_order_acquire);
-    if (ImGui::SliderFloat("roll调整", &roll, -179, 179)) {
-        this->atoRoll.store(roll, std::memory_order_release);
-    }
+    MulNX::UI::SliderFloat("roll调整", this->atoRoll, -179, 179);
 
     auto* pGlobalFOV = this->CvarSystem.GetCvar("fov_cs_debug")->GetPtr<float>();
     if (ImGui::SliderFloat("fov调整", pGlobalFOV, 0, 179));
@@ -80,40 +111,43 @@ bool CSController::UINodeFunc(MulNXUINode* node) {
     if (ImGui::CollapsingHeader("烟雾弹控制")) {
         MulNX::UI::Checkbox("启用烟雾弹控制", this->controlSomke.Enbale);
         MulNX::UI::Checkbox("烟雾显示", this->controlSomke.Show);
-        MulNX::UI::SliderFloat("色彩R", this->controlSomke.R,0,255);
-        MulNX::UI::SliderFloat("色彩G", this->controlSomke.G,0,255);
-        MulNX::UI::SliderFloat("色彩B", this->controlSomke.B,0,255);
+        MulNX::UI::SliderFloat("色彩R", this->controlSomke.R, 0, 255);
+        MulNX::UI::SliderFloat("色彩G", this->controlSomke.G, 0, 255);
+        MulNX::UI::SliderFloat("色彩B", this->controlSomke.B, 0, 255);
     }
 #ifdef _DEBUG
-    int highestEntityIndex = this->Modules.client.dwGameEntitySystem_highestEntityIndex();
-    for (int i = 0;i <= highestEntityIndex;i++) {
-        auto entity = this->Modules.client.GetBaseEntity(i);
-        if (entity == 0) {
-            continue;
-        }
-        auto hPawn = *entity->As<CS2::CBasePlayerController>()->hPawn();
-        if (!hPawn.Valid()) {
-            continue;
-        }
-        auto* pawn = this->Modules.client.GetBaseEntity(hPawn.GetIndexInEntityList());
-        if (!pawn) {
-            continue;
-        }
-        // DirectX::XMFLOAT3 pos5 = BonePos(reinterpret_cast<uintptr_t>(pawn), 5);
-        // DirectX::XMFLOAT3 pos6 = BonePos(reinterpret_cast<uintptr_t>(pawn), 6);
-        // DirectX::XMFLOAT3 pos7 = BonePos(reinterpret_cast<uintptr_t>(pawn), 7);
-        // DirectX::XMFLOAT3 pos8 = BonePos(reinterpret_cast<uintptr_t>(pawn), 8);
+    try {
+        for (int i = 0;i <= this->Modules.client.dwGameEntitySystem_highestEntityIndex();i++) {
+            auto entity = this->Modules.client.GetBaseEntity(i);
+            if (entity == 0) {
+                continue;
+            }
+            auto hPawn = MulNX::MRead(entity->As<CS2::CBasePlayerController>()->hPawn());
+            if (!hPawn.Valid()) {
+                continue;
+            }
+            auto* pawn = this->Modules.client.GetBaseEntity(hPawn.GetIndexInEntityList());
+            if (!pawn) {
+                continue;
+            }
+            auto* pGameSceneNode = MulNX::MRead(pawn->pGameSceneNode());
+            if (!pGameSceneNode)continue;
+            auto* bones = MulNX::MRead(static_cast<CS2::CSkeletonInstance*>(pGameSceneNode)->unkBoneArray());
+            if (!bones)continue;
 
-        // DirectX::XMFLOAT2 D5, D6, D7, D8;
+            MulNX::TransInfo info;
+            info.pMatrix = this->GetViewMatrix();
+            info.windowHeight = 1080;
+            info.windowWidth = 1920;
 
-        // MulNX::Math::XMWorldToScreen(pos5, D5, this->GetViewMatrix(), 1920, 1080);
-        // MulNX::Math::XMWorldToScreen(pos6, D6, this->GetViewMatrix(), 1920, 1080);
-        // MulNX::Math::XMWorldToScreen(pos7, D7, this->GetViewMatrix(), 1920, 1080);
-        // MulNX::Math::XMWorldToScreen(pos8, D8, this->GetViewMatrix(), 1920, 1080);
-
-        // ImGui::GetBackgroundDrawList()->AddLine({ D5.x,D5.y }, { D6.x,D6.y }, IM_COL32(255, 0, 0, 255));
-        // ImGui::GetBackgroundDrawList()->AddLine({ D6.x,D6.y }, { D7.x,D7.y }, IM_COL32(255, 0, 0, 255));
-        // ImGui::GetBackgroundDrawList()->AddLine({ D7.x,D7.y }, { D8.x,D8.y }, IM_COL32(255, 0, 0, 255));
+            for (int i = 0;i < 30;++i) {
+                DirectX::XMFLOAT3 pos = MulNX::MRead(bones->at(i));
+                MulNX::UI::DrawWorldPoint(pos, info, std::to_string(i).c_str());
+            }
+        }
+    }
+    catch (const std::runtime_error& e) {
+        this->ISys().LogWarning("捕获到在绘制时发生的异常");
     }
 
 
@@ -200,7 +234,7 @@ int CSController::BasicUpdate() {
     this->EntityList.Address = MulNX::MRead<uintptr_t>(this->Modules.client.GetBaseAddress() + cs2_dumper::offsets::client_dll::dwEntityList);
     // 获取CS2全局变量
     this->CSGlobalVars.Address = MulNX::MRead<uintptr_t>(this->Modules.client.GetBaseAddress() + cs2_dumper::offsets::client_dll::dwGlobalVars);
-    //获取本地控制器
+    // 获取本地控制器
     this->LocalPlayer.Entity.Controller.Address = MulNX::MRead<uintptr_t>(this->Modules.client.GetBaseAddress() + cs2_dumper::offsets::client_dll::dwLocalPlayerController);
     if (int result = this->LocalPlayer.Update()) {
         return result;
@@ -214,18 +248,18 @@ int CSController::BasicUpdate() {
     }
     for (int i = 0;i <= this->Modules.client.dwGameEntitySystem_highestEntityIndex();i++) {
         auto entity = this->Modules.client.GetBaseEntity(i);
-        if (entity == 0) {
+        if (entity == nullptr) {
             continue;
         }
 
-        auto pClassInfo = entity->pClassInfo();
-        if (pClassInfo == 0) {
+        auto pClassInfo = MulNX::MRead(entity->pClassInfo());
+        if (pClassInfo == nullptr) {
             continue;
         }
 
 
-        auto pName = MulNX::MRead(((MulNX::MRead(pClassInfo))->pName()));
-        if (pName == 0) {
+        auto pName = MulNX::MRead(((pClassInfo))->pName());
+        if (pName == nullptr) {
             continue;
         }
         auto zname = std::string(pName);
@@ -246,7 +280,7 @@ int CSController::BasicUpdate() {
                     MulNX::MWrite(entity->As<CS2::C_SmokeGrenadeProjectile>()->nSmokeEffectTickBegin(), 0);
                 }
             }
-        
+
             //auto pOrigin = (*entity->pGameSceneNode())->vecAbsOrigin();
 
             // auto view = std::make_shared<Views>();
@@ -400,8 +434,7 @@ int CSController::TryGetMsg() {
     this->CSGameRules.Address = MulNX::MRead<uintptr_t>(this->Modules.client.GetBaseAddress() + cs2_dumper::offsets::client_dll::dwGameRules);
     this->CSGameRules.Update();
 
-    uintptr_t ppPlantedC4;
-    ppPlantedC4 = MulNX::MRead<uintptr_t>(this->Modules.client.GetBaseAddress() + cs2_dumper::offsets::client_dll::dwPlantedC4);
+    uintptr_t ppPlantedC4 = ppPlantedC4 = MulNX::MRead<uintptr_t>(this->Modules.client.GetBaseAddress() + cs2_dumper::offsets::client_dll::dwPlantedC4);
     if (ppPlantedC4) {
         this->PlantedC4.Address = MulNX::MRead<uintptr_t>(ppPlantedC4);
         this->PlantedC4.Update();

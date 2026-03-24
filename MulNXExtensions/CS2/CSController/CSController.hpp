@@ -71,7 +71,7 @@ class CSController final :public MulNX::IAbstractLayer3D {
 private:
     ControlSmoke controlSomke{};
     std::atomic<std::shared_ptr<Views>> ViewToGame = nullptr;
-    std::atomic<float> outFOV;
+    std::atomic<float> outFOV = 90;
     std::atomic<float> atoRoll = 0;
     // 逆向层关键接口
     void* Source2EngineToClient001 = nullptr;

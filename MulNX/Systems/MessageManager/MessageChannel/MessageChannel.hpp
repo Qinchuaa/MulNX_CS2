@@ -2,20 +2,17 @@
 
 #include "IMessageChannel.hpp"
 #include <MulNX/Systems/MessageManager/MulNXMessage/MulNXMessage.hpp>
-#include <mutex>
-#include <deque>
+#include <MulNXThirdParty/queue/concurrentqueue.h>
 
 namespace MulNX {
 	class MessageChannel final :public IMessageChannel {
 		friend class IMessageManager;
 		friend class MessageManager;
-		std::mutex ChannelMutex{};
 		MessageManager* MsgManager = nullptr;
 		//自身句柄
 		MulNXHandle hChannel{};
-		std::deque<Message>Messages{};
-		std::atomic<bool>bHasMessage = false;
-	public:
+        moodycamel::ConcurrentQueue<MulNX::Message>Messages;
+    public:
 		MessageChannel(MessageManager* MsgManager);
 	private:
         IMessageChannel& Subscribe(const std::string& MsgType)override;

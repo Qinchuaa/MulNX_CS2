@@ -2,6 +2,7 @@
 
 #include <MulNX/MulNX.hpp>
 #include <MulNXExtensions/CameraSystem/Elements/Elements.hpp>
+#include <MulNXExtensions/CameraSystem/ElementManager/ElementDebugger/ElementDebugger.hpp>
 #include "ElementConfig.hpp"
 
 #include <filesystem>
@@ -15,24 +16,18 @@ class ElementDebugger;
 class ElementManager final : public MulNX::ModuleBase {
     //对于元素，我们只给出三个通用接口：创建、获取、删除，具体的各个元素的功能由各个元素类自己实现
 private:
-    //Core指针，用于其它服务
     CameraDrawer* CamDrawer = nullptr;
     SolutionManager* SManager = nullptr;
     ProjectManager* PManager = nullptr;
-    ElementDebugger* ElementDebugger = nullptr;
 
-    //是否需要更新当前操作的元素
-    bool NeedUpdateCurrentElement = false;
-    //更新当前操作的元素的函数
-    void UpdateCurrentElement();
-    //当前操作的元素名称
-    std::string CurrentElementName = "";
-    //当前操作的元素指针
+    // 独占元素调试器
+    std::unique_ptr<ElementDebugger> elementDebugger = nullptr;
+
+    // 当前操作的元素指针
     std::shared_ptr<ElementBase> CurrentElement = nullptr;
 
 public:
     ElementManager();
-    ~ElementManager();
 
     ElementConfig Config{};
     // 使用智能指针存储多态对象，以存储不同类型的元素

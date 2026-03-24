@@ -170,7 +170,7 @@ bool Solution::Call(CameraSystemIO* IO) {
 
     //先分开播放模式逻辑
     switch (this->Playmode) {
-    case PlaybackMode::Serial: {
+    case PlaybackMode::Orchestration: {
         //偏移时间轴播放
 
         //判断偏移后的时间是否位于解决方案持续范围之中（先统一计算偏移后时间，无论究竟有没有偏移）
@@ -182,7 +182,7 @@ bool Solution::Call(CameraSystemIO* IO) {
             *IO->isPlaying = false;//播放结束
             return false;//无插值结果
         }
-        IO->PlaybackMode = PlaybackMode::Serial;
+        IO->PlaybackMode = PlaybackMode::Orchestration;
         for (size_t i = 0; i < this->Elements.size(); ++i) {
             //这里用减法得到相对于元素的时间
             //尝试该元素插值，如果有结果则代表可以应用
@@ -193,14 +193,14 @@ bool Solution::Call(CameraSystemIO* IO) {
         }
         break;
     }
-    case PlaybackMode::Parallel: {
+    case PlaybackMode::Activation: {
         //默认游戏时间轴播放
         //if (Time < this->StartTime || this->EndTime < Time) {
         //    return false;//无插值结果
         //    //不修改isPlaying状态，使用者任意跳转时间，如果在范围内，仍能给出插值结果
         //}
         IO->ElementTime = IO->SolutionTime;
-        IO->PlaybackMode = PlaybackMode::Parallel;
+        IO->PlaybackMode = PlaybackMode::Activation;
         for (size_t i = 0; i < this->Elements.size(); ++i) {
 
             bResult = bResult || this->Elements[i].Element->Call(IO);
