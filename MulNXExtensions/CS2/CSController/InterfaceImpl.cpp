@@ -6,8 +6,8 @@ bool CSController::ExecuteCommand(const std::string& cmd) {
     this->executor(0, cmd.c_str(), 1);
     return true;
 }
-float* CSController::GetViewMatrix()const {
-    return this->LocalPlayer.ViewMatrix;
+float* CSController::GetViewMatrix() {
+    return this->Modules.client.dwViewMatrix();
 }
 MulNX::Math::View CSController::GetView()const {
     MulNX::Math::View view;

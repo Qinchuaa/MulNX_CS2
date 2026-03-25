@@ -5,11 +5,11 @@
 
 #include "ConVarSystem/ConVarSystem.hpp"
 #include "EntityList/EntityList.hpp"
-#include "CSGameRules/CSGameRules.hpp"
 #include "GlobalVars/GlobalVars.hpp"
 #include "PlantedC4/PlantedC4.hpp"
-#include "LocalPlayer/LocalPlayer.hpp"
 #include "List/C_BaseEntity.hpp"
+
+#include "C_CSGameRules/C_CSGameRules.hpp"
 
 namespace CS2 {
     namespace Module {
@@ -19,6 +19,8 @@ namespace CS2 {
             uintptr_t dwEntityList() { return MulNX::MRead<uintptr_t>(this->GetBaseAddress() + cs2_dumper::offsets::client_dll::dwEntityList); }
             uintptr_t dwGameEntitySystem() { return MulNX::MRead<uintptr_t>(this->GetBaseAddress() + cs2_dumper::offsets::client_dll::dwGameEntitySystem); }
             int dwGameEntitySystem_highestEntityIndex() { return MulNX::MRead<int>(this->dwGameEntitySystem() + cs2_dumper::offsets::client_dll::dwGameEntitySystem_highestEntityIndex); }
+            CS2::C_CSGameRules* dwGameRules() { return MulNX::MRead<CS2::C_CSGameRules*>(this->GetBaseAddress() + cs2_dumper::offsets::client_dll::dwGameRules); }
+            float* dwViewMatrix() { return reinterpret_cast<float*>(this->GetBaseAddress() + cs2_dumper::offsets::client_dll::dwViewMatrix); }
             // 常常用于获取控制器
             CS2::C_BaseEntity* GetBaseEntity(int index) {
                 uintptr_t entListBase = MulNX::MRead<uintptr_t>(this->GetBaseAddress() + cs2_dumper::offsets::client_dll::dwEntityList);
@@ -88,8 +90,6 @@ private:
     C_PlantedC4 PlantedC4{};
     C_EntityList EntityList{};
     C_Modules Modules{};
-    C_CSGameRules CSGameRules{};
-    C_LocalPlayer LocalPlayer{};
 
     // 索引映射（小地图<->游戏实体列表）
     std::shared_mutex IndexMapMtx{};
@@ -118,7 +118,7 @@ public:
 
     // 核心接口
     bool ExecuteCommand(const std::string& cmd)override;
-    float* GetViewMatrix()const override;
+    float* GetViewMatrix()override;
     MulNX::Math::View GetView()const override;
     float GetTime()const override;
     float GetWinWidth()const override;
@@ -134,14 +134,10 @@ public:
     void HandleFirstPersonCameraPath(const CameraSystemIO* const IO);
     bool CameraSystemIOOverride(const CameraSystemIO* const IO)override;
 
-    // 获取LocalPlayer的引用
-    C_LocalPlayer& GetLocalPlayer() { return this->LocalPlayer; }
     // 获取控制台变量系统
     C_ConVarSystem& GetCvarSystem() { return this->CvarSystem; }
     // 获取Entity引用，注意，内部读取还是拷贝
     C_EntityList& GetEntityList() { return this->EntityList; }
-    // 拷贝游戏状态数据
-    C_CSGameRules GetCSGameRules();
 
     void HandleAimAtEntity(int AimTargetIndexInMap);
 };

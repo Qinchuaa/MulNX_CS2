@@ -37,7 +37,7 @@ namespace MulNX {
 
         virtual MulNX::Math::View GetView()const = 0;
 
-        virtual float* GetViewMatrix()const = 0;
+        virtual float* GetViewMatrix() = 0;
         virtual float GetWinWidth()const = 0;
         virtual float GetWinHeight()const = 0;
 

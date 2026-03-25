@@ -3,7 +3,6 @@ add_library(MulNXCS2Ext
     "CSController/InterfaceImpl.cpp"
     "CSController/Draw/DrawImpl.cpp"
     "CSController/ConVarSystem/ConVarSystem.cpp"
-    "CSController/CSGameRules/CSGameRules.cpp"
     "CSController/EntityList/EntityList.cpp"
     "CSController/EntityList/Entity/Entity.cpp"
     "CSController/EntityList/Entity/Controller/Controller.cpp"
@@ -12,7 +11,6 @@ add_library(MulNXCS2Ext
     "CSController/EntityList/Entity/Pawn/GameSceneNode/GameSceneNode.cpp"
     "CSController/EntityList/Entity/Pawn/ObserverServices/ObserverServices.cpp"
     "CSController/GlobalVars/GlobalVars.cpp"
-    "CSController/LocalPlayer/LocalPlayer.cpp"
     "CSCOntroller/PlantedC4/PlantedC4.cpp"
 
     "ConsoleManager/ConsoleManager.cpp"

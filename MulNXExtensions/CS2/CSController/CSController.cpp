@@ -211,11 +211,6 @@ bool CSController::Init() {
 
     //this->LocalPlayer.pGlobalFOV = this->CvarSystem.GetCvar("fov_cs_debug")->GetPtr<float>();
 
-    // 获取本地视图投影矩阵
-    this->LocalPlayer.ViewMatrix = reinterpret_cast<float*>(this->Modules.client.GetBaseAddress() + cs2_dumper::offsets::client_dll::dwViewMatrix);
-    // 获取本地欧拉角
-    this->LocalPlayer.ViewAngles = reinterpret_cast<DirectX::XMFLOAT3*>(this->Modules.client.GetBaseAddress() + cs2_dumper::offsets::client_dll::dwViewAngles);
-
     if (this->Modules.client.Valid) {
         // 搜索 .text 段
         auto textRegion = this->Modules.client.GetTextRegion();
@@ -238,20 +233,15 @@ bool CSController::Init() {
 
 int CSController::BasicUpdate() {
     // 获取EntityList
-    this->EntityList.Address = MulNX::MRead<uintptr_t>(this->Modules.client.GetBaseAddress() + cs2_dumper::offsets::client_dll::dwEntityList);
+    this->EntityList.Address = this->Modules.client.dwEntityList();
     // 获取CS2全局变量
     this->CSGlobalVars.Address = MulNX::MRead<uintptr_t>(this->Modules.client.GetBaseAddress() + cs2_dumper::offsets::client_dll::dwGlobalVars);
-    // 获取本地控制器
-    this->LocalPlayer.Entity.Controller.Address = MulNX::MRead<uintptr_t>(this->Modules.client.GetBaseAddress() + cs2_dumper::offsets::client_dll::dwLocalPlayerController);
-    if (int result = this->LocalPlayer.Update()) {
-        return result;
-    }
-
-    static int OldRoundStartCount = this->CSGameRules.m_nRoundStartCount;
-    if (OldRoundStartCount != this->CSGameRules.m_nRoundStartCount) {
+    
+    static int OldRoundStartCount = MulNX::MRead(this->Modules.client.dwGameRules()->nRoundStartCount());
+    if (OldRoundStartCount != MulNX::MRead(this->Modules.client.dwGameRules()->nRoundStartCount())) {
         MulNX::Message Msg("Game/NewRound"_hash);
         this->ISys().PublishAsync(std::move(Msg));
-        OldRoundStartCount = this->CSGameRules.m_nRoundStartCount;
+        OldRoundStartCount = MulNX::MRead(this->Modules.client.dwGameRules()->nRoundStartCount());
     }
     for (int i = 0;i <= this->Modules.client.dwGameEntitySystem_highestEntityIndex();i++) {
         auto entity = this->Modules.client.GetBaseEntity(i);
@@ -438,8 +428,6 @@ int CSController::TryGetMsg() {
     if (Result) {
         return Result;
     }
-    this->CSGameRules.Address = MulNX::MRead<uintptr_t>(this->Modules.client.GetBaseAddress() + cs2_dumper::offsets::client_dll::dwGameRules);
-    this->CSGameRules.Update();
 
     uintptr_t ppPlantedC4 = ppPlantedC4 = MulNX::MRead<uintptr_t>(this->Modules.client.GetBaseAddress() + cs2_dumper::offsets::client_dll::dwPlantedC4);
     if (ppPlantedC4) {
@@ -498,24 +486,19 @@ bool CSController::CameraSystemIOOverride(const CameraSystemIO* const IO) {
     return true;
 }
 
-void CSController::HandleAimAtEntity(int AimTargetIndexInMap) {
-    DirectX::XMFLOAT3 LocalEyePos = this->LocalPlayer.Entity.Pawn.GetEyePos();
-    DirectX::XMFLOAT3 TargetEyePos;
-    int TargetIndexInEntityList = this->GetIndexInEntityListFromIndexInMap(AimTargetIndexInMap);
-    if (TargetIndexInEntityList == -1)return;
-    TargetEyePos = this->EntityList.GetEntity(TargetIndexInEntityList).Pawn.GetEyePos();
+// void CSController::HandleAimAtEntity(int AimTargetIndexInMap) {
+//     DirectX::XMFLOAT3 LocalEyePos = this->LocalPlayer.Entity.Pawn.GetEyePos();
+//     DirectX::XMFLOAT3 TargetEyePos;
+//     int TargetIndexInEntityList = this->GetIndexInEntityListFromIndexInMap(AimTargetIndexInMap);
+//     if (TargetIndexInEntityList == -1)return;
+//     TargetEyePos = this->EntityList.GetEntity(TargetIndexInEntityList).Pawn.GetEyePos();
 
-    DirectX::XMFLOAT3 dir = TargetEyePos - LocalEyePos;
-    DirectX::XMFLOAT3 TargetViewAngles{};
-    MulNX::Math::CSDirToEuler(dir, TargetViewAngles);
+//     DirectX::XMFLOAT3 dir = TargetEyePos - LocalEyePos;
+//     DirectX::XMFLOAT3 TargetViewAngles{};
+//     MulNX::Math::CSDirToEuler(dir, TargetViewAngles);
 
-    this->LocalPlayer.SetViewAngle(TargetViewAngles);
-}
-
-C_CSGameRules CSController::GetCSGameRules() {
-    std::shared_lock lock(this->CSGameRules.GameRulesMtx);
-    return this->CSGameRules;
-}
+//     this->LocalPlayer.SetViewAngle(TargetViewAngles);
+// }
 
 // C_ConVar* m_yawPtr = nullptr;
 // m_yawPtr = this->CvarSystem.GetCvar("m_yaw");
