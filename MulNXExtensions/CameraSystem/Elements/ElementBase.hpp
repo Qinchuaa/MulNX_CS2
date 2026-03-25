@@ -85,10 +85,16 @@ public:
 
     // 析构函数（虚）
     virtual ~ElementBase() = default;
-    // 调用函数（虚）（Mode:0为默认，1自动减去头时间）
+
+    bool CalculateFrame(CameraSystemIO* IO)const;
+protected:
+    
+    // 调用函数（虚）
     virtual bool Call(CameraSystemIO* IO)const = 0;
+public:
+    
     // 通用Call，用于时间变换，基类型绑定等
-    bool BaseCall(float& OutputTime, CameraSystemIO* IO)const;
+    // bool BaseCall(float& OutputTime, CameraSystemIO* IO)const;
 
     // 关闭绘制
     void CloseDraw();

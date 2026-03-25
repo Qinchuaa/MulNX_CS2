@@ -11,8 +11,6 @@ bool FirstPersonCameraPath::Call(CameraSystemIO* IO)const {
 
 	float Time;
 
-	if (!this->BaseCall(Time, IO))return false;
-
     IO->Frame.TargetOBMode = 2;
 
     IO->Frame.TargetPlayerIndexInMap = this->TargetPlayerIndexInMap;

@@ -156,7 +156,7 @@ std::string Solution::GetName()const {
 }
 bool Solution::Call(CameraSystemIO* IO) {
     if (!this->SafeUse) {
-        *IO->isPlaying = false;
+        IO->isPlaying = false;
         return false;
     }
     //对时间依次进行两次偏移：解决方案偏移，具体元素具体偏移
@@ -180,17 +180,18 @@ bool Solution::Call(CameraSystemIO* IO) {
         if (this->EndTime < SolutionOffsetedTime) {
             //播放结束
             this->SolutionOffset = 0;//归位时间
-            *IO->isPlaying = false;//播放结束
+            IO->isPlaying = false;//播放结束
             return false;//无插值结果
         }
-        IO->PlaybackMode = PlaybackMode::Orchestration;
         for (size_t i = 0; i < this->Elements.size(); ++i) {
             //这里用减法得到相对于元素的时间
             //尝试该元素插值，如果有结果则代表可以应用
             //这里传入的时间已经是相对时间
             //模式1自动减去头时间
-            IO->ElementTime = SolutionOffsetedTime - this->Elements[i].Offset;
-            bResult = bResult || this->Elements[i].Element->Call(IO);
+            auto& element = this->Elements[i].Element;
+            IO->ElementTime = SolutionOffsetedTime - this->Elements[i].Offset + element->GetStartTime();
+            bResult = bResult || element->CalculateFrame(IO);
+            if (bResult)IO->CurrentElementType = element->TypeGet_Enum();
         }
         break;
     }
@@ -200,11 +201,12 @@ bool Solution::Call(CameraSystemIO* IO) {
         //    return false;//无插值结果
         //    //不修改isPlaying状态，使用者任意跳转时间，如果在范围内，仍能给出插值结果
         //}
+        
         IO->ElementTime = IO->SolutionTime;
-        IO->PlaybackMode = PlaybackMode::Activation;
         for (size_t i = 0; i < this->Elements.size(); ++i) {
-
-            bResult = bResult || this->Elements[i].Element->Call(IO);
+            auto& element = this->Elements[i].Element;
+            bResult = bResult || element->CalculateFrame(IO);
+            if (bResult)IO->CurrentElementType = element->TypeGet_Enum();
         }
         break;
     }

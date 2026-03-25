@@ -57,7 +57,7 @@ public:
     std::vector<std::shared_ptr<ElementBase>>::iterator Element_GetIterator(const std::string_view Name);
 
     //获取元素指针
-    template<Element T>
+    template<Elements::Element T>
     std::shared_ptr<T> Element_Get(const std::string_view Name) {
         //编译期获取目标类型
         constexpr ElementType TargetElementType = T::TemplateType;
@@ -84,7 +84,7 @@ public:
 
 
     //创建元素函数，支持传递任意参数给元素构造函数
-    template<Element T>
+    template<Elements::Element T>
     bool Element_Create(const std::string& Name) {
         // 检查是否已存在同名元素
         if (this->Element_Get<ElementBase>(Name)) {

@@ -40,17 +40,10 @@ void ElementBase::ResetName(const std::string& NewName) {
     this->Name = NewName;
 }
 
-bool ElementBase::BaseCall(float& OutputTime, CameraSystemIO* IO)const {
-    IO->CurrentElementType = this->Type;
-    OutputTime = IO->ElementTime;
-    switch (IO->PlaybackMode) {
-    case PlaybackMode::Activation:break;
-    case PlaybackMode::Orchestration:OutputTime += this->StartTime; break;
-    }
-    //处理边界情况
-    if (OutputTime <= this->StartTime) return false;
-    if (OutputTime >= this->EndTime) return false;
-    return true;
+bool ElementBase::CalculateFrame(CameraSystemIO* IO)const {
+    if (IO->ElementTime < this->StartTime)return false;
+    if (IO->ElementTime > this->EndTime)return false;
+    return this->Call(IO);
 }
 
 void ElementBase::CloseDraw() {

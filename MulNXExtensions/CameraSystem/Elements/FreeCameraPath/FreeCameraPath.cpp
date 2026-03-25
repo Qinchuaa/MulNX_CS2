@@ -70,11 +70,7 @@ bool FreeCameraPath::Call(CameraSystemIO* IO)const {
     //处理空关键帧的情况
     if (CameraKeyFrames.empty())return false;
 
-	float Time;
-
-    if (!this->BaseCall(Time, IO)) {
-        return false;
-    }
+    float Time = IO->ElementTime;
 
     //查找当前时间所在的关键帧区间（使用绝对时间来搜索以匹配以绝对时间存储的关键帧）
     auto it = std::lower_bound(CameraKeyFrames.begin(), CameraKeyFrames.end(), Time,

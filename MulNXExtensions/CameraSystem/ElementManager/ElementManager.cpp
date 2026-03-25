@@ -321,14 +321,13 @@ void ElementManager::Preview_SetPreviewSchema(const float Time) {
 bool ElementManager::Preview_Call(CameraSystemIO* IO) {
     if (!this->OnPreview)return false;
     if (this->Preview_CurrentElement) {
-        float SchemaedTime = IO->ElementTime - this->Preview_TimeSchema;
-        if (SchemaedTime < 0.0f || SchemaedTime > this->Preview_CurrentElement->DurationTime) {
+        IO->ElementTime += this->Preview_CurrentElement->GetStartTime() - this->Preview_TimeSchema;
+        IO->CurrentElementType = this->Preview_CurrentElement->TypeGet_Enum();
+        if (!this->Preview_CurrentElement->CalculateFrame(IO)) {
             this->Preview_Disable();
             return false;
         }
-        IO->PlaybackMode = PlaybackMode::Orchestration;
-        IO->ElementTime = SchemaedTime;
-        return this->Preview_CurrentElement->Call(IO);
+        return true;
     }
     else {
         this->Preview_Disable();

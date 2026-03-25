@@ -295,7 +295,35 @@ void SolutionManager::Solution_DebugWindow() {
     auto w = MulNX::UI::RAIIWindow("解决方案调试", this->ShowWindow);
     // 检查当前是否操作解决方案
     if (this->CurrentSolution) {
-        ImGui::Text(("当前操作解决方案名称：" + this->CurrentSolution->Name + "   元素数量：" + std::to_string(this->CurrentSolution->Elements.size()) + "   总时长：" + std::to_string(this->CurrentSolution->GetMsg().empty() ? 0.0f : this->CurrentSolution->TotalDurationTime)).data());
+        ImGui::Text(std::format("当前操作解决方案名称：{}   元素数量：{}   总时长：{}   播放模式：{}",
+            this->CurrentSolution->Name,
+            this->CurrentSolution->Elements.size(),
+            this->CurrentSolution->TotalDurationTime,
+            PlaybackModeToString(this->CurrentSolution->Playmode)).c_str());
+
+        if (ImGui::Button("切换到激活模式")) {
+            this->CurrentSolution->Playmode = PlaybackMode::Activation;
+        }
+        ImGui::SameLine();
+        if (ImGui::Button("切换到编排模式")) {
+            this->CurrentSolution->Playmode = PlaybackMode::Orchestration;
+        }
+
+        if (ImGui::Button("使能当前解决方案")) {
+            this->Playing_SetSolution(this->CurrentSolution);
+            this->Playing_Enable();
+        }
+        ImGui::SameLine();
+        if (ImGui::Button("按激活模式生成编排模式偏移")) {
+            this->CurrentSolution->TimeLineGenerate();
+        }
+
+        if (ImGui::Button("修改按键绑定")) {
+            this->Buffer_KCPack = this->CurrentSolution->KCPack;//缓存
+            this->OpenSolutionKCPackDebugWindow = true;//打开窗口
+        }
+
+        ImGui::Separator();
 
         static std::string NewElementName = "";
         ImGui::InputText("新元素名称", &NewElementName);
@@ -314,34 +342,12 @@ void SolutionManager::Solution_DebugWindow() {
                 }
             }
         }
-
+        ImGui::SameLine();
         if (ImGui::Button("清空所有元素")) {
             this->CurrentSolution->Clear();
             this->ISys().LogSucc("成功清空解决方案所有元素");
         }
 
-        if (ImGui::Button("切换到激活模式")) {
-            this->CurrentSolution->Playmode = PlaybackMode::Activation;
-        }
-        ImGui::SameLine();
-        if (ImGui::Button("切换到编排模式")) {
-            this->CurrentSolution->Playmode = PlaybackMode::Orchestration;
-        }
-        if (ImGui::Button("使能当前解决方案")) {
-            this->Playing_SetSolution(this->CurrentSolution);
-            this->Playing_Enable();
-        }
-        if (ImGui::Button("按激活模式生成编排模式偏移")) {
-            this->CurrentSolution->TimeLineGenerate();
-        }
-
-        if (ImGui::Button("修改按键绑定")) {
-            this->Buffer_KCPack = this->CurrentSolution->KCPack;//缓存
-            this->OpenSolutionKCPackDebugWindow = true;//打开窗口
-        }
-
-        ImGui::Separator();
-        ImGui::Separator();
         ImGui::Separator();
 
         static int IndexForReset = 0;
@@ -563,19 +569,18 @@ void SolutionManager::Playing_Call() {
         this->Playing_Disable();
         return;
     }
-    std::unique_ptr<CameraSystemIO>IO = std::make_unique<CameraSystemIO>();
+    CameraSystemIO IO;
 
-    IO->SolutionTime = this->AL3D->GetTime();
-    IO->FrameGameTime = this->AL3D->GetTime();
-    IO->PlaybackMode = this->Playing_pSolution->Playmode;
-    IO->PlayBackRate = this->PlaybackRate;
-    bool bPlaying = this->Playing;
-    IO->isPlaying = &bPlaying;// 这里让解决方案拿到关闭播放控制权
+    IO.SolutionTime = this->AL3D->GetTime();
+    IO.FrameGameTime = this->AL3D->GetTime();
+    IO.PlayBackRate = this->PlaybackRate;
+    IO.isPlaying = this->Playing;
 
-    if (!this->Playing_pSolution->Call(IO.get())) {
+    if (!this->Playing_pSolution->Call(&IO)) {
+        this->AL3D->ClearViewOverride();
         // 这里不关闭播放，因为解决方案可能还有内容
         // 不应该由管理器因为仅仅没有结果就关闭
-        if (bPlaying == false) {
+        if (IO.isPlaying == false) {
             // 如果解决方案自己关闭了播放
             this->Playing_Disable();
             return;
@@ -583,9 +588,9 @@ void SolutionManager::Playing_Call() {
         return;
     }
     if (this->Config.PlayingOverride) {
-        this->AL3D->CameraSystemIOOverride(IO.get());
+        this->AL3D->CameraSystemIOOverride(&IO);
     }
     else if (this->Config.PlayingDraw) {
-        this->CamDrawer->DrawFrameCamera(IO->Frame, "解决方案插值摄像机");
+        this->CamDrawer->DrawFrameCamera(IO.Frame, "解决方案插值摄像机");
     }
 }
