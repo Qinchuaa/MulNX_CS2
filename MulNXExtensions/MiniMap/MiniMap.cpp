@@ -16,7 +16,7 @@ bool MiniMap::Init() {
 }
 
 void MiniMap::VirtualMain() {
-    if (this->KT->CheckWithPack(MulNX::KeyCheckPack{ true,false,false,true,'M',1 })) {
+    if (this->pInputSystem->CheckWithPack(MulNX::KeyCheckPack{ true,false,false,true,'M',1 })) {
         this->ShowWindow = !this->ShowWindow;
     }
 

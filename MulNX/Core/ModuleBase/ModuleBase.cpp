@@ -36,7 +36,7 @@ bool MulNX::ModuleBase::BaseInit() {
         this->IDebugger = moduleManager->FindModule<MulNX::IDebugger>("Debugger");
         this->GlobalVars = moduleManager->FindModule<MulNX::GlobalVars>("GlobalVars");
         this->AL3D = moduleManager->FindAbstractLayer3D();
-        this->KT = moduleManager->FindModule<MulNX::KeyTracker>("KeyTracker");
+        this->pInputSystem = moduleManager->FindModule<MulNX::InputSystem>("InputSystem");
         this->pPathManager = moduleManager->FindModule<MulNX::PathManager>("PathManager");
 
         if (!this->HModule.IsValid()) {

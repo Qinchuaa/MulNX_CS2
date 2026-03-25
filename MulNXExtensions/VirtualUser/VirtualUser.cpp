@@ -51,10 +51,10 @@ void VirtualUser::Menu() {
 }
 void VirtualUser::VirtualMain() {
     this->EntryProcessMsg();
-    if (this->KT->CheckWithPack(MulNX::KeyCheckPack{ true,false,false,true,'P',1 })) {
+    if (this->pInputSystem->CheckWithPack(MulNX::KeyCheckPack{ true,false,false,true,'P',1 })) {
         this->CameraSystem->ShutDown();
     }
-    if (this->KT->CheckWithPack(MulNX::KeyCheckPack{ true,false,false,true,'T',1 })) {
+    if (this->pInputSystem->CheckWithPack(MulNX::KeyCheckPack{ true,false,false,true,'T',1 })) {
         bool AutoRunning = this->Running.load();
         if (AutoRunning) {
             this->Running.store(false);

@@ -43,8 +43,6 @@ public:
     //是否处于播放状态
     //播放完成之后需要变为false，切换解决方案要变成true
     bool Playing = false;
-    //播放模式
-    PlaybackMode Playmode = PlaybackMode::Orchestration;
     //播放比率，用于调控解决方案播放速度和游戏速度，用于制作子弹时间等
     float PlaybackRate = 1.0f;
 
@@ -108,10 +106,10 @@ public:
     void Playing_Enable();
     //关闭播放
     void Playing_Disable();
-    //通过指针设置当前播放的解决方案（0：默认游戏时间轴播放，1：偏移时间轴播放）
-    bool Playing_SetSolution(Solution* const solution, const PlaybackMode Playmode);
-    //通过名称设置当前播放的解决方案（0：默认游戏时间轴播放，1：偏移时间轴播放）
-    bool Playing_SetSolution(const std::string& SolutionName, const PlaybackMode Playmode);
+    //通过指针设置当前播放的解决方案
+    bool Playing_SetSolution(Solution* const solution);
+    //通过名称设置当前播放的解决方案
+    bool Playing_SetSolution(const std::string& SolutionName);
 
 
     //设置播放时间偏移

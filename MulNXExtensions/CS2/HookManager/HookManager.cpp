@@ -29,7 +29,7 @@ void HookManager::CheckHook() {
         this->ISys().LogInfo("检测到D3D11波动，等待用户手动ReHook");
     }
     if (AllowReHook) {
-        if (this->KT->CheckComboClick(VK_INSERT, 3)) {
+        if (this->pInputSystem->CheckComboClick(VK_INSERT, 3)) {
             ReHook = true;
             AllowReHook = false;
         }

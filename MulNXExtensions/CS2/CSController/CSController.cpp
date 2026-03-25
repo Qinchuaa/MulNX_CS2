@@ -17,35 +17,35 @@ void CSController::HandleOverrideView(void* ThisCViewSetup) {
     float* pViewAngles = (float*)((char*)ThisCViewSetup + 0x4b8);
 
     // 加载来自摄像机系统的View
-    auto view = this->ViewToGame.load(std::memory_order_acquire);
-    // 如果处于摄像机轨道播放中
-    if (this->GlobalVars->CampathPlaying.load(std::memory_order_acquire)) {
-        if (view != nullptr) {
-            pViewOrigin[0] = view->OriginX;
-            pViewOrigin[1] = view->OriginY;
-            pViewOrigin[2] = view->OriginZ;
+    auto view = this->controlView.ViewToGame.load(std::memory_order_acquire);
+    if (view != nullptr) {
+        pViewOrigin[0] = view->OriginX;
+        pViewOrigin[1] = view->OriginY;
+        pViewOrigin[2] = view->OriginZ;
 
-            pViewAngles[0] = view->AnglesX;
-            pViewAngles[1] = view->AnglesY;
-            pViewAngles[2] = view->AnglesZ;
+        pViewAngles[0] = view->AnglesX;
+        pViewAngles[1] = view->AnglesY;
+        pViewAngles[2] = view->AnglesZ;
 
-            if (view->FOV > 0.01f) {
-                *pFov = view->FOV;
-            }
-
-            this->atoRoll.store(view->AnglesZ, std::memory_order_release);
+        if (view->FOV > 0.01f) {
+            *pFov = view->FOV;
         }
-        return;
     }
-    // 记录关键数据
+    // 执行roll覆盖
+    pViewAngles[2] = this->controlView.InputRoll.load(std::memory_order_acquire);
+    // 记录视角数据
+    this->controlView.currentView.AnglesX.store(pViewAngles[0], std::memory_order_release);
+    this->controlView.currentView.AnglesY.store(pViewAngles[1], std::memory_order_release);
+    this->controlView.currentView.AnglesZ.store(pViewAngles[2], std::memory_order_release);
+    this->controlView.currentView.OriginX.store(pViewOrigin[0], std::memory_order_release);
+    this->controlView.currentView.OriginY.store(pViewOrigin[1], std::memory_order_release);
+    this->controlView.currentView.OriginZ.store(pViewOrigin[2], std::memory_order_release);
     if (*pFov < 0.01f) {
-        this->outFOV.store(90.0f, std::memory_order_release);
+        this->controlView.currentView.FOV.store(90.0f, std::memory_order_release);
     }
     else {
-        this->outFOV.store(*pFov, std::memory_order_release);
+        this->controlView.currentView.FOV.store(*pFov, std::memory_order_release);
     }
-    pViewAngles[2] = this->atoRoll.load(std::memory_order_acquire);
-
     // try {
     //     for (int i = 0;i <= this->Modules.client.dwGameEntitySystem_highestEntityIndex();i++) {
     //         auto entity = this->Modules.client.GetBaseEntity(i);
@@ -99,13 +99,13 @@ bool CSController::UINodeFunc(MulNXUINode* node) {
     auto w = MulNX::UI::RAIIWindow("快捷操作", this->ShowWindow);
     if (!w)return true;
 
-    MulNX::UI::SliderFloat("roll调整", this->atoRoll, -179, 179);
+    MulNX::UI::SliderFloat("roll调整", this->controlView.InputRoll, -179, 179);
 
     auto* pGlobalFOV = this->CvarSystem.GetCvar("fov_cs_debug")->GetPtr<float>();
     if (ImGui::SliderFloat("fov调整", pGlobalFOV, 0, 179));
-
+    MulNX::UI::Checkbox("摄像机模式", this->controlView.CameraMode);
     if (ImGui::Button("一键归正")) {
-        this->atoRoll.store(0, std::memory_order_release);
+        this->controlView.InputRoll.store(0, std::memory_order_release);
         *pGlobalFOV = 0;
     }
     if (ImGui::CollapsingHeader("烟雾弹控制")) {
@@ -210,7 +210,6 @@ bool CSController::Init() {
         ("VEngineCvar007", nullptr);
 
     //this->LocalPlayer.pGlobalFOV = this->CvarSystem.GetCvar("fov_cs_debug")->GetPtr<float>();
-    this->LocalPlayer.pGlobalFOV = &this->outFOV;
 
     // 获取本地视图投影矩阵
     this->LocalPlayer.ViewMatrix = reinterpret_cast<float*>(this->Modules.client.GetBaseAddress() + cs2_dumper::offsets::client_dll::dwViewMatrix);
@@ -474,7 +473,8 @@ void CSController::HandleFreeCameraPath(const CameraSystemIO* const IO) {
     view->AnglesX = RotEuler.x;
     view->AnglesY = RotEuler.y;
     view->AnglesZ = RotEuler.z;
-    this->ViewToGame.store(view);
+    this->controlView.InputRoll.store(view->AnglesZ, std::memory_order_release);
+    this->controlView.ViewToGame.store(view);
 }
 void CSController::HandleFirstPersonCameraPath(const CameraSystemIO* const IO) {
     static uint8_t LastIndex = 0xFFFF;

@@ -355,7 +355,7 @@ bool CameraSystem::CallProject(const std::string& ProjectName) {
     return true;
 }
 bool CameraSystem::CallSolution(const std::string& SolutionName) {
-    if (this->SManager.Playing_SetSolution(SolutionName, PlaybackMode::Orchestration)) {
+    if (this->SManager.Playing_SetSolution(SolutionName)) {
         this->SManager.Playing_Enable();
         return true;
     }

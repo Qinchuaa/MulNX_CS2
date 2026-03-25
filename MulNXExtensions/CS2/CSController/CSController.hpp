@@ -49,13 +49,13 @@ public:
 
 class Views {
 public:
-    float OriginX = 0;
-    float OriginY = 0;
-    float OriginZ = 0;
-    float AnglesX = 0;
-    float AnglesY = 0;
-    float AnglesZ = 0;
-    float FOV = 90.0f;
+    std::atomic<float> OriginX = 0;
+    std::atomic<float> OriginY = 0;
+    std::atomic<float> OriginZ = 0;
+    std::atomic<float> AnglesX = 0;
+    std::atomic<float> AnglesY = 0;
+    std::atomic<float> AnglesZ = 0;
+    std::atomic<float> FOV = 90.0f;
 };
 
 class ControlSmoke {
@@ -67,12 +67,18 @@ public:
     std::atomic<float> B = 127;
 };
 
+class ControlView{
+public:
+    std::atomic<std::shared_ptr<Views>> ViewToGame = nullptr;
+    std::atomic<float> InputRoll = 0;
+    std::atomic<bool> CameraMode = false;
+    Views currentView{};
+};
+
 class CSController final :public MulNX::IAbstractLayer3D {
 private:
     ControlSmoke controlSomke{};
-    std::atomic<std::shared_ptr<Views>> ViewToGame = nullptr;
-    std::atomic<float> outFOV = 90;
-    std::atomic<float> atoRoll = 0;
+    ControlView controlView{};
     // 逆向层关键接口
     void* Source2EngineToClient001 = nullptr;
     VExecutor<void(int, const char*, int)> executor{};
@@ -120,6 +126,7 @@ public:
     bool SpecPlayer(int IndexInMap)override;
     D_Player& GetPlayerMsg(int Index)override;
     void spec_goto_ex(const DirectX::XMFLOAT3& pos, const DirectX::XMFLOAT3& rot)override;
+    void ClearViewOverride()override;
 
     // CameraSystemIO的处理
 

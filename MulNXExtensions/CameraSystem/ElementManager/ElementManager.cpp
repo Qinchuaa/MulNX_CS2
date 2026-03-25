@@ -297,12 +297,11 @@ void ElementManager::Preview_Enable() {
         return;
     }
     this->OnPreview = true;
-    this->GlobalVars->CampathPlaying = true;
     this->ISys().LogInfo("已开启预览");
 }
 void ElementManager::Preview_Disable() {
     this->OnPreview = false;
-    this->GlobalVars->CampathPlaying = false;
+    this->AL3D->ClearViewOverride();
     this->ISys().LogInfo("已关闭预览");
 }
 void ElementManager::Preview_SetElement(const std::string& Name) {

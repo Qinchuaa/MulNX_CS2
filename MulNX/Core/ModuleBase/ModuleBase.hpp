@@ -43,7 +43,7 @@ namespace MulNX {
         std::atomic<int> MyThreadDelta = 10;
 	public:
         // 按键追踪器指针
-		MulNX::KeyTracker* KT = nullptr;
+        MulNX::InputSystem* pInputSystem = nullptr;
 		// 组件句柄
 		MulNXHandle HModule;
 		// 3D抽象层指针

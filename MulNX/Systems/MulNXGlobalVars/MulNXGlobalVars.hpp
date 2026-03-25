@@ -25,8 +25,6 @@ namespace MulNX {
         std::atomic<bool>DebugMode = false;
         // 是否正在游戏对局中
 		std::atomic<bool>InGamePlaying = false;
-        // 是否正在播放摄像机轨道
-		std::atomic<bool>CampathPlaying = false;
         // 核心心跳
 		std::atomic<uint32_t>CoreTick = 0;
         // 关键配置：是否让部分高危错误直接引发崩溃

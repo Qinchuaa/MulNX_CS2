@@ -11,7 +11,6 @@ public:
 	DirectX::XMFLOAT3* PositionB{};
 	DirectX::XMFLOAT3* ViewAngles{};
 	float* ViewMatrix;
-	std::atomic<float>* pGlobalFOV = nullptr;
 
 	// 获取综合信息
 	std::ostringstream GetMsg();

@@ -46,8 +46,8 @@ void SolutionManager::Traversal() {
     //遍历
     for (const auto& pSolution : this->Solutions) {
         //快捷键播放处理
-        if (this->KT->CheckWithPack(pSolution->KCPack)) {
-            this->Playing_SetSolution(pSolution.get(), PlaybackMode::Orchestration);//设置播放，偏移时间轴播放
+        if (this->pInputSystem->CheckWithPack(pSolution->KCPack)) {
+            this->Playing_SetSolution(pSolution.get());//设置播放，偏移时间轴播放
             this->Playing_Enable();//启动播放
         }
         //后续其它任务待补充
@@ -320,16 +320,19 @@ void SolutionManager::Solution_DebugWindow() {
             this->ISys().LogSucc("成功清空解决方案所有元素");
         }
 
-        if (ImGui::Button("激活当前解决方案")) {
-            this->Playing_SetSolution(this->CurrentSolution, PlaybackMode::Activation);
+        if (ImGui::Button("切换到激活模式")) {
+            this->CurrentSolution->Playmode = PlaybackMode::Activation;
+        }
+        ImGui::SameLine();
+        if (ImGui::Button("切换到编排模式")) {
+            this->CurrentSolution->Playmode = PlaybackMode::Orchestration;
+        }
+        if (ImGui::Button("使能当前解决方案")) {
+            this->Playing_SetSolution(this->CurrentSolution);
             this->Playing_Enable();
         }
-        if (ImGui::Button("按激活模式生成时间偏移")) {
+        if (ImGui::Button("按激活模式生成编排模式偏移")) {
             this->CurrentSolution->TimeLineGenerate();
-        }
-        if (ImGui::Button("播放当前解决方案（在编排模式下可用）")) {
-            this->Playing_SetSolution(this->CurrentSolution, PlaybackMode::Orchestration);
-            this->Playing_Enable();
         }
 
         if (ImGui::Button("修改按键绑定")) {
@@ -503,16 +506,14 @@ void SolutionManager::Solution_Name_DebugWindow() {
 
 //切换相关
 
-bool SolutionManager::Playing_SetSolution(Solution* const solution, const PlaybackMode Playmode) {
+bool SolutionManager::Playing_SetSolution(Solution* const solution) {
     //这里只需要设置，播放结束解决方案本身自动归位
     if (!solution) {
         this->ISys().LogError("找不到目标解决方案，可能是空指针");
         return false;
     }
     this->Playing_pSolution = solution;
-    this->Playmode = Playmode;
-    solution->Playmode = Playmode;
-    switch (Playmode) {
+    switch (solution->Playmode) {
     case PlaybackMode::Orchestration:
         this->Playing_SetTimeSchema(this->AL3D->GetTime());//偏移时间轴播放
         this->ISys().LogInfo("偏移时间轴播放，偏移时间设置为：" + std::to_string(this->AL3D->GetTime()));
@@ -524,12 +525,12 @@ bool SolutionManager::Playing_SetSolution(Solution* const solution, const Playba
     this->ISys().LogInfo("已经切换至解决方案：" + solution->Name);
     return true;
 }
-bool SolutionManager::Playing_SetSolution(const std::string& SolutionName, const PlaybackMode Playmode) {
+bool SolutionManager::Playing_SetSolution(const std::string& SolutionName) {
     Solution* pSolution = this->Solution_Get(SolutionName);
     if (!pSolution) {
         return false;
     }
-    return this->Playing_SetSolution(pSolution, Playmode);
+    return this->Playing_SetSolution(pSolution);
 }
 
 
@@ -541,12 +542,11 @@ void SolutionManager::Playing_Enable() {
         return;
     }
     this->Playing = true;
-    this->GlobalVars->CampathPlaying = true;
     this->ISys().LogInfo("已开启播放");
 }
 void SolutionManager::Playing_Disable() {
     this->Playing = false;
-    this->GlobalVars->CampathPlaying = false;
+    this->AL3D->ClearViewOverride();
     this->ISys().LogInfo("已关闭播放");
 }
 void SolutionManager::Playing_SetTimeSchema(const float Time) {
@@ -567,7 +567,7 @@ void SolutionManager::Playing_Call() {
 
     IO->SolutionTime = this->AL3D->GetTime();
     IO->FrameGameTime = this->AL3D->GetTime();
-    IO->PlaybackMode = this->Playmode;
+    IO->PlaybackMode = this->Playing_pSolution->Playmode;
     IO->PlayBackRate = this->PlaybackRate;
     bool bPlaying = this->Playing;
     IO->isPlaying = &bPlaying;// 这里让解决方案拿到关闭播放控制权

@@ -10,9 +10,15 @@ float* CSController::GetViewMatrix()const {
     return this->LocalPlayer.ViewMatrix;
 }
 MulNX::Math::View CSController::GetView()const {
-    auto view = this->LocalPlayer.GetView();
-    view.FOV = this->outFOV.load(std::memory_order_acquire);
-    view.rotation.z = this->atoRoll.load(std::memory_order_acquire);
+    MulNX::Math::View view;
+    view.position.x = this->controlView.currentView.OriginX.load(std::memory_order_acquire);
+    view.position.y = this->controlView.currentView.OriginY.load(std::memory_order_acquire);
+    view.position.z = this->controlView.currentView.OriginZ.load(std::memory_order_acquire);
+    view.rotation.x = this->controlView.currentView.AnglesX.load(std::memory_order_acquire);
+    view.rotation.y = this->controlView.currentView.AnglesY.load(std::memory_order_acquire);
+    view.rotation.z = this->controlView.currentView.AnglesZ.load(std::memory_order_acquire);
+    view.FOV = this->controlView.currentView.FOV.load(std::memory_order_acquire);
+
     return view;
 }
 float CSController::GetTime()const {
@@ -46,5 +52,8 @@ D_Player& CSController::GetPlayerMsg(int Index) {
 }
 void CSController::spec_goto_ex(const DirectX::XMFLOAT3& pos, const DirectX::XMFLOAT3& rot) {
     this->ExecuteCommand(std::format("spec_goto {} {} {} {} {}", pos.x, pos.y, pos.z, rot.x, rot.y));
-    this->atoRoll.store(rot.z, std::memory_order_release);
+    this->controlView.InputRoll.store(rot.z, std::memory_order_release);
+}
+void CSController::ClearViewOverride() {
+    this->controlView.ViewToGame.store(nullptr, std::memory_order_release);
 }

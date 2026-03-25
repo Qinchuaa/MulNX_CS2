@@ -2,11 +2,9 @@
 
 #include <MulNX/Base/UI/UI.hpp>
 #include <MulNX/Core/Core.hpp>
-
-#include "../MessageManager/IMessageManager.hpp"
-#include "../HandleSystem/HandleSystem.hpp"
-#include "../KeyTracker/KeyTracker.hpp"
-#include "../MulNXGlobalVars/MulNXGlobalVars.hpp"
+#include <MulNX/Systems/MessageManager/IMessageManager.hpp>
+#include <MulNX/Systems/InputSystem/InputSystem.hpp>
+#include <MulNX/Systems/MulNXGlobalVars/MulNXGlobalVars.hpp>
 
 #include <Windows.h>
 
@@ -44,7 +42,7 @@ int MulNX::UISystem::Render() {
     
     this->FrameBefore();
     MulNX::SetUIStyle();
-    if (this->KT->CheckComboClick(VK_INSERT, 1)) {
+    if (this->pInputSystem->CheckComboClick(VK_INSERT, 1)) {
         this->UIContext.Active = !this->UIContext.Active;
     }
     if (this->UIContext.Active) {

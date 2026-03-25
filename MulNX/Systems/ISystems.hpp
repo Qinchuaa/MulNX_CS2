@@ -2,7 +2,7 @@
 
 #include "HandleSystem/IHandleSystem.hpp"
 #include "IPCer/IPCer.hpp"
-#include "KeyTracker/KeyTracker.hpp"
+#include "InputSystem/InputSystem.hpp"
 #include "MessageManager/IMessageManager.hpp"
 #include "MulNXGlobalVars/MulNXGlobalVars.hpp"
 #include "MulNXUISystem/IMulNXUISystem.hpp"

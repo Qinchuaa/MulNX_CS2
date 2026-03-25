@@ -75,7 +75,7 @@ void ProjectManager::VirtualMain() {
 void ProjectManager::Traversal() {
     if (!this->Config.ProjectShortcutEnable)return;
     for (const auto& Project : this->Projects) {
-        if (this->KT->CheckWithPack(Project->KCPack)) {
+        if (this->pInputSystem->CheckWithPack(Project->KCPack)) {
             this->Project_Apply(Project);
         }
     }
@@ -536,7 +536,7 @@ bool ProjectManager::Playing_AutoCall(const MulNX::Message& Msg) {
             return false;
         }
         int temp = rand() % OnNewRound.size();
-        return this->SManager->Playing_SetSolution(OnNewRound[temp], PlaybackMode::Orchestration);
+        return this->SManager->Playing_SetSolution(OnNewRound[temp]);
     }
     case "Game/RoundEnd"_hash: {
         const std::vector<std::string>& OnEnd = this->ActiveProject->OnRoundEnd;
@@ -545,7 +545,7 @@ bool ProjectManager::Playing_AutoCall(const MulNX::Message& Msg) {
             return false;
         }
         int temp = rand() % OnEnd.size();
-        return this->SManager->Playing_SetSolution(OnEnd[temp], PlaybackMode::Orchestration);
+        return this->SManager->Playing_SetSolution(OnEnd[temp]);
     }
     }
     return false;

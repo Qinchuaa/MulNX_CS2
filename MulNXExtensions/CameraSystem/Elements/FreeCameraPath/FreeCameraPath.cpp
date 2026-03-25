@@ -322,14 +322,14 @@ void FreeCameraPath::DebugUI(CameraDrawer* CamDrawer, ElementManager* EManager) 
         ImGui::Text(Frame.GetMsg().c_str());
     }
     
-    if (ImGui::Button("添加关键帧") || EManager->KT->CheckComboClick(VK_CAPITAL, 1)) {
+    if (ImGui::Button("添加关键帧") || EManager->pInputSystem->CheckComboClick('F', 1)) {
         MulNX::Math::CameraKeyFrame Frame;
         Frame.KeyTime = EManager->AL3D->GetTime();
         Frame.SpatialState = EManager->AL3D->GetView().ToSpatialState();
         this->AddKeyframe(Frame);
     }
 
-    if (ImGui::Button("清空关键帧") || EManager->KT->CheckComboClick(VK_DELETE, 2)) {
+    if (ImGui::Button("清空关键帧") || EManager->pInputSystem->CheckComboClick(VK_DELETE, 2)) {
         this->Clear();
     }
 

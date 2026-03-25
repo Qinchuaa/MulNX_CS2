@@ -29,8 +29,8 @@ namespace MulNX {
     class HandleSystem;
     // 跨进程信息接口
     class IPCer;
-    // 按键追踪器
-    class KeyTracker;
+    // 输入系统
+    class InputSystem;
     // 全局变量
     class GlobalVars;
     // 3D抽象层
