@@ -111,11 +111,11 @@ bool CSController::UINodeFunc(MulNXUINode* node) {
         *pGlobalFOV = 0;
     }
     if (ImGui::CollapsingHeader("烟雾弹控制")) {
-        MulNX::UI::Checkbox("启用烟雾弹控制", this->controlSomke.Enbale);
-        MulNX::UI::Checkbox("烟雾显示", this->controlSomke.Show);
-        MulNX::UI::SliderFloat("色彩R", this->controlSomke.R, 0, 255);
-        MulNX::UI::SliderFloat("色彩G", this->controlSomke.G, 0, 255);
-        MulNX::UI::SliderFloat("色彩B", this->controlSomke.B, 0, 255);
+        MulNX::UI::Checkbox("启用烟雾弹控制", this->controlSmoke.Enbale);
+        MulNX::UI::Checkbox("烟雾显示", this->controlSmoke.Show);
+        MulNX::UI::SliderFloat("色彩R", this->controlSmoke.R, 0, 255);
+        MulNX::UI::SliderFloat("色彩G", this->controlSmoke.G, 0, 255);
+        MulNX::UI::SliderFloat("色彩B", this->controlSmoke.B, 0, 255);
     }
 #ifdef _DEBUG
     try {
@@ -252,13 +252,13 @@ int CSController::BasicUpdate() {
         auto zname = std::string(pName);
 
         if (zname.find("smokegrenade") != std::string::npos && zname.find("weapon") == std::string::npos) {
-            if (this->controlSomke.Enbale.load(std::memory_order_acquire)) {
-                if (this->controlSomke.Show.load(std::memory_order_acquire) == true) {
+            if (this->controlSmoke.Enbale.load(std::memory_order_acquire)) {
+                if (this->controlSmoke.Show.load(std::memory_order_acquire) == true) {
                     auto* color = entity->As<CS2::C_SmokeGrenadeProjectile>()->vSmokeColor();
                     DirectX::XMFLOAT3 pushIn{
-                        this->controlSomke.R.load(std::memory_order_acquire) ,
-                        this->controlSomke.G.load(std::memory_order_acquire) ,
-                        this->controlSomke.B.load(std::memory_order_acquire) };
+                        this->controlSmoke.R.load(std::memory_order_acquire) ,
+                        this->controlSmoke.G.load(std::memory_order_acquire) ,
+                        this->controlSmoke.B.load(std::memory_order_acquire) };
                     MulNX::MWrite(color, pushIn);
                 }
                 else {
@@ -384,6 +384,7 @@ int CSController::EntityListUpdate() {
             this->AL3DGameData.Players[PlayerMsg.IndexInMap] = std::move(PlayerMsg);
             lock.unlock();
         }
+        ++IndexInMap;
     }
     return 0;
 }

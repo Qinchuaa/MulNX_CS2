@@ -2,6 +2,7 @@ add_library(MulNXCS2Ext
     "CSController/CSController.cpp"
     "CSController/InterfaceImpl.cpp"
     "CSController/Draw/DrawImpl.cpp"
+    "CSController/Client/Client.cpp"
     "CSController/ConVarSystem/ConVarSystem.cpp"
     "CSController/EntityList/EntityList.cpp"
     "CSController/EntityList/Entity/Entity.cpp"

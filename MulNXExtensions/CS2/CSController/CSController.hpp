@@ -10,37 +10,7 @@
 #include "List/C_BaseEntity.hpp"
 
 #include "C_CSGameRules/C_CSGameRules.hpp"
-
-namespace CS2 {
-    namespace Module {
-        class Client :public MulNX::Memory::DllModule {
-        public:
-            using MulNX::Memory::DllModule::DllModule;
-            uintptr_t dwEntityList() { return MulNX::MRead<uintptr_t>(this->GetBaseAddress() + cs2_dumper::offsets::client_dll::dwEntityList); }
-            uintptr_t dwGameEntitySystem() { return MulNX::MRead<uintptr_t>(this->GetBaseAddress() + cs2_dumper::offsets::client_dll::dwGameEntitySystem); }
-            int dwGameEntitySystem_highestEntityIndex() { return MulNX::MRead<int>(this->dwGameEntitySystem() + cs2_dumper::offsets::client_dll::dwGameEntitySystem_highestEntityIndex); }
-            CS2::C_CSGameRules* dwGameRules() { return MulNX::MRead<CS2::C_CSGameRules*>(this->GetBaseAddress() + cs2_dumper::offsets::client_dll::dwGameRules); }
-            float* dwViewMatrix() { return reinterpret_cast<float*>(this->GetBaseAddress() + cs2_dumper::offsets::client_dll::dwViewMatrix); }
-            // 常常用于获取控制器
-            CS2::C_BaseEntity* GetBaseEntity(int index) {
-                uintptr_t entListBase = MulNX::MRead<uintptr_t>(this->GetBaseAddress() + cs2_dumper::offsets::client_dll::dwEntityList);
-                if (entListBase == 0) {
-                    return 0;
-                }
-                uintptr_t entityListBase = MulNX::MRead<uintptr_t>(entListBase + 0x8 * (index >> 9) + 0x10);
-                if (entityListBase == 0) {
-                    return 0;
-                }
-                return MulNX::MRead<CS2::C_BaseEntity*>(entityListBase + (0x70 * (index & 0x1FF)));
-            }
-            // 常常用于获取Pawn对象
-            CS2::C_BaseEntity* GetBaseEntityFromHandle(uint32_t uHandle) {
-                const int nIndex = uHandle & 0x7FFF;
-                return this->GetBaseEntity(nIndex);
-            }
-        };
-    }
-}
+#include "Client/Client.hpp"
 
 class C_Modules {
 public:
@@ -84,7 +54,7 @@ class CSController final :public MulNX::IAbstractLayer3D {
 private:
     C_Modules Modules{};
 
-    ControlSmoke controlSomke{};
+    ControlSmoke controlSmoke{};
     ControlView controlView{};
     // 逆向层关键接口
     void* Source2EngineToClient001 = nullptr;

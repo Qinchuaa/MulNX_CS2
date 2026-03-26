@@ -1,3 +1,5 @@
+#pragma once
+
 #include <MulNXThirdParty/All_cs2_dumper.hpp>
 
 namespace CS2 {

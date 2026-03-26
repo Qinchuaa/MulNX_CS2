@@ -135,4 +135,9 @@ namespace CS2 {
 
         CHandle<C_BasePlayerPawn>* hPawn() { return reinterpret_cast<CHandle<C_BasePlayerPawn>*>(reinterpret_cast<uintptr_t>(this) + cs2_dumper::schemas::client_dll::CBasePlayerController::m_hPawn); }
     };
+
+    class CCSPlayerController :public CBasePlayerController{
+    public:
+        
+    };
 }
