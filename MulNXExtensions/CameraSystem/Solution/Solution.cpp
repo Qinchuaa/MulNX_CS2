@@ -191,7 +191,6 @@ bool Solution::Call(CameraSystemIO* IO) {
             auto& element = this->Elements[i].Element;
             IO->ElementTime = SolutionOffsetedTime - this->Elements[i].Offset + element->GetStartTime();
             bResult = bResult || element->CalculateFrame(IO);
-            if (bResult)IO->CurrentElementType = element->TypeGet_Enum();
         }
         break;
     }
@@ -206,7 +205,6 @@ bool Solution::Call(CameraSystemIO* IO) {
         for (size_t i = 0; i < this->Elements.size(); ++i) {
             auto& element = this->Elements[i].Element;
             bResult = bResult || element->CalculateFrame(IO);
-            if (bResult)IO->CurrentElementType = element->TypeGet_Enum();
         }
         break;
     }

@@ -11,6 +11,8 @@ void CSController::HandleOverrideView(void* ThisCViewSetup) {
     // 定位关键数据
     int* pWidth = (int*)((char*)ThisCViewSetup + 0x434);
     int* pHeight = (int*)((char*)ThisCViewSetup + 0x43C);
+    this->controlView.currentView.WindowWidth.store(*pWidth, std::memory_order_relaxed);
+    this->controlView.currentView.WindowHeight.store(*pHeight, std::memory_order_relaxed);
 
     float* pFov = (float*)((char*)ThisCViewSetup + 0x498);
     float* pViewOrigin = (float*)((char*)ThisCViewSetup + 0x4a0);
@@ -460,9 +462,9 @@ bool CSController::CameraSystemIOOverride(const CameraSystemIO* const IO) {
     }
     LastCallTime = IO->FrameGameTime;
 
-    switch (IO->CurrentElementType) {
-    case ElementType::FreeCameraPath:this->HandleFreeCameraPath(IO); break;
-    case ElementType::FirstPersonCameraPath:this->HandleFirstPersonCameraPath(IO); break;
+    switch (IO->Frame.TargetOBMode) {
+    case 4:this->HandleFreeCameraPath(IO); break;
+    case 2:this->HandleFirstPersonCameraPath(IO); break;
     }
 
     return true;

@@ -322,7 +322,6 @@ bool ElementManager::Preview_Call(CameraSystemIO* IO) {
     if (!this->OnPreview)return false;
     if (this->Preview_CurrentElement) {
         IO->ElementTime += this->Preview_CurrentElement->GetStartTime() - this->Preview_TimeSchema;
-        IO->CurrentElementType = this->Preview_CurrentElement->TypeGet_Enum();
         if (!this->Preview_CurrentElement->CalculateFrame(IO)) {
             this->Preview_Disable();
             return false;

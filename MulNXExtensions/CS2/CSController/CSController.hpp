@@ -58,6 +58,9 @@ public:
     std::atomic<float> AnglesY = 0;
     std::atomic<float> AnglesZ = 0;
     std::atomic<float> FOV = 90.0f;
+
+    std::atomic<int> WindowWidth = 1920;
+    std::atomic<int> WindowHeight = 1080;
 };
 
 class ControlSmoke {

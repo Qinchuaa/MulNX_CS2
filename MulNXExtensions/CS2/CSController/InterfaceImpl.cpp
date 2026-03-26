@@ -37,10 +37,10 @@ float CSController::GetTime()const {
 }
 
 float CSController::GetWinWidth()const {
-    return this->AL3DCurrentWindowWidth;
+    return this->controlView.currentView.WindowWidth.load(std::memory_order_relaxed);
 }
 float CSController::GetWinHeight()const {
-    return this->AL3DCurrentWindowHeight;
+    return this->controlView.currentView.WindowHeight.load(std::memory_order_relaxed);
 }
 bool CSController::SpecPlayer(int IndexInMap) {
     this->ExecuteCommand("spec_mode 2;spec_player " + std::to_string(this->AL3DGameData.Players[IndexInMap].IndexInMap));
