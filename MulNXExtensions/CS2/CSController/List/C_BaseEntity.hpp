@@ -1,5 +1,6 @@
 #pragma once 
 
+#include <stdfloat>
 #include <MulNX/Base/Math/Math.hpp>
 #include <MulNXThirdParty/All_cs2_dumper.hpp>
 
@@ -114,8 +115,20 @@ namespace CS2 {
         CHandle<C_BasePlayerWeapon>* hActiveWeapon() { return reinterpret_cast<CHandle<C_BasePlayerWeapon>*>(reinterpret_cast<uintptr_t>(this) + cs2_dumper::schemas::client_dll::CPlayer_WeaponServices::m_hActiveWeapon); }
     };
 
+    using ObserverMode_t = uint32_t;
+    class CPlayer_ObserverServices :public CPlayerPawnComponent {
+    public:
+        uint8_t* iObserverMode() { return reinterpret_cast<uint8_t*>(reinterpret_cast<uintptr_t>(this) + cs2_dumper::schemas::client_dll::CPlayer_ObserverServices::m_iObserverMode); }
+        CHandle<C_BaseEntity>* hObserverTarget() { return reinterpret_cast<CHandle<C_BaseEntity>*>(reinterpret_cast<uintptr_t>(this) + cs2_dumper::schemas::client_dll::CPlayer_ObserverServices::m_hObserverTarget); }
+        ObserverMode_t* iObserverLastMode() { return reinterpret_cast<ObserverMode_t*>(reinterpret_cast<uintptr_t>(this) + cs2_dumper::schemas::client_dll::CPlayer_ObserverServices::m_iObserverLastMode); }
+        bool* bForcedObserverMode() { return reinterpret_cast<bool*>(reinterpret_cast<uintptr_t>(this) + cs2_dumper::schemas::client_dll::CPlayer_ObserverServices::m_bForcedObserverMode); }
+        float* flObserverChaseDistance() { return reinterpret_cast<float*>(reinterpret_cast<uintptr_t>(this) + cs2_dumper::schemas::client_dll::CPlayer_ObserverServices::m_flObserverChaseDistance); }
+        GameTime_t* flObserverChaseDistanceCalcTime() { return reinterpret_cast<GameTime_t*>(reinterpret_cast<uintptr_t>(this) + cs2_dumper::schemas::client_dll::CPlayer_ObserverServices::m_flObserverChaseDistanceCalcTime); }
+    };
+
     class C_BasePlayerPawn :public C_BaseCombatCharacter {
     public:
+        CPlayer_ObserverServices** pObserverServices() { return reinterpret_cast<CPlayer_ObserverServices**>(reinterpret_cast<uintptr_t>(this) + cs2_dumper::schemas::client_dll::C_BasePlayerPawn::m_pObserverServices); }
         DirectX::XMFLOAT3* vOldOrigin() { return reinterpret_cast<DirectX::XMFLOAT3*>(reinterpret_cast<uintptr_t>(this) + cs2_dumper::schemas::client_dll::C_BasePlayerPawn::m_vOldOrigin); }
         //DirectX::XMFLOAT3 GetEyePos(){}
         CPlayer_WeaponServices** pWeaponServices() { return reinterpret_cast<CPlayer_WeaponServices**>(reinterpret_cast<uintptr_t>(this) + cs2_dumper::schemas::client_dll::C_BasePlayerPawn::m_pWeaponServices); }

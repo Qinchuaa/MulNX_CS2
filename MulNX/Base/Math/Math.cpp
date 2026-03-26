@@ -185,7 +185,21 @@ void MulNX::Math::CSDirToEuler(const DirectX::XMFLOAT3& Dir, DirectX::XMFLOAT3& 
 	while (Euler.y > 180.f)Euler.y -= 360.f;
 	while (Euler.y < -180.f)Euler.y += 360.f;
 }
+DirectX::XMFLOAT3 MulNX::Math::CSEulerToDir(float pitchDegrees, float yawDegrees) {
+    float pitchRad = pitchDegrees * (PI / 180.0f);
+    float yawRad = yawDegrees * (PI / 180.0f);
 
+    float cosPitch = std::cos(pitchRad);
+    float sinPitch = std::sin(pitchRad);
+    float cosYaw = std::cos(yawRad);
+    float sinYaw = std::sin(yawRad);
+
+    return DirectX::XMFLOAT3(
+        cosPitch * cosYaw,
+        cosPitch * sinYaw,
+        -sinPitch
+    );
+}
 
 bool MulNX::Math::WorldToScreen(const DirectX::XMFLOAT3& pWorldPos, DirectX::XMFLOAT2& pScreenPos, const float* pMatrixPtr, const float pWinWidth, const float pWinHeight)
 {

@@ -48,6 +48,174 @@ void CSController::HandleOverrideView(void* ThisCViewSetup) {
     else {
         this->controlView.currentView.FOV.store(*pFov, std::memory_order_release);
     }
+
+    // // 平滑系数 (0.0 ~ 1.0)，值越小越平滑
+    // constexpr float SMOOTH_FACTOR = 0.2f;
+
+    // // 使用静态变量保存上一帧的平滑值
+    // static DirectX::XMFLOAT3 s_smoothCameraPos{};
+    // static DirectX::XMFLOAT3 s_smoothCameraAngle{};
+    // static bool s_firstFrame = true;
+
+    // try {
+    //     auto* localController = this->Modules.client.dwLocalPlayerController();
+    //     if (!localController) return;
+    //     auto hLocalPawn = MulNX::MRead(localController->hPawn());
+    //     if (!hLocalPawn.Valid()) return;
+    //     auto* localPawn = this->Modules.client.GetBaseEntityFromHandle(hLocalPawn.GetIndexInEntityList())->As<CS2::C_CSPlayerPawn>();
+    //     if (!localPawn) return;
+    //     auto* pOB = MulNX::MRead(localPawn->pObserverServices());
+    //     if (!pOB) return;
+    //     auto handle = MulNX::MRead(pOB->hObserverTarget());
+    //     if (!handle.Valid()) return;
+    //     auto* target = this->Modules.client.GetBaseEntityFromHandle(handle.GetIndexInEntityList())->As<CS2::C_CSPlayerPawn>();
+    //     if (!target) return;
+
+    //     auto EyePos = MulNX::MRead(target->vOldOrigin()) + MulNX::MRead(target->vecViewOffset());
+    //     auto ViewAngle = MulNX::MRead(target->angEyeAngles());
+
+    //     // 计算目标摄像机位置（目标前方 50 单位）
+    //     auto dir = MulNX::Math::CSEulerToDir(ViewAngle.x, ViewAngle.y);
+    //     dir *= 50;
+    //     DirectX::XMFLOAT3 targetCameraPos = dir + EyePos;
+
+    //     // 计算目标摄像机角度（从摄像机指向目标）
+    //     DirectX::XMFLOAT3 targetCameraAngle;
+    //     MulNX::Math::CSDirToEuler(EyePos - targetCameraPos, targetCameraAngle);
+    //     // 滚转角强制为 0（保持水平）
+    //     targetCameraAngle.z = 0;
+
+    //     // 第一帧直接赋值，避免突变
+    //     if (s_firstFrame) {
+    //         s_smoothCameraPos = targetCameraPos;
+    //         s_smoothCameraAngle = targetCameraAngle;
+    //         s_firstFrame = false;
+    //     }
+
+    //     // 指数平滑位置
+    //     s_smoothCameraPos.x += (targetCameraPos.x - s_smoothCameraPos.x) * SMOOTH_FACTOR;
+    //     s_smoothCameraPos.y += (targetCameraPos.y - s_smoothCameraPos.y) * SMOOTH_FACTOR;
+    //     s_smoothCameraPos.z += (targetCameraPos.z - s_smoothCameraPos.z) * SMOOTH_FACTOR;
+
+    //     // 指数平滑角度（注意处理角度环绕）
+    //     // 先计算差值，并规范化到 [-180, 180]
+    //     auto angleDiff = [](float target, float current) -> float {
+    //         float diff = target - current;
+    //         // 将差值限制在 [-180, 180] 范围内（处理环绕）
+    //         if (diff > 180.0f) diff -= 360.0f;
+    //         if (diff < -180.0f) diff += 360.0f;
+    //         return diff;
+    //         };
+    //     s_smoothCameraAngle.x += angleDiff(targetCameraAngle.x, s_smoothCameraAngle.x) * SMOOTH_FACTOR;
+    //     s_smoothCameraAngle.y += angleDiff(targetCameraAngle.y, s_smoothCameraAngle.y) * SMOOTH_FACTOR;
+    //     // 滚转角始终为 0，不做平滑（或直接赋值）
+    //     s_smoothCameraAngle.z = 0;
+
+    //     // 输出平滑后的值
+    //     pViewOrigin[0] = s_smoothCameraPos.x;
+    //     pViewOrigin[1] = s_smoothCameraPos.y;
+    //     pViewOrigin[2] = s_smoothCameraPos.z;
+
+    //     pViewAngles[0] = s_smoothCameraAngle.x;
+    //     pViewAngles[1] = s_smoothCameraAngle.y;
+    //     pViewAngles[2] = 0;
+    // }
+    // catch (...) {
+    //     // 捕获异常后可重置第一帧标志，避免残留错误状态
+    //     s_firstFrame = true;
+    // }
+
+
+    // 平滑系数 (0.0 ~ 1.0)，值越小越平滑
+    constexpr float SMOOTH_FACTOR = 0.2f;
+    // 摄像机与目标的偏移距离（单位）
+    constexpr float CAMERA_OFFSET = 50.0f;
+
+    // 使用静态变量保存上一帧的平滑值
+    static DirectX::XMFLOAT3 s_smoothCameraPos{};
+    static DirectX::XMFLOAT3 s_smoothCameraAngle{};
+    static bool s_firstFrame = true;
+
+    try {
+        auto* localController = this->Modules.client.dwLocalPlayerController();
+        if (!localController) return;
+        auto hLocalPawn = MulNX::MRead(localController->hPawn());
+        if (!hLocalPawn.Valid()) return;
+        auto* localPawn = this->Modules.client.GetBaseEntityFromHandle(hLocalPawn.GetIndexInEntityList())->As<CS2::C_CSPlayerPawn>();
+        if (!localPawn) return;
+        auto* pOB = MulNX::MRead(localPawn->pObserverServices());
+        if (!pOB) return;
+        auto handle = MulNX::MRead(pOB->hObserverTarget());
+        if (!handle.Valid()) return;
+        auto* target = this->Modules.client.GetBaseEntityFromHandle(handle.GetIndexInEntityList())->As<CS2::C_CSPlayerPawn>();
+        if (!target) return;
+
+        // ---------- 骨骼数据获取 ----------
+        auto* pGameSceneNode = MulNX::MRead(target->pGameSceneNode());
+        if (!pGameSceneNode) return;
+        auto* bones = MulNX::MRead(static_cast<CS2::CSkeletonInstance*>(pGameSceneNode)->unkBoneArray());
+        if (!bones) return;
+
+        // 索引 15 = 头骨，索引 16 = 脖子（或头部参考点）
+        DirectX::XMFLOAT3 headPos = MulNX::MRead(bones->at(15));     // 目标位置（头骨）
+        DirectX::XMFLOAT3 neckPos = MulNX::MRead(bones->at(16));     // 辅助方向点
+
+        // 计算前向向量（从脖子指向头）
+        DirectX::XMFLOAT3 forwardDir = headPos - neckPos;
+        float len = sqrtf(forwardDir.x * forwardDir.x + forwardDir.y * forwardDir.y + forwardDir.z * forwardDir.z);
+        if (len > 0.0001f) {
+            forwardDir.x /= len;
+            forwardDir.y /= len;
+            forwardDir.z /= len;
+        }
+
+        // 目标摄像机位置 = 头骨位置 + 前向向量 * 偏移距离
+        DirectX::XMFLOAT3 targetCameraPos = headPos + forwardDir * CAMERA_OFFSET;
+
+        // 目标摄像机角度：从摄像机指向头骨位置
+        DirectX::XMFLOAT3 lookDir = headPos - targetCameraPos;
+        DirectX::XMFLOAT3 targetCameraAngle;
+        MulNX::Math::CSDirToEuler(lookDir, targetCameraAngle);
+        // 滚转角强制为 0
+        targetCameraAngle.z = 0;
+
+        // ---------- 平滑处理 ----------
+        if (s_firstFrame) {
+            s_smoothCameraPos = targetCameraPos;
+            s_smoothCameraAngle = targetCameraAngle;
+            s_firstFrame = false;
+        }
+
+        // 指数平滑位置
+        s_smoothCameraPos.x += (targetCameraPos.x - s_smoothCameraPos.x) * SMOOTH_FACTOR;
+        s_smoothCameraPos.y += (targetCameraPos.y - s_smoothCameraPos.y) * SMOOTH_FACTOR;
+        s_smoothCameraPos.z += (targetCameraPos.z - s_smoothCameraPos.z) * SMOOTH_FACTOR;
+
+        // 指数平滑角度（处理环绕）
+        auto angleDiff = [](float target, float current) -> float {
+            float diff = target - current;
+            if (diff > 180.0f) diff -= 360.0f;
+            if (diff < -180.0f) diff += 360.0f;
+            return diff;
+            };
+        s_smoothCameraAngle.x += angleDiff(targetCameraAngle.x, s_smoothCameraAngle.x) * SMOOTH_FACTOR;
+        s_smoothCameraAngle.y += angleDiff(targetCameraAngle.y, s_smoothCameraAngle.y) * SMOOTH_FACTOR;
+        s_smoothCameraAngle.z = 0;
+
+        // 输出平滑后的值
+        pViewOrigin[0] = s_smoothCameraPos.x;
+        pViewOrigin[1] = s_smoothCameraPos.y;
+        pViewOrigin[2] = s_smoothCameraPos.z;
+
+        pViewAngles[0] = s_smoothCameraAngle.x;
+        pViewAngles[1] = s_smoothCameraAngle.y;
+        pViewAngles[2] = 0;
+    }
+    catch (...) {
+        s_firstFrame = true;
+    }
+
+
     // try {
     //     for (int i = 0;i <= this->Modules.client.dwGameEntitySystem_highestEntityIndex();i++) {
     //         auto entity = this->Modules.client.GetBaseEntity(i);
@@ -121,21 +289,23 @@ bool CSController::UINodeFunc(MulNXUINode* node) {
     try {
         for (int i = 0;i <= this->Modules.client.dwGameEntitySystem_highestEntityIndex();i++) {
             auto* pEntity = this->Modules.client.GetBaseEntity(i);
-            if (pEntity == nullptr) {
-                continue;
-            }
+            if (!pEntity)continue;
             auto hPawn = MulNX::MRead(pEntity->As<CS2::CBasePlayerController>()->hPawn());
-            if (!hPawn.Valid()) {
-                continue;
-            }
-            auto* pPawn = this->Modules.client.GetBaseEntity(hPawn.GetIndexInEntityList());
-            if (!pPawn) {
-                continue;
-            }
+            if (!hPawn.Valid())continue;
+            auto* pPawn = this->Modules.client.GetBaseEntity(hPawn.GetIndexInEntityList())->As<CS2::C_CSPlayerPawn>();
+            if (!pPawn)continue;
             auto* pGameSceneNode = MulNX::MRead(pPawn->pGameSceneNode());
             if (!pGameSceneNode)continue;
             auto* bones = MulNX::MRead(static_cast<CS2::CSkeletonInstance*>(pGameSceneNode)->unkBoneArray());
             if (!bones)continue;
+
+            auto* pWeaponServices = MulNX::MRead(pPawn->pWeaponServices());
+            auto hAc = MulNX::MRead(pWeaponServices->hActiveWeapon());
+            auto* pWeapon = this->Modules.client.GetBaseEntityFromHandle(hAc.GetIndexInEntityList())->As<CS2::C_BasePlayerWeapon>();
+            auto* pWeaponsGameSceneNode = MulNX::MRead(pWeapon->pGameSceneNode());
+            auto* bones2 = MulNX::MRead(static_cast<CS2::CSkeletonInstance*>(pWeaponsGameSceneNode)->unkBoneArray());
+
+
 
             MulNX::TransInfo info;
             info.pMatrix = this->GetViewMatrix();
@@ -144,7 +314,9 @@ bool CSController::UINodeFunc(MulNXUINode* node) {
 
             for (int i = 0;i < 34;++i) {
                 DirectX::XMFLOAT3 pos = MulNX::MRead(bones->at(i));
+                DirectX::XMFLOAT3 pos2 = MulNX::MRead(bones2->at(i));
                 MulNX::UI::DrawWorldPoint(pos, info, std::to_string(i).c_str());
+                MulNX::UI::DrawWorldPoint(pos2, info, std::to_string(i).c_str());
             }
         }
     }
@@ -225,20 +397,14 @@ int CSController::BasicUpdate() {
     }
     for (int i = 0;i <= this->Modules.client.dwGameEntitySystem_highestEntityIndex();i++) {
         auto entity = this->Modules.client.GetBaseEntity(i);
-        if (entity == nullptr) {
-            continue;
-        }
+        if (!entity)continue;
 
         auto pClassInfo = MulNX::MRead(entity->pClassInfo());
-        if (pClassInfo == nullptr) {
-            continue;
-        }
-
+        if (!pClassInfo)continue;
 
         auto pName = MulNX::MRead(((pClassInfo))->pName());
-        if (pName == nullptr) {
-            continue;
-        }
+        if (!pName)continue;
+        
         auto zname = std::string(pName);
 
         if (zname.find("smokegrenade") != std::string::npos && zname.find("weapon") == std::string::npos) {
@@ -395,9 +561,8 @@ int CSController::TryGetMsg() {
         return Result;
     }
     Result = this->EntityListUpdate();
-    if (Result) {
-        return Result;
-    }
+    if (Result)return Result;
+    
 
     uintptr_t ppPlantedC4 = ppPlantedC4 = MulNX::MRead<uintptr_t>(this->Modules.client.GetBaseAddress() + cs2_dumper::offsets::client_dll::dwPlantedC4);
     if (ppPlantedC4) {
