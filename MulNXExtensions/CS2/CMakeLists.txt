@@ -4,13 +4,6 @@ add_library(MulNXCS2Ext
     "CSController/Draw/DrawImpl.cpp"
     "CSController/Client/Client.cpp"
     "CSController/ConVarSystem/ConVarSystem.cpp"
-    "CSController/EntityList/EntityList.cpp"
-    "CSController/EntityList/Entity/Entity.cpp"
-    "CSController/EntityList/Entity/Controller/Controller.cpp"
-    "CSController/EntityList/Entity/Pawn/Pawn.cpp"
-    "CSController/EntityList/Entity/Pawn/CameraServices/CameraServices.cpp"
-    "CSController/EntityList/Entity/Pawn/GameSceneNode/GameSceneNode.cpp"
-    "CSController/EntityList/Entity/Pawn/ObserverServices/ObserverServices.cpp"
     "CSController/GlobalVars/GlobalVars.cpp"
     "CSCOntroller/PlantedC4/PlantedC4.cpp"
 

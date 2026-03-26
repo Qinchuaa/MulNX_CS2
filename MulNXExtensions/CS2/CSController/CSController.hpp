@@ -4,7 +4,6 @@
 #include <MulNXExtensions/WinExt/WinExt.hpp>
 
 #include "ConVarSystem/ConVarSystem.hpp"
-#include "EntityList/EntityList.hpp"
 #include "GlobalVars/GlobalVars.hpp"
 #include "PlantedC4/PlantedC4.hpp"
 #include "List/C_BaseEntity.hpp"
@@ -63,7 +62,6 @@ private:
     C_ConVarSystem CvarSystem{};
     C_GlobalVars CSGlobalVars{};
     C_PlantedC4 PlantedC4{};
-    C_EntityList EntityList{};
 
     void ESP();
 public:
@@ -105,8 +103,6 @@ public:
 
     // 获取控制台变量系统
     C_ConVarSystem& GetCvarSystem() { return this->CvarSystem; }
-    // 获取Entity引用，注意，内部读取还是拷贝
-    C_EntityList& GetEntityList() { return this->EntityList; }
 
     // void HandleAimAtEntity(int AimTargetIndexInMap);
 };

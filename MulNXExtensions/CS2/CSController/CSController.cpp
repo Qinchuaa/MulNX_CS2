@@ -159,14 +159,6 @@ bool CSController::UINodeFunc(MulNXUINode* node) {
 
 void CSController::VirtualMain() {
     this->EntryProcessMsg();
-    //RECT rect;
-    //GetClientRect(GetActiveWindow(), &rect);
-    //int width = rect.right - rect.left;
-    //int height = rect.bottom - rect.top;
-    
-    //this->AL3DCurrentWindowHeight = height;
-    //this->AL3DCurrentWindowWidth = width;
-
     return;
 }
 void CSController::ProcessMsg(MulNX::Message& Msg) {
@@ -222,8 +214,6 @@ bool CSController::Init() {
 }
 
 int CSController::BasicUpdate() {
-    // 获取EntityList
-    this->EntityList.Address = this->Modules.client.dwEntityList();
     // 获取CS2全局变量
     this->CSGlobalVars.Address = MulNX::MRead<uintptr_t>(this->Modules.client.GetBaseAddress() + cs2_dumper::offsets::client_dll::dwGlobalVars);
     
@@ -358,34 +348,29 @@ int CSController::BasicUpdate() {
     return 0;
 }
 int CSController::EntityListUpdate() {
-    //更新实体列表
-    this->EntityList.Update();
+    std::unique_lock lock(this->GetMutex());
+    // 玩家控制器，地图上从1到10，位于索引1到10处
+    for (int i = 1; i <= 10; ++i) {
+        auto* controller = this->Modules.client.GetBaseEntity(i)->As<CS2::CCSPlayerController>();
+        if (!controller)continue;
+        auto hPawn = MulNX::MRead(controller->hPawn());
+        if (!hPawn.Valid())continue;
+        auto* pawn = this->Modules.client.GetBaseEntityFromHandle(hPawn.GetIndexInEntityList())->As<CS2::C_CSPlayerPawn>();
+        if (!pawn)continue;
 
-    int IndexInMap = 1;
-    for (int i = 0; i < 64; ++i) {
-        if (IndexInMap == 11) {
-            break;
-        }
-        C_Entity& Entity = this->EntityList.at(i);
-        int team = Entity.GetPawn().m_iTeamNum;
-        if (team == 2 || team == 3) {
-            D_Player PlayerMsg{
-            .Position = Entity.GetPawn().m_vOldOrigin,
-            .EyePosition = Entity.GetPawn().GetEyePos(),
-            .Rotation = Entity.GetPawn().m_angEyeAngles,
-            .HP = Entity.GetPawn().m_iHealth,
-            .Team = team,
-            .Alive = (Entity.GetPawn().m_iHealth > 0),
-            .IndexInEntityList = Entity.IndexInEntityList,
-            .IndexInMap = IndexInMap,
-            };
+        auto team = MulNX::MRead(pawn->iTeamNum());
+        if (team != 2 && team != 3)continue;
 
-            std::unique_lock lock(this->GetMutex());
-            this->AL3DGameData.Players[PlayerMsg.IndexInMap] = std::move(PlayerMsg);
-            lock.unlock();
-        }
-        ++IndexInMap;
+        auto& AL3DEntity = this->AL3DGameData.Players[i];
+        AL3DEntity.Position = MulNX::MRead(pawn->vOldOrigin());
+        AL3DEntity.EyePosition = MulNX::MRead(pawn->vOldOrigin()) + MulNX::MRead(pawn->vecViewOffset());
+        AL3DEntity.Rotation = MulNX::MRead(pawn->angEyeAngles());
+        AL3DEntity.HP = MulNX::MRead(pawn->iHealth());
+        AL3DEntity.Team = team;
+        AL3DEntity.Alive = AL3DEntity.HP;
+        AL3DEntity.IndexInMap = i;
     }
+
     return 0;
 }
 

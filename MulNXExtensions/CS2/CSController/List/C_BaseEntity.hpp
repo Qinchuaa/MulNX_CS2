@@ -37,7 +37,7 @@ namespace CS2 {
     public:
         DirectX::XMFLOAT3* at(int32_t index) { return reinterpret_cast<DirectX::XMFLOAT3*>(reinterpret_cast<uintptr_t>(this) + index * unkSize); }
     };
-    
+
     class CSkeletonInstance :public CGameSceneNode {
         constexpr static uintptr_t unkSchema = 0x80;
     public:
@@ -47,11 +47,13 @@ namespace CS2 {
     class C_BaseEntity {
     public:
         template<typename T>
-        requires std::derived_from<T, CS2::C_BaseEntity>
+            requires std::derived_from<T, CS2::C_BaseEntity>
         T* As() { return reinterpret_cast<T*>(this); }
 
         C_ClassInfo** pClassInfo() { return reinterpret_cast<C_ClassInfo**>(reinterpret_cast<uintptr_t>(this) + 0x10); }
         CGameSceneNode** pGameSceneNode() { return reinterpret_cast<CGameSceneNode**>(reinterpret_cast<uintptr_t>(this) + cs2_dumper::schemas::client_dll::C_BaseEntity::m_pGameSceneNode); }
+        int32_t* iHealth() { return reinterpret_cast<int32_t*>(reinterpret_cast<uintptr_t>(this) + cs2_dumper::schemas::client_dll::C_BaseEntity::m_iHealth); }
+        uint8_t* iTeamNum() { return reinterpret_cast<uint8_t*>(reinterpret_cast<uintptr_t>(this) + cs2_dumper::schemas::client_dll::C_BaseEntity::m_iTeamNum); }
     };
 
     class C_BaseModelEntity :public C_BaseEntity {
@@ -90,7 +92,7 @@ namespace CS2 {
 
     class C_BaseCombatCharacter :public C_BaseFlex {
     public:
-        
+
     };
 
     class C_EconEntity :public C_BaseFlex {
@@ -100,7 +102,7 @@ namespace CS2 {
 
     class CPlayerPawnComponent {
     public:
-        
+
     };
 
     class C_BasePlayerWeapon :public C_EconEntity {
@@ -124,7 +126,7 @@ namespace CS2 {
 
     };
 
-    
+
     class C_CSPlayerPawn :public C_CSPlayerPawnBase {
     public:
         DirectX::XMFLOAT3* angEyeAngles() { return reinterpret_cast<DirectX::XMFLOAT3*>(reinterpret_cast<uintptr_t>(this) + cs2_dumper::schemas::client_dll::C_CSPlayerPawn::m_angEyeAngles); }
@@ -136,8 +138,8 @@ namespace CS2 {
         CHandle<C_BasePlayerPawn>* hPawn() { return reinterpret_cast<CHandle<C_BasePlayerPawn>*>(reinterpret_cast<uintptr_t>(this) + cs2_dumper::schemas::client_dll::CBasePlayerController::m_hPawn); }
     };
 
-    class CCSPlayerController :public CBasePlayerController{
+    class CCSPlayerController :public CBasePlayerController {
     public:
-        
+
     };
 }
