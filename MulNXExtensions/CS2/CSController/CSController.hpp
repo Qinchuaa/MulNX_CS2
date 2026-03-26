@@ -79,6 +79,8 @@ public:
 
 class CSController final :public MulNX::IAbstractLayer3D {
 private:
+    C_Modules Modules{};
+
     ControlSmoke controlSomke{};
     ControlView controlView{};
     // 逆向层关键接口
@@ -89,12 +91,6 @@ private:
     C_GlobalVars CSGlobalVars{};
     C_PlantedC4 PlantedC4{};
     C_EntityList EntityList{};
-    C_Modules Modules{};
-
-    // 索引映射（小地图<->游戏实体列表）
-    std::shared_mutex IndexMapMtx{};
-    std::unordered_map<int, int>IndexInMap_To_IndexInEntityList_Map{};
-    int GetIndexInEntityListFromIndexInMap(int IndexInMap);
 
     void ESP();
 public:
@@ -139,5 +135,5 @@ public:
     // 获取Entity引用，注意，内部读取还是拷贝
     C_EntityList& GetEntityList() { return this->EntityList; }
 
-    void HandleAimAtEntity(int AimTargetIndexInMap);
+    // void HandleAimAtEntity(int AimTargetIndexInMap);
 };

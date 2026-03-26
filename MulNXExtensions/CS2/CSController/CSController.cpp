@@ -155,18 +155,6 @@ bool CSController::UINodeFunc(MulNXUINode* node) {
     return true;
 }
 
-int CSController::GetIndexInEntityListFromIndexInMap(int IndexInMap) {
-    std::shared_lock lock(this->IndexMapMtx);
-    auto it = this->IndexInMap_To_IndexInEntityList_Map.find(IndexInMap);
-    if (it != this->IndexInMap_To_IndexInEntityList_Map.end()) {
-        return it->second;
-    }
-    //未找到对应关系
-    return -1;
-}
-
-
-
 void CSController::VirtualMain() {
     this->EntryProcessMsg();
     //RECT rect;
@@ -371,9 +359,6 @@ int CSController::EntityListUpdate() {
     //更新实体列表
     this->EntityList.Update();
 
-    //处理映射关系，更新3D层数据
-    std::unique_lock lock(this->IndexMapMtx);
-    this->IndexInMap_To_IndexInEntityList_Map.clear();
     int IndexInMap = 1;
     for (int i = 0; i < 64; ++i) {
         if (IndexInMap == 11) {
@@ -396,9 +381,6 @@ int CSController::EntityListUpdate() {
             std::unique_lock lock(this->GetMutex());
             this->AL3DGameData.Players[PlayerMsg.IndexInMap] = std::move(PlayerMsg);
             lock.unlock();
-
-            this->IndexInMap_To_IndexInEntityList_Map[IndexInMap] = Entity.IndexInEntityList;
-            ++IndexInMap;
         }
     }
     return 0;
