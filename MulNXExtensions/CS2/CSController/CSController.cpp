@@ -51,11 +51,13 @@ void CSController::HandleOverrideView(void* ThisCViewSetup) {
         this->controlView.currentView.FOV.store(*pFov, std::memory_order_release);
     }
 
+    if (!this->controlAdvancedView.Enable.load(std::memory_order_acquire))return;
+
     // ==================== 摄像机绑定逻辑（武器枪口视角） ====================
     // 平滑系数 (0.0 ~ 1.0)，值越小越平滑
     constexpr float SMOOTH_FACTOR = 0.2f;
     // 摄像机与骨骼9的偏移距离（单位）
-    constexpr float CAMERA_OFFSET = 50.0f;
+    float CAMERA_OFFSET = this->controlAdvancedView.distance.load(std::memory_order_acquire);
 
     // 静态平滑状态（仅在第一次成功时初始化，异常时重置）
     static DirectX::XMFLOAT3 s_smoothCameraPos{};
@@ -67,32 +69,20 @@ void CSController::HandleOverrideView(void* ThisCViewSetup) {
         auto* localController = this->Modules.client.dwLocalPlayerController();
         if (!localController) return;
         auto hLocalPawn = MulNX::MRead(localController->hPawn());
-        if (!hLocalPawn.Valid()) return;
-        auto* localPawn = this->Modules.client.GetBaseEntityFromHandle(hLocalPawn.GetIndexInEntityList())->As<CS2::C_CSPlayerPawn>();
+        auto* localPawn = this->Modules.client.GetBaseEntityFromHandle(hLocalPawn)->As<CS2::C_CSPlayerPawn>();
         if (!localPawn) return;
-        // auto* pOB = MulNX::MRead(localPawn->pObserverServices());
-        // if (!pOB) return;
-        // auto handle = MulNX::MRead(pOB->hObserverTarget());
-        // if (!handle.Valid()) return;
-        // auto* target = this->Modules.client.GetBaseEntityFromHandle(handle.GetIndexInEntityList())->As<CS2::C_CSPlayerPawn>();
-        // if (!target) return;
+        auto hObserverTarget = localPawn->GetHandleObserverTarget();
+        auto* target = this->Modules.client.GetBaseEntityFromHandle(hObserverTarget)->As<CS2::C_CSPlayerPawn>();
+        if (!target) return;
 
         // ---------- 获取武器骨骼 ----------
-        auto* pWeaponServices = MulNX::MRead(localPawn->pWeaponServices());
-        if (!pWeaponServices) return;
-        auto hActiveWeapon = MulNX::MRead(pWeaponServices->hActiveWeapon());
-        if (!hActiveWeapon.Valid()) return;
-        auto* pWeapon = this->Modules.client.GetBaseEntityFromHandle(hActiveWeapon.GetIndexInEntityList())->As<CS2::C_BasePlayerWeapon>();
+        auto hActiveWeapon = target->GetHandleActiveWeapon();
+        auto* pWeapon = this->Modules.client.GetBaseEntityFromHandle(hActiveWeapon)->As<CS2::C_BasePlayerWeapon>();
         if (!pWeapon) return;
 
-        auto* pWeaponGameSceneNode = MulNX::MRead(pWeapon->pGameSceneNode());
-        if (!pWeaponGameSceneNode) return;
-        auto* weaponBones = MulNX::MRead(static_cast<CS2::CSkeletonInstance*>(pWeaponGameSceneNode)->unkBoneArray());
-        if (!weaponBones) return;
-
-        // 索引 8 = 枪口位置，索引 9 = 枪口指向参考点
-        DirectX::XMFLOAT3 gunPos = MulNX::MRead(weaponBones->at(8));
-        DirectX::XMFLOAT3 gunDirRef = MulNX::MRead(weaponBones->at(9));
+        // 两个参考点
+        DirectX::XMFLOAT3 gunPos = pWeapon->GetBonePos(this->controlAdvancedView.boneIndex1.load(std::memory_order_acquire));
+        DirectX::XMFLOAT3 gunDirRef = pWeapon->GetBonePos(this->controlAdvancedView.boneIndex2.load(std::memory_order_acquire));
 
         // 计算枪口指向单位向量（从枪口指向参考点）
         DirectX::XMFLOAT3 forwardDir = gunDirRef - gunPos;
@@ -193,6 +183,14 @@ bool CSController::UINodeFunc(MulNXUINode* node) {
         MulNX::UI::SliderFloat("色彩R", this->controlSmoke.R, 0, 255);
         MulNX::UI::SliderFloat("色彩G", this->controlSmoke.G, 0, 255);
         MulNX::UI::SliderFloat("色彩B", this->controlSmoke.B, 0, 255);
+    }
+    if (ImGui::CollapsingHeader("高级视角控制")) {
+        MulNX::UI::Checkbox("启用高级视角控制", this->controlAdvancedView.Enable);
+
+        MulNX::UI::SliderInt("骨骼起点", this->controlAdvancedView.boneIndex1, 0, 127);
+        MulNX::UI::SliderInt("骨骼终点", this->controlAdvancedView.boneIndex2, 0, 127);
+
+        MulNX::UI::SliderFloat("距离控制", this->controlAdvancedView.distance, 0.0f, 200.0f);
     }
 #ifdef _DEBUG
     try {

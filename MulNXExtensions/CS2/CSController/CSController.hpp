@@ -49,12 +49,26 @@ public:
     Views currentView{};
 };
 
+class ControlAdvancedView{
+public:
+    std::atomic<bool> Enable = false;
+    
+    std::atomic<int> boneIndex1 = 8;
+    std::atomic<int> boneIndex2 = 9;
+    std::atomic<int> boneIndex3 = 10;
+
+    std::atomic<float> distance = 50.0f;
+};
+
 class CSController final :public MulNX::IAbstractLayer3D {
 private:
     C_Modules Modules{};
 
     ControlSmoke controlSmoke{};
     ControlView controlView{};
+    ControlAdvancedView controlAdvancedView{};
+
+
     // 逆向层关键接口
     void* Source2EngineToClient001 = nullptr;
     VExecutor<void(int, const char*, int)> executor{};

@@ -15,7 +15,7 @@ namespace MulNX {
 
     namespace UI {
         bool SliderFloat(const char* label, std::atomic<float>& av, float v_min, float v_max, const char* format = "%.3f", ImGuiSliderFlags flags = 0);
-        bool SliderInt(const char* label, std::atomic<int>& av, int v_min, int v_max, const char* format = "%.3f", ImGuiSliderFlags flags = 0);
+        bool SliderInt(const char* label, std::atomic<int>& av, int v_min, int v_max, const char* format = "%d", ImGuiSliderFlags flags = 0);
         bool Checkbox(const char* label, std::atomic<bool>& av);
 
         bool DrawWorldPoint(const DirectX::XMFLOAT3& pos, const TransInfo& info, const char* label);

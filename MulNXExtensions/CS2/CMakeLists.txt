@@ -5,7 +5,8 @@ add_library(MulNXCS2Ext
     "CSController/Client/Client.cpp"
     "CSController/ConVarSystem/ConVarSystem.cpp"
     "CSController/GlobalVars/GlobalVars.cpp"
-    "CSCOntroller/PlantedC4/PlantedC4.cpp"
+    "CSController/PlantedC4/PlantedC4.cpp"
+    "CSController/List/C_BaseEntity.cpp"
 
     "ConsoleManager/ConsoleManager.cpp"
     "DemoHelper/DemoHelper.cpp"

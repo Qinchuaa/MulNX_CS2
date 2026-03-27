@@ -21,6 +21,8 @@ namespace CS2 {
             CS2::C_BaseEntity* GetBaseEntity(int index);
             // 常常用于获取Pawn对象
             CS2::C_BaseEntity* GetBaseEntityFromHandle(uint32_t uHandle);
+
+            CS2::C_BaseEntity* GetBaseEntityFromHandle(CS2::CHandleBase handle);
         };
     }
 }

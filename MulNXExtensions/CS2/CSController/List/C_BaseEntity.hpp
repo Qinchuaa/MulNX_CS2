@@ -4,16 +4,23 @@
 #include <MulNX/Base/Math/Math.hpp>
 #include <MulNXThirdParty/All_cs2_dumper.hpp>
 
+using GameTime_t = float;
+
 namespace CS2 {
-    template<typename T>
-    class CHandle {
+    class CHandleBase {
     public:
         uint32_t handle;
-        CHandle(uint32_t handle) :handle(handle) {}
+        CHandleBase(uint32_t handle) :handle(handle) {}
         int GetIndexInEntityList() { return this->handle & 0x7FFF; }
         bool Valid() { return this->handle != 0xFFFFFFFF; }
 
-        CHandle() :handle(0xFFFFFFFF) {}
+        CHandleBase() :handle(0xFFFFFFFF) {}
+    };
+
+    template<typename T>
+    class CHandle :public CHandleBase {
+    public:
+        
     };
 
     class C_ClassInfo {
@@ -55,6 +62,8 @@ namespace CS2 {
         CGameSceneNode** pGameSceneNode() { return reinterpret_cast<CGameSceneNode**>(reinterpret_cast<uintptr_t>(this) + cs2_dumper::schemas::client_dll::C_BaseEntity::m_pGameSceneNode); }
         int32_t* iHealth() { return reinterpret_cast<int32_t*>(reinterpret_cast<uintptr_t>(this) + cs2_dumper::schemas::client_dll::C_BaseEntity::m_iHealth); }
         uint8_t* iTeamNum() { return reinterpret_cast<uint8_t*>(reinterpret_cast<uintptr_t>(this) + cs2_dumper::schemas::client_dll::C_BaseEntity::m_iTeamNum); }
+
+        DirectX::XMFLOAT3 GetBonePos(int index);
     };
 
     class C_BaseModelEntity :public C_BaseEntity {
@@ -107,6 +116,12 @@ namespace CS2 {
     };
 
     class C_BasePlayerWeapon :public C_EconEntity {
+    public:
+        
+    };
+
+    class C_CSWeaponBase :public C_BasePlayerWeapon {
+    public:
 
     };
 
@@ -132,6 +147,10 @@ namespace CS2 {
         DirectX::XMFLOAT3* vOldOrigin() { return reinterpret_cast<DirectX::XMFLOAT3*>(reinterpret_cast<uintptr_t>(this) + cs2_dumper::schemas::client_dll::C_BasePlayerPawn::m_vOldOrigin); }
         //DirectX::XMFLOAT3 GetEyePos(){}
         CPlayer_WeaponServices** pWeaponServices() { return reinterpret_cast<CPlayer_WeaponServices**>(reinterpret_cast<uintptr_t>(this) + cs2_dumper::schemas::client_dll::C_BasePlayerPawn::m_pWeaponServices); }
+
+
+        CHandle<C_BasePlayerWeapon> GetHandleActiveWeapon();
+        CHandle<C_BaseEntity> GetHandleObserverTarget();
     };
 
     class C_CSPlayerPawnBase :public C_BasePlayerPawn {

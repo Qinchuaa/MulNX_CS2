@@ -22,3 +22,8 @@ CS2::C_BaseEntity* CS2::Module::Client::GetBaseEntityFromHandle(uint32_t uHandle
     const int nIndex = uHandle & 0x7FFF;
     return this->GetBaseEntity(nIndex);
 }
+
+CS2::C_BaseEntity* CS2::Module::Client::GetBaseEntityFromHandle(CS2::CHandleBase handle) {
+    if (!handle.Valid())return nullptr;
+    return this->GetBaseEntity(handle.GetIndexInEntityList());
+}
