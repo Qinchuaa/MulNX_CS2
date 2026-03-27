@@ -33,8 +33,10 @@ void CSController::HandleOverrideView(void* ThisCViewSetup) {
             *pFov = view->FOV;
         }
     }
+
     // 执行roll覆盖
     pViewAngles[2] = this->controlView.InputRoll.load(std::memory_order_acquire);
+
     // 记录视角数据
     this->controlView.currentView.AnglesX.store(pViewAngles[0], std::memory_order_release);
     this->controlView.currentView.AnglesY.store(pViewAngles[1], std::memory_order_release);
@@ -49,141 +51,92 @@ void CSController::HandleOverrideView(void* ThisCViewSetup) {
         this->controlView.currentView.FOV.store(*pFov, std::memory_order_release);
     }
 
-    // // 平滑系数 (0.0 ~ 1.0)，值越小越平滑
-    // constexpr float SMOOTH_FACTOR = 0.2f;
-
-    // // 使用静态变量保存上一帧的平滑值
-    // static DirectX::XMFLOAT3 s_smoothCameraPos{};
-    // static DirectX::XMFLOAT3 s_smoothCameraAngle{};
-    // static bool s_firstFrame = true;
-
-    // try {
-    //     auto* localController = this->Modules.client.dwLocalPlayerController();
-    //     if (!localController) return;
-    //     auto hLocalPawn = MulNX::MRead(localController->hPawn());
-    //     if (!hLocalPawn.Valid()) return;
-    //     auto* localPawn = this->Modules.client.GetBaseEntityFromHandle(hLocalPawn.GetIndexInEntityList())->As<CS2::C_CSPlayerPawn>();
-    //     if (!localPawn) return;
-    //     auto* pOB = MulNX::MRead(localPawn->pObserverServices());
-    //     if (!pOB) return;
-    //     auto handle = MulNX::MRead(pOB->hObserverTarget());
-    //     if (!handle.Valid()) return;
-    //     auto* target = this->Modules.client.GetBaseEntityFromHandle(handle.GetIndexInEntityList())->As<CS2::C_CSPlayerPawn>();
-    //     if (!target) return;
-
-    //     auto EyePos = MulNX::MRead(target->vOldOrigin()) + MulNX::MRead(target->vecViewOffset());
-    //     auto ViewAngle = MulNX::MRead(target->angEyeAngles());
-
-    //     // 计算目标摄像机位置（目标前方 50 单位）
-    //     auto dir = MulNX::Math::CSEulerToDir(ViewAngle.x, ViewAngle.y);
-    //     dir *= 50;
-    //     DirectX::XMFLOAT3 targetCameraPos = dir + EyePos;
-
-    //     // 计算目标摄像机角度（从摄像机指向目标）
-    //     DirectX::XMFLOAT3 targetCameraAngle;
-    //     MulNX::Math::CSDirToEuler(EyePos - targetCameraPos, targetCameraAngle);
-    //     // 滚转角强制为 0（保持水平）
-    //     targetCameraAngle.z = 0;
-
-    //     // 第一帧直接赋值，避免突变
-    //     if (s_firstFrame) {
-    //         s_smoothCameraPos = targetCameraPos;
-    //         s_smoothCameraAngle = targetCameraAngle;
-    //         s_firstFrame = false;
-    //     }
-
-    //     // 指数平滑位置
-    //     s_smoothCameraPos.x += (targetCameraPos.x - s_smoothCameraPos.x) * SMOOTH_FACTOR;
-    //     s_smoothCameraPos.y += (targetCameraPos.y - s_smoothCameraPos.y) * SMOOTH_FACTOR;
-    //     s_smoothCameraPos.z += (targetCameraPos.z - s_smoothCameraPos.z) * SMOOTH_FACTOR;
-
-    //     // 指数平滑角度（注意处理角度环绕）
-    //     // 先计算差值，并规范化到 [-180, 180]
-    //     auto angleDiff = [](float target, float current) -> float {
-    //         float diff = target - current;
-    //         // 将差值限制在 [-180, 180] 范围内（处理环绕）
-    //         if (diff > 180.0f) diff -= 360.0f;
-    //         if (diff < -180.0f) diff += 360.0f;
-    //         return diff;
-    //         };
-    //     s_smoothCameraAngle.x += angleDiff(targetCameraAngle.x, s_smoothCameraAngle.x) * SMOOTH_FACTOR;
-    //     s_smoothCameraAngle.y += angleDiff(targetCameraAngle.y, s_smoothCameraAngle.y) * SMOOTH_FACTOR;
-    //     // 滚转角始终为 0，不做平滑（或直接赋值）
-    //     s_smoothCameraAngle.z = 0;
-
-    //     // 输出平滑后的值
-    //     pViewOrigin[0] = s_smoothCameraPos.x;
-    //     pViewOrigin[1] = s_smoothCameraPos.y;
-    //     pViewOrigin[2] = s_smoothCameraPos.z;
-
-    //     pViewAngles[0] = s_smoothCameraAngle.x;
-    //     pViewAngles[1] = s_smoothCameraAngle.y;
-    //     pViewAngles[2] = 0;
-    // }
-    // catch (...) {
-    //     // 捕获异常后可重置第一帧标志，避免残留错误状态
-    //     s_firstFrame = true;
-    // }
-
-
+    // ==================== 摄像机绑定逻辑（武器枪口视角） ====================
     // 平滑系数 (0.0 ~ 1.0)，值越小越平滑
     constexpr float SMOOTH_FACTOR = 0.2f;
-    // 摄像机与目标的偏移距离（单位）
+    // 摄像机与骨骼9的偏移距离（单位）
     constexpr float CAMERA_OFFSET = 50.0f;
 
-    // 使用静态变量保存上一帧的平滑值
+    // 静态平滑状态（仅在第一次成功时初始化，异常时重置）
     static DirectX::XMFLOAT3 s_smoothCameraPos{};
     static DirectX::XMFLOAT3 s_smoothCameraAngle{};
-    static bool s_firstFrame = true;
+    static bool s_initialized = false;  // 是否已初始化过平滑值
 
     try {
+        // ---------- 获取目标 ----------
         auto* localController = this->Modules.client.dwLocalPlayerController();
         if (!localController) return;
         auto hLocalPawn = MulNX::MRead(localController->hPawn());
         if (!hLocalPawn.Valid()) return;
         auto* localPawn = this->Modules.client.GetBaseEntityFromHandle(hLocalPawn.GetIndexInEntityList())->As<CS2::C_CSPlayerPawn>();
         if (!localPawn) return;
-        auto* pOB = MulNX::MRead(localPawn->pObserverServices());
-        if (!pOB) return;
-        auto handle = MulNX::MRead(pOB->hObserverTarget());
-        if (!handle.Valid()) return;
-        auto* target = this->Modules.client.GetBaseEntityFromHandle(handle.GetIndexInEntityList())->As<CS2::C_CSPlayerPawn>();
-        if (!target) return;
+        // auto* pOB = MulNX::MRead(localPawn->pObserverServices());
+        // if (!pOB) return;
+        // auto handle = MulNX::MRead(pOB->hObserverTarget());
+        // if (!handle.Valid()) return;
+        // auto* target = this->Modules.client.GetBaseEntityFromHandle(handle.GetIndexInEntityList())->As<CS2::C_CSPlayerPawn>();
+        // if (!target) return;
 
-        // ---------- 骨骼数据获取 ----------
-        auto* pGameSceneNode = MulNX::MRead(target->pGameSceneNode());
-        if (!pGameSceneNode) return;
-        auto* bones = MulNX::MRead(static_cast<CS2::CSkeletonInstance*>(pGameSceneNode)->unkBoneArray());
-        if (!bones) return;
+        // ---------- 获取武器骨骼 ----------
+        auto* pWeaponServices = MulNX::MRead(localPawn->pWeaponServices());
+        if (!pWeaponServices) return;
+        auto hActiveWeapon = MulNX::MRead(pWeaponServices->hActiveWeapon());
+        if (!hActiveWeapon.Valid()) return;
+        auto* pWeapon = this->Modules.client.GetBaseEntityFromHandle(hActiveWeapon.GetIndexInEntityList())->As<CS2::C_BasePlayerWeapon>();
+        if (!pWeapon) return;
 
-        // 索引 15 = 头骨，索引 16 = 脖子（或头部参考点）
-        DirectX::XMFLOAT3 headPos = MulNX::MRead(bones->at(15));     // 目标位置（头骨）
-        DirectX::XMFLOAT3 neckPos = MulNX::MRead(bones->at(16));     // 辅助方向点
+        auto* pWeaponGameSceneNode = MulNX::MRead(pWeapon->pGameSceneNode());
+        if (!pWeaponGameSceneNode) return;
+        auto* weaponBones = MulNX::MRead(static_cast<CS2::CSkeletonInstance*>(pWeaponGameSceneNode)->unkBoneArray());
+        if (!weaponBones) return;
 
-        // 计算前向向量（从脖子指向头）
-        DirectX::XMFLOAT3 forwardDir = headPos - neckPos;
+        // 索引 8 = 枪口位置，索引 9 = 枪口指向参考点
+        DirectX::XMFLOAT3 gunPos = MulNX::MRead(weaponBones->at(8));
+        DirectX::XMFLOAT3 gunDirRef = MulNX::MRead(weaponBones->at(9));
+
+        // 计算枪口指向单位向量（从枪口指向参考点）
+        DirectX::XMFLOAT3 forwardDir = gunDirRef - gunPos;
         float len = sqrtf(forwardDir.x * forwardDir.x + forwardDir.y * forwardDir.y + forwardDir.z * forwardDir.z);
         if (len > 0.0001f) {
             forwardDir.x /= len;
             forwardDir.y /= len;
             forwardDir.z /= len;
         }
+        else {
+            return;  // 方向无效，放弃修改
+        }
 
-        // 目标摄像机位置 = 头骨位置 + 前向向量 * 偏移距离
-        DirectX::XMFLOAT3 targetCameraPos = headPos + forwardDir * CAMERA_OFFSET;
+        // 目标摄像机位置 = 骨骼9位置 + 枪口指向方向 × 偏移距离（向前延伸）
+        DirectX::XMFLOAT3 targetCameraPos = {
+            gunDirRef.x + forwardDir.x * CAMERA_OFFSET,
+            gunDirRef.y + forwardDir.y * CAMERA_OFFSET,
+            gunDirRef.z + forwardDir.z * CAMERA_OFFSET
+        };
 
-        // 目标摄像机角度：从摄像机指向头骨位置
-        DirectX::XMFLOAT3 lookDir = headPos - targetCameraPos;
+        // 目标摄像机角度：从摄像机指向枪口（即“倒着看回来”）
+        DirectX::XMFLOAT3 lookDir = {
+            gunPos.x - targetCameraPos.x,
+            gunPos.y - targetCameraPos.y,
+            gunPos.z - targetCameraPos.z
+        };
+        len = sqrtf(lookDir.x * lookDir.x + lookDir.y * lookDir.y + lookDir.z * lookDir.z);
+        if (len > 0.0001f) {
+            lookDir.x /= len;
+            lookDir.y /= len;
+            lookDir.z /= len;
+        }
+        else {
+            return;  // 方向无效，放弃修改
+        }
+
         DirectX::XMFLOAT3 targetCameraAngle;
         MulNX::Math::CSDirToEuler(lookDir, targetCameraAngle);
-        // 滚转角强制为 0
-        targetCameraAngle.z = 0;
 
         // ---------- 平滑处理 ----------
-        if (s_firstFrame) {
+        if (!s_initialized) {
             s_smoothCameraPos = targetCameraPos;
             s_smoothCameraAngle = targetCameraAngle;
-            s_firstFrame = false;
+            s_initialized = true;
         }
 
         // 指数平滑位置
@@ -191,7 +144,7 @@ void CSController::HandleOverrideView(void* ThisCViewSetup) {
         s_smoothCameraPos.y += (targetCameraPos.y - s_smoothCameraPos.y) * SMOOTH_FACTOR;
         s_smoothCameraPos.z += (targetCameraPos.z - s_smoothCameraPos.z) * SMOOTH_FACTOR;
 
-        // 指数平滑角度（处理环绕）
+        // 指数平滑角度（处理角度环绕）
         auto angleDiff = [](float target, float current) -> float {
             float diff = target - current;
             if (diff > 180.0f) diff -= 360.0f;
@@ -200,66 +153,22 @@ void CSController::HandleOverrideView(void* ThisCViewSetup) {
             };
         s_smoothCameraAngle.x += angleDiff(targetCameraAngle.x, s_smoothCameraAngle.x) * SMOOTH_FACTOR;
         s_smoothCameraAngle.y += angleDiff(targetCameraAngle.y, s_smoothCameraAngle.y) * SMOOTH_FACTOR;
-        s_smoothCameraAngle.z = 0;
+        s_smoothCameraAngle.z += angleDiff(targetCameraAngle.z, s_smoothCameraAngle.z) * SMOOTH_FACTOR;
 
-        // 输出平滑后的值
+        // 输出平滑后的值，滚转角强制为0（保持水平）
         pViewOrigin[0] = s_smoothCameraPos.x;
         pViewOrigin[1] = s_smoothCameraPos.y;
         pViewOrigin[2] = s_smoothCameraPos.z;
 
         pViewAngles[0] = s_smoothCameraAngle.x;
         pViewAngles[1] = s_smoothCameraAngle.y;
-        pViewAngles[2] = 0;
+        pViewAngles[2] = 0;  // 滚转角保持水平
     }
     catch (...) {
-        s_firstFrame = true;
+        // 发生异常时，重置平滑状态，避免使用无效数据
+        s_initialized = false;
+        // 不清空位置/角度，让游戏继续使用原有视角（或后续帧重新初始化）
     }
-
-
-    // try {
-    //     for (int i = 0;i <= this->Modules.client.dwGameEntitySystem_highestEntityIndex();i++) {
-    //         auto entity = this->Modules.client.GetBaseEntity(i);
-    //         if (entity == 0) {
-    //             continue;
-    //         }
-    //         auto hPawn = MulNX::MRead(entity->As<CS2::CBasePlayerController>()->hPawn());
-    //         if (!hPawn.Valid()) {
-    //             continue;
-    //         }
-    //         auto* pawn = this->Modules.client.GetBaseEntity(hPawn.GetIndexInEntityList());
-    //         if (!pawn) {
-    //             continue;
-    //         }
-    //         auto* pGameSceneNode = MulNX::MRead(pawn->pGameSceneNode());
-    //         if (!pGameSceneNode)continue;
-    //         auto* bones = MulNX::MRead(static_cast<CS2::CSkeletonInstance*>(pGameSceneNode)->unkBoneArray());
-    //         if (!bones)continue;
-
-    //         MulNX::TransInfo info;
-    //         info.pMatrix = this->GetViewMatrix();
-    //         info.windowHeight = 1080;
-    //         info.windowWidth = 1920;
-
-    //         DirectX::XMFLOAT3 pos15 = MulNX::MRead(bones->at(15));
-    //         DirectX::XMFLOAT3 pos16 = MulNX::MRead(bones->at(16));
-
-    //         DirectX::XMFLOAT3 euler;
-    //         MulNX::Math::CSDirToEuler(pos16 - pos15, euler);
-
-    //         pViewOrigin[0] = pos15.x;
-    //         pViewOrigin[1] = pos15.y;
-    //         pViewOrigin[2] = pos15.z;
-
-    //         pViewAngles[0] = euler.x;
-    //         pViewAngles[1] = euler.y;
-    //         break;
-    //     }
-    // }
-    // catch (const std::runtime_error& e) {
-    //     this->ISys().LogWarning("捕获到在应用自拍杆时发生的异常");
-    // }
-
-    return;
 }
 
 bool CSController::UINodeFunc(MulNXUINode* node) {
