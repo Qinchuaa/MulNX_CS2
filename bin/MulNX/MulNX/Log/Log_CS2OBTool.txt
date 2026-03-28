@@ -14,30 +14,29 @@
 [成功][UISystem]初始化成功!
 [成功][Debugger]成功订阅消息：Debugger/SetMaxInfoCount
 [成功][Debugger]成功订阅消息：Debugger/SaveToFile
-[提示][Debugger]推送了UI节点到UI系统
+[提示][Debugger]发送了一个UI节点进入消息系统
 [成功][Debugger]初始化成功!
 [成功][HandleSystem]初始化成功!
-[提示][KeyTracker]申请了一个线程创建
-[成功][KeyTracker]初始化成功!
+[提示][InputSystem]申请了一个线程创建
+[成功][InputSystem]初始化成功!
 [成功][GlobalVars]初始化成功!
 [成功][CSController]成功订阅消息：Core/ReHook
-[提示][CSController]推送了UI节点到UI系统
+[提示][CSController]发送了一个UI节点进入消息系统
 [提示][CSController]申请了一个线程创建
 [成功][CSController]初始化成功!
 [成功][WebSocketManager]成功订阅消息：WebSocketManager/Post
 [提示][WebSocketManager]申请了一个线程创建
 [成功][WebSocketManager]初始化成功!
 [成功][WorkspaceManager]初始化成功!
-[提示][ProjectManager]推送了UI节点到UI系统
+[提示][ProjectManager]发送了一个UI节点进入消息系统
 [成功][ProjectManager]初始化成功!
-[提示][SolutionManager]推送了UI节点到UI系统
+[提示][SolutionManager]发送了一个UI节点进入消息系统
 [成功][SolutionManager]初始化成功!
-[成功][ElementDebugger]初始化成功!
-[提示][ElementManager]推送了UI节点到UI系统
+[提示][ElementManager]发送了一个UI节点进入消息系统
 [成功][ElementManager]初始化成功!
-[提示][CameraSystem]推送了UI节点到UI系统
+[提示][CameraSystem]发送了一个UI节点进入消息系统
 [成功][CameraSystem]初始化成功!
-[提示][MiniMap]推送了UI节点到UI系统
+[提示][MiniMap]发送了一个UI节点进入消息系统
 [成功][MiniMap]初始化成功!
 [成功][VirtualUser]成功订阅消息：Core/Tick30min
 [成功][VirtualUser]成功订阅消息：Core/Tick60
@@ -46,18 +45,18 @@
 [成功][VirtualUser]成功订阅消息：Game/NewRound
 [成功][VirtualUser]初始化成功!
 [成功][GameCfgManager]Cfg文件列表更新完成
-[提示][GameCfgManager]推送了UI节点到UI系统
+[提示][GameCfgManager]发送了一个UI节点进入消息系统
 [成功][GameCfgManager]初始化成功!
 [成功][DemoHelper]成功订阅消息：DemoHelper/MarkTime
 [成功][DemoHelper]成功订阅消息：DemoHelper/JumpTIme
-[提示][DemoHelper]推送了UI节点到UI系统
+[提示][DemoHelper]发送了一个UI节点进入消息系统
 [成功][DemoHelper]初始化成功!
-[提示][GameSettingsManager]推送了UI节点到UI系统
+[提示][GameSettingsManager]发送了一个UI节点进入消息系统
 [成功][GameSettingsManager]初始化成功!
-[提示][ConsoleManager]推送了UI节点到UI系统
+[提示][ConsoleManager]发送了一个UI节点进入消息系统
 [成功][ConsoleManager]初始化成功!
 [成功][MulNXController]成功订阅消息：ModuleManager/ModuleInfo/Response
-[提示][MulNXController]推送了UI节点到UI系统
+[提示][MulNXController]发送了一个UI节点进入消息系统
 [成功][MulNXController]初始化成功!
 [提示][ModuleManager]注意: AbstractLayer3D(3D抽象层)被绑定为CSController
 [成功][ModuleManager]成功订阅消息：ModuleManager/ModuleInfo/Request
@@ -80,12 +79,248 @@
 [成功][UISystem]接收到一个UI节点
 [成功][WebSocketManager]正在监听端口：55202
 [成功][CSController]已完成Hook重载！
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]捕获到在绘制时发生的异常
 [提示][VirtualUser]接收到新回合信息
 [提示][ProjectManager]项目管理器正在处理消息！
 [警告][ProjectManager]无活跃项目，无法执行自动操作
-[提示][VirtualUser]接收到新回合信息
-[提示][ProjectManager]项目管理器正在处理消息！
-[警告][ProjectManager]无活跃项目，无法执行自动操作
+[警告][CSController]捕获到在绘制时发生的异常
+[警告][CSController]捕获到在绘制时发生的异常
+[警告][CSController]捕获到在绘制时发生的异常
+[警告][CSController]捕获到在绘制时发生的异常
+[警告][CSController]捕获到在绘制时发生的异常
+[警告][CSController]捕获到在绘制时发生的异常
+[警告][CSController]捕获到在绘制时发生的异常
+[警告][CSController]捕获到在绘制时发生的异常
+[警告][CSController]捕获到在绘制时发生的异常
+[警告][CSController]捕获到在绘制时发生的异常
+[警告][CSController]捕获到在绘制时发生的异常
+[警告][CSController]捕获到在绘制时发生的异常
+[警告][CSController]捕获到在绘制时发生的异常
+[警告][CSController]捕获到在绘制时发生的异常
+[警告][CSController]捕获到在绘制时发生的异常
+[警告][CSController]捕获到在绘制时发生的异常
+[警告][CSController]捕获到在绘制时发生的异常
+[警告][CSController]捕获到在绘制时发生的异常
+[警告][CSController]捕获到在绘制时发生的异常
+[警告][CSController]捕获到在绘制时发生的异常
+[警告][CSController]捕获到在绘制时发生的异常
+[警告][CSController]捕获到在绘制时发生的异常
+[警告][CSController]捕获到在绘制时发生的异常
+[警告][CSController]捕获到在绘制时发生的异常
+[警告][CSController]捕获到在绘制时发生的异常
+[警告][CSController]捕获到在绘制时发生的异常
+[警告][CSController]捕获到在绘制时发生的异常
+[警告][CSController]捕获到在绘制时发生的异常
+[警告][CSController]捕获到在绘制时发生的异常
+[警告][CSController]捕获到在绘制时发生的异常
+[警告][CSController]捕获到在绘制时发生的异常
+[警告][CSController]捕获到在绘制时发生的异常
+[警告][CSController]捕获到在绘制时发生的异常
+[警告][CSController]捕获到在绘制时发生的异常
+[警告][CSController]捕获到在绘制时发生的异常
+[警告][CSController]捕获到在绘制时发生的异常
+[警告][CSController]捕获到在绘制时发生的异常
+[警告][CSController]捕获到在绘制时发生的异常
+[警告][CSController]捕获到在绘制时发生的异常
+[警告][CSController]捕获到在绘制时发生的异常
+[警告][CSController]捕获到在绘制时发生的异常
+[警告][CSController]捕获到在绘制时发生的异常
+[警告][CSController]捕获到在绘制时发生的异常
+[警告][CSController]捕获到在绘制时发生的异常
+[警告][CSController]捕获到在绘制时发生的异常
+[警告][CSController]捕获到在绘制时发生的异常
+[警告][CSController]捕获到在绘制时发生的异常
+[警告][CSController]捕获到在绘制时发生的异常
+[警告][CSController]捕获到在绘制时发生的异常
+[警告][CSController]捕获到在绘制时发生的异常
+[警告][CSController]捕获到在绘制时发生的异常
+[警告][CSController]捕获到在绘制时发生的异常
+[警告][CSController]捕获到在绘制时发生的异常
+[警告][CSController]捕获到在绘制时发生的异常
+[警告][CSController]捕获到在绘制时发生的异常
+[警告][CSController]捕获到在绘制时发生的异常
+[警告][CSController]捕获到在绘制时发生的异常
+[警告][CSController]捕获到在绘制时发生的异常
+[警告][CSController]捕获到在绘制时发生的异常
+[警告][CSController]捕获到在绘制时发生的异常
+[警告][CSController]捕获到在绘制时发生的异常
+[警告][CSController]捕获到在绘制时发生的异常
+[警告][CSController]捕获到在绘制时发生的异常
+[警告][CSController]捕获到在绘制时发生的异常
+[警告][CSController]捕获到在绘制时发生的异常
+[警告][CSController]捕获到在绘制时发生的异常
+[警告][CSController]捕获到在绘制时发生的异常
+[警告][CSController]捕获到在绘制时发生的异常
+[警告][CSController]捕获到在绘制时发生的异常
+[警告][CSController]捕获到在绘制时发生的异常
+[警告][CSController]捕获到在绘制时发生的异常
+[警告][CSController]捕获到在绘制时发生的异常
+[警告][CSController]捕获到在绘制时发生的异常
+[警告][CSController]捕获到在绘制时发生的异常
+[警告][CSController]捕获到在绘制时发生的异常
+[警告][CSController]捕获到在绘制时发生的异常
+[警告][CSController]捕获到在绘制时发生的异常
+[警告][CSController]捕获到在绘制时发生的异常
+[警告][CSController]捕获到在绘制时发生的异常
+[警告][CSController]捕获到在绘制时发生的异常
+[警告][CSController]捕获到在绘制时发生的异常
+[警告][CSController]捕获到在绘制时发生的异常
+[警告][CSController]捕获到在绘制时发生的异常
+[警告][CSController]捕获到在绘制时发生的异常
+[警告][CSController]捕获到在绘制时发生的异常
+[警告][CSController]捕获到在绘制时发生的异常
+[警告][CSController]捕获到在绘制时发生的异常
+[警告][CSController]捕获到在绘制时发生的异常
+[警告][CSController]捕获到在绘制时发生的异常
+[警告][CSController]捕获到在绘制时发生的异常
+[警告][CSController]捕获到在绘制时发生的异常
+[警告][CSController]捕获到在绘制时发生的异常
+[警告][CSController]捕获到在绘制时发生的异常
+[警告][CSController]捕获到在绘制时发生的异常
+[警告][CSController]捕获到在绘制时发生的异常
+[警告][CSController]捕获到在绘制时发生的异常
+[警告][CSController]捕获到在绘制时发生的异常
+[警告][CSController]捕获到在绘制时发生的异常
+[警告][CSController]捕获到在绘制时发生的异常
+[警告][CSController]捕获到在绘制时发生的异常
+[警告][CSController]捕获到在绘制时发生的异常
+[警告][CSController]捕获到在绘制时发生的异常
+[警告][CSController]捕获到在绘制时发生的异常
+[警告][CSController]捕获到在绘制时发生的异常
+[警告][CSController]捕获到在绘制时发生的异常
+[警告][CSController]捕获到在绘制时发生的异常
+[警告][CSController]捕获到在绘制时发生的异常
+[警告][CSController]捕获到在绘制时发生的异常
+[警告][CSController]捕获到在绘制时发生的异常
+[警告][CSController]捕获到在绘制时发生的异常
+[警告][CSController]捕获到在绘制时发生的异常
+[警告][CSController]捕获到在绘制时发生的异常
+[警告][CSController]捕获到在绘制时发生的异常
+[警告][CSController]捕获到在绘制时发生的异常
+[警告][CSController]捕获到在绘制时发生的异常
+[警告][CSController]捕获到在绘制时发生的异常
+[警告][CSController]捕获到在绘制时发生的异常
+[警告][CSController]捕获到在绘制时发生的异常
+[警告][CSController]捕获到在绘制时发生的异常
+[警告][CSController]捕获到在绘制时发生的异常
+[警告][CSController]捕获到在绘制时发生的异常
+[警告][CSController]捕获到在绘制时发生的异常
+[警告][CSController]捕获到在绘制时发生的异常
+[警告][CSController]捕获到在绘制时发生的异常
 [警告][ElementManager]当前没有任何元素，跳过清空操作！
 [提示][SolutionManager]已关闭播放
 [警告][SolutionManager]当前没有任何解决方案，跳过清空操作！
@@ -96,14 +331,6 @@
 [成功][ProjectManager]成功从文件加载项目：1
 [提示][ProjectManager]尝试从文件加载项目，文件路径：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace\Mtp\Mtp.yaml
 [成功][ProjectManager]成功从文件加载项目：Mtp
-[成功][WorkspaceManager]成功保存工作区配置文件到文件！ 文件路径：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace\WorkspaceConfig.yaml
-[提示][VirtualUser]已触发自动保存（频率：每分钟）
-[提示][VirtualUser]接收到新回合信息
-[提示][ProjectManager]项目管理器正在处理消息！
-[警告][ProjectManager]无活跃项目，无法执行自动操作
-[提示][VirtualUser]接收到新回合信息
-[提示][ProjectManager]项目管理器正在处理消息！
-[警告][ProjectManager]无活跃项目，无法执行自动操作
 [提示][SolutionManager]已关闭播放
 [警告][SolutionManager]当前没有任何解决方案，跳过清空操作！
 [警告][ElementManager]当前没有任何元素，跳过清空操作！
@@ -116,6 +343,9 @@
 [提示][ElementManager]尝试从磁盘文件加载元素，文件路径：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace\Mtp\Elements\32.yaml
 [提示][ElementManager]尝试进行分发，元素类型为 FreeCameraPath ，文件路径：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace\Mtp\Elements\32.yaml
 [成功][ElementManager]成功从YAML文件加载自由摄像机轨道信息！ 自由摄像机轨道 名：32
+[提示][ElementManager]尝试从磁盘文件加载元素，文件路径：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace\Mtp\Elements\666.yaml
+[提示][ElementManager]尝试进行分发，元素类型为 FreeCameraPath ，文件路径：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace\Mtp\Elements\666.yaml
+[成功][ElementManager]成功从YAML文件加载自由摄像机轨道信息！ 自由摄像机轨道 名：666
 [提示][ElementManager]尝试从磁盘文件加载元素，文件路径：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace\Mtp\Elements\CT_Begin_1.yaml
 [提示][ElementManager]尝试进行分发，元素类型为 FreeCameraPath ，文件路径：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace\Mtp\Elements\CT_Begin_1.yaml
 [成功][ElementManager]成功从YAML文件加载自由摄像机轨道信息！ 自由摄像机轨道 名：CT_Begin_1
@@ -143,6 +373,9 @@
 [提示][ElementManager]尝试从磁盘文件加载元素，文件路径：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace\Mtp\Elements\T_Begin_1.yaml
 [提示][ElementManager]尝试进行分发，元素类型为 FreeCameraPath ，文件路径：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace\Mtp\Elements\T_Begin_1.yaml
 [成功][ElementManager]成功从YAML文件加载自由摄像机轨道信息！ 自由摄像机轨道 名：T_Begin_1
+[提示][ElementManager]尝试从磁盘文件加载元素，文件路径：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace\Mtp\Elements\xyz.yaml
+[提示][ElementManager]尝试进行分发，元素类型为 FreeCameraPath ，文件路径：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace\Mtp\Elements\xyz.yaml
+[成功][ElementManager]成功从YAML文件加载自由摄像机轨道信息！ 自由摄像机轨道 名：xyz
 [提示][SolutionManager]尝试从yaml文件加载解决方案，文件路径：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace\Mtp\Solutions\begin.yaml
 [成功][SolutionManager]解决方案加载成功
 [提示][SolutionManager]+------------------------------------------------+
@@ -153,94 +386,13 @@
 [成功][SolutionManager]解决方案加载成功
 [提示][SolutionManager]+------------------------------------------------+
 [成功][ProjectManager]已切换至项目Mtp
-[成功][ProjectManager]尝试加载元素总数：11
+[成功][ProjectManager]尝试加载元素总数：13
 [成功][ProjectManager]尝试加载解决方案总数：3
-[成功][ProjectManager]成功加载元素总数：11
+[成功][ProjectManager]成功加载元素总数：13
 [成功][ProjectManager]成功加载解决方案总数：3
-[成功][WorkspaceManager]成功保存工作区配置文件到文件！ 文件路径：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace\WorkspaceConfig.yaml
-[成功][ElementManager]成功保存所有元素到磁盘！
-[成功][SolutionManager]保存成功  解决方案名：begin  元素个数：3
-[成功][SolutionManager]成功保存所有解决方案到文件！
-[成功][ProjectManager]保存成功  项目名：Mtp
-[成功][WorkspaceManager]工作区保存成功
-[提示][VirtualUser]已触发自动保存（频率：每分钟）
-[提示][SolutionManager]偏移时间轴播放，偏移时间设置为：98.968750
+[提示][SolutionManager]偏移时间轴播放，偏移时间设置为：57.161133
 [提示][SolutionManager]已经切换至解决方案：begin
 [提示][SolutionManager]已开启播放
-[提示][CSController]  坐标： X：1083.325806  Y：444.211609  Z：-153.663727  FOV:90.000000  角度： 俯仰：1.294228  偏航：166.625092  滚转：0.003601
-[提示][CSController]  坐标： X：1083.607788  Y：444.032593  Z：-153.659271  FOV:90.000008  角度： 俯仰：1.292705  偏航：166.681747  滚转：0.003797
-[提示][CSController]  坐标： X：1083.721924  Y：443.960052  Z：-153.657440  FOV:89.999992  角度： 俯仰：1.292103  偏航：166.704590  滚转：0.003864
-[提示][CSController]  坐标： X：1084.370117  Y：443.545990  Z：-153.647018  FOV:90.000000  角度： 俯仰：1.288821  偏航：166.834167  滚转：0.004121
-[提示][CSController]  坐标： X：1084.463867  Y：443.485901  Z：-153.645462  FOV:89.999992  角度： 俯仰：1.288365  偏航：166.852844  滚转：0.004142
-[提示][CSController]  坐标： X：1085.131470  Y：443.056396  Z：-153.634506  FOV:90.000000  角度： 俯仰：1.285244  偏航：166.985565  滚转：0.004177
-[提示][CSController]  坐标： X：1085.231079  Y：442.992157  Z：-153.632858  FOV:90.000000  角度： 俯仰：1.284797  偏航：167.005295  滚转：0.004167
-[提示][CSController]  坐标： X：1085.938721  Y：442.533661  Z：-153.621002  FOV:90.000000  角度： 俯仰：1.281738  偏航：167.145340  滚转：0.003983
-[提示][CSController]  坐标： X：1086.022705  Y：442.479218  Z：-153.619614  FOV:90.000008  角度： 俯仰：1.281389  偏航：167.161896  滚转：0.003949
-[提示][CSController]  坐标： X：1086.823242  Y：441.957428  Z：-153.606033  FOV:90.000008  角度： 俯仰：1.278194  偏航：167.319565  滚转：0.003509
-[提示][CSController]  坐标： X：1086.838745  Y：441.947418  Z：-153.605759  FOV:90.000008  角度： 俯仰：1.278135  偏航：167.322571  滚转：0.003498
-[提示][CSController]  坐标： X：1087.678467  Y：441.397156  Z：-153.591309  FOV:89.999992  角度： 俯仰：1.275025  偏航：167.487320  滚转：0.002824
-[提示][CSController]  坐标： X：1088.405518  Y：440.918793  Z：-153.578674  FOV:89.999992  角度： 俯仰：1.272507  偏航：167.629440  滚转：0.002088
-[提示][CSController]  坐标： X：1088.542114  Y：440.828796  Z：-153.576294  FOV:89.999992  角度： 俯仰：1.272051  偏航：167.656082  滚转：0.001936
-[提示][CSController]  坐标： X：1089.301636  Y：440.326813  Z：-153.562958  FOV:90.000000  角度： 俯仰：1.269600  偏航：167.804108  滚转：0.001010
-[提示][CSController]  坐标： X：1089.428589  Y：440.242737  Z：-153.560699  FOV:90.000000  角度： 俯仰：1.269205  偏航：167.828796  滚转：0.000843
-[提示][CSController]  坐标： X：1090.215942  Y：439.720520  Z：-153.546753  FOV:90.000008  角度： 俯仰：1.266833  偏航：167.981766  滚转：-0.000262
-[提示][CSController]  坐标： X：1090.338013  Y：439.639374  Z：-153.544586  FOV:90.000000  角度： 俯仰：1.266477  偏航：168.005463  滚转：-0.000443
-[提示][CSController]  坐标： X：1091.162231  Y：439.090759  Z：-153.529846  FOV:90.000000  角度： 俯仰：1.264155  偏航：168.165176  滚转：-0.001738
-[提示][CSController]  坐标： X：1091.269775  Y：439.019043  Z：-153.527908  FOV:90.000008  角度： 俯仰：1.263861  偏航：168.185989  滚转：-0.001915
-[提示][CSController]  坐标： X：1092.130127  Y：438.444733  Z：-153.512421  FOV:90.000008  角度： 俯仰：1.261587  偏航：168.352280  滚转：-0.003395
-[提示][CSController]  坐标： X：1092.223755  Y：438.382080  Z：-153.510727  FOV:90.000000  角度： 俯仰：1.261347  偏航：168.370377  滚转：-0.003562
-[提示][CSController]  坐标： X：1093.105957  Y：437.791534  Z：-153.494736  FOV:90.000000  角度： 俯仰：1.259152  偏航：168.540558  滚转：-0.005196
-[提示][CSController]  坐标： X：1093.199219  Y：437.728973  Z：-153.493042  FOV:90.000000  角度： 俯仰：1.258927  偏航：168.558548  滚转：-0.005375
-[提示][CSController]  坐标： X：1094.150269  Y：437.090698  Z：-153.475693  FOV:90.000000  角度： 俯仰：1.256696  偏航：168.741653  滚转：-0.007251
-[提示][CSController]  坐标： X：1094.195923  Y：437.059967  Z：-153.474854  FOV:90.000000  角度： 俯仰：1.256592  偏航：168.750458  滚转：-0.007344
-[提示][CSController]  坐标： X：1095.213745  Y：436.375488  Z：-153.456207  FOV:89.999992  角度： 俯仰：1.254333  偏航：168.946091  滚转：-0.009460
-[提示][CSController]  坐标： X：1095.948242  Y：435.880737  Z：-153.442703  FOV:90.000000  角度： 俯仰：1.252772  偏航：169.087097  滚转：-0.011045
-[提示][CSController]  坐标： X：1096.252075  Y：435.675964  Z：-153.437088  FOV:89.999992  角度： 俯仰：1.252143  偏航：169.145370  滚转：-0.011713
-[提示][CSController]  坐标： X：1096.963623  Y：435.195892  Z：-153.423965  FOV:90.000000  角度： 俯仰：1.250699  偏航：169.281799  滚转：-0.013305
-[提示][CSController]  坐标： X：1097.303833  Y：434.966278  Z：-153.417648  FOV:90.000000  角度： 俯仰：1.250025  偏航：169.346970  滚转：-0.014078
-[提示][CSController]  坐标： X：1097.310547  Y：434.961700  Z：-153.417542  FOV:89.999992  角度： 俯仰：1.250011  偏航：169.348282  滚转：-0.014094
-[提示][CSController]  坐标： X：1098.341553  Y：434.265045  Z：-153.398422  FOV:90.000000  角度： 俯仰：1.248020  偏航：169.545715  滚转：-0.016483
-[提示][CSController]  坐标： X：1098.388916  Y：434.233093  Z：-153.397537  FOV:90.000000  角度： 俯仰：1.247931  偏航：169.554764  滚转：-0.016594
-[提示][CSController]  坐标： X：1099.382935  Y：433.560730  Z：-153.379089  FOV:90.000008  角度： 俯仰：1.246081  偏航：169.744949  滚转：-0.018954
-[提示][CSController]  坐标： X：1099.486572  Y：433.490509  Z：-153.377167  FOV:90.000000  角度： 俯仰：1.245892  偏航：169.764786  滚转：-0.019203
-[提示][CSController]  坐标： X：1100.445801  Y：432.841095  Z：-153.359283  FOV:89.999992  角度： 俯仰：1.244165  偏航：169.948151  滚转：-0.021527
-[提示][CSController]  坐标： X：1100.603394  Y：432.734344  Z：-153.356354  FOV:90.000000  角度： 俯仰：1.243886  偏航：169.978271  滚转：-0.021912
-[提示][CSController]  坐标： X：1101.561890  Y：432.084930  Z：-153.338486  FOV:90.000000  角度： 俯仰：1.242210  偏航：170.161423  滚转：-0.024273
-[提示][CSController]  坐标： X：1101.738892  Y：431.964966  Z：-153.335175  FOV:90.000008  角度： 俯仰：1.241904  偏航：170.195236  滚转：-0.024712
-[提示][CSController]  坐标： X：1102.700928  Y：431.312683  Z：-153.317184  FOV:90.000000  角度： 俯仰：1.240262  偏航：170.378983  滚转：-0.027113
-[提示][CSController]  坐标： X：1102.892700  Y：431.182709  Z：-153.313614  FOV:89.999992  角度： 俯仰：1.239938  偏航：170.415573  滚转：-0.027594
-[提示][CSController]  坐标： X：1103.945190  Y：430.468872  Z：-153.293915  FOV:89.999992  角度： 俯仰：1.238176  偏航：170.616516  滚转：-0.030248
-[提示][CSController]  坐标： X：1104.064331  Y：430.388031  Z：-153.291702  FOV:90.000000  角度： 俯仰：1.237979  偏航：170.639282  滚转：-0.030549
-[提示][CSController]  坐标： X：1105.178223  Y：429.632355  Z：-153.270844  FOV:90.000000  角度： 俯仰：1.236140  偏航：170.851898  滚转：-0.033376
-[提示][CSController]  坐标： X：1105.253662  Y：429.581238  Z：-153.269455  FOV:90.000000  角度： 俯仰：1.236016  偏航：170.866302  滚转：-0.033568
-[提示][CSController]  坐标： X：1106.366577  Y：428.826263  Z：-153.248642  FOV:90.000000  角度： 俯仰：1.234195  偏航：171.078705  滚转：-0.036403
-[提示][CSController]  坐标： X：1106.460205  Y：428.762726  Z：-153.246887  FOV:90.000008  角度： 俯仰：1.234042  偏航：171.096588  滚转：-0.036642
-[提示][CSController]  坐标： X：1107.543457  Y：428.027802  Z：-153.226608  FOV:90.000000  角度： 俯仰：1.232275  偏航：171.303375  滚转：-0.039405
-[提示][CSController]  坐标： X：1108.366211  Y：427.469818  Z：-153.211212  FOV:90.000000  角度： 俯仰：1.230932  偏航：171.460434  滚转：-0.041502
-[提示][CSController]  坐标： X：1108.822266  Y：427.160522  Z：-153.202698  FOV:90.000000  角度： 俯仰：1.230187  偏航：171.547501  滚转：-0.042662
-[提示][CSController]  坐标： X：1108.923340  Y：427.091980  Z：-153.200821  FOV:90.000000  角度： 俯仰：1.230021  偏航：171.566803  滚转：-0.042920
-[提示][CSController]  坐标： X：1110.001587  Y：426.360931  Z：-153.180664  FOV:90.000000  角度： 俯仰：1.228250  偏航：171.772720  滚转：-0.045656
-[提示][CSController]  坐标： X：1110.179077  Y：426.240540  Z：-153.177338  FOV:90.000000  角度： 俯仰：1.227957  偏航：171.806641  滚转：-0.046106
-[提示][CSController]  坐标： X：1111.295288  Y：425.484161  Z：-153.156509  FOV:90.000000  角度： 俯仰：1.226103  偏航：172.019867  滚转：-0.048922
-[提示][CSController]  坐标： X：1111.450684  Y：425.378876  Z：-153.153625  FOV:90.000000  角度： 俯仰：1.225843  偏航：172.049561  滚转：-0.049313
-[提示][CSController]  坐标： X：1112.509766  Y：424.661682  Z：-153.133881  FOV:90.000000  角度： 俯仰：1.224059  偏航：172.251968  滚转：-0.051963
-[提示][CSController]  坐标： X：1112.737549  Y：424.507324  Z：-153.129639  FOV:90.000000  角度： 俯仰：1.223672  偏航：172.295547  滚转：-0.052531
-[提示][CSController]  坐标： X：1113.780151  Y：423.801727  Z：-153.110245  FOV:90.000000  角度： 俯仰：1.221882  偏航：172.494934  滚转：-0.055114
-[提示][CSController]  坐标： X：1114.039429  Y：423.626343  Z：-153.105438  FOV:90.000000  角度： 俯仰：1.221433  偏航：172.544525  滚转：-0.055753
-[提示][CSController]  坐标： X：1115.075684  Y：422.925598  Z：-153.086197  FOV:90.000008  角度： 俯仰：1.219614  偏航：172.742844  滚转：-0.058289
-[提示][CSController]  坐标： X：1115.456055  Y：422.668518  Z：-153.079132  FOV:90.000000  角度： 俯仰：1.218937  偏航：172.815674  滚转：-0.059213
-[提示][CSController]  坐标： X：1116.372803  Y：422.049255  Z：-153.062149  FOV:90.000000  角度： 俯仰：1.217286  偏航：172.991241  滚转：-0.061423
-[提示][CSController]  坐标： X：1116.686523  Y：421.837402  Z：-153.056335  FOV:90.000000  角度： 俯仰：1.216713  偏航：173.051361  滚转：-0.062174
-[提示][CSController]  坐标： X：1117.634399  Y：421.197723  Z：-153.038834  FOV:90.000000  角度： 俯仰：1.214959  偏航：173.233047  滚转：-0.064424
-[提示][CSController]  坐标： X：1118.023682  Y：420.935120  Z：-153.031647  FOV:90.000000  角度： 俯仰：1.214227  偏航：173.307709  滚转：-0.065340
-[提示][CSController]  坐标： X：1118.031006  Y：420.930237  Z：-153.031509  FOV:90.000008  角度： 俯仰：1.214213  偏航：173.309097  滚转：-0.065357
-[提示][CSController]  坐标： X：1119.228394  Y：420.123169  Z：-153.009445  FOV:90.000000  角度： 俯仰：1.211920  偏航：173.538864  滚转：-0.068141
-[提示][CSController]  坐标： X：1119.388916  Y：420.015045  Z：-153.006500  FOV:90.000000  角度： 俯仰：1.211607  偏航：173.569672  滚转：-0.068511
-[提示][CSController]  坐标： X：1120.577026  Y：419.215210  Z：-152.984665  FOV:89.999992  角度： 俯仰：1.209253  偏航：173.797913  滚转：-0.071216
-[提示][CSController]  坐标： X：1120.760010  Y：419.092285  Z：-152.981323  FOV:90.000000  角度： 俯仰：1.208885  偏航：173.833038  滚转：-0.071627
-[提示][CSController]  坐标： X：1121.981567  Y：418.271149  Z：-152.958969  FOV:90.000000  角度： 俯仰：1.206375  偏航：174.067963  滚转：-0.074344
-[提示][CSController]  坐标： X：1122.143799  Y：418.162292  Z：-152.956009  FOV:90.000000  角度： 俯仰：1.206036  偏航：174.099167  滚转：-0.074700
-[提示][CSController]  坐标： X：1123.406372  Y：417.314880  Z：-152.932983  FOV:90.000000  角度： 俯仰：1.203342  偏航：174.342270  滚转：-0.077434
 [警告][CameraSystem]ShutDown被调用！
 [提示][ElementManager]已关闭预览
 [提示][SolutionManager]已关闭播放

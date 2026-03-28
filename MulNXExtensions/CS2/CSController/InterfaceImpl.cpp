@@ -19,6 +19,11 @@ MulNX::Math::View CSController::GetView()const {
     view.rotation.z = this->controlView.currentView.AnglesZ.load(std::memory_order_acquire);
     view.FOV = this->controlView.currentView.FOV.load(std::memory_order_acquire);
 
+    view.dof.NearBlurry = *this->controlView.dofs.pNearBlurry;
+    view.dof.NearCrisp = *this->controlView.dofs.pNearCrisp;
+    view.dof.FarCrisp = *this->controlView.dofs.pFarCrisp;
+    view.dof.FarBlurry = *this->controlView.dofs.pFarBlurry;
+
     return view;
 }
 float CSController::GetTime()const {

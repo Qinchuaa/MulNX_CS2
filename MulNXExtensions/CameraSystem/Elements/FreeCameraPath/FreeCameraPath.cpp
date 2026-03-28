@@ -93,9 +93,24 @@ bool FreeCameraPath::Call(CameraSystemIO* IO)const {
         k3.PositionAndFOV,
         segmentTime);
 
+    // 写入数据
     IO->Frame.view.position = { PositionAndFOV.m128_f32[0],PositionAndFOV.m128_f32[1],PositionAndFOV.m128_f32[2] };
     IO->Frame.view.FOV = PositionAndFOV.m128_f32[3];
-    
+
+    // 景深插值
+    auto Dof = DirectX::XMVectorCatmullRom(
+        k0.dof,
+        k1.dof,
+        k2.dof,
+        k3.dof,
+        segmentTime
+    );
+
+    IO->Frame.view.dof.NearBlurry = Dof.m128_f32[0];
+    IO->Frame.view.dof.NearCrisp = Dof.m128_f32[1];
+    IO->Frame.view.dof.FarCrisp = Dof.m128_f32[2];
+    IO->Frame.view.dof.FarBlurry = Dof.m128_f32[3];
+
     // 旋转插值 (使用Squad提供高阶连续性)
 
     // 使用DirectXMath内置函数计算Squad控制点
@@ -218,6 +233,16 @@ std::pair<bool, std::string> FreeCameraPath::SaveImpl(YAML::Node& root) {
             // 添加fov节点
             keyframeNode["F"] = posFov.w;
 
+            // 添加景深节点
+            auto dofs = keyframe.GetDOF();
+            YAML::Node dofsNode;
+            dofsNode.push_back(dofs.NearBlurry);
+            dofsNode.push_back(dofs.NearCrisp);
+            dofsNode.push_back(dofs.FarCrisp);
+            dofsNode.push_back(dofs.FarBlurry);
+            dofsNode.SetStyle(YAML::EmitterStyle::Flow);
+            keyframeNode["D"] = dofsNode;
+
             // 设置关键帧节点为流样式
             keyframeNode.SetStyle(YAML::EmitterStyle::Flow);
 
@@ -270,6 +295,22 @@ std::pair<bool, std::string> FreeCameraPath::Load(YAML::Node& root) {
                 keyframe.RotationQuat = DirectX::XMLoadFloat4(&quat);
             }
 
+            // 读取景深
+            if (keyframeNode["D"] && keyframeNode["D"].IsSequence() && keyframeNode["D"].size() >= 3) {
+                MulNX::Math::DOFParam dof;
+                dof.NearBlurry = keyframeNode["D"][0].as<float>();
+                dof.NearCrisp = keyframeNode["D"][1].as<float>();
+                dof.FarCrisp = keyframeNode["D"][2].as<float>();
+                dof.FarBlurry = keyframeNode["D"][3].as<float>();
+
+                keyframe.dof = DirectX::XMVectorSet(
+                    dof.NearBlurry,
+                    dof.NearCrisp,
+                    dof.FarCrisp,
+                    dof.FarBlurry
+                );
+            }
+
             this->AddKeyframe(std::move(keyframe));
         }
 
@@ -311,8 +352,10 @@ void FreeCameraPath::DebugUI(CameraDrawer* CamDrawer, ElementManager* EManager) 
     if (ImGui::Button("添加关键帧") || EManager->pInputSystem->CheckComboClick('F', 1)) {
         MulNX::Math::CameraKeyframe keyframe;
         keyframe.time = EManager->AL3D->GetTime();
-        keyframe.PositionAndFOV = EManager->AL3D->GetView().ToPositionAndFOV();
-        keyframe.RotationQuat = EManager->AL3D->GetView().ToRotationQuat();
+        auto view = EManager->AL3D->GetView();
+        keyframe.PositionAndFOV = view.ToPositionAndFOV();
+        keyframe.RotationQuat = view.ToRotationQuat();
+        keyframe.dof = view.ToDOFPack();
         this->AddKeyframe(keyframe);
     }
 

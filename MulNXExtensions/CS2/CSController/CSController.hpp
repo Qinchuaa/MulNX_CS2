@@ -41,15 +41,25 @@ public:
     std::atomic<float> B = 127;
 };
 
-class ControlView{
+class Dofs{
+public:
+    float* pNearBlurry = nullptr;
+    float* pNearCrisp = nullptr;
+    float* pFarCrisp = nullptr;
+    float* pFarBlurry = nullptr;
+};
+
+class ControlView {
 public:
     std::atomic<std::shared_ptr<Views>> ViewToGame = nullptr;
     std::atomic<float> InputRoll = 0;
     std::atomic<bool> CameraMode = false;
     Views currentView{};
+
+    Dofs dofs{};
 };
 
-class ControlAdvancedView{
+class ControlAdvancedView {
 public:
     std::atomic<bool> Enable = false;
     

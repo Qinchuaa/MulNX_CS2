@@ -278,6 +278,11 @@ bool CSController::Init() {
         }
     }
 
+    this->controlView.dofs.pNearBlurry = this->CvarSystem.GetCvar("r_dof_override_near_blurry")->GetPtr<float>();
+    this->controlView.dofs.pNearCrisp = this->CvarSystem.GetCvar("r_dof_override_near_crisp")->GetPtr<float>();
+    this->controlView.dofs.pFarCrisp = this->CvarSystem.GetCvar("r_dof_override_far_crisp")->GetPtr<float>();
+    this->controlView.dofs.pFarBlurry = this->CvarSystem.GetCvar("r_dof_override_far_blurry")->GetPtr<float>();
+
     return true;
 }
 
@@ -468,6 +473,7 @@ void CSController::HandleFreeCameraPath(const CameraSystemIO* const IO) {
     const auto& pos = IO->Frame.view.position;
     const auto& fov = IO->Frame.view.FOV;
     const auto& rot = IO->Frame.view.rotation;
+    const auto& dof = IO->Frame.view.dof;
 #ifdef _DEBUG
     // static MulNX::Math::Frame thisFrame;
     // if (thisFrame != IO->Frame) {
@@ -485,6 +491,11 @@ void CSController::HandleFreeCameraPath(const CameraSystemIO* const IO) {
     view->AnglesZ = rot.z;
     this->controlView.InputRoll.store(view->AnglesZ, std::memory_order_release);
     this->controlView.ViewToGame.store(view);
+
+    *this->controlView.dofs.pNearBlurry = dof.NearBlurry;
+    *this->controlView.dofs.pNearCrisp = dof.NearCrisp;
+    *this->controlView.dofs.pFarCrisp = dof.FarCrisp;
+    *this->controlView.dofs.pFarBlurry = dof.FarBlurry;
 }
 void CSController::HandleFirstPersonCameraPath(const CameraSystemIO* const IO) {
     static uint8_t LastIndex = 0xFFFF;

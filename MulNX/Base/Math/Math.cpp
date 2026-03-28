@@ -49,6 +49,14 @@ DirectX::XMVECTOR MulNX::Math::View::ToPositionAndFOV() {
 DirectX::XMVECTOR MulNX::Math::View::ToRotationQuat() {
     return MulNX::Math::CSEulerToQuatVec(this->rotation);
 }
+DirectX::XMVECTOR MulNX::Math::View::ToDOFPack() {
+    return DirectX::XMVectorSet(
+        this->dof.NearBlurry,
+        this->dof.NearCrisp,
+        this->dof.FarCrisp,
+        this->dof.FarBlurry
+    );
+}
 
 std::string MulNX::Math::CameraKeyframe::GetMsg()const {
     DirectX::XMFLOAT4 PositionAndFOV = this->GetPositionAndFOV();

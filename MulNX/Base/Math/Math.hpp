@@ -16,6 +16,7 @@ namespace MulNX {
 
             DirectX::XMVECTOR ToPositionAndFOV();
             DirectX::XMVECTOR ToRotationQuat();
+            DirectX::XMVECTOR ToDOFPack();
         };
 
         // 帧，包含渲染一帧的所有预备前置条件
