@@ -5,42 +5,30 @@
 #include <fstream>
 #include <format>
 
-//拷贝语义版
-void FreeCameraPath::AddKeyframe(const MulNX::Math::CameraKeyFrame& KeyFrame) {
+void FreeCameraPath::AddKeyframe(const MulNX::Math::CameraKeyframe& keyframe) {
 	//按照时间排序插入
-    auto it = std::lower_bound(CameraKeyFrames.begin(), CameraKeyFrames.end(), KeyFrame,
-        [&](const MulNX::Math::CameraKeyFrame& a, const MulNX::Math::CameraKeyFrame& b) {//引用捕获加速
-            return a.KeyTime < b.KeyTime;
+    auto it = std::lower_bound(this->CameraKeyframes.begin(), this->CameraKeyframes.end(), keyframe,
+        [&](const MulNX::Math::CameraKeyframe& a, const MulNX::Math::CameraKeyframe& b) {//引用捕获加速
+            return a.time < b.time;
         });
-    CameraKeyFrames.insert(it, KeyFrame); // 拷贝插入
+    this->CameraKeyframes.insert(it, keyframe); // 拷贝插入
     this->Refresh();
 
     return;
 }
-//移动语义版
-void FreeCameraPath::AddKeyframe(MulNX::Math::CameraKeyFrame&& KeyFrame) {
-	//按照时间排序插入
-    auto it = std::lower_bound(CameraKeyFrames.begin(), CameraKeyFrames.end(), KeyFrame,
-        [&](const MulNX::Math::CameraKeyFrame& a, const MulNX::Math::CameraKeyFrame& b) {//引用捕获加速
-            return a.KeyTime < b.KeyTime;
-        });
-    CameraKeyFrames.insert(it, std::move(KeyFrame)); // 移动插入
-    this->Refresh();
 
-    return;
-}
 void FreeCameraPath::Refresh() {
     //标记为脏
     this->Dirty = true;
-    if (this->CameraKeyFrames.size() == 0) {
+    if (this->CameraKeyframes.size() == 0) {
         this->StartTime = 0;
         this->EndTime = 0;
         this->DurationTime = 0;
         return;
     }
     else {
-        this->StartTime = this->CameraKeyFrames.front().KeyTime;
-        this->EndTime = this->CameraKeyFrames.back().KeyTime;
+        this->StartTime = this->CameraKeyframes.front().time;
+        this->EndTime = this->CameraKeyframes.back().time;
         this->DurationTime = this->EndTime - this->StartTime;
         return;
     }
@@ -48,100 +36,102 @@ void FreeCameraPath::Refresh() {
     return;
 }
 void FreeCameraPath::TimeNormalize() {
-    if (this->CameraKeyFrames.front().KeyTime == 0)return;
-    size_t Size = this->CameraKeyFrames.size();
+    if (this->CameraKeyframes.front().time == 0)return;
+    size_t Size = this->CameraKeyframes.size();
     if (!Size)return;
     if (Size == 1) {
-        this->CameraKeyFrames.at(0).KeyTime = 0;
+        this->CameraKeyframes.at(0).time = 0;
         return;
     }
-    float Schema = this->CameraKeyFrames.front().KeyTime;
+    float Schema = this->CameraKeyframes.front().time;
     for (int i = 1; i < Size; ++i) {
-        this->CameraKeyFrames.at(i).KeyTime -= Schema;
+        this->CameraKeyframes.at(i).time -= Schema;
     }
-    this->CameraKeyFrames.front().KeyTime = 0;
+    this->CameraKeyframes.front().time = 0;
     this->Refresh();
     return;
 }
 bool FreeCameraPath::Call(CameraSystemIO* IO)const {
-    //如果不在理论影响范围内，应当直接返回而不做任何修改
-    //是与被遍历的其它call一起工作
+    // 如果不在理论影响范围内，应当直接返回而不做任何修改
+    // 是与被遍历的其它call一起工作
 
-    //处理空关键帧的情况
-    if (CameraKeyFrames.empty())return false;
+    // 处理空关键帧的情况
+    if (this->CameraKeyframes.empty())return false;
 
     float Time = IO->ElementTime;
 
-    //查找当前时间所在的关键帧区间（使用绝对时间来搜索以匹配以绝对时间存储的关键帧）
-    auto it = std::lower_bound(CameraKeyFrames.begin(), CameraKeyFrames.end(), Time,
-        [](const MulNX::Math::CameraKeyFrame& k, float t) {
-            return k.KeyTime < t;
+    // 查找当前时间所在的关键帧区间（使用绝对时间来搜索以匹配以绝对时间存储的关键帧）
+    auto it = std::lower_bound(this->CameraKeyframes.begin(), this->CameraKeyframes.end(), Time,
+        [](const MulNX::Math::CameraKeyframe& k, float t) {
+            return k.time < t;
         });
 
-    //确保迭代器有效并安全地计算索引
-    ptrdiff_t dist = std::distance(CameraKeyFrames.begin(), it);
+    // 确保迭代器有效并安全地计算索引
+    ptrdiff_t dist = std::distance(this->CameraKeyframes.begin(), it);
     size_t index = (dist == 0) ? 0 : static_cast<size_t>(dist - 1);
 
-    //保护：如果 index 位于最后一个元素，则没有下一个关键帧可用于插值
-    if (index + 1 >= this->CameraKeyFrames.size()) return false;
+    // 保护：如果 index 位于最后一个元素，则没有下一个关键帧可用于插值
+    if (index + 1 >= this->CameraKeyframes.size()) return false;
 
-    //获取相邻的四个关键帧用于插值
-    const MulNX::Math::CameraKeyFrame& k1 = CameraKeyFrames[index];
-    const MulNX::Math::CameraKeyFrame& k2 = CameraKeyFrames[index + 1];
-    const MulNX::Math::CameraKeyFrame& k0 = (index > 0) ? CameraKeyFrames[index - 1] : k1;
-    const MulNX::Math::CameraKeyFrame& k3 = (index + 2 < this->CameraKeyFrames.size()) ? CameraKeyFrames[index + 2] : k2;
+    // 获取相邻的四个关键帧用于插值
+    const auto& k1 = this->CameraKeyframes[index];
+    const auto& k2 = this->CameraKeyframes[index + 1];
+    const auto& k0 = (index > 0) ? this->CameraKeyframes[index - 1] : k1;
+    const auto& k3 = (index + 2 < this->CameraKeyframes.size()) ? this->CameraKeyframes[index + 2] : k2;
 
-    //计算当前片段的时间比例 (0~1)
-    float segmentDuration = k2.KeyTime - k1.KeyTime;
+    // 计算当前片段的时间比例 (0~1)
+    float segmentDuration = k2.time - k1.time;
     if (segmentDuration <= 0.0f) return false; // 避免除以零或无效的段
 
-    float segmentTime = (Time - k1.KeyTime) / segmentDuration;
+    float segmentTime = (Time - k1.time) / segmentDuration;
 
-    //位置和FOV插值 (Catmull-Rom)
-    IO->Frame.SpatialState.PositionAndFOV = DirectX::XMVectorCatmullRom(
-        k0.SpatialState.PositionAndFOV,
-        k1.SpatialState.PositionAndFOV,
-        k2.SpatialState.PositionAndFOV,
-        k3.SpatialState.PositionAndFOV,
+    // 位置和FOV插值 (Catmull-Rom)
+    auto PositionAndFOV = DirectX::XMVectorCatmullRom(
+        k0.PositionAndFOV,
+        k1.PositionAndFOV,
+        k2.PositionAndFOV,
+        k3.PositionAndFOV,
         segmentTime);
 
-    //旋转插值 (使用Squad提供高阶连续性)
+    IO->Frame.view.position = { PositionAndFOV.m128_f32[0],PositionAndFOV.m128_f32[1],PositionAndFOV.m128_f32[2] };
+    IO->Frame.view.FOV = PositionAndFOV.m128_f32[3];
+    
+    // 旋转插值 (使用Squad提供高阶连续性)
 
-    //使用DirectXMath内置函数计算Squad控制点
+    // 使用DirectXMath内置函数计算Squad控制点
     DirectX::XMVECTOR s1, s2, s3;
     DirectX::XMQuaternionSquadSetup(&s1, &s2, &s3,
-        k0.SpatialState.RotationQuat,
-        k1.SpatialState.RotationQuat,
-        k2.SpatialState.RotationQuat,
-        k3.SpatialState.RotationQuat);
+        k0.RotationQuat,
+        k1.RotationQuat,
+        k2.RotationQuat,
+        k3.RotationQuat);
 
-    //使用Squad进行插值
-    DirectX::XMVECTOR rotation = DirectX::XMQuaternionSquad(k1.SpatialState.RotationQuat, s1, s2, s3, segmentTime);
-    IO->Frame.SpatialState.RotationQuat = DirectX::XMQuaternionNormalize(rotation);
-
+    // 使用Squad进行插值
+    DirectX::XMVECTOR rotation = DirectX::XMQuaternionSquad(k1.RotationQuat, s1, s2, s3, segmentTime);
+    auto RotationQuat = DirectX::XMQuaternionNormalize(rotation);
+    DirectX::XMFLOAT4 quat;
+    DirectX::XMStoreFloat4(&quat, RotationQuat);
+    MulNX::Math::CSQuatToEuler(quat, IO->Frame.view.rotation);
+    
     IO->Frame.TargetOBMode = 4;
-
-    //DirectX::XMFLOAT3 output = Frame.SpatialState.GetPosition();
-    //ImGui::Text(("X: " + std::to_string(output.x) + "  Y: " + std::to_string(output.y) + "  Z: " + std::to_string(output.z)).c_str());
 
     return true;
 }
 //绘制函数（虚），各个元素按需实现
 bool FreeCameraPath::Draw(CameraDrawer* CamDrawer, const float* Matrix, const float WinWidth, const float WinHeight)const {
-    const std::vector<MulNX::Math::CameraKeyFrame>& Frames = this->GetAllKeyFrames();
-    int Size = Frames.size();
+    const auto& keyframes = this->GetAllKeyFrames();
 
     // 存储上一个关键帧的位置（用于连线）
     DirectX::XMFLOAT3 prevPosition{};
     bool firstFrame = true;
 
     // 遍历当前路径的所有关键帧
-    for (int i = 0; i < Size; ++i) {
+    for (int i = 0; i < keyframes.size(); ++i) {
         if (!Matrix)return false;
-        const auto& Frame = Frames.at(i);
+        const auto& keyframe = keyframes.at(i);
         // 绘制关键帧的摄像机
         std::string label = this->Name + " #" + std::to_string(i);
-        CamDrawer->DrawCamera(Frame.SpatialState.GetPosition(), Frame.SpatialState.GetRotationEuler(), label.c_str());
+        CamDrawer->DrawCamera(keyframe.GetPosition(), keyframe.GetRotationEuler(), label.c_str());
 
         // 获取ImDrawList用于绘制连线
         ImDrawList* drawList = ImGui::GetBackgroundDrawList();
@@ -154,7 +144,7 @@ bool FreeCameraPath::Draw(CameraDrawer* CamDrawer, const float* Matrix, const fl
             // 使用CameraDrawer中的转换方法
             MulNX::Math::WorldToScreen(prevPosition, prevScreenPos, Matrix, WinWidth, WinHeight);
 
-            MulNX::Math::WorldToScreen(Frame.SpatialState.GetPosition(), currentScreenPos, Matrix, WinWidth, WinHeight);
+            MulNX::Math::WorldToScreen(keyframe.GetPosition(), currentScreenPos, Matrix, WinWidth, WinHeight);
 
             // 绘制连线
             drawList->AddLine(
@@ -165,7 +155,7 @@ bool FreeCameraPath::Draw(CameraDrawer* CamDrawer, const float* Matrix, const fl
             );
         }
         // 保存当前位置用于下一次连线
-        prevPosition = Frame.SpatialState.GetPosition();
+        prevPosition = keyframe.GetPosition();
         firstFrame = false;
     }
     return true;
@@ -175,40 +165,40 @@ std::string FreeCameraPath::GetMsg()const {
     std::ostringstream oss;
     oss << this->GetBaseMsg()
         << "\n详细信息：\n";
-    const size_t& Size = this->CameraKeyFrames.size();
+    const size_t& Size = this->CameraKeyframes.size();
     oss << "  关键帧总数： " << std::to_string(Size) << "\n";
     for (size_t i = 0; i < Size; ++i) {
-        const MulNX::Math::CameraKeyFrame& Frame = this->CameraKeyFrames.at(i);
-        oss << "编号： " << std::to_string(i) << Frame.GetMsg() << "\n";
+        const MulNX::Math::CameraKeyframe& keyframe = this->CameraKeyframes.at(i);
+        oss << "编号： " << std::to_string(i) << keyframe.GetMsg() << "\n";
     }
 	return oss.str();
 }
 
 size_t FreeCameraPath::GetKeyFrameCount() const {
-    return this->CameraKeyFrames.size();
+    return this->CameraKeyframes.size();
 }
-const MulNX::Math::CameraKeyFrame& FreeCameraPath::GetKeyFrame(const size_t& index)const {
-    return this->CameraKeyFrames[index];
+const MulNX::Math::CameraKeyframe& FreeCameraPath::GetKeyFrame(const size_t& index)const {
+    return this->CameraKeyframes[index];
 }
-const std::vector<MulNX::Math::CameraKeyFrame>& FreeCameraPath::GetAllKeyFrames()const {
-    return this->CameraKeyFrames;
+const std::vector<MulNX::Math::CameraKeyframe>& FreeCameraPath::GetAllKeyFrames()const {
+    return this->CameraKeyframes;
 }
 void FreeCameraPath::Clear() {
-    this->CameraKeyFrames.clear();
+    this->CameraKeyframes.clear();
     this->Refresh();
     return;
 }
 std::pair<bool, std::string> FreeCameraPath::SaveImpl(YAML::Node& root) {
     try {
         // 添加关键帧
-        for (const auto& keyframe : this->CameraKeyFrames) {
+        for (const auto& keyframe : this->CameraKeyframes) {
             // 创建关键帧节点
             YAML::Node keyframeNode;
             // 时间
-            keyframeNode["T"] = keyframe.KeyTime;
+            keyframeNode["T"] = keyframe.time;
 
             // 添加坐标节点
-            DirectX::XMFLOAT4 posFov = keyframe.SpatialState.GetPositionAndFOV();
+            DirectX::XMFLOAT4 posFov = keyframe.GetPositionAndFOV();
             YAML::Node posNode;
             posNode.push_back(posFov.x);
             posNode.push_back(posFov.y);
@@ -217,7 +207,7 @@ std::pair<bool, std::string> FreeCameraPath::SaveImpl(YAML::Node& root) {
             keyframeNode["P"] = posNode;
 
             // 添加旋转节点
-            DirectX::XMFLOAT3 euler = keyframe.SpatialState.GetRotationEuler();
+            DirectX::XMFLOAT3 euler = keyframe.GetRotationEuler();
             YAML::Node rotNode;
             rotNode.push_back(euler.x); // Pitch
             rotNode.push_back(euler.y); // Yaw
@@ -254,10 +244,10 @@ std::pair<bool, std::string> FreeCameraPath::Load(YAML::Node& root) {
         for (const auto& keyframeNode : root["keyframes"]) {
             if (!keyframeNode.IsMap()) continue;
 
-            MulNX::Math::CameraKeyFrame keyframe;
+            MulNX::Math::CameraKeyframe keyframe;
 
             // 读取时间
-            keyframe.KeyTime = keyframeNode["T"].as<float>();
+            keyframe.time = keyframeNode["T"].as<float>();
 
             // 读取位置和FOV
             if (keyframeNode["P"] && keyframeNode["P"].IsSequence() && keyframeNode["P"].size() >= 3) {
@@ -266,7 +256,7 @@ std::pair<bool, std::string> FreeCameraPath::Load(YAML::Node& root) {
                 posFov.y = keyframeNode["P"][1].as<float>();
                 posFov.z = keyframeNode["P"][2].as<float>();
                 posFov.w = keyframeNode["F"].as<float>();
-                keyframe.SpatialState.PositionAndFOV = DirectX::XMLoadFloat4(&posFov);
+                keyframe.PositionAndFOV = DirectX::XMLoadFloat4(&posFov);
             }
 
             // 读取旋转（欧拉角）
@@ -277,7 +267,7 @@ std::pair<bool, std::string> FreeCameraPath::Load(YAML::Node& root) {
                 euler.z = keyframeNode["R"][2].as<float>(); // Roll
                 DirectX::XMFLOAT4 quat;
                 MulNX::Math::CSEulerToQuat(euler, quat);
-                keyframe.SpatialState.RotationQuat = DirectX::XMLoadFloat4(&quat);
+                keyframe.RotationQuat = DirectX::XMLoadFloat4(&quat);
             }
 
             this->AddKeyframe(std::move(keyframe));
@@ -297,7 +287,7 @@ void FreeCameraPath::DebugUI(CameraDrawer* CamDrawer, ElementManager* EManager) 
     std::ostringstream oss;
     oss << this->GetBaseMsg()
         << "\n详细信息：\n";
-    const size_t& Size = this->CameraKeyFrames.size();
+    const size_t& Size = this->CameraKeyframes.size();
     oss << "  关键帧总数： " << std::to_string(Size) << "\n";
     ImGui::TextUnformatted(oss.str().c_str());
 
@@ -305,24 +295,25 @@ void FreeCameraPath::DebugUI(CameraDrawer* CamDrawer, ElementManager* EManager) 
     static int PreIndex = -2;
 
     for (size_t i = 0; i < Size; ++i) {
-        const MulNX::Math::CameraKeyFrame& Frame = this->CameraKeyFrames.at(i);
+        const MulNX::Math::CameraKeyframe& keyframe = this->CameraKeyframes.at(i);
         if (ImGui::Selectable(std::to_string(i).c_str(), false, ImGuiSelectableFlags_AllowDoubleClick)) {
             IndexForReset = i;
             if (ImGui::IsMouseDoubleClicked(0)) {
-                auto pos = Frame.SpatialState.GetPosition();
-                auto rot = Frame.SpatialState.GetRotationEuler();
+                auto pos = keyframe.GetPosition();
+                auto rot = keyframe.GetRotationEuler();
                 EManager->AL3D->spec_goto_ex(pos, rot);
             }
         }
         ImGui::SameLine();
-        ImGui::Text(Frame.GetMsg().c_str());
+        ImGui::Text(keyframe.GetMsg().c_str());
     }
     
     if (ImGui::Button("添加关键帧") || EManager->pInputSystem->CheckComboClick('F', 1)) {
-        MulNX::Math::CameraKeyFrame Frame;
-        Frame.KeyTime = EManager->AL3D->GetTime();
-        Frame.SpatialState = EManager->AL3D->GetView().ToSpatialState();
-        this->AddKeyframe(Frame);
+        MulNX::Math::CameraKeyframe keyframe;
+        keyframe.time = EManager->AL3D->GetTime();
+        keyframe.PositionAndFOV = EManager->AL3D->GetView().ToPositionAndFOV();
+        keyframe.RotationQuat = EManager->AL3D->GetView().ToRotationQuat();
+        this->AddKeyframe(keyframe);
     }
 
     if (ImGui::Button("清空关键帧") || EManager->pInputSystem->CheckComboClick(VK_DELETE, 2)) {
@@ -341,9 +332,9 @@ void FreeCameraPath::DebugUI(CameraDrawer* CamDrawer, ElementManager* EManager) 
 
     ImGui::Separator();
 
-    if (0 <= IndexForReset && IndexForReset < this->CameraKeyFrames.size()) {
-        const MulNX::Math::CameraKeyFrame& Frame = this->GetKeyFrame(IndexForReset);
-        ImGui::Text(("关键帧信息： 编号： " + std::to_string(IndexForReset) + Frame.GetMsg()).c_str());
+    if (0 <= IndexForReset && IndexForReset < this->CameraKeyframes.size()) {
+        const MulNX::Math::CameraKeyframe& keyframe = this->GetKeyFrame(IndexForReset);
+        ImGui::Text(("关键帧信息： 编号： " + std::to_string(IndexForReset) + keyframe.GetMsg()).c_str());
 
         ImGui::Separator();
 
@@ -351,9 +342,9 @@ void FreeCameraPath::DebugUI(CameraDrawer* CamDrawer, ElementManager* EManager) 
         static DirectX::XMFLOAT4 tempPositionAndFOV{};
         static DirectX::XMFLOAT3 tempRotationEuler{};
         if (IndexForReset != PreIndex) {
-            temptime = Frame.KeyTime;
-            tempPositionAndFOV = Frame.SpatialState.GetPositionAndFOV();
-            tempRotationEuler = Frame.SpatialState.GetRotationEuler();
+            temptime = keyframe.time;
+            tempPositionAndFOV = keyframe.GetPositionAndFOV();
+            tempRotationEuler = keyframe.GetRotationEuler();
         }
 
         ImGui::SliderFloat("时间", &temptime, 0, 20000);
@@ -366,25 +357,25 @@ void FreeCameraPath::DebugUI(CameraDrawer* CamDrawer, ElementManager* EManager) 
 
         CamDrawer->DrawCamera(DirectX::XMFLOAT3{ tempPositionAndFOV.x,tempPositionAndFOV.y ,tempPositionAndFOV.z }, tempRotationEuler, "目标摄像机关键帧");
         if (ImGui::Button("修改")) {
-            //构造临时摄像机关键帧
-            MulNX::Math::CameraKeyFrame tempKey;
-            //注入时间
-            tempKey.KeyTime = temptime;
-            //注入位置和FOV
-            tempKey.SpatialState.PositionAndFOV = DirectX::XMLoadFloat4(&tempPositionAndFOV);
-            //转换角度并注入
+            // 构造临时摄像机关键帧
+            MulNX::Math::CameraKeyframe tempKey;
+            // 注入时间
+            tempKey.time = temptime;
+            // 注入位置和FOV
+            tempKey.PositionAndFOV = DirectX::XMLoadFloat4(&tempPositionAndFOV);
+            // 转换角度并注入
             DirectX::XMFLOAT4 tempRotationQuat;
             MulNX::Math::CSEulerToQuat(tempRotationEuler, tempRotationQuat);
-            tempKey.SpatialState.RotationQuat = DirectX::XMLoadFloat4(&tempRotationQuat);
-            //擦除旧关键帧
-            this->CameraKeyFrames.erase(this->CameraKeyFrames.begin() + IndexForReset);
-            //添加新关键帧
+            tempKey.RotationQuat = DirectX::XMLoadFloat4(&tempRotationQuat);
+            // 擦除旧关键帧
+            this->CameraKeyframes.erase(this->CameraKeyframes.begin() + IndexForReset);
+            // 添加新关键帧
             this->AddKeyframe(std::move(tempKey));
             PreIndex = -1;
         }
         if (ImGui::Button("删除")) {
             //删除并刷新
-            this->CameraKeyFrames.erase(this->CameraKeyFrames.begin() + IndexForReset);
+            this->CameraKeyframes.erase(this->CameraKeyframes.begin() + IndexForReset);
             this->Refresh();
             PreIndex = -1;
         }

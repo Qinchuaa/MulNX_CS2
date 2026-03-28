@@ -1,7 +1,11 @@
 add_library(MulNX
     "Base/any_smart_ptr/any_smart_ptr.hpp"
     "Base/CharUtility/CharUtility.cpp"
+
     "Base/Math/Math.cpp"
+    "Base/Math/DOF/DOF.cpp"
+    "Base/Math/Translate/Translate.cpp"
+
     "Base/TripleBuffer/TripleBuffer.cpp"
     "Base/MulNXHandle/MulNXHandle.cpp"
     "Base/UI/UI.cpp"

@@ -31,12 +31,14 @@ void CSController::HandleOverrideView(CS2::CViewSetup* viewSetup) {
     viewSetup->pViewAngles()->z = this->controlView.InputRoll.load(std::memory_order_acquire);
 
     // 记录视角数据
-    this->controlView.currentView.AnglesX.store(viewSetup->pViewOrigin()->x, std::memory_order_release);
-    this->controlView.currentView.AnglesY.store(viewSetup->pViewOrigin()->y, std::memory_order_release);
-    this->controlView.currentView.AnglesZ.store(viewSetup->pViewOrigin()->z, std::memory_order_release);
-    this->controlView.currentView.OriginX.store(viewSetup->pViewAngles()->x, std::memory_order_release);
-    this->controlView.currentView.OriginY.store(viewSetup->pViewAngles()->y, std::memory_order_release);
-    this->controlView.currentView.OriginZ.store(viewSetup->pViewAngles()->z, std::memory_order_release);
+    this->controlView.currentView.OriginX.store(viewSetup->pViewOrigin()->x, std::memory_order_release);
+    this->controlView.currentView.OriginY.store(viewSetup->pViewOrigin()->y, std::memory_order_release);
+    this->controlView.currentView.OriginZ.store(viewSetup->pViewOrigin()->z, std::memory_order_release);
+
+    this->controlView.currentView.AnglesX.store(viewSetup->pViewAngles()->x, std::memory_order_release);
+    this->controlView.currentView.AnglesY.store(viewSetup->pViewAngles()->y, std::memory_order_release);
+    this->controlView.currentView.AnglesZ.store(viewSetup->pViewAngles()->z, std::memory_order_release);
+    
     if (*viewSetup->pFov() < 0.01f) {
         this->controlView.currentView.FOV.store(90.0f, std::memory_order_release);
     }
@@ -88,7 +90,7 @@ void CSController::HandleOverrideView(CS2::CViewSetup* viewSetup) {
         else {
             return;  // 方向无效，放弃修改
         }
-        
+
         // 目标摄像机位置
         DirectX::XMFLOAT3 targetCameraPos = {
             gunDirRef.x + forwardDir.x * CAMERA_OFFSET,
@@ -463,23 +465,24 @@ int CSController::TryGetMsg() {
 
 
 void CSController::HandleFreeCameraPath(const CameraSystemIO* const IO) {
-    DirectX::XMFLOAT4 PosAndFOV = IO->Frame.GetPositionAndFOV();
-    DirectX::XMFLOAT3 RotEuler = IO->Frame.GetRotationEuler();
+    const auto& pos = IO->Frame.view.position;
+    const auto& fov = IO->Frame.view.FOV;
+    const auto& rot = IO->Frame.view.rotation;
 #ifdef _DEBUG
-    static MulNX::Math::Frame thisFrame;
-    if (thisFrame != IO->Frame) {
-        thisFrame = IO->Frame;
-        this->ISys().LogInfo(thisFrame.GetMsg());
-    }
+    // static MulNX::Math::Frame thisFrame;
+    // if (thisFrame != IO->Frame) {
+    //     thisFrame = IO->Frame;
+    //     this->ISys().LogInfo(thisFrame.GetMsg());
+    // }
 #endif // _DEBUG
     auto view = std::make_shared<Views>();
-    view->OriginX = PosAndFOV.x;
-    view->OriginY = PosAndFOV.y;
-    view->OriginZ = PosAndFOV.z;
-    view->FOV = PosAndFOV.w;
-    view->AnglesX = RotEuler.x;
-    view->AnglesY = RotEuler.y;
-    view->AnglesZ = RotEuler.z;
+    view->OriginX = pos.x;
+    view->OriginY = pos.y;
+    view->OriginZ = pos.z;
+    view->FOV = fov;
+    view->AnglesX = rot.x;
+    view->AnglesY = rot.y;
+    view->AnglesZ = rot.z;
     this->controlView.InputRoll.store(view->AnglesZ, std::memory_order_release);
     this->controlView.ViewToGame.store(view);
 }
