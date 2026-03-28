@@ -1,11 +1,11 @@
 #pragma once
 
 #include <MulNX/MulNX.hpp>
+#include <MulNX/Base/Math/Math.hpp>
 #include <MulNXExtensions/WinExt/WinExt.hpp>
 
 #include "ConVarSystem/ConVarSystem.hpp"
 #include "GlobalVars/GlobalVars.hpp"
-#include "PlantedC4/PlantedC4.hpp"
 #include "List/C_BaseEntity.hpp"
 
 #include "C_CSGameRules/C_CSGameRules.hpp"
@@ -75,14 +75,13 @@ private:
     // 逆向层数据备份
     C_ConVarSystem CvarSystem{};
     C_GlobalVars CSGlobalVars{};
-    C_PlantedC4 PlantedC4{};
-
+    
     void ESP();
 public:
     std::atomic<bool> ESPDraw = false;
     
     std::unique_ptr<MulNX::Memory::HookEx> MyHook = nullptr;
-    void HandleOverrideView(void* ThisCViewSetup);
+    void HandleOverrideView(CS2::CViewSetup* viewSetup);
     //bool UINodeFunc(MulNXUINode* ThisNode)override;
     bool Init()override;
     bool UINodeFunc(MulNXUINode* node)override;
@@ -117,6 +116,4 @@ public:
 
     // 获取控制台变量系统
     C_ConVarSystem& GetCvarSystem() { return this->CvarSystem; }
-
-    // void HandleAimAtEntity(int AimTargetIndexInMap);
 };

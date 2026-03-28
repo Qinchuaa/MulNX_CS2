@@ -7,6 +7,17 @@
 using GameTime_t = float;
 
 namespace CS2 {
+    class CViewSetup {
+    public:
+        // 定位关键数据
+        int* pWidth() { return reinterpret_cast<int*>(reinterpret_cast<uintptr_t>(this) + 0x434); }
+        int* pHeight() { return reinterpret_cast<int*>(reinterpret_cast<uintptr_t>(this) + 0x43C); }
+
+        float* pFov() { return reinterpret_cast<float*>(reinterpret_cast<uintptr_t>(this) + 0x498); }
+        DirectX::XMFLOAT3* pViewOrigin() { return reinterpret_cast<DirectX::XMFLOAT3*>(reinterpret_cast<uintptr_t>(this) + 0x4a0); }
+        DirectX::XMFLOAT3* pViewAngles() { return reinterpret_cast<DirectX::XMFLOAT3*>(reinterpret_cast<uintptr_t>(this) + 0x4b8); }
+    };
+
     class CHandleBase {
     public:
         uint32_t handle;
@@ -74,6 +85,11 @@ namespace CS2 {
     class CBaseAnimGraph :public C_BaseModelEntity {
     public:
 
+    };
+
+    class C_PlantedC4 :public CBaseAnimGraph{
+    public:
+        
     };
 
     class C_BaseFlex :public CBaseAnimGraph {

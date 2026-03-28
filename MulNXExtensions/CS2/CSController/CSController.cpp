@@ -7,48 +7,41 @@
 #include <MulNXThirdParty/All_cs2_dumper.hpp>
 #include <MulNXThirdParty/All_MinHook.hpp>
 
-void CSController::HandleOverrideView(void* ThisCViewSetup) {
-    // 定位关键数据
-    int* pWidth = (int*)((char*)ThisCViewSetup + 0x434);
-    int* pHeight = (int*)((char*)ThisCViewSetup + 0x43C);
-    this->controlView.currentView.WindowWidth.store(*pWidth, std::memory_order_relaxed);
-    this->controlView.currentView.WindowHeight.store(*pHeight, std::memory_order_relaxed);
-
-    float* pFov = (float*)((char*)ThisCViewSetup + 0x498);
-    float* pViewOrigin = (float*)((char*)ThisCViewSetup + 0x4a0);
-    float* pViewAngles = (float*)((char*)ThisCViewSetup + 0x4b8);
+void CSController::HandleOverrideView(CS2::CViewSetup* viewSetup) {
+    this->controlView.currentView.WindowWidth.store(*viewSetup->pWidth(), std::memory_order_relaxed);
+    this->controlView.currentView.WindowHeight.store(*viewSetup->pHeight(), std::memory_order_relaxed);
 
     // 加载来自摄像机系统的View
     auto view = this->controlView.ViewToGame.load(std::memory_order_acquire);
     if (view != nullptr) {
-        pViewOrigin[0] = view->OriginX;
-        pViewOrigin[1] = view->OriginY;
-        pViewOrigin[2] = view->OriginZ;
+        viewSetup->pViewOrigin()->x = view->OriginX;
+        viewSetup->pViewOrigin()->y = view->OriginY;
+        viewSetup->pViewOrigin()->z = view->OriginZ;
 
-        pViewAngles[0] = view->AnglesX;
-        pViewAngles[1] = view->AnglesY;
-        pViewAngles[2] = view->AnglesZ;
+        viewSetup->pViewAngles()->x = view->AnglesX;
+        viewSetup->pViewAngles()->y = view->AnglesY;
+        viewSetup->pViewAngles()->z = view->AnglesZ;
 
         if (view->FOV > 0.01f) {
-            *pFov = view->FOV;
+            *viewSetup->pFov() = view->FOV;
         }
     }
 
     // 执行roll覆盖
-    pViewAngles[2] = this->controlView.InputRoll.load(std::memory_order_acquire);
+    viewSetup->pViewAngles()->z = this->controlView.InputRoll.load(std::memory_order_acquire);
 
     // 记录视角数据
-    this->controlView.currentView.AnglesX.store(pViewAngles[0], std::memory_order_release);
-    this->controlView.currentView.AnglesY.store(pViewAngles[1], std::memory_order_release);
-    this->controlView.currentView.AnglesZ.store(pViewAngles[2], std::memory_order_release);
-    this->controlView.currentView.OriginX.store(pViewOrigin[0], std::memory_order_release);
-    this->controlView.currentView.OriginY.store(pViewOrigin[1], std::memory_order_release);
-    this->controlView.currentView.OriginZ.store(pViewOrigin[2], std::memory_order_release);
-    if (*pFov < 0.01f) {
+    this->controlView.currentView.AnglesX.store(viewSetup->pViewOrigin()->x, std::memory_order_release);
+    this->controlView.currentView.AnglesY.store(viewSetup->pViewOrigin()->y, std::memory_order_release);
+    this->controlView.currentView.AnglesZ.store(viewSetup->pViewOrigin()->z, std::memory_order_release);
+    this->controlView.currentView.OriginX.store(viewSetup->pViewAngles()->x, std::memory_order_release);
+    this->controlView.currentView.OriginY.store(viewSetup->pViewAngles()->y, std::memory_order_release);
+    this->controlView.currentView.OriginZ.store(viewSetup->pViewAngles()->z, std::memory_order_release);
+    if (*viewSetup->pFov() < 0.01f) {
         this->controlView.currentView.FOV.store(90.0f, std::memory_order_release);
     }
     else {
-        this->controlView.currentView.FOV.store(*pFov, std::memory_order_release);
+        this->controlView.currentView.FOV.store(*viewSetup->pFov(), std::memory_order_release);
     }
 
     if (!this->controlAdvancedView.Enable.load(std::memory_order_acquire))return;
@@ -95,15 +88,15 @@ void CSController::HandleOverrideView(void* ThisCViewSetup) {
         else {
             return;  // 方向无效，放弃修改
         }
-
-        // 目标摄像机位置 = 骨骼9位置 + 枪口指向方向 × 偏移距离（向前延伸）
+        
+        // 目标摄像机位置
         DirectX::XMFLOAT3 targetCameraPos = {
             gunDirRef.x + forwardDir.x * CAMERA_OFFSET,
             gunDirRef.y + forwardDir.y * CAMERA_OFFSET,
             gunDirRef.z + forwardDir.z * CAMERA_OFFSET
         };
 
-        // 目标摄像机角度：从摄像机指向枪口（即“倒着看回来”）
+        // 目标摄像机角度
         DirectX::XMFLOAT3 lookDir = {
             gunPos.x - targetCameraPos.x,
             gunPos.y - targetCameraPos.y,
@@ -146,13 +139,9 @@ void CSController::HandleOverrideView(void* ThisCViewSetup) {
         s_smoothCameraAngle.z += angleDiff(targetCameraAngle.z, s_smoothCameraAngle.z) * SMOOTH_FACTOR;
 
         // 输出平滑后的值，滚转角强制为0（保持水平）
-        pViewOrigin[0] = s_smoothCameraPos.x;
-        pViewOrigin[1] = s_smoothCameraPos.y;
-        pViewOrigin[2] = s_smoothCameraPos.z;
-
-        pViewAngles[0] = s_smoothCameraAngle.x;
-        pViewAngles[1] = s_smoothCameraAngle.y;
-        pViewAngles[2] = 0;  // 滚转角保持水平
+        *viewSetup->pViewOrigin() = s_smoothCameraPos;
+        *viewSetup->pViewAngles() = s_smoothCameraAngle;
+        viewSetup->pViewAngles()->z = 0;  // 滚转角保持水平
     }
     catch (...) {
         // 发生异常时，重置平滑状态，避免使用无效数据
@@ -270,8 +259,6 @@ bool CSController::Init() {
         (uintptr_t)this->Modules.tier0.GetProcAddressT<void* (const char*, int*)>("CreateInterface")
         ("VEngineCvar007", nullptr);
 
-    //this->LocalPlayer.pGlobalFOV = this->CvarSystem.GetCvar("fov_cs_debug")->GetPtr<float>();
-
     if (this->Modules.client.Valid) {
         // 搜索 .text 段
         auto textRegion = this->Modules.client.GetTextRegion();
@@ -282,7 +269,7 @@ bool CSController::Init() {
 
             if (target.IsValid()) {
                 this->MyHook = MulNX::Memory::HookEx::Create(target.Data(), 16, false, [this](RegContext* ctx)->void {
-                    return this->HandleOverrideView((void*)ctx->rsi);
+                    return this->HandleOverrideView((CS2::CViewSetup*)ctx->rsi);
                     });
                 this->MyHook->Attach();
             }
@@ -427,7 +414,6 @@ int CSController::EntityListUpdate() {
         auto* controller = this->Modules.client.GetBaseEntity(i)->As<CS2::CCSPlayerController>();
         if (!controller)continue;
         auto hPawn = MulNX::MRead(controller->hPawn());
-        if (!hPawn.Valid())continue;
         auto* pawn = this->Modules.client.GetBaseEntityFromHandle(hPawn.GetIndexInEntityList())->As<CS2::C_CSPlayerPawn>();
         if (!pawn)continue;
 
@@ -467,16 +453,7 @@ int CSController::TryGetMsg() {
         this->GlobalVars->InGamePlaying = false;
         return Result;
     }
-    Result = this->EntityListUpdate();
-    if (Result)return Result;
-    
-
-    uintptr_t ppPlantedC4 = ppPlantedC4 = MulNX::MRead<uintptr_t>(this->Modules.client.GetBaseAddress() + cs2_dumper::offsets::client_dll::dwPlantedC4);
-    if (ppPlantedC4) {
-        this->PlantedC4.Address = MulNX::MRead<uintptr_t>(ppPlantedC4);
-        this->PlantedC4.Update();
-    }
-
+    this->EntityListUpdate();    
 
     this->CSGlobalVars.Update();
     this->GlobalVars->InGamePlaying = true;
@@ -527,20 +504,6 @@ bool CSController::CameraSystemIOOverride(const CameraSystemIO* const IO) {
 
     return true;
 }
-
-// void CSController::HandleAimAtEntity(int AimTargetIndexInMap) {
-//     DirectX::XMFLOAT3 LocalEyePos = this->LocalPlayer.Entity.Pawn.GetEyePos();
-//     DirectX::XMFLOAT3 TargetEyePos;
-//     int TargetIndexInEntityList = this->GetIndexInEntityListFromIndexInMap(AimTargetIndexInMap);
-//     if (TargetIndexInEntityList == -1)return;
-//     TargetEyePos = this->EntityList.GetEntity(TargetIndexInEntityList).Pawn.GetEyePos();
-
-//     DirectX::XMFLOAT3 dir = TargetEyePos - LocalEyePos;
-//     DirectX::XMFLOAT3 TargetViewAngles{};
-//     MulNX::Math::CSDirToEuler(dir, TargetViewAngles);
-
-//     this->LocalPlayer.SetViewAngle(TargetViewAngles);
-// }
 
 // C_ConVar* m_yawPtr = nullptr;
 // m_yawPtr = this->CvarSystem.GetCvar("m_yaw");
