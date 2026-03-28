@@ -46,7 +46,7 @@ public:
     // 依赖注入
     void InjectDependence(CameraDrawer* CamDrawer, SolutionManager* SManager, ProjectManager* PManager);
     // UI
-    bool UINodeFunc(MulNXUINode* node)override;
+    bool UINodeFunc(MulNXUINode* node);
     // 逻辑主函数
     void VirtualMain()override;
 

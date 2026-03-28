@@ -1,6 +1,6 @@
 #pragma once
 
-#include "IMulNXUISystem.hpp"
+#include "IUISystem.hpp"
 
 namespace MulNX {
     class UISystem final :public IUISystem {

@@ -84,7 +84,7 @@ public:
     void HandleOverrideView(CS2::CViewSetup* viewSetup);
     //bool UINodeFunc(MulNXUINode* ThisNode)override;
     bool Init()override;
-    bool UINodeFunc(MulNXUINode* node)override;
+    bool UINodeFunc(MulNXUINode* node);
     void VirtualMain()override;
     void ProcessMsg(MulNX::Message& Msg)override;
     void ThreadMain()override;

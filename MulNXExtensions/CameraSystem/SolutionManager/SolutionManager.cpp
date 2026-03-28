@@ -8,7 +8,7 @@
 //解决方案管理器
 
 bool SolutionManager::Init() {
-    this->NeedUINode = true;
+    this->SendUINode(this->GetName(), [this](MulNXUINode* node) {return this->UINodeFunc(node);});
     auto* PathManager = this->ISys().PathManager();
     if (PathManager->CreateKey("Solutions", "Solutions",
         [this](MulNX::PathManager* PathManager)->bool {

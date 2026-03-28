@@ -36,7 +36,7 @@ public:
     // 初始化
     bool Init()override;
     // UI
-    bool UINodeFunc(MulNXUINode* node)override;
+    bool UINodeFunc(MulNXUINode* node);
     // 依赖注入
     void InjectDependence(ElementManager* EManager, SolutionManager* SManager);
     // 逻辑主函数

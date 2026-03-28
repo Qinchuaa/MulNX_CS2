@@ -1,8 +1,8 @@
-#include "MulNXUINode.hpp"
+#include "UINode.hpp"
 
 #include <MulNX/Core/Core.hpp>
 #include <MulNX/Core/ModuleManager/ModuleManager.hpp>
-#include <MulNX/Systems/MulNXUISystem/MulNXUIContext/MulNXUIContext.hpp>
+#include <MulNX/Systems/UISystem/UIContext/UIContext.hpp>
 #include <MulNX/Systems/MessageManager/IMessageManager.hpp>
 
 void MulNXUINode::Draw() {

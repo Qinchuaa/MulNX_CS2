@@ -47,7 +47,7 @@ public:
     // 初始化
     bool Init()override;
     // 菜单
-    bool UINodeFunc(MulNXUINode* ThisNode)override;
+    bool UINodeFunc(MulNXUINode* node);
     // 逻辑主函数
     void VirtualMain()override;
 private:

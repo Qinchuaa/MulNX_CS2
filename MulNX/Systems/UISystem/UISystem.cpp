@@ -1,10 +1,10 @@
-#include "MulNXUISystem.hpp"
+#include "UISystem.hpp"
 
 #include <MulNX/Base/UI/UI.hpp>
 #include <MulNX/Core/Core.hpp>
 #include <MulNX/Systems/MessageManager/IMessageManager.hpp>
 #include <MulNX/Systems/InputSystem/InputSystem.hpp>
-#include <MulNX/Systems/MulNXGlobalVars/MulNXGlobalVars.hpp>
+#include <MulNX/Systems/GlobalVars/GlobalVars.hpp>
 
 #include <Windows.h>
 

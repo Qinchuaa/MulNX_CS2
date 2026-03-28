@@ -2,7 +2,7 @@
 
 #include <MulNX/Core/ModuleBase/ModuleBase.hpp>
 
-#include "MulNXGlobalVarsOnlyRead.hpp"
+#include "GlobalVarsOnlyRead.hpp"
 
 #include <atomic>
 
@@ -27,7 +27,7 @@ namespace MulNX {
 		std::atomic<bool>InGamePlaying = false;
         // 核心心跳
 		std::atomic<uint32_t>CoreTick = 0;
-        // 关键配置：是否让部分高危错误直接引发崩溃
+        // 是否让部分高危错误直接引发崩溃
         std::atomic<bool>DangerousErrorShouldTerminate = false;
 
 		bool Init()override;

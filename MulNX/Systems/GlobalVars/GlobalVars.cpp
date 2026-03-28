@@ -1,4 +1,4 @@
-#include "MulNXGlobalVars.hpp"
+#include "GlobalVars.hpp"
 
 #include <MulNX/Core/Core.hpp>
 #include <MulNX/Systems/MessageManager/IMessageManager.hpp>

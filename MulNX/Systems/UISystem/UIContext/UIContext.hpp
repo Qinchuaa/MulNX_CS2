@@ -1,6 +1,6 @@
 #pragma once
 
-#include "MulNXUINode/MulNXUINode.hpp"
+#include "UINode/UINode.hpp"
 
 #include <queue>
 

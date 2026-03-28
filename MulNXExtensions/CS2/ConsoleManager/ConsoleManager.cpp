@@ -5,7 +5,7 @@
 #include <MulNXExtensions/CS2/CSController/CSController.hpp>
 
 bool ConsoleManager::Init() {
-    this->NeedUINode = true;
+    this->SendUINode(this->GetName(), [this](MulNXUINode* node) {return this->UINodeFunc(node);});
     this->pCSController = this->Core->ModuleManager()->FindModule<CSController>("CSController");
     return true;
 }

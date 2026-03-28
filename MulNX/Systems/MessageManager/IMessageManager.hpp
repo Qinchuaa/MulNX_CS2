@@ -2,7 +2,7 @@
 
 #include <MulNX/Core/ModuleBase/ModuleBase.hpp>
 
-#include "MulNXMessage/MulNXMessage.hpp"
+#include <MulNX/Systems/MessageManager/Message.hpp>
 #include "MessageChannel/IMessageChannel.hpp"
 
 namespace MulNX {

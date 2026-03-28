@@ -2,7 +2,7 @@
 #include "MessageChannel/MessageChannel.hpp"
 #include <MulNX/Core/Core.hpp>
 #include <MulNX/Systems/HandleSystem/IHandleSystem.hpp>
-#include <MulNX/Systems/MulNXGlobalVars/MulNXGlobalVars.hpp>
+#include <MulNX/Systems/GlobalVars/GlobalVars.hpp>
 
 bool MulNX::MessageManager::Init() {
     this->NeedThread(10);

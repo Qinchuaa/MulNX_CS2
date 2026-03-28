@@ -1,9 +1,10 @@
 #pragma once
 
 #include <MulNX/Base/MulNXHandle/MulNXHandle.hpp>
+#include "ISys/ISys.hpp"
 #include <shared_mutex>
 #include <thread>
-#include "ISys/ISys.hpp"
+#include <functional>
 
 // 前向声明：MulNXController 位于 MulNXExtensions 命名空间
 namespace MulNXExtensions { class MulNXController; }
@@ -98,17 +99,13 @@ namespace MulNX {
 	protected:
 		// 消息处理入口
 		void EntryProcessMsg();
+        // 通过任意函数，发送一个UI节点
+        bool SendUINode(std::string&& name, std::function<void(MulNXUINode*)>&& func);
        
     private:
         // 创建线程入口
         bool CreateThread();
-        // 自动创建UI节点
-        bool CreateUINode();
-        // UI节点函数，默认空实现
-        virtual bool UINodeFunc(MulNXUINode* ThisNode) { return true; }
     protected:
-        // 是否需要UI节点，默认不需要
-        bool NeedUINode = false;
         // 指示需要线程，在初始化中创建
         void NeedThread(int TimeDelta);
     public:

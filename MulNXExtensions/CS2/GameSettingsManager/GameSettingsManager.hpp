@@ -78,7 +78,7 @@ public:
     //基类接口实现
 
     bool Init()override;
-    bool UINodeFunc(MulNXUINode* ThisNode)override;
+    bool UINodeFunc(MulNXUINode* node);
     void VirtualMain()override;
 
     void SettingGraphFloat(const char* Label, float* V, const float& min, const float& max);

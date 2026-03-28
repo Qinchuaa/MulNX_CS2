@@ -2,6 +2,7 @@
 
 #include <MulNX/Base/any_smart_ptr/any_smart_ptr.hpp>
 #include <MulNX/Config/Config.hpp>
+#include <cstdint>
 
 namespace MulNX {
 	// MulNX消息
@@ -15,7 +16,6 @@ namespace MulNX {
         union { int i;float f; }p4;
         // 8字节类型安全擦除共享指针，使用时需用get方法正确恢复，类型错误返回nullptr
         MulNX::any_shared_ptr asp = nullptr;
-        // 消息管道指针，一般用于指示消息来源
 
 		Message() = default;
 		Message(size_t Type) :type(Type) {}
@@ -23,8 +23,6 @@ namespace MulNX {
         Message& operator=(const Message& other) = default;
         Message(Message&& other) = default;
         Message& operator=(Message&& other) = default;
-
-        void Clear();
 
         template<typename T, typename... Args>
         static Message Create(size_t type, Args&&... args) {

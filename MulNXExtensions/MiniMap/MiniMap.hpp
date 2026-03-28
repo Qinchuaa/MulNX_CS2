@@ -16,5 +16,5 @@ private:
 public:
     bool Init()override;
     void VirtualMain()override;
-    bool UINodeFunc(MulNXUINode* ThisNode)override;
+    bool UINodeFunc(MulNXUINode* node);
 };

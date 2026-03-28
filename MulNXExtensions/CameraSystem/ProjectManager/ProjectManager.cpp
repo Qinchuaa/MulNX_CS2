@@ -33,7 +33,7 @@ bool ProjectManager::UINodeFunc(MulNXUINode* node) {
 }
 
 bool ProjectManager::Init() {
-    this->NeedUINode = true;
+    this->SendUINode(this->GetName(), [this](MulNXUINode* node) {return this->UINodeFunc(node);});
     auto* PathManager = this->ISys().PathManager();
     if (PathManager->CreateKey("CurrentProject", {},
         [this](MulNX::PathManager* PathManager)->bool {

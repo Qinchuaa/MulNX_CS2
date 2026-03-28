@@ -20,7 +20,7 @@ bool ElementManager::UINodeFunc(MulNXUINode* node) {
 }
 //元素管理器基本函数
 bool ElementManager::Init() {
-    this->NeedUINode = true;
+    this->SendUINode(this->GetName(), [this](MulNXUINode* node) {return this->UINodeFunc(node);});
 
     auto* PathManager = this->ISys().PathManager();
     if (PathManager->CreateKey("Elements", "Elements",

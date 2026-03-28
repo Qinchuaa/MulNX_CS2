@@ -1,6 +1,6 @@
 #pragma once
 
-#include "MulNXUIContext/MulNXUIContext.hpp"
+#include "UIContext/UIContext.hpp"
 #include <MulNX/Core/ModuleBase/ModuleBase.hpp>
 
 namespace MulNX {

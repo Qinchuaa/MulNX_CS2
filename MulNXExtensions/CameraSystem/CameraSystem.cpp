@@ -50,7 +50,7 @@ bool CameraSystem::Init() {
     this->EManager.EntryInit(this->Core);
     this->EManager.InjectDependence(&this->CamDrawer, &this->SManager, &this->PManager);
 
-    this->NeedUINode = true;
+    this->SendUINode(this->GetName(), [this](MulNXUINode* node) {return this->UINodeFunc(node);});
     return true;
 }
 

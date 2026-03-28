@@ -11,7 +11,7 @@
 #include <Windows.h>
 
 bool MiniMap::Init() {
-    this->NeedUINode = true;
+    this->SendUINode(this->GetName(), [this](MulNXUINode* node) {return this->UINodeFunc(node);});
     return true;
 }
 

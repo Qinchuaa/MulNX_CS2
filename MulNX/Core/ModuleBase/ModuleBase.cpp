@@ -51,19 +51,19 @@ bool MulNX::ModuleBase::BaseInit() {
 
     return true;
 }
-bool MulNX::ModuleBase::CreateUINode() {
+
+bool MulNX::ModuleBase::SendUINode(std::string&& name, std::function<void(MulNXUINode*)>&& func) {
     try {
         // 创建UI节点
         MulNXUINode UINode = MulNXUINode::Create(this);
         // 设置UI节点属性
-        UINode.name = this->GetName();
-        UINode.MyFunc = [this](MulNXUINode* ThisNode) {
-            return this->UINodeFunc(ThisNode);
-            };
+        UINode.name = std::move(name);
+        UINode.MyFunc = std::move(func);
         // 创建UI消息
         auto msg = MulNX::Message::Create<MulNXUINode>("UISystem/ModulePush"_hash, std::move(UINode));
         // 发送UI消息
         this->ISys().PublishAsync(std::move(msg));
+        this->ISys().LogInfo("发送了一个UI节点进入消息系统");
     }
     catch (...) {
         return false;
@@ -77,12 +77,6 @@ bool MulNX::ModuleBase::EntryInit(MulNX::Core::Core* Core) {
     }
     if (!this->Init()) {
         return false;
-    }
-    if(this->NeedUINode) {
-        if (!this->CreateUINode()) {
-            return false;
-        }
-        this->ISys().LogInfo("推送了UI节点到UI系统");
     }
     if (this->InitNeedThread) {
         if (!this->CreateThread()) {

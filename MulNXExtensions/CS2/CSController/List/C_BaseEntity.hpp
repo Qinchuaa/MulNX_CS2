@@ -77,6 +77,11 @@ namespace CS2 {
         DirectX::XMFLOAT3 GetBonePos(int index);
     };
 
+    class C_SoundEventEntity :public C_BaseEntity {
+    public:
+        
+    };
+
     class C_BaseModelEntity :public C_BaseEntity {
     public:
         DirectX::XMFLOAT3* vecViewOffset() { return reinterpret_cast<DirectX::XMFLOAT3*>(reinterpret_cast<uintptr_t>(this) + cs2_dumper::schemas::client_dll::C_BaseModelEntity::m_vecViewOffset); }

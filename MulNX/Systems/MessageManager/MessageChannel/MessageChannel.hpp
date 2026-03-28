@@ -1,7 +1,7 @@
 #pragma once
 
 #include "IMessageChannel.hpp"
-#include <MulNX/Systems/MessageManager/MulNXMessage/MulNXMessage.hpp>
+#include <MulNX/Systems/MessageManager/Message.hpp>
 #include <MulNXThirdParty/queue/concurrentqueue.h>
 
 namespace MulNX {

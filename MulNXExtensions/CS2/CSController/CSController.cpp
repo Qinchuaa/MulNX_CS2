@@ -246,7 +246,7 @@ bool CSController::Init() {
     this->ISys()
         .SubscribeAsync("Core/ReHook");
     this->NeedThread(3);
-    this->NeedUINode = true;
+    this->SendUINode(this->GetName(), [this](MulNXUINode* node) {return this->UINodeFunc(node);});
 
     this->Modules.client = CS2::Module::Client(L"client.dll");
     this->Modules.engine2 = MulNX::Memory::DllModule(L"engine2.dll");

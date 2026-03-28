@@ -146,7 +146,7 @@ bool GameSettingsManager::Init() {
     this->GameSettings.SoundSettings.snd_deathcamera_volume = CVarSystem.GetCvar("snd_deathcamera_volume")->GetPtr<float>();
     this->GameSettings.SoundSettings.snd_mute_mvp_music_live_players = CVarSystem.GetCvar("snd_mute_mvp_music_live_players")->GetPtr<bool>();
 
-    this->NeedUINode = true;
+    this->SendUINode(this->GetName(), [this](MulNXUINode* node) {return this->UINodeFunc(node);});
     return true;
 }
 
