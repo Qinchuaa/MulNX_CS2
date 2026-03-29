@@ -47,8 +47,9 @@ namespace MulNX {
     public:
 		virtual ~IAbstractLayer3D() = default;
 
-        // 正在废弃
         virtual float GetTime()const = 0;
+        virtual bool JumpTime(const float time) = 0;
+
         // 返回时间源，由实现创建独占指针，这里返回原始指针
         virtual TimeBridge* GetTimeBridge() { return nullptr; };
 

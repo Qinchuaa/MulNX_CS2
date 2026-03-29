@@ -111,6 +111,7 @@ public:
     float* GetViewMatrix()override;
     MulNX::Math::View GetView()const override;
     float GetTime()const override;
+    bool JumpTime(const float time)override;
     float GetWinWidth()const override;
     float GetWinHeight()const override;
     bool SpecPlayer(int IndexInMap)override;

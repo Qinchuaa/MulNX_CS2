@@ -275,41 +275,42 @@ std::pair<bool, std::string> FreeCameraPath::Load(YAML::Node& root) {
             keyframe.time = keyframeNode["T"].as<float>();
 
             // 读取位置和FOV
-            if (keyframeNode["P"] && keyframeNode["P"].IsSequence() && keyframeNode["P"].size() >= 3) {
-                DirectX::XMFLOAT4 posFov;
-                posFov.x = keyframeNode["P"][0].as<float>();
-                posFov.y = keyframeNode["P"][1].as<float>();
-                posFov.z = keyframeNode["P"][2].as<float>();
-                posFov.w = keyframeNode["F"].as<float>();
-                keyframe.PositionAndFOV = DirectX::XMLoadFloat4(&posFov);
-            }
+            DirectX::XMFLOAT4 posFov;
+            posFov.x = keyframeNode["P"][0].as<float>();
+            posFov.y = keyframeNode["P"][1].as<float>();
+            posFov.z = keyframeNode["P"][2].as<float>();
+            posFov.w = keyframeNode["F"].as<float>();
+            keyframe.PositionAndFOV = DirectX::XMLoadFloat4(&posFov);
 
             // 读取旋转（欧拉角）
-            if (keyframeNode["R"] && keyframeNode["R"].IsSequence() && keyframeNode["R"].size() >= 3) {
-                DirectX::XMFLOAT3 euler;
-                euler.x = keyframeNode["R"][0].as<float>(); // Pitch
-                euler.y = keyframeNode["R"][1].as<float>(); // Yaw
-                euler.z = keyframeNode["R"][2].as<float>(); // Roll
-                DirectX::XMFLOAT4 quat;
-                MulNX::Math::CSEulerToQuat(euler, quat);
-                keyframe.RotationQuat = DirectX::XMLoadFloat4(&quat);
-            }
+            DirectX::XMFLOAT3 euler;
+            euler.x = keyframeNode["R"][0].as<float>(); // Pitch
+            euler.y = keyframeNode["R"][1].as<float>(); // Yaw
+            euler.z = keyframeNode["R"][2].as<float>(); // Roll
+            DirectX::XMFLOAT4 quat;
+            MulNX::Math::CSEulerToQuat(euler, quat);
+            keyframe.RotationQuat = DirectX::XMLoadFloat4(&quat);
 
             // 读取景深
-            if (keyframeNode["D"] && keyframeNode["D"].IsSequence() && keyframeNode["D"].size() >= 3) {
-                MulNX::Math::DOFParam dof;
+            MulNX::Math::DOFParam dof;
+            try {
                 dof.NearBlurry = keyframeNode["D"][0].as<float>();
                 dof.NearCrisp = keyframeNode["D"][1].as<float>();
                 dof.FarCrisp = keyframeNode["D"][2].as<float>();
                 dof.FarBlurry = keyframeNode["D"][3].as<float>();
-
-                keyframe.dof = DirectX::XMVectorSet(
-                    dof.NearBlurry,
-                    dof.NearCrisp,
-                    dof.FarCrisp,
-                    dof.FarBlurry
-                );
             }
+            catch (const std::exception&) {
+                // 如果没有景深信息，使用默认值
+                dof = { 0, 0, 10000, 10000 };
+            }
+
+
+            keyframe.dof = DirectX::XMVectorSet(
+                dof.NearBlurry,
+                dof.NearCrisp,
+                dof.FarCrisp,
+                dof.FarBlurry
+            );
 
             this->AddKeyframe(std::move(keyframe));
         }
@@ -346,6 +347,9 @@ void FreeCameraPath::DebugUI(CameraDrawer* CamDrawer, ElementManager* EManager) 
                 auto* al3d = EManager->AL3D;
                 al3d->spec_goto_ex(pos, rot);
                 al3d->SetDOF(dof);
+                if (al3d->pInputSystem->IsKeyPressed(VK_MENU)) {
+                    al3d->JumpTime(keyframe.time);
+                }
             }
         }
         ImGui::SameLine();
