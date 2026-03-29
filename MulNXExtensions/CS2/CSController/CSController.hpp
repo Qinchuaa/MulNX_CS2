@@ -84,7 +84,7 @@ private:
     VExecutor<void(int, const char*, int)> executor{};
     // 逆向层数据备份
     C_ConVarSystem CvarSystem{};
-    C_GlobalVars CSGlobalVars{};
+    C_GlobalVars* CSGlobalVars{};
     
     void ESP();
 public:

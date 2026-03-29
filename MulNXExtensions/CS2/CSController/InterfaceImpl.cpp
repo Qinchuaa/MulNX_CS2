@@ -28,12 +28,11 @@ MulNX::Math::View CSController::GetView()const {
 }
 float CSController::GetTime() {
     float time = 0;
-    uintptr_t GlobalVarsPointer = this->CSGlobalVars.GetCurrentTimePointer();
     try {
-        time = MulNX::MRead<float>(GlobalVarsPointer);
+        time = MulNX::MRead<float>(this->CSGlobalVars->fCurrentTime());
     }
     catch (const bad_memory_read& e) {
-        this->ISys().LogError("读取游戏时间失败，地址：" + std::to_string(GlobalVarsPointer) + "，错误信息：" + e.what());
+        this->ISys().LogError("读取游戏时间失败");
         return 0;
     }
     return time;

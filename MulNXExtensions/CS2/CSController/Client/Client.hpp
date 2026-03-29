@@ -18,11 +18,8 @@ namespace CS2 {
             CS2::C_CSPlayerPawn* dwLocalPlayerPawn() { return MulNX::MRead(reinterpret_cast<CS2::C_CSPlayerPawn**>(this->GetBaseAddress() + cs2_dumper::offsets::client_dll::dwLocalPlayerPawn)); }
             CS2::C_PlantedC4* dwPlantedC4() { return MulNX::MRead(reinterpret_cast<CS2::C_PlantedC4**>(this->GetBaseAddress() + cs2_dumper::offsets::client_dll::dwPlantedC4)); }
 
-            // 常常用于获取控制器
-            CS2::C_BaseEntity* GetBaseEntity(int index);
-            // 常常用于获取Pawn对象
-            CS2::C_BaseEntity* GetBaseEntityFromHandle(uint32_t uHandle);
 
+            CS2::C_BaseEntity* GetBaseEntity(int index);
             CS2::C_BaseEntity* GetBaseEntityFromHandle(CS2::CHandleBase handle);
         };
     }

@@ -82,8 +82,24 @@ namespace CS2 {
         
     };
 
+    class CGlowProperty{
+    public:
+        void* fGlowColor() { return reinterpret_cast<void*>(reinterpret_cast<uintptr_t>(this) + cs2_dumper::schemas::client_dll::CGlowProperty::m_fGlowColor); }
+        int32_t* iGlowType() { return reinterpret_cast<int32_t*>(reinterpret_cast<uintptr_t>(this) + cs2_dumper::schemas::client_dll::CGlowProperty::m_iGlowType); }
+        int32_t* iGlowTeam() { return reinterpret_cast<int32_t*>(reinterpret_cast<uintptr_t>(this) + cs2_dumper::schemas::client_dll::CGlowProperty::m_iGlowTeam); }
+        int32_t* nGlowRange() { return reinterpret_cast<int32_t*>(reinterpret_cast<uintptr_t>(this) + cs2_dumper::schemas::client_dll::CGlowProperty::m_nGlowRange); }
+        int32_t* nGlowRangeMin() { return reinterpret_cast<int32_t*>(reinterpret_cast<uintptr_t>(this) + cs2_dumper::schemas::client_dll::CGlowProperty::m_nGlowRangeMin); }
+        void* glowColorOverride() { return reinterpret_cast<void*>(reinterpret_cast<uintptr_t>(this) + cs2_dumper::schemas::client_dll::CGlowProperty::m_glowColorOverride); }
+        bool* bFlashing() { return reinterpret_cast<bool*>(reinterpret_cast<uintptr_t>(this) + cs2_dumper::schemas::client_dll::CGlowProperty::m_bFlashing); }
+        float* flGlowTime() { return reinterpret_cast<float*>(reinterpret_cast<uintptr_t>(this) + cs2_dumper::schemas::client_dll::CGlowProperty::m_flGlowTime); }
+        float* flGlowStartTime() { return reinterpret_cast<float*>(reinterpret_cast<uintptr_t>(this) + cs2_dumper::schemas::client_dll::CGlowProperty::m_flGlowStartTime); }
+        bool* bEligibleForScreenHighlight() { return reinterpret_cast<bool*>(reinterpret_cast<uintptr_t>(this) + cs2_dumper::schemas::client_dll::CGlowProperty::m_bEligibleForScreenHighlight); }
+        bool* bGlowing() { return reinterpret_cast<bool*>(reinterpret_cast<uintptr_t>(this) + cs2_dumper::schemas::client_dll::CGlowProperty::m_bGlowing); }
+    };
+
     class C_BaseModelEntity :public C_BaseEntity {
     public:
+        CGlowProperty* Glow() { return reinterpret_cast<CGlowProperty*>(reinterpret_cast<uintptr_t>(this) + cs2_dumper::schemas::client_dll::C_BaseModelEntity::m_Glow); }
         DirectX::XMFLOAT3* vecViewOffset() { return reinterpret_cast<DirectX::XMFLOAT3*>(reinterpret_cast<uintptr_t>(this) + cs2_dumper::schemas::client_dll::C_BaseModelEntity::m_vecViewOffset); }
     };
 
