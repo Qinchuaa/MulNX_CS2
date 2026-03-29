@@ -571,7 +571,7 @@ void SolutionManager::Playing_Call() {
     }
     CameraSystemIO IO;
 
-    IO.SolutionTime = this->virtualtimePlaying ? this->AL3D->Time()->GetVirtual() : this->AL3D->Time()->GetReal();
+    IO.SolutionTime = this->AL3D->Time()->Get();
     IO.FrameGameTime = this->AL3D->Time()->GetReal();
     IO.PlayBackRate = this->PlaybackRate;
     IO.isPlaying = this->Playing;

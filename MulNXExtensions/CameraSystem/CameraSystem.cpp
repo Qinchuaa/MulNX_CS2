@@ -208,27 +208,6 @@ void CameraSystem::MenuSolution() {
         ImGui::Checkbox("解决方案快捷键检测系统", &this->SManager.Config.SolutionShortcutEnable);
         ImGui::Checkbox("解决方案插值摄像机绘制", &this->SManager.Config.PlayingDraw);
         ImGui::Checkbox("解决方案插值覆盖", &this->SManager.Config.PlayingOverride);
-
-        if (ImGui::Button("子弹时间")) {
-            this->AL3D->ExecuteCommand("host_timescale 0");
-            this->AL3D->Time()->RefreshVirtual(1.0f);// 开启子弹时间，刷新虚拟时间与真实时间的关系，使虚拟时间以正常速度流动
-            this->SManager.virtualtimePlaying = true;
-        }
-        if (ImGui::Button("恢复正常时间")) {
-            this->AL3D->ExecuteCommand("host_timescale 1");
-            this->SManager.virtualtimePlaying = false;
-        }
-        //ImGui::Text("播放倍率：%f", 1 / this->SManager.PlaybackRate);
-        //static float temp = 1.0f;
-        //ImGui::Text("目标倍率:");
-        //ImGui::SameLine();
-        //ImGui::InputFloat("##目标倍率", &temp);
-        //ImGui::SameLine();
-        //if (ImGui::Button("切换##解决方案播放倍率")) {
-        //    this->AL3D->ExecuteCommand("host_timescale " + std::to_string(temp));
-        //    this->SManager.PlaybackRate = 1 / temp;
-        //}
-
     }
     // 创建解决方案
     if (ImGui::CollapsingHeader("解决方案创建")) {

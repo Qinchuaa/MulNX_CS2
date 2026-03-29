@@ -43,9 +43,6 @@ public:
     // 是否处于播放状态
     // 播放完成之后需要变为false，切换解决方案要变成true
     bool Playing = false;
-
-    bool virtualtimePlaying = false;//是否在虚拟时间轴播放（偏移时间轴播放）
-
     // 播放比率，用于调控解决方案播放速度和游戏速度，用于制作子弹时间等
     float PlaybackRate = 1.0f;
 

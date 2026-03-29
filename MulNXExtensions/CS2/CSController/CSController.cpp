@@ -159,11 +159,26 @@ bool CSController::UINodeFunc(MulNXUINode* node) {
     auto w = MulNX::UI::RAIIWindow("快捷操作", this->ShowWindow);
     if (!w)return true;
 
-    MulNX::UI::SliderFloat("roll调整", this->controlView.InputRoll, -179, 179);
+    static float gameTimeScale = 1.0f;
+    static float virtualTimeScale = 1.0f;
+    ImGui::SliderFloat("游戏时间流速", &gameTimeScale, 0.0f, 5.0f);
+    ImGui::SliderFloat("虚拟时间流速", &virtualTimeScale, 0.0f, 5.0f);
+
+    if (ImGui::Button("启用时间虚拟化")) {
+        this->AL3D->ExecuteCommand(std::format("host_timescale {}", gameTimeScale));
+        this->AL3D->Time()->RefreshVirtual(true, virtualTimeScale);
+    }
+    ImGui::SameLine();
+    if (ImGui::Button("解除时间虚拟化")) {
+        this->AL3D->ExecuteCommand("host_timescale 1");
+        this->AL3D->Time()->RefreshVirtual(false, 1.0f);
+    }
+
+    MulNX::UI::SliderFloat("roll调整", this->controlView.InputRoll, -179.99f, 179.99f);
 
     auto* pGlobalFOV = this->CvarSystem.GetCvar("fov_cs_debug")->GetPtr<float>();
-    if (ImGui::SliderFloat("fov调整", pGlobalFOV, 0, 179));
-    MulNX::UI::Checkbox("摄像机模式", this->controlView.CameraMode);
+    ImGui::SliderFloat("fov调整", pGlobalFOV, 0, 179.99f);
+    //MulNX::UI::Checkbox("摄像机模式", this->controlView.CameraMode);
     if (ImGui::Button("一键归正")) {
         this->controlView.InputRoll.store(0, std::memory_order_release);
         *pGlobalFOV = 0;

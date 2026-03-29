@@ -24,14 +24,16 @@ public:
 
 namespace MulNX {
     class TimeBridge {
+        // 指向抽象层的指针，用于调用抽象层的时间函数
         IAbstractLayer3D* pAL3D;
+        //是否在虚拟时间轴播放（偏移时间轴播放）
+        bool virtualTimePlaying = false;
         // MulNX时间参考点
         std::chrono::steady_clock::time_point startTime;
         // 用于计算虚拟时间的缓冲变量
         float refreshTime = 0.0f;
         // 比例，用于控制虚拟时间的流速，默认为1.0f（与真实时间相同）
         float scale = 1.0f;
-
         // 上一次获取的真实时间，用于检测时间回跳等异常情况
         float lastRealTime = 0.0f;
         // 内部更新函数
@@ -40,10 +42,11 @@ namespace MulNX {
         TimeBridge() = delete;
         TimeBridge(IAbstractLayer3D* pAL3D);
 
-        bool RefreshVirtual(float scale);
+        bool RefreshVirtual(bool virtualTimePlaying, float scale);
         float GetReal();
         bool JumpReal(float time);
         float GetVirtual();
+        float Get();
     };
 
     class IAbstractLayer3D :public MulNX::ModuleBase {
