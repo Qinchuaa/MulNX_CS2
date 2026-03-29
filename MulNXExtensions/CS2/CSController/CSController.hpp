@@ -117,6 +117,7 @@ public:
     D_Player& GetPlayerMsg(int Index)override;
     void spec_goto_ex(const DirectX::XMFLOAT3& pos, const DirectX::XMFLOAT3& rot)override;
     void ClearViewOverride()override;
+    void SetDOF(const MulNX::Math::DOFParam& dof)override;
 
     // CameraSystemIO的处理
 

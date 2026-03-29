@@ -1,7 +1,6 @@
 #pragma once
 
 #include "FreeCameraPath/FreeCameraPath.hpp"
-#include "FirstPersonCameraPath/FirstPersonCameraPath.hpp"
 
 namespace Elements {
     // Element模板定义，元素必须继承自ElementBase

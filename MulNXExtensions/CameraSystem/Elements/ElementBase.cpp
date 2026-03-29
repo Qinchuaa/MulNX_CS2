@@ -4,18 +4,16 @@
 
 std::string ElementType_EnumToString(const ElementType Type) {
     switch (Type) {
-    case ElementType::FreeCameraPath:return "FreeCameraPath";
-    case ElementType::FirstPersonCameraPath:return "FirstPersonCameraPath";
-    case ElementType::LockedCameraPath:return "LockedCameraPath";
     case ElementType::ElementBase:return "ElementBase";
+    case ElementType::FreeCameraPath:return "FreeCameraPath";
+
     default:return "None";
     }
 }
 
 ElementType ElementType_StringToEnum(const std::string& typeStr) {
     if (typeStr == "FreeCameraPath")  return ElementType::FreeCameraPath;
-    else if (typeStr == "FirstPersonCameraPath") return ElementType::FirstPersonCameraPath;
-    else if (typeStr == "LockedCameraPath") return ElementType::LockedCameraPath;
+
     else if (typeStr == "ElementBase") return ElementType::ElementBase;
     else return ElementType::None;
 }

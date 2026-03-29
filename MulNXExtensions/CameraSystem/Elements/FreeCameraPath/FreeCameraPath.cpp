@@ -342,7 +342,10 @@ void FreeCameraPath::DebugUI(CameraDrawer* CamDrawer, ElementManager* EManager) 
             if (ImGui::IsMouseDoubleClicked(0)) {
                 auto pos = keyframe.GetPosition();
                 auto rot = keyframe.GetRotationEuler();
-                EManager->AL3D->spec_goto_ex(pos, rot);
+                auto dof = keyframe.GetDOF();
+                auto* al3d = EManager->AL3D;
+                al3d->spec_goto_ex(pos, rot);
+                al3d->SetDOF(dof);
             }
         }
         ImGui::SameLine();

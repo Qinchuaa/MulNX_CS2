@@ -62,3 +62,9 @@ void CSController::spec_goto_ex(const DirectX::XMFLOAT3& pos, const DirectX::XMF
 void CSController::ClearViewOverride() {
     this->controlView.ViewToGame.store(nullptr, std::memory_order_release);
 }
+void CSController::SetDOF(const MulNX::Math::DOFParam& dof) {
+    *this->controlView.dofs.pNearBlurry = dof.NearBlurry;
+    *this->controlView.dofs.pNearCrisp = dof.NearCrisp;
+    *this->controlView.dofs.pFarCrisp = dof.FarCrisp;
+    *this->controlView.dofs.pFarBlurry = dof.FarBlurry;
+}

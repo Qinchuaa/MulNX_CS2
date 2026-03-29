@@ -134,11 +134,6 @@ bool ElementManager::Element_Load(const std::filesystem::path& FullPath) {
         case ElementType::FreeCameraPath:
             pElement = std::make_shared<FreeCameraPath>(std::move(NewElementName));
             break;
-        case ElementType::FirstPersonCameraPath:
-            pElement = std::make_shared<FirstPersonCameraPath>(std::move(NewElementName));
-            break;
-        case ElementType::LockedCameraPath:
-            break;
         case ElementType::ElementBase:
             break;
         case ElementType::None:

@@ -20,8 +20,6 @@ enum class ElementType :int {
 	None = -1,// 错误类型
 	ElementBase = 0,// 元素基类
 	FreeCameraPath = 1,// 自由摄像机轨道
-	FirstPersonCameraPath = 2,// 第一人称摄像机轨道
-	LockedCameraPath = 3// 锁定摄像机轨道
 };
 
 // 待添加的附加元素类型，如景深滤镜

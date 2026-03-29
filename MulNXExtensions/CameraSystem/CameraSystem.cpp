@@ -172,12 +172,6 @@ void CameraSystem::MenuElement() {
                 CreateElementName.clear();
             }
         }
-        // 创建第一人称摄像机轨道
-        if (ImGui::Button("新的第一人称摄像机轨道")) {
-            if (this->EManager.Element_Create<FirstPersonCameraPath>(CreateElementName)) {
-                CreateElementName.clear();
-            }
-        }
     }
     // 载入元素
     if (ImGui::CollapsingHeader("元素载入")) {
