@@ -26,19 +26,17 @@ MulNX::Math::View CSController::GetView()const {
 
     return view;
 }
-float CSController::GetTime()const {
+float CSController::GetTime() {
     float time = 0;
     uintptr_t GlobalVarsPointer = this->CSGlobalVars.GetCurrentTimePointer();
-    time = MRead<float>(GlobalVarsPointer);
-    static float timeBuffer = time;
-    if (timeBuffer < time) {
-        timeBuffer = time;
+    try {
+        time = MulNX::MRead<float>(GlobalVarsPointer);
     }
-    // 这个延迟是因为CS2的demo系统，它的时间阅读有时候会出现回跳，这里简单过滤一下
-    else if (timeBuffer - time > 0.025f) {
-        timeBuffer = time;
+    catch (const bad_memory_read& e) {
+        this->ISys().LogError("读取游戏时间失败，地址：" + std::to_string(GlobalVarsPointer) + "，错误信息：" + e.what());
+        return 0;
     }
-    return timeBuffer;
+    return time;
 }
 bool CSController::JumpTime(const float time) {
     // 这个函数的实现思路是通过demo_gototick命令跳转到指定时间的tick上，CS2每秒钟有64个tick，所以需要将时间转换为tick

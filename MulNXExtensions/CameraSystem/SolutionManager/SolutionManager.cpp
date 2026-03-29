@@ -521,8 +521,8 @@ bool SolutionManager::Playing_SetSolution(Solution* const solution) {
     this->Playing_pSolution = solution;
     switch (solution->Playmode) {
     case PlaybackMode::Orchestration:
-        this->Playing_SetTimeSchema(this->AL3D->GetTime());//偏移时间轴播放
-        this->ISys().LogInfo("偏移时间轴播放，偏移时间设置为：" + std::to_string(this->AL3D->GetTime()));
+        this->Playing_SetTimeSchema(this->AL3D->Time()->GetReal());//偏移时间轴播放
+        this->ISys().LogInfo("偏移时间轴播放，偏移时间设置为：" + std::to_string(this->AL3D->Time()->GetReal()));
         break;
     case PlaybackMode::Activation:
         this->Playing_SetTimeSchema(0);
@@ -571,8 +571,8 @@ void SolutionManager::Playing_Call() {
     }
     CameraSystemIO IO;
 
-    IO.SolutionTime = this->AL3D->GetTime();
-    IO.FrameGameTime = this->AL3D->GetTime();
+    IO.SolutionTime = this->virtualtimePlaying ? this->AL3D->Time()->GetVirtual() : this->AL3D->Time()->GetReal();
+    IO.FrameGameTime = this->AL3D->Time()->GetReal();
     IO.PlayBackRate = this->PlaybackRate;
     IO.isPlaying = this->Playing;
 

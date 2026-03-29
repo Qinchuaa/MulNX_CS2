@@ -24,34 +24,40 @@ public:
 
 namespace MulNX {
     class TimeBridge {
-        // 存储游戏原始时间指针
-        float* rawTimePointer = nullptr;
-        // 模式为0时使用游戏时间，模式为1时使用MulNX时间
-        uint8_t timeMode = 0;
+        IAbstractLayer3D* pAL3D;
         // MulNX时间参考点
         std::chrono::steady_clock::time_point startTime;
-        // 当时间模式切换时，记录游戏时间，以便继续模仿，用于子弹时间等
-        float bufferTime = 0.0f;
-        // 比例，用于控制MulNX时间流速
+        // 用于计算虚拟时间的缓冲变量
+        float refreshTime = 0.0f;
+        // 比例，用于控制虚拟时间的流速，默认为1.0f（与真实时间相同）
         float scale = 1.0f;
+
+        // 上一次获取的真实时间，用于检测时间回跳等异常情况
+        float lastRealTime = 0.0f;
+        // 内部更新函数
+        void update();
     public:
-        // 切换时间模式，内部维护状态
-        void ChangeMode(const uint8_t mode);
-        void SetScale(const float scale);
-        float GetTime();
+        TimeBridge() = delete;
+        TimeBridge(IAbstractLayer3D* pAL3D);
+
+        bool RefreshVirtual(float scale);
+        float GetReal();
+        bool JumpReal(float time);
+        float GetVirtual();
     };
 
     class IAbstractLayer3D :public MulNX::ModuleBase {
+        friend TimeBridge;
+    private:
+        TimeBridge timeBridge{ this };
+        virtual float GetTime() = 0;
+        virtual bool JumpTime(const float time) = 0;
     protected:
         D_GameData AL3DGameData{};
     public:
 		virtual ~IAbstractLayer3D() = default;
-
-        virtual float GetTime()const = 0;
-        virtual bool JumpTime(const float time) = 0;
-
         // 返回时间源，由实现创建独占指针，这里返回原始指针
-        virtual TimeBridge* GetTimeBridge() { return nullptr; };
+        TimeBridge* Time();
 
         virtual MulNX::Math::View GetView()const = 0;
 

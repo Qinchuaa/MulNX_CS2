@@ -53,7 +53,7 @@ void DemoHelper::ProcessMsg(MulNX::Message& Msg) {
         float data = Msg.p1.f;
         std::string str = "跳转到" + std::to_string(data);
         this->ISys().LogInfo(str);
-        this->AL3D->JumpTime(data);
+        this->AL3D->Time()->JumpReal(data);
         break;
     }
 	}
@@ -68,7 +68,7 @@ void DemoHelper::VirtualMain() {
 }
 
 bool DemoHelper::MarkTime() {
-	this->Marks.push_back(this->AL3D->GetTime());
+	this->Marks.push_back(this->AL3D->Time()->GetReal());
 
 
 	return true;

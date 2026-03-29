@@ -348,7 +348,7 @@ void FreeCameraPath::DebugUI(CameraDrawer* CamDrawer, ElementManager* EManager) 
                 al3d->spec_goto_ex(pos, rot);
                 al3d->SetDOF(dof);
                 if (al3d->pInputSystem->IsKeyPressed(VK_MENU)) {
-                    al3d->JumpTime(keyframe.time);
+                    al3d->Time()->JumpReal(keyframe.time);
                 }
             }
         }
@@ -358,7 +358,7 @@ void FreeCameraPath::DebugUI(CameraDrawer* CamDrawer, ElementManager* EManager) 
     
     if (ImGui::Button("添加关键帧") || EManager->pInputSystem->CheckComboClick('F', 1)) {
         MulNX::Math::CameraKeyframe keyframe;
-        keyframe.time = EManager->AL3D->GetTime();
+        keyframe.time = EManager->AL3D->Time()->GetReal();
         auto view = EManager->AL3D->GetView();
         keyframe.PositionAndFOV = view.ToPositionAndFOV();
         keyframe.RotationQuat = view.ToRotationQuat();
@@ -376,7 +376,7 @@ void FreeCameraPath::DebugUI(CameraDrawer* CamDrawer, ElementManager* EManager) 
 
     if (ImGui::Button("预览轨道")) {
         EManager->Preview_SetElement(this->Name);
-        EManager->Preview_SetPreviewSchema(EManager->AL3D->GetTime());
+        EManager->Preview_SetPreviewSchema(EManager->AL3D->Time()->GetReal());
         EManager->Preview_Enable();
     }
 

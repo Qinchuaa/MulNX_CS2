@@ -110,7 +110,7 @@ public:
     bool ExecuteCommand(const std::string& cmd)override;
     float* GetViewMatrix()override;
     MulNX::Math::View GetView()const override;
-    float GetTime()const override;
+    float GetTime()override;
     bool JumpTime(const float time)override;
     float GetWinWidth()const override;
     float GetWinHeight()const override;

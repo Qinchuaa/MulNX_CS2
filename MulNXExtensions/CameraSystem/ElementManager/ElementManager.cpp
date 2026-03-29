@@ -46,8 +46,8 @@ void ElementManager::VirtualMain() {
 
     if (this->OnPreview) {
         CameraSystemIO IO;
-        IO.ElementTime = this->AL3D->GetTime();
-        IO.FrameGameTime = this->AL3D->GetTime();
+        IO.ElementTime = this->AL3D->Time()->GetReal();
+        IO.FrameGameTime = this->AL3D->Time()->GetReal();
         if (this->Preview_Call(&IO)) {
             //自由摄像机轨道预览
             if (this->Preview_CurrentElement->Type == ElementType::FreeCameraPath) {
