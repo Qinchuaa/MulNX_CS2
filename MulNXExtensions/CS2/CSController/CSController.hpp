@@ -70,7 +70,7 @@ public:
     std::atomic<float> distance = 50.0f;
 
     // 平滑系数 (0.0 ~ 1.0)，值越小越平滑
-    float SMOOTH_FACTOR = 0.35f;
+    std::atomic<float> SMOOTH_FACTOR = 0.35f;
 
     // 静态平滑状态（仅在第一次成功时初始化，异常时重置）
     DirectX::XMFLOAT3 smoothCameraPos{};
@@ -97,6 +97,7 @@ private:
     C_GlobalVars* CSGlobalVars{};
     
     void ESP();
+    void QuaternionToEuler(const DirectX::XMVECTOR& quat, float& pitch, float& yaw, float& roll);
 public:
     std::atomic<bool> ESPDraw = false;
     

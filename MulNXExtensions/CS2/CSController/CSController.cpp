@@ -62,13 +62,14 @@ void CSController::HandleOverrideView(CS2::CViewSetup* viewSetup) {
         if (result != 0) {
             this->ISys().LogWarning("HandleSelfViewUpdate returned error code: " + std::to_string(result));
         }
+        else {
+            // 输出平滑后的值，滚转角强制为0（保持水平）
+            *viewSetup->pViewOrigin() = this->controlAdvancedView.smoothCameraPos;
+            *viewSetup->pViewAngles() = this->controlAdvancedView.smoothCameraAngle;
+            viewSetup->pViewAngles()->z = 0;  // 滚转角保持水平
+        }
         lastTime = currentTime;
     }
-        
-    // 输出平滑后的值，滚转角强制为0（保持水平）
-    *viewSetup->pViewOrigin() = this->controlAdvancedView.smoothCameraPos;
-    *viewSetup->pViewAngles() = this->controlAdvancedView.smoothCameraAngle;
-    viewSetup->pViewAngles()->z = 0;  // 滚转角保持水平
 }
 
 int CSController::HandleSelfViewUpdate() {
@@ -218,6 +219,7 @@ bool CSController::UINodeFunc(MulNXUINode* node) {
         MulNX::UI::SliderInt("骨骼终点", this->controlAdvancedView.boneIndex2, 0, 127);
 
         MulNX::UI::SliderFloat("距离控制", this->controlAdvancedView.distance, 0.0f, 200.0f);
+        MulNX::UI::SliderFloat("平滑系数", this->controlAdvancedView.SMOOTH_FACTOR, 0.0f, 1.0f);
     }
 
     // 自由摄像机控制
