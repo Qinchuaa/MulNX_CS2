@@ -1,7 +1,5 @@
 #include "CSController.hpp"
 
-using namespace MulNX::Memory::ReadWrite;
-
 bool CSController::ExecuteCommand(const std::string& cmd) {
     this->executor(0, cmd.c_str(), 1);
     return true;
@@ -31,9 +29,8 @@ float CSController::GetTime() {
     try {
         time = MulNX::MRead<float>(this->CSGlobalVars->fCurrentTime());
     }
-    catch (const bad_memory_read& e) {
+    catch (const std::runtime_error& e) {
         this->ISys().LogError("读取游戏时间失败");
-        return 0;
     }
     return time;
 }

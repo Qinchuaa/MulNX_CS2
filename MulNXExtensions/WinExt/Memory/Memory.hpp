@@ -6,31 +6,33 @@
 #include "Assembler/Assembler.hpp"
 #include "Hook/Hook.hpp"
 
+#include <cstdint>
 #include <atomic>
 #include <string>
 #include <vector>
 #include <optional>
 #include <Windows.h>
+#include <format>
 
 namespace MulNX {
     namespace Memory {
         namespace ReadWrite {
-            class AccessError :public std::runtime_error {
+            class bad_memory_access :public std::runtime_error {
             public:
-                explicit AccessError(const std::string& msg)
+                explicit bad_memory_access(const std::string& msg)
                     : std::runtime_error(msg) {}
             };
 
-            class bad_memory_read :public AccessError {
+            class bad_memory_read :public bad_memory_access {
             public:
                 explicit bad_memory_read(const std::string& msg)
-                    : AccessError(msg) {}
+                    : bad_memory_access(msg) {}
             };
 
-            class bad_memory_write :public AccessError {
+            class bad_memory_write :public bad_memory_access {
             public:
                 explicit bad_memory_write(const std::string& msg)
-                    : AccessError(msg) {}
+                    : bad_memory_access(msg) {}
             };
 
             template<typename T>
@@ -48,7 +50,7 @@ namespace MulNX {
             T MRead(uintptr_t address) {
                 T target;
                 if (!ReadImpl(address, target)) {
-                    throw bad_memory_read("access error");
+                    throw bad_memory_read(std::format("read error at: 0x{:X}", address));
                 }
                 else {
                     return target;
@@ -58,7 +60,7 @@ namespace MulNX {
             T MRead(T* address) {
                 T target;
                 if (!ReadImpl(reinterpret_cast<uintptr_t>(address), target)) {
-                    throw bad_memory_read("access error");
+                    throw bad_memory_read(std::format("read error at: 0x{:X}", reinterpret_cast<uintptr_t>(address)));
                 }
                 else {
                     return target;
@@ -79,14 +81,14 @@ namespace MulNX {
             template<typename T>
             void MWrite(uintptr_t address, const T& value) {
                 if (!WriteImpl(address, value)) {
-                    throw bad_memory_write("access error");
+                    throw bad_memory_write(std::format("write error at: 0x{:X}", address));
                 }
             }
 
             template<typename T>
             void MWrite(T* address, const T& value) {
                 if (!WriteImpl(reinterpret_cast<uintptr_t>(address), value)) {
-                    throw bad_memory_write("access error");
+                    throw bad_memory_write(std::format("write error at: 0x{:X}", reinterpret_cast<uintptr_t>(address)));
                 }
             }
         }

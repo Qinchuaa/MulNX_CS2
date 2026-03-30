@@ -54,32 +54,50 @@ void CSController::HandleOverrideView(CS2::CViewSetup* viewSetup) {
 
     if (!this->controlAdvancedView.Enable.load(std::memory_order_acquire))return;
 
+    // 通过时间桥判断是否需要更新视角，防止抖动
+    static auto lastTime = this->AL3D->Time()->GetReal();
+    auto currentTime = this->AL3D->Time()->GetReal();
+    if (currentTime > lastTime) {
+        auto result = this->HandleSelfViewUpdate();
+        if (result != 0) {
+            this->ISys().LogWarning("HandleSelfViewUpdate returned error code: " + std::to_string(result));
+        }
+        lastTime = currentTime;
+    }
+        
+    // 输出平滑后的值，滚转角强制为0（保持水平）
+    *viewSetup->pViewOrigin() = this->controlAdvancedView.smoothCameraPos;
+    *viewSetup->pViewAngles() = this->controlAdvancedView.smoothCameraAngle;
+    viewSetup->pViewAngles()->z = 0;  // 滚转角保持水平
+}
+
+int CSController::HandleSelfViewUpdate() {
     // ==================== 摄像机绑定逻辑（武器枪口视角） ====================
-    // 平滑系数 (0.0 ~ 1.0)，值越小越平滑
-    constexpr float SMOOTH_FACTOR = 0.2f;
     // 摄像机与骨骼9的偏移距离（单位）
     float CAMERA_OFFSET = this->controlAdvancedView.distance.load(std::memory_order_acquire);
-
-    // 静态平滑状态（仅在第一次成功时初始化，异常时重置）
-    static DirectX::XMFLOAT3 s_smoothCameraPos{};
-    static DirectX::XMFLOAT3 s_smoothCameraAngle{};
-    static bool s_initialized = false;  // 是否已初始化过平滑值
-
     try {
         // ---------- 获取目标 ----------
         auto* localController = this->Modules.client.dwLocalPlayerController();
-        if (!localController) return;
+        if (!localController) {
+            return 1;
+        }
         auto hLocalPawn = MulNX::MRead(localController->hPawn());
         auto* localPawn = this->Modules.client.GetBaseEntityFromHandle(hLocalPawn)->As<CS2::C_CSPlayerPawn>();
-        if (!localPawn) return;
+        if (!localPawn) {
+            return 2;
+        }
         auto hObserverTarget = localPawn->GetHandleObserverTarget();
         auto* target = this->Modules.client.GetBaseEntityFromHandle(hObserverTarget)->As<CS2::C_CSPlayerPawn>();
-        if (!target) return;
+        if (!target) {
+            return 3;
+        }
 
         // ---------- 获取武器骨骼 ----------
         auto hActiveWeapon = target->GetHandleActiveWeapon();
         auto* pWeapon = this->Modules.client.GetBaseEntityFromHandle(hActiveWeapon)->As<CS2::C_BasePlayerWeapon>();
-        if (!pWeapon) return;
+        if (!pWeapon) {
+            return 4;
+        }
 
         // 两个参考点
         DirectX::XMFLOAT3 gunPos = pWeapon->GetBonePos(this->controlAdvancedView.boneIndex1.load(std::memory_order_acquire));
@@ -94,7 +112,7 @@ void CSController::HandleOverrideView(CS2::CViewSetup* viewSetup) {
             forwardDir.z /= len;
         }
         else {
-            return;  // 方向无效，放弃修改
+            return 5;  // 方向无效，放弃修改
         }
 
         // 目标摄像机位置
@@ -117,23 +135,23 @@ void CSController::HandleOverrideView(CS2::CViewSetup* viewSetup) {
             lookDir.z /= len;
         }
         else {
-            return;  // 方向无效，放弃修改
+            return 6;  // 方向无效，放弃修改
         }
 
         DirectX::XMFLOAT3 targetCameraAngle;
         MulNX::Math::CSDirToEuler(lookDir, targetCameraAngle);
 
         // ---------- 平滑处理 ----------
-        if (!s_initialized) {
-            s_smoothCameraPos = targetCameraPos;
-            s_smoothCameraAngle = targetCameraAngle;
-            s_initialized = true;
+        if (!this->controlAdvancedView.initialized) {
+            this->controlAdvancedView.smoothCameraPos = targetCameraPos;
+            this->controlAdvancedView.smoothCameraAngle = targetCameraAngle;
+            this->controlAdvancedView.initialized = true;
         }
 
         // 指数平滑位置
-        s_smoothCameraPos.x += (targetCameraPos.x - s_smoothCameraPos.x) * SMOOTH_FACTOR;
-        s_smoothCameraPos.y += (targetCameraPos.y - s_smoothCameraPos.y) * SMOOTH_FACTOR;
-        s_smoothCameraPos.z += (targetCameraPos.z - s_smoothCameraPos.z) * SMOOTH_FACTOR;
+        this->controlAdvancedView.smoothCameraPos.x += (targetCameraPos.x - this->controlAdvancedView.smoothCameraPos.x) * this->controlAdvancedView.SMOOTH_FACTOR;
+        this->controlAdvancedView.smoothCameraPos.y += (targetCameraPos.y - this->controlAdvancedView.smoothCameraPos.y) * this->controlAdvancedView.SMOOTH_FACTOR;
+        this->controlAdvancedView.smoothCameraPos.z += (targetCameraPos.z - this->controlAdvancedView.smoothCameraPos.z) * this->controlAdvancedView.SMOOTH_FACTOR;
 
         // 指数平滑角度（处理角度环绕）
         auto angleDiff = [](float target, float current) -> float {
@@ -142,20 +160,17 @@ void CSController::HandleOverrideView(CS2::CViewSetup* viewSetup) {
             if (diff < -180.0f) diff += 360.0f;
             return diff;
             };
-        s_smoothCameraAngle.x += angleDiff(targetCameraAngle.x, s_smoothCameraAngle.x) * SMOOTH_FACTOR;
-        s_smoothCameraAngle.y += angleDiff(targetCameraAngle.y, s_smoothCameraAngle.y) * SMOOTH_FACTOR;
-        s_smoothCameraAngle.z += angleDiff(targetCameraAngle.z, s_smoothCameraAngle.z) * SMOOTH_FACTOR;
-
-        // 输出平滑后的值，滚转角强制为0（保持水平）
-        *viewSetup->pViewOrigin() = s_smoothCameraPos;
-        *viewSetup->pViewAngles() = s_smoothCameraAngle;
-        viewSetup->pViewAngles()->z = 0;  // 滚转角保持水平
+        this->controlAdvancedView.smoothCameraAngle.x += angleDiff(targetCameraAngle.x, this->controlAdvancedView.smoothCameraAngle.x) * this->controlAdvancedView.SMOOTH_FACTOR;
+        this->controlAdvancedView.smoothCameraAngle.y += angleDiff(targetCameraAngle.y, this->controlAdvancedView.smoothCameraAngle.y) * this->controlAdvancedView.SMOOTH_FACTOR;
+        this->controlAdvancedView.smoothCameraAngle.z += angleDiff(targetCameraAngle.z, this->controlAdvancedView.smoothCameraAngle.z) * this->controlAdvancedView.SMOOTH_FACTOR;
     }
     catch (...) {
         // 发生异常时，重置平滑状态，避免使用无效数据
-        s_initialized = false;
+        this->controlAdvancedView.initialized = false;
         // 不清空位置/角度，让游戏继续使用原有视角（或后续帧重新初始化）
+        return 0xffff;  // 返回特定错误码，表示发生异常
     }
+    return 0;
 }
 
 bool CSController::UINodeFunc(MulNXUINode* node) {
@@ -233,44 +248,44 @@ bool CSController::UINodeFunc(MulNXUINode* node) {
     }
 #ifdef _DEBUG
 
-    try {
-        for (int i = 0;i <= this->Modules.client.dwGameEntitySystem_highestEntityIndex();i++) {
-            auto* pEntity = this->Modules.client.GetBaseEntity(i);
-            if (!pEntity)continue;
-            auto hPawn = MulNX::MRead(pEntity->As<CS2::CBasePlayerController>()->hPawn());
-            if (!hPawn.Valid())continue;
-            auto* pPawn = this->Modules.client.GetBaseEntityFromHandle(hPawn)->As<CS2::C_CSPlayerPawn>();
-            if (!pPawn)continue;
-            auto* pGameSceneNode = MulNX::MRead(pPawn->pGameSceneNode());
-            if (!pGameSceneNode)continue;
-            auto* bones = MulNX::MRead(static_cast<CS2::CSkeletonInstance*>(pGameSceneNode)->unkBoneArray());
-            if (!bones)continue;
+    // try {
+    //     for (int i = 0;i <= this->Modules.client.dwGameEntitySystem_highestEntityIndex();i++) {
+    //         auto* pEntity = this->Modules.client.GetBaseEntity(i);
+    //         if (!pEntity)continue;
+    //         auto hPawn = MulNX::MRead(pEntity->As<CS2::CBasePlayerController>()->hPawn());
+    //         if (!hPawn.Valid())continue;
+    //         auto* pPawn = this->Modules.client.GetBaseEntityFromHandle(hPawn)->As<CS2::C_CSPlayerPawn>();
+    //         if (!pPawn)continue;
+    //         auto* pGameSceneNode = MulNX::MRead(pPawn->pGameSceneNode());
+    //         if (!pGameSceneNode)continue;
+    //         auto* bones = MulNX::MRead(static_cast<CS2::CSkeletonInstance*>(pGameSceneNode)->unkBoneArray());
+    //         if (!bones)continue;
 
-            auto* pWeaponServices = MulNX::MRead(pPawn->pWeaponServices());
-            auto hAc = MulNX::MRead(pWeaponServices->hActiveWeapon());
-            auto* pWeapon = this->Modules.client.GetBaseEntityFromHandle(hAc)->As<CS2::C_BasePlayerWeapon>();
-            auto* pWeaponsGameSceneNode = MulNX::MRead(pWeapon->pGameSceneNode());
-            auto* bones2 = MulNX::MRead(static_cast<CS2::CSkeletonInstance*>(pWeaponsGameSceneNode)->unkBoneArray());
+    //         auto* pWeaponServices = MulNX::MRead(pPawn->pWeaponServices());
+    //         auto hAc = MulNX::MRead(pWeaponServices->hActiveWeapon());
+    //         auto* pWeapon = this->Modules.client.GetBaseEntityFromHandle(hAc)->As<CS2::C_BasePlayerWeapon>();
+    //         auto* pWeaponsGameSceneNode = MulNX::MRead(pWeapon->pGameSceneNode());
+    //         auto* bones2 = MulNX::MRead(static_cast<CS2::CSkeletonInstance*>(pWeaponsGameSceneNode)->unkBoneArray());
 
-            auto* pGlow = pPawn->Glow();
-            auto* pGlowColor = pGlow->fGlowColor();;
+    //         auto* pGlow = pPawn->Glow();
+    //         auto* pGlowColor = pGlow->fGlowColor();;
 
-            MulNX::TransInfo info;
-            info.pMatrix = this->GetViewMatrix();
-            info.windowHeight = this->GetWinHeight();
-            info.windowWidth = this->GetWinWidth();
+    //         MulNX::TransInfo info;
+    //         info.pMatrix = this->GetViewMatrix();
+    //         info.windowHeight = this->GetWinHeight();
+    //         info.windowWidth = this->GetWinWidth();
 
-            for (int i = 0;i < 34;++i) {
-                DirectX::XMFLOAT3 pos = MulNX::MRead(bones->at(i));
-                DirectX::XMFLOAT3 pos2 = MulNX::MRead(bones2->at(i));
-                MulNX::UI::DrawWorldPoint(pos, info, std::to_string(i).c_str());
-                MulNX::UI::DrawWorldPoint(pos2, info, std::to_string(i).c_str());
-            }
-        }
-    }
-    catch (const std::runtime_error& e) {
-        this->ISys().LogWarning("捕获到在绘制时发生的异常");
-    }
+    //         for (int i = 0;i < 34;++i) {
+    //             DirectX::XMFLOAT3 pos = MulNX::MRead(bones->at(i));
+    //             DirectX::XMFLOAT3 pos2 = MulNX::MRead(bones2->at(i));
+    //             MulNX::UI::DrawWorldPoint(pos, info, std::to_string(i).c_str());
+    //             MulNX::UI::DrawWorldPoint(pos2, info, std::to_string(i).c_str());
+    //         }
+    //     }
+    // }
+    // catch (const std::runtime_error& e) {
+    //     this->ISys().LogWarning("捕获到在绘制时发生的异常");
+    // }
 
 
 #endif

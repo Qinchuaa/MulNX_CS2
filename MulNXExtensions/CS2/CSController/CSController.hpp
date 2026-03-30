@@ -68,6 +68,14 @@ public:
     std::atomic<int> boneIndex3 = 10;
 
     std::atomic<float> distance = 50.0f;
+
+    // 平滑系数 (0.0 ~ 1.0)，值越小越平滑
+    float SMOOTH_FACTOR = 0.35f;
+
+    // 静态平滑状态（仅在第一次成功时初始化，异常时重置）
+    DirectX::XMFLOAT3 smoothCameraPos{};
+    DirectX::XMFLOAT3 smoothCameraAngle{};
+    bool initialized = false;  // 是否已初始化过平滑值
 };
 
 class CSController final :public MulNX::IAbstractLayer3D {
@@ -94,6 +102,7 @@ public:
     
     std::unique_ptr<MulNX::Memory::HookEx> MyHook = nullptr;
     void HandleOverrideView(CS2::CViewSetup* viewSetup);
+    int HandleSelfViewUpdate();
     //bool UINodeFunc(MulNXUINode* ThisNode)override;
     bool Init()override;
     bool UINodeFunc(MulNXUINode* node);
