@@ -76,6 +76,23 @@ public:
     DirectX::XMFLOAT3 smoothCameraPos{};
     DirectX::XMFLOAT3 smoothCameraAngle{};
     bool initialized = false;  // 是否已初始化过平滑值
+
+    // 新增：摄像机相对于武器坐标系的位置偏移（右、上、前）
+    DirectX::XMFLOAT3 localPositionOffset{ -50.0f, 20.0f, -30.0f };  // 默认：左后方
+
+    // 新增：滚转角（度），绕前向轴旋转
+    float rollDegrees{ 0.0f };
+
+    // 新增：注视点相对于武器坐标系的偏移（右、上、前）
+    // 如果为零向量，则摄像机指向武器自身（枪口位置）
+    DirectX::XMFLOAT3 localTargetOffset{ 0.0f, 0.0f, 0.0f };
+
+    // 启用/禁用高级模式（现在旧模式已删除，此开关可省略，但保留以便UI控制）
+    bool useAdvancedMode{ true };
+
+    // 可选：是否使用第三个骨骼辅助定义局部坐标系的垂直轴
+    // 若为 true，则使用骨骼1→骨骼3 作为临时上向参考；否则使用世界向上
+    std::atomic<bool> useThirdBoneForUp{ false };
 };
 
 class CSController final :public MulNX::IAbstractLayer3D {

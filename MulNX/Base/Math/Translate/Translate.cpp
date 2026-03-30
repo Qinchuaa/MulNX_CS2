@@ -3,8 +3,6 @@
 #include <algorithm>
 #include <cmath>
 
-constexpr float PI = 3.141592653f;
-
 void MulNX::Math::CSEulerToQuat(const DirectX::XMFLOAT3& Euler, DirectX::XMFLOAT4& QuaT) {
     auto quatResult = CSEulerToQuatVec(Euler);
     DirectX::XMStoreFloat4(&QuaT, quatResult);
@@ -78,8 +76,8 @@ void MulNX::Math::CSQuatToEuler(const DirectX::XMFLOAT4& Quat, DirectX::XMFLOAT3
 }
 
 void MulNX::Math::CSDirToEuler(const DirectX::XMFLOAT3& Dir, DirectX::XMFLOAT3& Euler) {
-    Euler.x = std::atan2(-Dir.z, std::sqrt(Dir.x * Dir.x + Dir.y * Dir.y)) * (180.0 / PI);
-    Euler.y = std::atan2(Dir.y, Dir.x) * (180.0 / PI);
+    Euler.x = std::atan2(-Dir.z, std::sqrt(Dir.x * Dir.x + Dir.y * Dir.y)) * (180.0 / DirectX::XM_PI);
+    Euler.y = std::atan2(Dir.y, Dir.x) * (180.0 / DirectX::XM_PI);
 
     Euler.x = (Euler.x < -89.0f) ? -89.0f : Euler.x;
     Euler.x = (Euler.x > 89.f) ? 89.0f : Euler.x;
@@ -88,8 +86,8 @@ void MulNX::Math::CSDirToEuler(const DirectX::XMFLOAT3& Dir, DirectX::XMFLOAT3& 
     while (Euler.y < -180.f)Euler.y += 360.f;
 }
 DirectX::XMFLOAT3 MulNX::Math::CSEulerToDir(float pitchDegrees, float yawDegrees) {
-    float pitchRad = pitchDegrees * (PI / 180.0f);
-    float yawRad = yawDegrees * (PI / 180.0f);
+    float pitchRad = pitchDegrees * (DirectX::XM_PI / 180.0f);
+    float yawRad = yawDegrees * (DirectX::XM_PI / 180.0f);
 
     float cosPitch = std::cos(pitchRad);
     float sinPitch = std::sin(pitchRad);

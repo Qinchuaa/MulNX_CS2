@@ -57,92 +57,146 @@ void CSController::HandleOverrideView(CS2::CViewSetup* viewSetup) {
     // 通过时间桥判断是否需要更新视角，防止抖动
     static auto lastTime = this->AL3D->Time()->GetReal();
     auto currentTime = this->AL3D->Time()->GetReal();
-    if (currentTime > lastTime) {
+    if (currentTime > lastTime||lastTime - currentTime > 0.015f) {
         auto result = this->HandleSelfViewUpdate();
         if (result != 0) {
             this->ISys().LogWarning("HandleSelfViewUpdate returned error code: " + std::to_string(result));
         }
         else {
-            // 输出平滑后的值，滚转角强制为0（保持水平）
+            // 输出平滑后的值
             *viewSetup->pViewOrigin() = this->controlAdvancedView.smoothCameraPos;
             *viewSetup->pViewAngles() = this->controlAdvancedView.smoothCameraAngle;
-            viewSetup->pViewAngles()->z = 0;  // 滚转角保持水平
         }
         lastTime = currentTime;
     }
 }
 
 int CSController::HandleSelfViewUpdate() {
-    // ==================== 摄像机绑定逻辑（武器枪口视角） ====================
-    // 摄像机与骨骼9的偏移距离（单位）
-    float CAMERA_OFFSET = this->controlAdvancedView.distance.load(std::memory_order_acquire);
     try {
-        // ---------- 获取目标 ----------
+        // ----- 获取目标实体 -----
         auto* localController = this->Modules.client.dwLocalPlayerController();
-        if (!localController) {
-            return 1;
-        }
+        if (!localController) return 1;
         auto hLocalPawn = MulNX::MRead(localController->hPawn());
         auto* localPawn = this->Modules.client.GetBaseEntityFromHandle(hLocalPawn)->As<CS2::C_CSPlayerPawn>();
-        if (!localPawn) {
-            return 2;
-        }
+        if (!localPawn) return 2;
         auto hObserverTarget = localPawn->GetHandleObserverTarget();
         auto* target = this->Modules.client.GetBaseEntityFromHandle(hObserverTarget)->As<CS2::C_CSPlayerPawn>();
-        if (!target) {
-            return 3;
-        }
+        if (!target) return 3;
 
-        // ---------- 获取武器骨骼 ----------
+        // ----- 获取武器 -----
         auto hActiveWeapon = target->GetHandleActiveWeapon();
         auto* pWeapon = this->Modules.client.GetBaseEntityFromHandle(hActiveWeapon)->As<CS2::C_BasePlayerWeapon>();
-        if (!pWeapon) {
-            return 4;
-        }
+        if (!pWeapon) return 4;
 
-        // 两个参考点
-        DirectX::XMFLOAT3 gunPos = pWeapon->GetBonePos(this->controlAdvancedView.boneIndex1.load(std::memory_order_acquire));
-        DirectX::XMFLOAT3 gunDirRef = pWeapon->GetBonePos(this->controlAdvancedView.boneIndex2.load(std::memory_order_acquire));
+        // 获取三个骨骼的世界坐标
+        DirectX::XMFLOAT3 bone1 = pWeapon->GetBonePos(this->controlAdvancedView.boneIndex1.load());
+        DirectX::XMFLOAT3 bone2 = pWeapon->GetBonePos(this->controlAdvancedView.boneIndex2.load());
+        DirectX::XMFLOAT3 bone3 = pWeapon->GetBonePos(this->controlAdvancedView.boneIndex3.load());
 
-        // 计算枪口指向单位向量（从枪口指向参考点）
-        DirectX::XMFLOAT3 forwardDir = gunDirRef - gunPos;
+        // 计算前向向量（从 bone1 指向 bone2）
+        DirectX::XMFLOAT3 forwardDir = { bone2.x - bone1.x, bone2.y - bone1.y, bone2.z - bone1.z };
         float len = sqrtf(forwardDir.x * forwardDir.x + forwardDir.y * forwardDir.y + forwardDir.z * forwardDir.z);
-        if (len > 0.0001f) {
-            forwardDir.x /= len;
-            forwardDir.y /= len;
-            forwardDir.z /= len;
-        }
-        else {
-            return 5;  // 方向无效，放弃修改
+        if (len < 0.0001f) return 5;
+        forwardDir.x /= len; forwardDir.y /= len; forwardDir.z /= len;
+
+        // ----- 构建局部坐标系 -----
+        // 确定参考点（通常为 bone1 或 bone2，这里使用 bone1 作为原点）
+        DirectX::XMFLOAT3 refPoint = bone1;   // 局部坐标系原点
+
+        // 右向量：世界向上 × 前向
+        const DirectX::XMFLOAT3 worldUp = { 0.0f, 0.0f, 1.0f };
+        DirectX::XMFLOAT3 right;
+        DirectX::XMStoreFloat3(&right,
+            DirectX::XMVector3Normalize(DirectX::XMVector3Cross(
+                DirectX::XMLoadFloat3(&worldUp),
+                DirectX::XMLoadFloat3(&forwardDir))));
+
+        // 处理前向与世界向上平行的情况
+        if (sqrtf(right.x * right.x + right.y * right.y + right.z * right.z) < 0.0001f) {
+            // 使用骨骼3辅助定义垂直轴（若启用）或世界前向
+            if (this->controlAdvancedView.useThirdBoneForUp) {
+                DirectX::XMFLOAT3 tempUpDir = { bone3.x - bone1.x, bone3.y - bone1.y, bone3.z - bone1.z };
+                DirectX::XMStoreFloat3(&right,
+                    DirectX::XMVector3Normalize(DirectX::XMVector3Cross(
+                        DirectX::XMLoadFloat3(&tempUpDir),
+                        DirectX::XMLoadFloat3(&forwardDir))));
+            }
+            else {
+                const DirectX::XMFLOAT3 worldFront = { 1.0f, 0.0f, 0.0f };
+                DirectX::XMStoreFloat3(&right,
+                    DirectX::XMVector3Normalize(DirectX::XMVector3Cross(
+                        DirectX::XMLoadFloat3(&worldFront),
+                        DirectX::XMLoadFloat3(&forwardDir))));
+            }
         }
 
-        // 目标摄像机位置
-        DirectX::XMFLOAT3 targetCameraPos = {
-            gunDirRef.x + forwardDir.x * CAMERA_OFFSET,
-            gunDirRef.y + forwardDir.y * CAMERA_OFFSET,
-            gunDirRef.z + forwardDir.z * CAMERA_OFFSET
+        // 上向量：前向 × 右
+        DirectX::XMFLOAT3 up;
+        DirectX::XMStoreFloat3(&up,
+            DirectX::XMVector3Cross(
+                DirectX::XMLoadFloat3(&forwardDir),
+                DirectX::XMLoadFloat3(&right)));
+
+        // 应用滚转角（绕前向轴旋转 right 和 up）
+        float rollRad = this->controlAdvancedView.rollDegrees * (DirectX::XM_PI / 180.0f);
+        float cosR = cosf(rollRad);
+        float sinR = sinf(rollRad);
+        DirectX::XMFLOAT3 rightRolled = {
+            right.x * cosR + up.x * sinR,
+            right.y * cosR + up.y * sinR,
+            right.z * cosR + up.z * sinR
+        };
+        DirectX::XMFLOAT3 upRolled = {
+            -right.x * sinR + up.x * cosR,
+            -right.y * sinR + up.y * cosR,
+            -right.z * sinR + up.z * cosR
         };
 
-        // 目标摄像机角度
+        // ----- 计算摄像机世界位置 -----
+        const auto& offset = this->controlAdvancedView.localPositionOffset;
+        DirectX::XMFLOAT3 worldOffset = {
+            offset.x * rightRolled.x + offset.y * upRolled.x + offset.z * forwardDir.x,
+            offset.x * rightRolled.y + offset.y * upRolled.y + offset.z * forwardDir.y,
+            offset.x * rightRolled.z + offset.y * upRolled.z + offset.z * forwardDir.z
+        };
+        DirectX::XMFLOAT3 targetCameraPos = {
+            refPoint.x + worldOffset.x,
+            refPoint.y + worldOffset.y,
+            refPoint.z + worldOffset.z
+        };
+
+        // ----- 计算摄像机注视点世界坐标 -----
+        const auto& targetOffset = this->controlAdvancedView.localTargetOffset;
+        DirectX::XMFLOAT3 worldTargetOffset = {
+            targetOffset.x * rightRolled.x + targetOffset.y * upRolled.x + targetOffset.z * forwardDir.x,
+            targetOffset.x * rightRolled.y + targetOffset.y * upRolled.y + targetOffset.z * forwardDir.y,
+            targetOffset.x * rightRolled.z + targetOffset.y * upRolled.z + targetOffset.z * forwardDir.z
+        };
+        DirectX::XMFLOAT3 targetPoint = {
+            refPoint.x + worldTargetOffset.x,
+            refPoint.y + worldTargetOffset.y,
+            refPoint.z + worldTargetOffset.z
+        };
+
+        // ----- 计算摄像机需要指向的方向 -----
         DirectX::XMFLOAT3 lookDir = {
-            gunPos.x - targetCameraPos.x,
-            gunPos.y - targetCameraPos.y,
-            gunPos.z - targetCameraPos.z
+            targetPoint.x - targetCameraPos.x,
+            targetPoint.y - targetCameraPos.y,
+            targetPoint.z - targetCameraPos.z
         };
         len = sqrtf(lookDir.x * lookDir.x + lookDir.y * lookDir.y + lookDir.z * lookDir.z);
-        if (len > 0.0001f) {
-            lookDir.x /= len;
-            lookDir.y /= len;
-            lookDir.z /= len;
-        }
-        else {
-            return 6;  // 方向无效，放弃修改
-        }
+        if (len < 0.0001f) return 6;
+        lookDir.x /= len; lookDir.y /= len; lookDir.z /= len;
 
+        // 将方向转换为欧拉角（pitch, yaw, roll）
         DirectX::XMFLOAT3 targetCameraAngle;
         MulNX::Math::CSDirToEuler(lookDir, targetCameraAngle);
 
-        // ---------- 平滑处理 ----------
+        // 应用滚转角到欧拉角的 roll 分量（注意：此处的滚转角可能与之前计算的方向滚转重复，但通常我们只保留一个）
+        // 如果希望摄像机自身带有滚转（倾斜），直接设置 z 分量即可
+        targetCameraAngle.z = this->controlAdvancedView.rollDegrees;  // 或者直接保留 CSDirToEuler 计算出的 z
+
+        // ----- 平滑处理（保留原有逻辑）-----
         if (!this->controlAdvancedView.initialized) {
             this->controlAdvancedView.smoothCameraPos = targetCameraPos;
             this->controlAdvancedView.smoothCameraAngle = targetCameraAngle;
@@ -150,26 +204,26 @@ int CSController::HandleSelfViewUpdate() {
         }
 
         // 指数平滑位置
-        this->controlAdvancedView.smoothCameraPos.x += (targetCameraPos.x - this->controlAdvancedView.smoothCameraPos.x) * this->controlAdvancedView.SMOOTH_FACTOR;
-        this->controlAdvancedView.smoothCameraPos.y += (targetCameraPos.y - this->controlAdvancedView.smoothCameraPos.y) * this->controlAdvancedView.SMOOTH_FACTOR;
-        this->controlAdvancedView.smoothCameraPos.z += (targetCameraPos.z - this->controlAdvancedView.smoothCameraPos.z) * this->controlAdvancedView.SMOOTH_FACTOR;
+        float factor = this->controlAdvancedView.SMOOTH_FACTOR.load();
+        this->controlAdvancedView.smoothCameraPos.x += (targetCameraPos.x - this->controlAdvancedView.smoothCameraPos.x) * factor;
+        this->controlAdvancedView.smoothCameraPos.y += (targetCameraPos.y - this->controlAdvancedView.smoothCameraPos.y) * factor;
+        this->controlAdvancedView.smoothCameraPos.z += (targetCameraPos.z - this->controlAdvancedView.smoothCameraPos.z) * factor;
 
-        // 指数平滑角度（处理角度环绕）
+        // 指数平滑角度（处理环绕）
         auto angleDiff = [](float target, float current) -> float {
             float diff = target - current;
             if (diff > 180.0f) diff -= 360.0f;
             if (diff < -180.0f) diff += 360.0f;
             return diff;
             };
-        this->controlAdvancedView.smoothCameraAngle.x += angleDiff(targetCameraAngle.x, this->controlAdvancedView.smoothCameraAngle.x) * this->controlAdvancedView.SMOOTH_FACTOR;
-        this->controlAdvancedView.smoothCameraAngle.y += angleDiff(targetCameraAngle.y, this->controlAdvancedView.smoothCameraAngle.y) * this->controlAdvancedView.SMOOTH_FACTOR;
-        this->controlAdvancedView.smoothCameraAngle.z += angleDiff(targetCameraAngle.z, this->controlAdvancedView.smoothCameraAngle.z) * this->controlAdvancedView.SMOOTH_FACTOR;
+        this->controlAdvancedView.smoothCameraAngle.x += angleDiff(targetCameraAngle.x, this->controlAdvancedView.smoothCameraAngle.x) * factor;
+        this->controlAdvancedView.smoothCameraAngle.y += angleDiff(targetCameraAngle.y, this->controlAdvancedView.smoothCameraAngle.y) * factor;
+        this->controlAdvancedView.smoothCameraAngle.z += angleDiff(targetCameraAngle.z, this->controlAdvancedView.smoothCameraAngle.z) * factor;
+
     }
     catch (...) {
-        // 发生异常时，重置平滑状态，避免使用无效数据
         this->controlAdvancedView.initialized = false;
-        // 不清空位置/角度，让游戏继续使用原有视角（或后续帧重新初始化）
-        return 0xffff;  // 返回特定错误码，表示发生异常
+        return 0xffff;
     }
     return 0;
 }
@@ -215,10 +269,28 @@ bool CSController::UINodeFunc(MulNXUINode* node) {
     if (ImGui::CollapsingHeader("高级视角控制")) {
         MulNX::UI::Checkbox("启用高级视角控制", this->controlAdvancedView.Enable);
 
-        MulNX::UI::SliderInt("骨骼起点", this->controlAdvancedView.boneIndex1, 0, 127);
-        MulNX::UI::SliderInt("骨骼终点", this->controlAdvancedView.boneIndex2, 0, 127);
+        // 骨骼选择
+        MulNX::UI::SliderInt("骨骼起点 (原点)", this->controlAdvancedView.boneIndex1, 0, 127);
+        MulNX::UI::SliderInt("骨骼终点 (前向)", this->controlAdvancedView.boneIndex2, 0, 127);
+        MulNX::UI::SliderInt("骨骼辅助 (可选上向)", this->controlAdvancedView.boneIndex3, 0, 127);
+        MulNX::UI::Checkbox("使用第三骨骼辅助定义垂直轴", this->controlAdvancedView.useThirdBoneForUp);
 
-        MulNX::UI::SliderFloat("距离控制", this->controlAdvancedView.distance, 0.0f, 200.0f);
+        // 位置偏移
+        ImGui::Text("摄像机局部偏移 (右,上,前)");
+        ImGui::SliderFloat("右移 (X)", &this->controlAdvancedView.localPositionOffset.x, -200.0f, 200.0f);
+        ImGui::SliderFloat("上移 (Y)", &this->controlAdvancedView.localPositionOffset.y, -200.0f, 200.0f);
+        ImGui::SliderFloat("前移 (Z)", &this->controlAdvancedView.localPositionOffset.z, -200.0f, 200.0f);
+
+        // 注视点偏移
+        ImGui::Text("注视点局部偏移 (右,上,前)");
+        ImGui::SliderFloat("注视点右移 (X)", &this->controlAdvancedView.localTargetOffset.x, -200.0f, 200.0f);
+        ImGui::SliderFloat("注视点上移 (Y)", &this->controlAdvancedView.localTargetOffset.y, -200.0f, 200.0f);
+        ImGui::SliderFloat("注视点前移 (Z)", &this->controlAdvancedView.localTargetOffset.z, -200.0f, 200.0f);
+
+        // 滚转角
+        ImGui::SliderFloat("滚转角 (度)", &this->controlAdvancedView.rollDegrees, -180.0f, 180.0f);
+
+        // 平滑系数
         MulNX::UI::SliderFloat("平滑系数", this->controlAdvancedView.SMOOTH_FACTOR, 0.0f, 1.0f);
     }
 
