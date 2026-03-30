@@ -6,24 +6,42 @@
 #include <MulNXExtensions/CameraSystem/CameraSystemIO/CameraSystemIO.hpp>
 #include <MulNXThirdParty/All_cs2_dumper.hpp>
 #include <MulNXThirdParty/All_MinHook.hpp>
+#include <MulNX/Systems/InputSystem/InputSystem.hpp>
 
 void CSController::HandleOverrideView(CS2::CViewSetup* viewSetup) {
     this->controlView.currentView.WindowWidth.store(*viewSetup->pWidth(), std::memory_order_relaxed);
     this->controlView.currentView.WindowHeight.store(*viewSetup->pHeight(), std::memory_order_relaxed);
 
-    // 加载来自摄像机系统的View
-    auto view = this->controlView.ViewToGame.load(std::memory_order_acquire);
-    if (view != nullptr) {
-        viewSetup->pViewOrigin()->x = view->OriginX;
-        viewSetup->pViewOrigin()->y = view->OriginY;
-        viewSetup->pViewOrigin()->z = view->OriginZ;
+    // 记录当前游戏位置和角度
+    DirectX::XMFLOAT3 gamePos = *viewSetup->pViewOrigin();
+    DirectX::XMFLOAT3 gameAngles = *viewSetup->pViewAngles();
+    this->CurrentGamePosition.store(gamePos, std::memory_order_release);
+    this->CurrentGameAngles.store(gameAngles, std::memory_order_release);
 
-        viewSetup->pViewAngles()->x = view->AnglesX;
-        viewSetup->pViewAngles()->y = view->AnglesY;
-        viewSetup->pViewAngles()->z = view->AnglesZ;
+    // 检查是否启用自由摄像机控制
+    if (this->EnableFreeCameraControl.load(std::memory_order_acquire)) {
+        // 从InputSystem获取位置并覆盖
+        auto* inputSys = this->Core->ModuleManager()->FindModule<MulNX::InputSystem>("InputSystem");
+        const auto& freeCam = inputSys->GetFreeCamera();
+        viewSetup->pViewOrigin()->x = freeCam.Position.x;
+        viewSetup->pViewOrigin()->y = freeCam.Position.y;
+        viewSetup->pViewOrigin()->z = freeCam.Position.z;
+    }
+    else {
+        // 加载来自摄像机系统的View
+        auto view = this->controlView.ViewToGame.load(std::memory_order_acquire);
+        if (view != nullptr) {
+            viewSetup->pViewOrigin()->x = view->OriginX;
+            viewSetup->pViewOrigin()->y = view->OriginY;
+            viewSetup->pViewOrigin()->z = view->OriginZ;
 
-        if (view->FOV > 0.01f) {
-            *viewSetup->pFov() = view->FOV;
+            viewSetup->pViewAngles()->x = view->AnglesX;
+            viewSetup->pViewAngles()->y = view->AnglesY;
+            viewSetup->pViewAngles()->z = view->AnglesZ;
+
+            if (view->FOV > 0.01f) {
+                *viewSetup->pFov() = view->FOV;
+            }
         }
     }
 
@@ -38,7 +56,7 @@ void CSController::HandleOverrideView(CS2::CViewSetup* viewSetup) {
     this->controlView.currentView.AnglesX.store(viewSetup->pViewAngles()->x, std::memory_order_release);
     this->controlView.currentView.AnglesY.store(viewSetup->pViewAngles()->y, std::memory_order_release);
     this->controlView.currentView.AnglesZ.store(viewSetup->pViewAngles()->z, std::memory_order_release);
-    
+
     if (*viewSetup->pFov() < 0.01f) {
         this->controlView.currentView.FOV.store(90.0f, std::memory_order_release);
     }
@@ -198,7 +216,37 @@ bool CSController::UINodeFunc(MulNXUINode* node) {
 
         MulNX::UI::SliderFloat("距离控制", this->controlAdvancedView.distance, 0.0f, 200.0f);
     }
+
+    // 自由摄像机控制
+    if (ImGui::CollapsingHeader("自由摄像机控制")) {
+        bool currentEnable = this->EnableFreeCameraControl.load(std::memory_order_acquire);
+        if (ImGui::Checkbox("启用自由摄像机位置控制", &currentEnable)) {
+            if (currentEnable && !this->EnableFreeCameraControl.load(std::memory_order_acquire)) {
+                // 从未启用到启用：读取当前游戏位置和角度
+                DirectX::XMFLOAT3 gamePos = this->CurrentGamePosition.load(std::memory_order_acquire);
+                DirectX::XMFLOAT3 gameAngles = this->CurrentGameAngles.load(std::memory_order_acquire);
+                auto* inputSys = this->Core->ModuleManager()->FindModule<MulNX::InputSystem>("InputSystem");
+                inputSys->SetFreeCameraPosition(gamePos);
+                inputSys->SetFreeCameraRotation(gameAngles);
+            }
+            this->EnableFreeCameraControl.store(currentEnable, std::memory_order_release);
+        }
+
+        if (currentEnable) {
+            auto* inputSys = this->Core->ModuleManager()->FindModule<MulNX::InputSystem>("InputSystem");
+            const auto& freeCam = inputSys->GetFreeCamera();
+
+            ImGui::Text("当前位置: X=%.2f, Y=%.2f, Z=%.2f",
+                freeCam.Position.x, freeCam.Position.y, freeCam.Position.z);
+
+            float speed = freeCam.MoveSpeed;
+            if (ImGui::SliderFloat("移动速度", &speed, 10.0f, 500.0f)) {
+                inputSys->SetFreeCameraMoveSpeed(speed);
+            }
+        }
+    }
 #ifdef _DEBUG
+
     try {
         for (int i = 0;i <= this->Modules.client.dwGameEntitySystem_highestEntityIndex();i++) {
             auto* pEntity = this->Modules.client.GetBaseEntity(i);
@@ -305,7 +353,7 @@ bool CSController::Init() {
 int CSController::BasicUpdate() {
     // 获取CS2全局变量
     this->CSGlobalVars = MulNX::MRead<C_GlobalVars*>(this->Modules.client.GetBaseAddress() + cs2_dumper::offsets::client_dll::dwGlobalVars);
-    
+
     static int OldRoundStartCount = MulNX::MRead(this->Modules.client.dwGameRules()->nRoundStartCount());
     if (OldRoundStartCount != MulNX::MRead(this->Modules.client.dwGameRules()->nRoundStartCount())) {
         MulNX::Message Msg("Game/NewRound"_hash);
@@ -321,7 +369,7 @@ int CSController::BasicUpdate() {
 
         auto pName = MulNX::MRead(((pClassInfo))->pName());
         if (!pName)continue;
-        
+
         auto zname = std::string(pName);
 
         if (zname.find("smokegrenade") != std::string::npos && zname.find("weapon") == std::string::npos) {
@@ -379,6 +427,13 @@ void CSController::ThreadMain() {
             this->ISys().LogWarning("在更新数据时捕获到异常：" + std::string(e.what()));
         }
 
+        // 如果启用自由摄像机控制，同步角度到InputSystem
+        if (this->EnableFreeCameraControl.load(std::memory_order_acquire)) {
+            DirectX::XMFLOAT3 angles = this->CurrentGameAngles.load(std::memory_order_acquire);
+            auto* inputSys = this->Core->ModuleManager()->FindModule<MulNX::InputSystem>("InputSystem");
+            inputSys->SetFreeCameraRotation(angles);
+        }
+
         std::this_thread::sleep_for(std::chrono::milliseconds(this->MyThreadDelta));
     }
     return;
@@ -390,7 +445,7 @@ int CSController::TryGetMsg() {
         this->GlobalVars->InGamePlaying = false;
         return Result;
     }
-    this->EntityListUpdate();    
+    this->EntityListUpdate();
 
     this->GlobalVars->InGamePlaying = true;
 

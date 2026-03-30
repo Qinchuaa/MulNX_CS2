@@ -6,35 +6,16 @@
 constexpr float PI = 3.141592653f;
 
 void MulNX::Math::CSEulerToQuat(const DirectX::XMFLOAT3& Euler, DirectX::XMFLOAT4& QuaT) {
-    // 将角度转换为弧度
-    float yawRad = DirectX::XMConvertToRadians(Euler.y);   // 偏航角（绕Z轴，向左为正）
-    float pitchRad = DirectX::XMConvertToRadians(-Euler.x); // 俯仰角（绕Y轴，向下为正，取负以符合右手系）
-    float rollRad = DirectX::XMConvertToRadians(-Euler.z);  // 滚转角（绕X轴，顺时针为正，取负以符合右手系）
-
-    // 创建旋转轴
-    DirectX::XMVECTOR axisZ = DirectX::XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f);
-    DirectX::XMVECTOR axisY = DirectX::XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
-    DirectX::XMVECTOR axisX = DirectX::XMVectorSet(1.0f, 0.0f, 0.0f, 0.0f);
-
-    // 计算各旋转的四元数
-    DirectX::XMVECTOR quatYaw = DirectX::XMQuaternionRotationAxis(axisZ, yawRad);
-    DirectX::XMVECTOR quatPitch = DirectX::XMQuaternionRotationAxis(axisY, pitchRad);
-    DirectX::XMVECTOR quatRoll = DirectX::XMQuaternionRotationAxis(axisX, rollRad);
-
-    // 按顺序组合旋转：先偏航，再俯仰，最后滚转
-    DirectX::XMVECTOR quatTemp = DirectX::XMQuaternionMultiply(quatPitch, quatYaw);
-    DirectX::XMVECTOR quatResult = DirectX::XMQuaternionMultiply(quatRoll, quatTemp);
-
-    // 存储并返回结果
+    auto quatResult = CSEulerToQuatVec(Euler);
     DirectX::XMStoreFloat4(&QuaT, quatResult);
     return;
 }
 
 DirectX::XMVECTOR MulNX::Math::CSEulerToQuatVec(const DirectX::XMFLOAT3& Euler) {
     // 将角度转换为弧度
-    float yawRad = DirectX::XMConvertToRadians(Euler.y);   // 偏航角（绕Z轴，向左为正）
-    float pitchRad = DirectX::XMConvertToRadians(-Euler.x); // 俯仰角（绕Y轴，向下为正，取负以符合右手系）
-    float rollRad = DirectX::XMConvertToRadians(-Euler.z);  // 滚转角（绕X轴，顺时针为正，取负以符合右手系）
+    float pitchRad = DirectX::XMConvertToRadians(Euler.x); // 俯仰角（绕Y轴）
+    float yawRad = DirectX::XMConvertToRadians(Euler.y);   // 偏航角（绕Z轴）
+    float rollRad = DirectX::XMConvertToRadians(Euler.z);  // 滚转角（绕X轴）
 
     // 创建旋转轴
     DirectX::XMVECTOR axisZ = DirectX::XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f);
@@ -84,13 +65,13 @@ void MulNX::Math::CSQuatToEuler(const DirectX::XMFLOAT4& Quat, DirectX::XMFLOAT3
         float rollStd = std::atan2(2.0f * (w * x + y * z), 1.0f - 2.0f * (x * x + y * y));
 
         //转换旋转方向
-        pitchRad = -pitchStd; // 俯仰角取负
-        rollRad = -rollStd;   // 滚转角取负
+        pitchRad = pitchStd; // 俯仰角取负
+        rollRad = rollStd;   // 滚转角取负
     }
 
     //将弧度转换为角度
-    Euler.y = DirectX::XMConvertToDegrees(yawRad);   // 偏航角
     Euler.x = DirectX::XMConvertToDegrees(pitchRad); // 俯仰角
+    Euler.y = DirectX::XMConvertToDegrees(yawRad);   // 偏航角
     Euler.z = DirectX::XMConvertToDegrees(rollRad);  // 滚转角
 
     return;

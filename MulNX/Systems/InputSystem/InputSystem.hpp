@@ -5,6 +5,7 @@
 
 #include <thread>
 #include <chrono>
+#include <DirectXMath.h>
 
 namespace MulNX {
 	//Usable Ctrl Shift Alt 虚拟键码 连击数
@@ -32,6 +33,16 @@ namespace MulNX {
 		unsigned int LastPressTimeMs{};//线程内，非原子化，单位为毫秒
 	};
 
+	// 自由摄像机位置控制器（仅位置控制）
+	class FreeCameraController {
+	public:
+		DirectX::XMFLOAT3 Position = { 0.0f, 0.0f, 0.0f }; // 位置
+		DirectX::XMFLOAT3 Rotation = { 0.0f, 0.0f, 0.0f }; // 旋转角度 (pitch, yaw, roll)
+		float MoveSpeed = 100.0f; // 移动速度 (单位/秒)
+
+		void Update(float deltaTime, const InputSystem& inputSystem);
+	};
+
     class InputSystem final :public ModuleBase {
 	private:
 		std::atomic<bool> IfCreated{};//跨线程，原子化，标记是否已经创建好检测线程	
@@ -40,6 +51,9 @@ namespace MulNX {
 		unsigned int CurrentTimeMs{};//线程内，非原子化，单位为毫秒
 		std::atomic<unsigned int> Threshold = 200;//跨线程，原子化，单位为毫秒
 		KeyState KeysState[256]{};//跨线程，内部有关跨线程的内容已经原子化
+
+		FreeCameraController FreeCamera; // 自由摄像机控制器
+		float LastUpdateTime = 0.0f; // 上次更新时间
 	public:
 		bool Init()override;
 		void ThreadMain()override;
@@ -50,6 +64,12 @@ namespace MulNX {
 		bool CheckWithPack(const KeyCheckPack& Pack);//读取并移除连击缓冲
 		unsigned char CheckComboClickUnremove(const unsigned char vkCode)const;//读取连击（非缓冲）
 		void ResetThreshold(const unsigned int Threshold);//重新设置阈值
+
+		// 自由摄像机相关方法
+		const FreeCameraController& GetFreeCamera() const { return FreeCamera; }
+		void SetFreeCameraPosition(const DirectX::XMFLOAT3& pos) { FreeCamera.Position = pos; }
+		void SetFreeCameraRotation(const DirectX::XMFLOAT3& rot) { FreeCamera.Rotation = rot; }
+		void SetFreeCameraMoveSpeed(float speed) { FreeCamera.MoveSpeed = speed; }
 	};
 }
 

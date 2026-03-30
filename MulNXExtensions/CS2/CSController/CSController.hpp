@@ -78,6 +78,11 @@ private:
     ControlView controlView{};
     ControlAdvancedView controlAdvancedView{};
 
+    // 自由摄像机控制
+    std::atomic<bool> EnableFreeCameraControl = false;
+    std::atomic<DirectX::XMFLOAT3> CurrentGamePosition;
+    std::atomic<DirectX::XMFLOAT3> CurrentGameAngles;
+
 
     // 逆向层关键接口
     void* Source2EngineToClient001 = nullptr;
