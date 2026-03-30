@@ -52,12 +52,7 @@ bool MulNX::InputSystem::Init() {
 
 void MulNX::InputSystem::ThreadMain() {
     while (this->MyThreadRunning) {
-        float currentTime = static_cast<float>(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - this->ClockEpoch).count()) / 1000.0f;
-        float deltaTime = currentTime - LastUpdateTime;
-        LastUpdateTime = currentTime;
-
         this->UpdateKeysState();
-        this->FreeCamera.Update(deltaTime, *this);
         std::this_thread::sleep_for(std::chrono::milliseconds(this->MyThreadDelta));
     }
     
@@ -138,16 +133,20 @@ void MulNX::InputSystem::ResetThreshold(const unsigned int Threshold) {
     this->Threshold = Threshold;
 }
 
-void MulNX::FreeCameraController::Update(float deltaTime, const InputSystem& inputSystem) {
+void MulNX::FreeCameraController::Update(InputSystem* inputSystem) {
+    float currentTime = static_cast<float>(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - inputSystem->ClockEpoch).count()) / 1000.0f;
+    float deltaTime = currentTime - inputSystem->LastUpdateTime;
+    inputSystem->LastUpdateTime = currentTime;
+
     // CS2 坐标轴：X前，Y左，Z上
     DirectX::XMFLOAT3 moveDir = { 0.0f, 0.0f, 0.0f };
 
-    if (inputSystem.IsKeyPressed('W')) moveDir.x += 1.0f;  // 前进
-    if (inputSystem.IsKeyPressed('S')) moveDir.x -= 1.0f;  // 后退
-    if (inputSystem.IsKeyPressed('A')) moveDir.y += 1.0f;  // 左移
-    if (inputSystem.IsKeyPressed('D')) moveDir.y -= 1.0f;  // 右移
-    if (inputSystem.IsKeyPressed('R')) moveDir.z += 1.0f;  // 上移
-    if (inputSystem.IsKeyPressed('V')) moveDir.z -= 1.0f;  // 下移
+    if (inputSystem->IsKeyPressed('W')) moveDir.x += 1.0f;  // 前进
+    if (inputSystem->IsKeyPressed('S')) moveDir.x -= 1.0f;  // 后退
+    if (inputSystem->IsKeyPressed('A')) moveDir.y += 1.0f;  // 左移
+    if (inputSystem->IsKeyPressed('D')) moveDir.y -= 1.0f;  // 右移
+    if (inputSystem->IsKeyPressed('R')) moveDir.z += 1.0f;  // 上移
+    if (inputSystem->IsKeyPressed('V')) moveDir.z -= 1.0f;  // 下移
 
     // 归一化移动方向
     float moveLength = sqrtf(moveDir.x * moveDir.x + moveDir.y * moveDir.y + moveDir.z * moveDir.z);

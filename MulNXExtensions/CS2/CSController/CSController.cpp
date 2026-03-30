@@ -12,41 +12,34 @@ void CSController::HandleOverrideView(CS2::CViewSetup* viewSetup) {
     this->controlView.currentView.WindowWidth.store(*viewSetup->pWidth(), std::memory_order_relaxed);
     this->controlView.currentView.WindowHeight.store(*viewSetup->pHeight(), std::memory_order_relaxed);
 
-    // 记录当前游戏位置和角度
-    DirectX::XMFLOAT3 gamePos = *viewSetup->pViewOrigin();
-    DirectX::XMFLOAT3 gameAngles = *viewSetup->pViewAngles();
-    this->CurrentGamePosition.store(gamePos, std::memory_order_release);
-    this->CurrentGameAngles.store(gameAngles, std::memory_order_release);
+    // 加载来自摄像机系统的View
+    auto view = this->controlView.ViewToGame.load(std::memory_order_acquire);
+    if (view) {
+        viewSetup->pViewOrigin()->x = view->OriginX;
+        viewSetup->pViewOrigin()->y = view->OriginY;
+        viewSetup->pViewOrigin()->z = view->OriginZ;
 
-    // 检查是否启用自由摄像机控制
-    if (this->EnableFreeCameraControl.load(std::memory_order_acquire)) {
-        // 从InputSystem获取位置并覆盖
-        auto* inputSys = this->Core->ModuleManager()->FindModule<MulNX::InputSystem>("InputSystem");
-        const auto& freeCam = inputSys->GetFreeCamera();
-        viewSetup->pViewOrigin()->x = freeCam.Position.x;
-        viewSetup->pViewOrigin()->y = freeCam.Position.y;
-        viewSetup->pViewOrigin()->z = freeCam.Position.z;
-    }
-    else {
-        // 加载来自摄像机系统的View
-        auto view = this->controlView.ViewToGame.load(std::memory_order_acquire);
-        if (view != nullptr) {
-            viewSetup->pViewOrigin()->x = view->OriginX;
-            viewSetup->pViewOrigin()->y = view->OriginY;
-            viewSetup->pViewOrigin()->z = view->OriginZ;
+        viewSetup->pViewAngles()->x = view->AnglesX;
+        viewSetup->pViewAngles()->y = view->AnglesY;
+        viewSetup->pViewAngles()->z = view->AnglesZ;
 
-            viewSetup->pViewAngles()->x = view->AnglesX;
-            viewSetup->pViewAngles()->y = view->AnglesY;
-            viewSetup->pViewAngles()->z = view->AnglesZ;
-
-            if (view->FOV > 0.01f) {
-                *viewSetup->pFov() = view->FOV;
-            }
+        if (view->FOV > 0.01f) {
+            *viewSetup->pFov() = view->FOV;
         }
     }
 
     // 执行roll覆盖
     viewSetup->pViewAngles()->z = this->controlView.InputRoll.load(std::memory_order_acquire);
+    // 如果启用自由摄像机控制，同步角度到InputSystem
+    if (this->EnableFreeCameraControl.load(std::memory_order_acquire)) {
+        auto* inputSys = this->pInputSystem;
+        auto& freeCam = inputSys->GetFreeCamera();
+        freeCam.Rotation = *viewSetup->pViewAngles();
+        freeCam.Update(inputSys);
+        viewSetup->pViewOrigin()->x = freeCam.Position.x;
+        viewSetup->pViewOrigin()->y = freeCam.Position.y;
+        viewSetup->pViewOrigin()->z = freeCam.Position.z;
+    }
 
     // 记录视角数据
     this->controlView.currentView.OriginX.store(viewSetup->pViewOrigin()->x, std::memory_order_release);
@@ -57,12 +50,7 @@ void CSController::HandleOverrideView(CS2::CViewSetup* viewSetup) {
     this->controlView.currentView.AnglesY.store(viewSetup->pViewAngles()->y, std::memory_order_release);
     this->controlView.currentView.AnglesZ.store(viewSetup->pViewAngles()->z, std::memory_order_release);
 
-    if (*viewSetup->pFov() < 0.01f) {
-        this->controlView.currentView.FOV.store(90.0f, std::memory_order_release);
-    }
-    else {
-        this->controlView.currentView.FOV.store(*viewSetup->pFov(), std::memory_order_release);
-    }
+    this->controlView.currentView.FOV.store(*viewSetup->pFov(), std::memory_order_release);
 
     if (!this->controlAdvancedView.Enable.load(std::memory_order_acquire))return;
 
@@ -223,25 +211,23 @@ bool CSController::UINodeFunc(MulNXUINode* node) {
         if (ImGui::Checkbox("启用自由摄像机位置控制", &currentEnable)) {
             if (currentEnable && !this->EnableFreeCameraControl.load(std::memory_order_acquire)) {
                 // 从未启用到启用：读取当前游戏位置和角度
-                DirectX::XMFLOAT3 gamePos = this->CurrentGamePosition.load(std::memory_order_acquire);
-                DirectX::XMFLOAT3 gameAngles = this->CurrentGameAngles.load(std::memory_order_acquire);
-                auto* inputSys = this->Core->ModuleManager()->FindModule<MulNX::InputSystem>("InputSystem");
-                inputSys->SetFreeCameraPosition(gamePos);
-                inputSys->SetFreeCameraRotation(gameAngles);
+                DirectX::XMFLOAT3 gamePos{ this->controlView.currentView.OriginX.load(std::memory_order_acquire),
+                    this->controlView.currentView.OriginY.load(std::memory_order_acquire),
+                    this->controlView.currentView.OriginZ.load(std::memory_order_acquire) };
+                this->pInputSystem->GetFreeCamera().Position = gamePos;
             }
             this->EnableFreeCameraControl.store(currentEnable, std::memory_order_release);
         }
 
         if (currentEnable) {
-            auto* inputSys = this->Core->ModuleManager()->FindModule<MulNX::InputSystem>("InputSystem");
-            const auto& freeCam = inputSys->GetFreeCamera();
+            auto& freeCam = this->pInputSystem->GetFreeCamera();
 
             ImGui::Text("当前位置: X=%.2f, Y=%.2f, Z=%.2f",
                 freeCam.Position.x, freeCam.Position.y, freeCam.Position.z);
 
             float speed = freeCam.MoveSpeed;
-            if (ImGui::SliderFloat("移动速度", &speed, 10.0f, 500.0f)) {
-                inputSys->SetFreeCameraMoveSpeed(speed);
+            if (ImGui::SliderFloat("移动速度", &speed, 10.0f, 1000.0f)) {
+                freeCam.MoveSpeed = speed;
             }
         }
     }
@@ -425,13 +411,6 @@ void CSController::ThreadMain() {
         }
         catch (const std::runtime_error& e) {
             this->ISys().LogWarning("在更新数据时捕获到异常：" + std::string(e.what()));
-        }
-
-        // 如果启用自由摄像机控制，同步角度到InputSystem
-        if (this->EnableFreeCameraControl.load(std::memory_order_acquire)) {
-            DirectX::XMFLOAT3 angles = this->CurrentGameAngles.load(std::memory_order_acquire);
-            auto* inputSys = this->Core->ModuleManager()->FindModule<MulNX::InputSystem>("InputSystem");
-            inputSys->SetFreeCameraRotation(angles);
         }
 
         std::this_thread::sleep_for(std::chrono::milliseconds(this->MyThreadDelta));

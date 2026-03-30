@@ -5,4 +5,3 @@ bin/**/*.pdb
 bin/**/*.exe
 bin/**/*.dll
 bin/**/*.ini
-bin/**/*.txt

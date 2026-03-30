@@ -1,0 +1,487 @@
+[成功][HookManager]初始化成功!
+[成功][ModuleManager]初始化成功!
+[成功][HookManager]核心系统组件初始化完成！
+[成功][IPCer]初始化成功!
+[提示][PathManager]检测到共享目录已创建：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\Saves
+[提示][PathManager]检测到共享目录已创建：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\Config
+[提示][PathManager]检测到共享目录已创建：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\Resource
+[提示][PathManager]检测到共享目录已创建：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\Log
+[成功][PathManager]初始化成功!
+[提示][MessageManager]申请了一个线程创建
+[成功][MessageManager]初始化成功!
+[成功][UISystem]成功订阅消息：UISystem/Start
+[成功][UISystem]成功订阅消息：UISystem/ModulePush
+[成功][UISystem]初始化成功!
+[成功][Debugger]成功订阅消息：Debugger/SetMaxInfoCount
+[成功][Debugger]成功订阅消息：Debugger/SaveToFile
+[提示][Debugger]发送了一个UI节点进入消息系统
+[成功][Debugger]初始化成功!
+[成功][HandleSystem]初始化成功!
+[提示][InputSystem]申请了一个线程创建
+[成功][InputSystem]初始化成功!
+[成功][GlobalVars]初始化成功!
+[成功][CSController]成功订阅消息：Core/ReHook
+[提示][CSController]发送了一个UI节点进入消息系统
+[提示][CSController]申请了一个线程创建
+[成功][CSController]初始化成功!
+[成功][WebSocketManager]成功订阅消息：WebSocketManager/Post
+[提示][WebSocketManager]申请了一个线程创建
+[成功][WebSocketManager]初始化成功!
+[成功][WorkspaceManager]初始化成功!
+[提示][ProjectManager]发送了一个UI节点进入消息系统
+[成功][ProjectManager]初始化成功!
+[提示][SolutionManager]发送了一个UI节点进入消息系统
+[成功][SolutionManager]初始化成功!
+[提示][ElementManager]发送了一个UI节点进入消息系统
+[成功][ElementManager]初始化成功!
+[提示][CameraSystem]发送了一个UI节点进入消息系统
+[成功][CameraSystem]初始化成功!
+[提示][MiniMap]发送了一个UI节点进入消息系统
+[成功][MiniMap]初始化成功!
+[成功][VirtualUser]成功订阅消息：Core/Tick60
+[成功][VirtualUser]成功订阅消息：CameraSystem/Play/Shutdown
+[成功][VirtualUser]成功订阅消息：Command/SpecPlayer
+[成功][VirtualUser]成功订阅消息：Game/NewRound
+[成功][VirtualUser]初始化成功!
+[成功][GameCfgManager]Cfg文件列表更新完成
+[提示][GameCfgManager]发送了一个UI节点进入消息系统
+[成功][GameCfgManager]初始化成功!
+[成功][DemoHelper]成功订阅消息：DemoHelper/MarkTime
+[成功][DemoHelper]成功订阅消息：DemoHelper/JumpTIme
+[提示][DemoHelper]发送了一个UI节点进入消息系统
+[成功][DemoHelper]初始化成功!
+[提示][GameSettingsManager]发送了一个UI节点进入消息系统
+[成功][GameSettingsManager]初始化成功!
+[提示][ConsoleManager]发送了一个UI节点进入消息系统
+[成功][ConsoleManager]初始化成功!
+[成功][MulNXController]成功订阅消息：ModuleManager/ModuleInfo/Response
+[提示][MulNXController]发送了一个UI节点进入消息系统
+[成功][MulNXController]初始化成功!
+[提示][ModuleManager]注意: AbstractLayer3D(3D抽象层)被绑定为CSController
+[成功][ModuleManager]成功订阅消息：ModuleManager/ModuleInfo/Request
+[成功][HookManager]注入成功！
+[提示][HookManager]各模块初始化完成！
+[警告][HookManager]您正在使用测试版本！！
+[提示][MessageManager]消息派发开始！
+[成功][WebSocketManager]正在监听端口：55202
+[成功][UISystem]接收到一个UI节点
+[成功][UISystem]接收到一个UI节点
+[成功][UISystem]接收到一个UI节点
+[成功][UISystem]接收到一个UI节点
+[成功][UISystem]接收到一个UI节点
+[成功][UISystem]接收到一个UI节点
+[成功][UISystem]接收到一个UI节点
+[成功][UISystem]接收到一个UI节点
+[成功][UISystem]接收到一个UI节点
+[成功][UISystem]接收到一个UI节点
+[成功][UISystem]接收到一个UI节点
+[成功][UISystem]接收到一个UI节点
+[成功][UISystem]接收到一个UI节点
+[成功][CSController]已完成Hook重载！
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[警告][CSController]在更新数据时捕获到异常：access error
+[提示][VirtualUser]接收到新回合信息
+[提示][ProjectManager]项目管理器正在处理消息！
+[警告][ProjectManager]无活跃项目，无法执行自动操作
+[提示][VirtualUser]接收到新回合信息
+[提示][ProjectManager]项目管理器正在处理消息！
+[警告][ProjectManager]无活跃项目，无法执行自动操作
+[提示][VirtualUser]接收到新回合信息
+[提示][ProjectManager]项目管理器正在处理消息！
+[警告][ProjectManager]无活跃项目，无法执行自动操作
+[提示][VirtualUser]接收到新回合信息
+[提示][ProjectManager]项目管理器正在处理消息！
+[警告][ProjectManager]无活跃项目，无法执行自动操作
+[警告][ElementManager]当前没有任何元素，跳过清空操作！
+[提示][SolutionManager]已关闭播放
+[警告][SolutionManager]当前没有任何解决方案，跳过清空操作！
+[成功][CameraSystem]成功设置工作区路径为：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace
+[提示][WorkspaceManager]尝试从文件加载工作区配置，文件路径：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace\WorkspaceConfig.yaml
+[成功][WorkspaceManager]成功从文件加载工作区配置！ 文件路径：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace\WorkspaceConfig.yaml
+[提示][ProjectManager]尝试从文件加载项目，文件路径：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace\1\1.yaml
+[成功][ProjectManager]成功从文件加载项目：1
+[提示][ProjectManager]尝试从文件加载项目，文件路径：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace\doftest\doftest.yaml
+[成功][ProjectManager]成功从文件加载项目：doftest
+[提示][ProjectManager]尝试从文件加载项目，文件路径：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace\Mtp\Mtp.yaml
+[成功][ProjectManager]成功从文件加载项目：Mtp
+[成功][WorkspaceManager]成功保存工作区配置文件到文件！ 文件路径：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace\WorkspaceConfig.yaml
+[提示][VirtualUser]已触发自动保存（频率：每分钟）
+[提示][SolutionManager]已关闭播放
+[警告][SolutionManager]当前没有任何解决方案，跳过清空操作！
+[警告][ElementManager]当前没有任何元素，跳过清空操作！
+[成功][ProjectManager]成功设置项目路径为：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace\Mtp
+[成功][SolutionManager]成功设置解决方案路径为：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace\Mtp\Solutions
+[成功][ElementManager]成功设置元素路径为：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace\Mtp\Elements
+[提示][ElementManager]尝试从磁盘文件加载元素，文件路径：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace\Mtp\Elements\15+.yaml
+[提示][ElementManager]尝试进行分发，元素类型为 FreeCameraPath ，文件路径：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace\Mtp\Elements\15+.yaml
+[成功][ElementManager]成功从YAML文件加载自由摄像机轨道信息！ 自由摄像机轨道 名：15+
+[提示][ElementManager]尝试从磁盘文件加载元素，文件路径：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace\Mtp\Elements\32.yaml
+[提示][ElementManager]尝试进行分发，元素类型为 FreeCameraPath ，文件路径：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace\Mtp\Elements\32.yaml
+[成功][ElementManager]成功从YAML文件加载自由摄像机轨道信息！ 自由摄像机轨道 名：32
+[提示][ElementManager]尝试从磁盘文件加载元素，文件路径：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace\Mtp\Elements\666.yaml
+[提示][ElementManager]尝试进行分发，元素类型为 FreeCameraPath ，文件路径：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace\Mtp\Elements\666.yaml
+[成功][ElementManager]成功从YAML文件加载自由摄像机轨道信息！ 自由摄像机轨道 名：666
+[提示][ElementManager]尝试从磁盘文件加载元素，文件路径：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace\Mtp\Elements\CT_Begin_1.yaml
+[提示][ElementManager]尝试进行分发，元素类型为 FreeCameraPath ，文件路径：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace\Mtp\Elements\CT_Begin_1.yaml
+[成功][ElementManager]成功从YAML文件加载自由摄像机轨道信息！ 自由摄像机轨道 名：CT_Begin_1
+[提示][ElementManager]尝试从磁盘文件加载元素，文件路径：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace\Mtp\Elements\CT_Begin_2.yaml
+[提示][ElementManager]尝试进行分发，元素类型为 FreeCameraPath ，文件路径：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace\Mtp\Elements\CT_Begin_2.yaml
+[成功][ElementManager]成功从YAML文件加载自由摄像机轨道信息！ 自由摄像机轨道 名：CT_Begin_2
+[提示][ElementManager]尝试从磁盘文件加载元素，文件路径：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace\Mtp\Elements\fovtest.yaml
+[提示][ElementManager]尝试进行分发，元素类型为 FreeCameraPath ，文件路径：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace\Mtp\Elements\fovtest.yaml
+[成功][ElementManager]成功从YAML文件加载自由摄像机轨道信息！ 自由摄像机轨道 名：fovtest
+[提示][ElementManager]尝试从磁盘文件加载元素，文件路径：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace\Mtp\Elements\kadun.yaml
+[提示][ElementManager]尝试进行分发，元素类型为 FreeCameraPath ，文件路径：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace\Mtp\Elements\kadun.yaml
+[成功][ElementManager]成功从YAML文件加载自由摄像机轨道信息！ 自由摄像机轨道 名：kadun
+[提示][ElementManager]尝试从磁盘文件加载元素，文件路径：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace\Mtp\Elements\Mte.yaml
+[提示][ElementManager]尝试进行分发，元素类型为 FreeCameraPath ，文件路径：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace\Mtp\Elements\Mte.yaml
+[成功][ElementManager]成功从YAML文件加载自由摄像机轨道信息！ 自由摄像机轨道 名：Mte
+[提示][ElementManager]尝试从磁盘文件加载元素，文件路径：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace\Mtp\Elements\nnn.yaml
+[提示][ElementManager]尝试进行分发，元素类型为 FreeCameraPath ，文件路径：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace\Mtp\Elements\nnn.yaml
+[成功][ElementManager]成功从YAML文件加载自由摄像机轨道信息！ 自由摄像机轨道 名：nnn
+[提示][ElementManager]尝试从磁盘文件加载元素，文件路径：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace\Mtp\Elements\roll.yaml
+[提示][ElementManager]尝试进行分发，元素类型为 FreeCameraPath ，文件路径：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace\Mtp\Elements\roll.yaml
+[成功][ElementManager]成功从YAML文件加载自由摄像机轨道信息！ 自由摄像机轨道 名：roll
+[提示][ElementManager]尝试从磁盘文件加载元素，文件路径：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace\Mtp\Elements\ttt.yaml
+[提示][ElementManager]尝试进行分发，元素类型为 FreeCameraPath ，文件路径：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace\Mtp\Elements\ttt.yaml
+[成功][ElementManager]成功从YAML文件加载自由摄像机轨道信息！ 自由摄像机轨道 名：ttt
+[提示][ElementManager]尝试从磁盘文件加载元素，文件路径：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace\Mtp\Elements\T_Begin_1.yaml
+[提示][ElementManager]尝试进行分发，元素类型为 FreeCameraPath ，文件路径：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace\Mtp\Elements\T_Begin_1.yaml
+[成功][ElementManager]成功从YAML文件加载自由摄像机轨道信息！ 自由摄像机轨道 名：T_Begin_1
+[提示][ElementManager]尝试从磁盘文件加载元素，文件路径：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace\Mtp\Elements\xyz.yaml
+[提示][ElementManager]尝试进行分发，元素类型为 FreeCameraPath ，文件路径：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace\Mtp\Elements\xyz.yaml
+[成功][ElementManager]成功从YAML文件加载自由摄像机轨道信息！ 自由摄像机轨道 名：xyz
+[提示][SolutionManager]尝试从yaml文件加载解决方案，文件路径：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace\Mtp\Solutions\begin.yaml
+[成功][SolutionManager]解决方案加载成功
+[提示][SolutionManager]+------------------------------------------------+
+[提示][SolutionManager]尝试从yaml文件加载解决方案，文件路径：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace\Mtp\Solutions\Mts.yaml
+[成功][SolutionManager]解决方案加载成功
+[提示][SolutionManager]+------------------------------------------------+
+[提示][SolutionManager]尝试从yaml文件加载解决方案，文件路径：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace\Mtp\Solutions\test.yaml
+[成功][SolutionManager]解决方案加载成功
+[提示][SolutionManager]+------------------------------------------------+
+[成功][ProjectManager]已切换至项目Mtp
+[成功][ProjectManager]尝试加载元素总数：13
+[成功][ProjectManager]尝试加载解决方案总数：3
+[成功][ProjectManager]成功加载元素总数：13
+[成功][ProjectManager]成功加载解决方案总数：3
+[成功][WorkspaceManager]成功保存工作区配置文件到文件！ 文件路径：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace\WorkspaceConfig.yaml
+[成功][ElementManager]成功保存所有元素到磁盘！
+[成功][SolutionManager]成功保存所有解决方案到文件！
+[成功][ProjectManager]保存成功  项目名：Mtp
+[成功][WorkspaceManager]工作区保存成功
+[提示][VirtualUser]已触发自动保存（频率：每分钟）
+[成功][ElementManager]成功保存所有元素到磁盘！
+[成功][SolutionManager]成功保存所有解决方案到文件！
+[成功][ProjectManager]保存成功  项目名：Mtp
+[提示][SolutionManager]已关闭播放
+[成功][SolutionManager]成功删除所有解决方案！
+[提示][ElementManager]已关闭预览
+[成功][ElementManager]成功清空所有元素！
+[成功][ProjectManager]成功设置项目路径为：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace\Mtp
+[成功][SolutionManager]成功设置解决方案路径为：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace\Mtp\Solutions
+[成功][ElementManager]成功设置元素路径为：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace\Mtp\Elements
+[提示][ElementManager]尝试从磁盘文件加载元素，文件路径：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace\Mtp\Elements\15+.yaml
+[提示][ElementManager]尝试进行分发，元素类型为 FreeCameraPath ，文件路径：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace\Mtp\Elements\15+.yaml
+[成功][ElementManager]成功从YAML文件加载自由摄像机轨道信息！ 自由摄像机轨道 名：15+
+[提示][ElementManager]尝试从磁盘文件加载元素，文件路径：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace\Mtp\Elements\32.yaml
+[提示][ElementManager]尝试进行分发，元素类型为 FreeCameraPath ，文件路径：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace\Mtp\Elements\32.yaml
+[成功][ElementManager]成功从YAML文件加载自由摄像机轨道信息！ 自由摄像机轨道 名：32
+[提示][ElementManager]尝试从磁盘文件加载元素，文件路径：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace\Mtp\Elements\666.yaml
+[提示][ElementManager]尝试进行分发，元素类型为 FreeCameraPath ，文件路径：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace\Mtp\Elements\666.yaml
+[成功][ElementManager]成功从YAML文件加载自由摄像机轨道信息！ 自由摄像机轨道 名：666
+[提示][ElementManager]尝试从磁盘文件加载元素，文件路径：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace\Mtp\Elements\CT_Begin_1.yaml
+[提示][ElementManager]尝试进行分发，元素类型为 FreeCameraPath ，文件路径：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace\Mtp\Elements\CT_Begin_1.yaml
+[成功][ElementManager]成功从YAML文件加载自由摄像机轨道信息！ 自由摄像机轨道 名：CT_Begin_1
+[提示][ElementManager]尝试从磁盘文件加载元素，文件路径：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace\Mtp\Elements\CT_Begin_2.yaml
+[提示][ElementManager]尝试进行分发，元素类型为 FreeCameraPath ，文件路径：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace\Mtp\Elements\CT_Begin_2.yaml
+[成功][ElementManager]成功从YAML文件加载自由摄像机轨道信息！ 自由摄像机轨道 名：CT_Begin_2
+[提示][ElementManager]尝试从磁盘文件加载元素，文件路径：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace\Mtp\Elements\fovtest.yaml
+[提示][ElementManager]尝试进行分发，元素类型为 FreeCameraPath ，文件路径：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace\Mtp\Elements\fovtest.yaml
+[成功][ElementManager]成功从YAML文件加载自由摄像机轨道信息！ 自由摄像机轨道 名：fovtest
+[提示][ElementManager]尝试从磁盘文件加载元素，文件路径：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace\Mtp\Elements\kadun.yaml
+[提示][ElementManager]尝试进行分发，元素类型为 FreeCameraPath ，文件路径：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace\Mtp\Elements\kadun.yaml
+[成功][ElementManager]成功从YAML文件加载自由摄像机轨道信息！ 自由摄像机轨道 名：kadun
+[提示][ElementManager]尝试从磁盘文件加载元素，文件路径：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace\Mtp\Elements\Mte.yaml
+[提示][ElementManager]尝试进行分发，元素类型为 FreeCameraPath ，文件路径：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace\Mtp\Elements\Mte.yaml
+[成功][ElementManager]成功从YAML文件加载自由摄像机轨道信息！ 自由摄像机轨道 名：Mte
+[提示][ElementManager]尝试从磁盘文件加载元素，文件路径：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace\Mtp\Elements\nnn.yaml
+[提示][ElementManager]尝试进行分发，元素类型为 FreeCameraPath ，文件路径：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace\Mtp\Elements\nnn.yaml
+[成功][ElementManager]成功从YAML文件加载自由摄像机轨道信息！ 自由摄像机轨道 名：nnn
+[提示][ElementManager]尝试从磁盘文件加载元素，文件路径：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace\Mtp\Elements\roll.yaml
+[提示][ElementManager]尝试进行分发，元素类型为 FreeCameraPath ，文件路径：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace\Mtp\Elements\roll.yaml
+[成功][ElementManager]成功从YAML文件加载自由摄像机轨道信息！ 自由摄像机轨道 名：roll
+[提示][ElementManager]尝试从磁盘文件加载元素，文件路径：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace\Mtp\Elements\ttt.yaml
+[提示][ElementManager]尝试进行分发，元素类型为 FreeCameraPath ，文件路径：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace\Mtp\Elements\ttt.yaml
+[成功][ElementManager]成功从YAML文件加载自由摄像机轨道信息！ 自由摄像机轨道 名：ttt
+[提示][ElementManager]尝试从磁盘文件加载元素，文件路径：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace\Mtp\Elements\T_Begin_1.yaml
+[提示][ElementManager]尝试进行分发，元素类型为 FreeCameraPath ，文件路径：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace\Mtp\Elements\T_Begin_1.yaml
+[成功][ElementManager]成功从YAML文件加载自由摄像机轨道信息！ 自由摄像机轨道 名：T_Begin_1
+[提示][ElementManager]尝试从磁盘文件加载元素，文件路径：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace\Mtp\Elements\xyz.yaml
+[提示][ElementManager]尝试进行分发，元素类型为 FreeCameraPath ，文件路径：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace\Mtp\Elements\xyz.yaml
+[成功][ElementManager]成功从YAML文件加载自由摄像机轨道信息！ 自由摄像机轨道 名：xyz
+[提示][SolutionManager]尝试从yaml文件加载解决方案，文件路径：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace\Mtp\Solutions\begin.yaml
+[成功][SolutionManager]解决方案加载成功
+[提示][SolutionManager]+------------------------------------------------+
+[提示][SolutionManager]尝试从yaml文件加载解决方案，文件路径：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace\Mtp\Solutions\Mts.yaml
+[成功][SolutionManager]解决方案加载成功
+[提示][SolutionManager]+------------------------------------------------+
+[提示][SolutionManager]尝试从yaml文件加载解决方案，文件路径：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace\Mtp\Solutions\test.yaml
+[成功][SolutionManager]解决方案加载成功
+[提示][SolutionManager]+------------------------------------------------+
+[成功][ProjectManager]已切换至项目Mtp
+[成功][ProjectManager]尝试加载元素总数：13
+[成功][ProjectManager]尝试加载解决方案总数：3
+[成功][ProjectManager]成功加载元素总数：13
+[成功][ProjectManager]成功加载解决方案总数：3
+[成功][ElementManager]成功保存所有元素到磁盘！
+[成功][SolutionManager]保存成功  解决方案名：begin  元素个数：3
+[成功][SolutionManager]保存成功  解决方案名：Mts  元素个数：3
+[成功][SolutionManager]保存成功  解决方案名：test  元素个数：2
+[成功][SolutionManager]成功保存所有解决方案到文件！
+[成功][ProjectManager]保存成功  项目名：Mtp
+[提示][SolutionManager]已关闭播放
+[成功][SolutionManager]成功删除所有解决方案！
+[提示][ElementManager]已关闭预览
+[成功][ElementManager]成功清空所有元素！
+[成功][ProjectManager]成功设置项目路径为：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace\Mtp
+[成功][SolutionManager]成功设置解决方案路径为：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace\Mtp\Solutions
+[成功][ElementManager]成功设置元素路径为：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace\Mtp\Elements
+[提示][ElementManager]尝试从磁盘文件加载元素，文件路径：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace\Mtp\Elements\15+.yaml
+[提示][ElementManager]尝试进行分发，元素类型为 FreeCameraPath ，文件路径：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace\Mtp\Elements\15+.yaml
+[成功][ElementManager]成功从YAML文件加载自由摄像机轨道信息！ 自由摄像机轨道 名：15+
+[提示][ElementManager]尝试从磁盘文件加载元素，文件路径：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace\Mtp\Elements\32.yaml
+[提示][ElementManager]尝试进行分发，元素类型为 FreeCameraPath ，文件路径：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace\Mtp\Elements\32.yaml
+[成功][ElementManager]成功从YAML文件加载自由摄像机轨道信息！ 自由摄像机轨道 名：32
+[提示][ElementManager]尝试从磁盘文件加载元素，文件路径：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace\Mtp\Elements\666.yaml
+[提示][ElementManager]尝试进行分发，元素类型为 FreeCameraPath ，文件路径：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace\Mtp\Elements\666.yaml
+[成功][ElementManager]成功从YAML文件加载自由摄像机轨道信息！ 自由摄像机轨道 名：666
+[提示][ElementManager]尝试从磁盘文件加载元素，文件路径：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace\Mtp\Elements\CT_Begin_1.yaml
+[提示][ElementManager]尝试进行分发，元素类型为 FreeCameraPath ，文件路径：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace\Mtp\Elements\CT_Begin_1.yaml
+[成功][ElementManager]成功从YAML文件加载自由摄像机轨道信息！ 自由摄像机轨道 名：CT_Begin_1
+[提示][ElementManager]尝试从磁盘文件加载元素，文件路径：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace\Mtp\Elements\CT_Begin_2.yaml
+[提示][ElementManager]尝试进行分发，元素类型为 FreeCameraPath ，文件路径：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace\Mtp\Elements\CT_Begin_2.yaml
+[成功][ElementManager]成功从YAML文件加载自由摄像机轨道信息！ 自由摄像机轨道 名：CT_Begin_2
+[提示][ElementManager]尝试从磁盘文件加载元素，文件路径：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace\Mtp\Elements\fovtest.yaml
+[提示][ElementManager]尝试进行分发，元素类型为 FreeCameraPath ，文件路径：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace\Mtp\Elements\fovtest.yaml
+[成功][ElementManager]成功从YAML文件加载自由摄像机轨道信息！ 自由摄像机轨道 名：fovtest
+[提示][ElementManager]尝试从磁盘文件加载元素，文件路径：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace\Mtp\Elements\kadun.yaml
+[提示][ElementManager]尝试进行分发，元素类型为 FreeCameraPath ，文件路径：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace\Mtp\Elements\kadun.yaml
+[成功][ElementManager]成功从YAML文件加载自由摄像机轨道信息！ 自由摄像机轨道 名：kadun
+[提示][ElementManager]尝试从磁盘文件加载元素，文件路径：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace\Mtp\Elements\Mte.yaml
+[提示][ElementManager]尝试进行分发，元素类型为 FreeCameraPath ，文件路径：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace\Mtp\Elements\Mte.yaml
+[成功][ElementManager]成功从YAML文件加载自由摄像机轨道信息！ 自由摄像机轨道 名：Mte
+[提示][ElementManager]尝试从磁盘文件加载元素，文件路径：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace\Mtp\Elements\nnn.yaml
+[提示][ElementManager]尝试进行分发，元素类型为 FreeCameraPath ，文件路径：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace\Mtp\Elements\nnn.yaml
+[成功][ElementManager]成功从YAML文件加载自由摄像机轨道信息！ 自由摄像机轨道 名：nnn
+[提示][ElementManager]尝试从磁盘文件加载元素，文件路径：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace\Mtp\Elements\roll.yaml
+[提示][ElementManager]尝试进行分发，元素类型为 FreeCameraPath ，文件路径：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace\Mtp\Elements\roll.yaml
+[成功][ElementManager]成功从YAML文件加载自由摄像机轨道信息！ 自由摄像机轨道 名：roll
+[提示][ElementManager]尝试从磁盘文件加载元素，文件路径：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace\Mtp\Elements\ttt.yaml
+[提示][ElementManager]尝试进行分发，元素类型为 FreeCameraPath ，文件路径：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace\Mtp\Elements\ttt.yaml
+[成功][ElementManager]成功从YAML文件加载自由摄像机轨道信息！ 自由摄像机轨道 名：ttt
+[提示][ElementManager]尝试从磁盘文件加载元素，文件路径：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace\Mtp\Elements\T_Begin_1.yaml
+[提示][ElementManager]尝试进行分发，元素类型为 FreeCameraPath ，文件路径：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace\Mtp\Elements\T_Begin_1.yaml
+[成功][ElementManager]成功从YAML文件加载自由摄像机轨道信息！ 自由摄像机轨道 名：T_Begin_1
+[提示][ElementManager]尝试从磁盘文件加载元素，文件路径：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace\Mtp\Elements\xyz.yaml
+[提示][ElementManager]尝试进行分发，元素类型为 FreeCameraPath ，文件路径：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace\Mtp\Elements\xyz.yaml
+[成功][ElementManager]成功从YAML文件加载自由摄像机轨道信息！ 自由摄像机轨道 名：xyz
+[提示][SolutionManager]尝试从yaml文件加载解决方案，文件路径：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace\Mtp\Solutions\begin.yaml
+[成功][SolutionManager]解决方案加载成功
+[提示][SolutionManager]+------------------------------------------------+
+[提示][SolutionManager]尝试从yaml文件加载解决方案，文件路径：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace\Mtp\Solutions\Mts.yaml
+[成功][SolutionManager]解决方案加载成功
+[提示][SolutionManager]+------------------------------------------------+
+[提示][SolutionManager]尝试从yaml文件加载解决方案，文件路径：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace\Mtp\Solutions\test.yaml
+[成功][SolutionManager]解决方案加载成功
+[提示][SolutionManager]+------------------------------------------------+
+[成功][ProjectManager]已切换至项目Mtp
+[成功][ProjectManager]尝试加载元素总数：13
+[成功][ProjectManager]尝试加载解决方案总数：3
+[成功][ProjectManager]成功加载元素总数：13
+[成功][ProjectManager]成功加载解决方案总数：3
+[提示][SolutionManager]偏移时间轴播放，偏移时间设置为：1266.375000
+[提示][SolutionManager]已经切换至解决方案：begin
+[提示][SolutionManager]已开启播放
+[警告][CameraSystem]ShutDown被调用！
+[提示][ElementManager]已关闭预览
+[提示][SolutionManager]已关闭播放
+[提示][VirtualUser]接收到新回合信息
+[提示][ProjectManager]项目管理器正在处理消息！
+[提示][SolutionManager]偏移时间轴播放，偏移时间设置为：1302.015625
+[提示][SolutionManager]已经切换至解决方案：begin
+[提示][SolutionManager]已开启播放
+[警告][CameraSystem]ShutDown被调用！
+[提示][ElementManager]已关闭预览
+[提示][SolutionManager]已关闭播放
+[成功][WorkspaceManager]成功保存工作区配置文件到文件！ 文件路径：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace\WorkspaceConfig.yaml
+[成功][ElementManager]成功保存所有元素到磁盘！
+[成功][SolutionManager]保存成功  解决方案名：begin  元素个数：3
+[成功][SolutionManager]保存成功  解决方案名：Mts  元素个数：3
+[成功][SolutionManager]保存成功  解决方案名：test  元素个数：2
+[成功][SolutionManager]成功保存所有解决方案到文件！
+[成功][ProjectManager]保存成功  项目名：Mtp
+[成功][WorkspaceManager]工作区保存成功
+[提示][VirtualUser]已触发自动保存（频率：每分钟）

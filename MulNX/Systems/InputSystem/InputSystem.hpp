@@ -25,7 +25,6 @@ namespace MulNX {
 
 	class KeyState {
 	public:
-		//在KeyTracker用private创建KeyState的情况下，部分非原子化的变量没有合法访问的接口
 		std::atomic<bool> Current{};//跨线程，原子化
 		bool Previous{};//线程内，非原子化
 		std::atomic<unsigned char> ComboClick{};//跨线程，原子化 不认为连击能超过127
@@ -40,11 +39,12 @@ namespace MulNX {
 		DirectX::XMFLOAT3 Rotation = { 0.0f, 0.0f, 0.0f }; // 旋转角度 (pitch, yaw, roll)
 		float MoveSpeed = 100.0f; // 移动速度 (单位/秒)
 
-		void Update(float deltaTime, const InputSystem& inputSystem);
+		void Update(InputSystem* inputSystem);
 	};
 
     class InputSystem final :public ModuleBase {
-	private:
+        friend class FreeCameraController;
+    private:
 		std::atomic<bool> IfCreated{};//跨线程，原子化，标记是否已经创建好检测线程	
 
 		const std::chrono::steady_clock::time_point ClockEpoch = std::chrono::steady_clock::now();//常量，只读，不需要原子化
@@ -66,10 +66,7 @@ namespace MulNX {
 		void ResetThreshold(const unsigned int Threshold);//重新设置阈值
 
 		// 自由摄像机相关方法
-		const FreeCameraController& GetFreeCamera() const { return FreeCamera; }
-		void SetFreeCameraPosition(const DirectX::XMFLOAT3& pos) { FreeCamera.Position = pos; }
-		void SetFreeCameraRotation(const DirectX::XMFLOAT3& rot) { FreeCamera.Rotation = rot; }
-		void SetFreeCameraMoveSpeed(float speed) { FreeCamera.MoveSpeed = speed; }
+		FreeCameraController& GetFreeCamera() { return FreeCamera; }
 	};
 }
 
