@@ -4,6 +4,7 @@
 #include "DOF/DOF.hpp"
 #include "Translate/Translate.hpp"
 
+#include <atomic>
 namespace MulNX {
     namespace Math {
         // 包含游戏提取视角信息
@@ -17,6 +18,24 @@ namespace MulNX {
             DirectX::XMVECTOR ToPositionAndFOV();
             DirectX::XMVECTOR ToRotationQuat();
             DirectX::XMVECTOR ToDOFPack();
+        };
+
+        class ViewBuffer {
+            MulNX::Math::View view;
+            bool initialized = false;
+        public:
+            // 平滑系数
+            std::atomic<float> SMOOTH_FACTOR{ 0.2f };
+            void Push(MulNX::Math::View newView);
+            MulNX::Math::View& Get() { return this->view; }
+        };
+
+        // 包含三个点，用于构建坐标系
+        class Point3 {
+        public:
+            DirectX::XMFLOAT3 origin;
+            DirectX::XMFLOAT3 forward;
+            DirectX::XMFLOAT3 up;
         };
 
         // 帧，包含渲染一帧的所有预备前置条件

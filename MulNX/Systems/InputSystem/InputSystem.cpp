@@ -167,14 +167,14 @@ void MulNX::FreeCameraController::Update(InputSystem* inputSystem) {
     DirectX::XMVECTOR quatRot = DirectX::XMQuaternionMultiply(quatRoll, quatTemp);
 
     // 从四元数提取三个方向向量
-    DirectX::XMFLOAT3 forward, right, up;
+    DirectX::XMFLOAT3 forward, left, up;
     DirectX::XMStoreFloat3(&forward, DirectX::XMVector3Rotate(DirectX::XMVectorSet(1.0f, 0.0f, 0.0f, 0.0f), quatRot));
-    DirectX::XMStoreFloat3(&right, DirectX::XMVector3Rotate(DirectX::XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f), quatRot));
+    // 基向量 (0,1,0) 在本坐标系中表示向左，因此旋转后得到的是 left 向量
+    DirectX::XMStoreFloat3(&left, DirectX::XMVector3Rotate(DirectX::XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f), quatRot));
     DirectX::XMStoreFloat3(&up, DirectX::XMVector3Rotate(DirectX::XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f), quatRot));
 
-    // 应用移动：前/后（moveDir.x）、左/右（moveDir.y，右为正）、上/下（moveDir.z）
-    // 注意：right 向量指向右，所以右移直接用 right * moveDir.y（正值为右）
-    Position.x += (forward.x * moveDir.x + right.x * moveDir.y + up.x * moveDir.z) * MoveSpeed * deltaTime;
-    Position.y += (forward.y * moveDir.x + right.y * moveDir.y + up.y * moveDir.z) * MoveSpeed * deltaTime;
-    Position.z += (forward.z * moveDir.x + right.z * moveDir.y + up.z * moveDir.z) * MoveSpeed * deltaTime;
+    // 应用移动：前/后（moveDir.x）、左/右（moveDir.y，正值为左）、上/下（moveDir.z）
+    Position.x += (forward.x * moveDir.x + left.x * moveDir.y + up.x * moveDir.z) * MoveSpeed * deltaTime;
+    Position.y += (forward.y * moveDir.x + left.y * moveDir.y + up.y * moveDir.z) * MoveSpeed * deltaTime;
+    Position.z += (forward.z * moveDir.x + left.z * moveDir.y + up.z * moveDir.z) * MoveSpeed * deltaTime;
 }

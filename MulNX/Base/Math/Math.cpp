@@ -58,6 +58,37 @@ DirectX::XMVECTOR MulNX::Math::View::ToDOFPack() {
     );
 }
 
+void MulNX::Math::ViewBuffer::Push(MulNX::Math::View newView) {
+    float factor = this->SMOOTH_FACTOR.load();
+
+    // 位置指数平滑
+    if (factor > 0.99f) {
+        this->view.position = newView.position;
+    }
+    else {
+        this->view.position.x += (newView.position.x - this->view.position.x) * factor;
+        this->view.position.y += (newView.position.y - this->view.position.y) * factor;
+        this->view.position.z += (newView.position.z - this->view.position.z) * factor;
+    }
+
+    // 角度指数平滑（处理环绕）
+    auto angleDiff = [](float target, float current) -> float {
+        float diff = target - current;
+        if (diff > 180.0f) diff -= 360.0f;
+        if (diff < -180.0f) diff += 360.0f;
+        return diff;
+        };
+
+    if (factor > 0.99f) {
+        this->view.rotation = newView.rotation;
+    }
+    else {
+        this->view.rotation.x += angleDiff(newView.rotation.x, this->view.rotation.x) * factor;
+        this->view.rotation.y += angleDiff(newView.rotation.y, this->view.rotation.y) * factor;
+        this->view.rotation.z += angleDiff(newView.rotation.z, this->view.rotation.z) * factor;
+    }
+}
+
 std::string MulNX::Math::CameraKeyframe::GetMsg()const {
     DirectX::XMFLOAT4 PositionAndFOV = this->GetPositionAndFOV();
     DirectX::XMFLOAT3 Euler = this->GetRotationEuler();

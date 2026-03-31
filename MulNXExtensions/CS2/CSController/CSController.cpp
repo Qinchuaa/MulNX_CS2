@@ -7,6 +7,7 @@
 #include <MulNXThirdParty/All_cs2_dumper.hpp>
 #include <MulNXThirdParty/All_MinHook.hpp>
 #include <MulNX/Systems/InputSystem/InputSystem.hpp>
+#include <MulNX/Base/Math/Translate/Translate.hpp>
 
 void CSController::HandleOverrideView(CS2::CViewSetup* viewSetup) {
     this->controlView.currentView.WindowWidth.store(*viewSetup->pWidth(), std::memory_order_relaxed);
@@ -57,175 +58,177 @@ void CSController::HandleOverrideView(CS2::CViewSetup* viewSetup) {
     // 通过时间桥判断是否需要更新视角，防止抖动
     static auto lastTime = this->AL3D->Time()->GetReal();
     auto currentTime = this->AL3D->Time()->GetReal();
-    if (currentTime > lastTime||lastTime - currentTime > 0.015f) {
+    if (currentTime > lastTime || lastTime - currentTime > 0.015f|| this->controlAdvancedView.AlwaysCaulate.load(std::memory_order_acquire)) {
         auto result = this->HandleSelfViewUpdate();
-        if (result != 0) {
-            this->ISys().LogWarning("HandleSelfViewUpdate returned error code: " + std::to_string(result));
+        if (result.has_value()) {
+            auto newView = result.value();
+            this->viewBuffer.Push(newView);
         }
         else {
-            // 输出平滑后的值
-            *viewSetup->pViewOrigin() = this->controlAdvancedView.smoothCameraPos;
-            *viewSetup->pViewAngles() = this->controlAdvancedView.smoothCameraAngle;
+            this->ISys().LogWarning(std::format("HandleSelfViewUpdate failed with code: 0x{:X}", result.error()));
         }
         lastTime = currentTime;
     }
+    if (this->controlAdvancedView.OverrideSelfView.load(std::memory_order_acquire)) {
+        // 输出平滑后的值
+        *viewSetup->pViewOrigin() = this->viewBuffer.Get().position;
+        *viewSetup->pViewAngles() = this->viewBuffer.Get().rotation;
+    }
 }
 
-int CSController::HandleSelfViewUpdate() {
+CS2::C_CSPlayerPawn* CSController::GetObserverTargetPawn() {
     try {
-        // ----- 获取目标实体 -----
         auto* localController = this->Modules.client.dwLocalPlayerController();
-        if (!localController) return 1;
+        if (!localController) return nullptr;
         auto hLocalPawn = MulNX::MRead(localController->hPawn());
         auto* localPawn = this->Modules.client.GetBaseEntityFromHandle(hLocalPawn)->As<CS2::C_CSPlayerPawn>();
-        if (!localPawn) return 2;
+        if (!localPawn) return nullptr;
+
         auto hObserverTarget = localPawn->GetHandleObserverTarget();
         auto* target = this->Modules.client.GetBaseEntityFromHandle(hObserverTarget)->As<CS2::C_CSPlayerPawn>();
-        if (!target) return 3;
+        return target;
+    }
+    catch (const std::exception& e) {
+        this->ISys().LogWarning(std::format("GetObserverTargetPawn exception: {}", e.what()));
+        return nullptr;
+    }
+}
 
-        // ----- 获取武器 -----
-        auto hActiveWeapon = target->GetHandleActiveWeapon();
-        auto* pWeapon = this->Modules.client.GetBaseEntityFromHandle(hActiveWeapon)->As<CS2::C_BasePlayerWeapon>();
-        if (!pWeapon) return 4;
+std::expected<MulNX::Math::Point3, int> CSController::GetPoint3() {
+    try {
+        auto* target = this->GetObserverTargetPawn();
+        if (!target) return std::unexpected(3);
 
-        // 获取三个骨骼的世界坐标
-        DirectX::XMFLOAT3 bone1 = pWeapon->GetBonePos(this->controlAdvancedView.boneIndex1.load());
-        DirectX::XMFLOAT3 bone2 = pWeapon->GetBonePos(this->controlAdvancedView.boneIndex2.load());
-        DirectX::XMFLOAT3 bone3 = pWeapon->GetBonePos(this->controlAdvancedView.boneIndex3.load());
+        // 根据模式选择骨骼来源（武器或人体），二选一（不回退）
+        bool useBody = this->controlAdvancedView.UseBodyBones.load(std::memory_order_acquire);
+        MulNX::Math::Point3 point3{};
 
-        // 计算前向向量（从 bone1 指向 bone2）
-        DirectX::XMFLOAT3 forwardDir = { bone2.x - bone1.x, bone2.y - bone1.y, bone2.z - bone1.z };
-        float len = sqrtf(forwardDir.x * forwardDir.x + forwardDir.y * forwardDir.y + forwardDir.z * forwardDir.z);
-        if (len < 0.0001f) return 5;
-        forwardDir.x /= len; forwardDir.y /= len; forwardDir.z /= len;
+        if (useBody) {
+            // 从人体读取骨骼
+            point3.origin = target->GetBonePos(this->controlAdvancedView.boneIndex1.load());
+            point3.forward = target->GetBonePos(this->controlAdvancedView.boneIndex2.load());
+            point3.up = target->GetBonePos(this->controlAdvancedView.boneIndex3.load());
+        }
+        else {
+            // 从武器读取骨骼
+            auto hActiveWeapon = target->GetHandleActiveWeapon();
+            auto* pWeapon = this->Modules.client.GetBaseEntityFromHandle(hActiveWeapon)->As<CS2::C_BasePlayerWeapon>();
+            if (!pWeapon) return std::unexpected(4);
+            point3.origin = pWeapon->GetBonePos(this->controlAdvancedView.boneIndex1.load());
+            point3.forward = pWeapon->GetBonePos(this->controlAdvancedView.boneIndex2.load());
+            point3.up = pWeapon->GetBonePos(this->controlAdvancedView.boneIndex3.load());
+        }
+        return std::expected<MulNX::Math::Point3, int>(point3);
+    }
+    catch (const std::exception& e) {
+        this->ISys().LogWarning(std::format("GetObserverTargetBonePos exception: {}", e.what()));
+        return std::unexpected(5);
+    }
+}
 
-        // ----- 构建局部坐标系 -----
-        // 确定参考点（通常为 bone1 或 bone2，这里使用 bone1 作为原点）
-        DirectX::XMFLOAT3 refPoint = bone1;   // 局部坐标系原点
+std::expected<MulNX::Math::View, int> CSController::HandleSelfViewUpdate() {
+    try {
+        auto point3Result = this->GetPoint3();
+        if (!point3Result.has_value()) {
+            return std::unexpected(point3Result.error());
+        }
+        auto point3 = point3Result.value();
 
-        // 右向量：世界向上 × 前向
-        const DirectX::XMFLOAT3 worldUp = { 0.0f, 0.0f, 1.0f };
-        DirectX::XMFLOAT3 right;
-        DirectX::XMStoreFloat3(&right,
-            DirectX::XMVector3Normalize(DirectX::XMVector3Cross(
-                DirectX::XMLoadFloat3(&worldUp),
-                DirectX::XMLoadFloat3(&forwardDir))));
-
-        // 处理前向与世界向上平行的情况
-        if (sqrtf(right.x * right.x + right.y * right.y + right.z * right.z) < 0.0001f) {
-            // 使用骨骼3辅助定义垂直轴（若启用）或世界前向
-            if (this->controlAdvancedView.useThirdBoneForUp) {
-                DirectX::XMFLOAT3 tempUpDir = { bone3.x - bone1.x, bone3.y - bone1.y, bone3.z - bone1.z };
-                DirectX::XMStoreFloat3(&right,
-                    DirectX::XMVector3Normalize(DirectX::XMVector3Cross(
-                        DirectX::XMLoadFloat3(&tempUpDir),
-                        DirectX::XMLoadFloat3(&forwardDir))));
-            }
-            else {
-                const DirectX::XMFLOAT3 worldFront = { 1.0f, 0.0f, 0.0f };
-                DirectX::XMStoreFloat3(&right,
-                    DirectX::XMVector3Normalize(DirectX::XMVector3Cross(
-                        DirectX::XMLoadFloat3(&worldFront),
-                        DirectX::XMLoadFloat3(&forwardDir))));
-            }
+        // ========== 构建局部坐标系 ==========
+        DirectX::XMFLOAT3 forward, left, up;
+        if (!MulNX::Math::BuildLocalCoordinateSystem(point3.origin, point3.forward, point3.up,
+            forward, left, up,
+            this->controlAdvancedView.InvertUp.load(std::memory_order_acquire))) {
+            return std::unexpected(5);
         }
 
-        // 上向量：前向 × 右
-        DirectX::XMFLOAT3 up;
-        DirectX::XMStoreFloat3(&up,
-            DirectX::XMVector3Cross(
-                DirectX::XMLoadFloat3(&forwardDir),
-                DirectX::XMLoadFloat3(&right)));
+        // 存储调试信息
+        auto boneInfo = std::make_shared<BoneInfo>();
+        boneInfo->PosOrigin = point3.origin;
+        boneInfo->PosForward = point3.forward;
+        boneInfo->PosUp = point3.up;
+        boneInfo->AxisForward = forward;
+        boneInfo->AxisLeft = left;
+        boneInfo->AxisUp = up;
+        float axisLen = this->controlAdvancedView.AxisLength.load(std::memory_order_acquire);
+        boneInfo->PosLeft = {
+            point3.origin.x + left.x * axisLen,
+            point3.origin.y + left.y * axisLen,
+            point3.origin.z + left.z * axisLen
+        };
+        this->controlAdvancedView.CurrentBoneInfo.store(boneInfo, std::memory_order_release);
 
-        // 应用滚转角（绕前向轴旋转 right 和 up）
-        float rollRad = this->controlAdvancedView.rollDegrees * (DirectX::XM_PI / 180.0f);
-        float cosR = cosf(rollRad);
-        float sinR = sinf(rollRad);
-        DirectX::XMFLOAT3 rightRolled = {
-            right.x * cosR + up.x * sinR,
-            right.y * cosR + up.y * sinR,
-            right.z * cosR + up.z * sinR
-        };
-        DirectX::XMFLOAT3 upRolled = {
-            -right.x * sinR + up.x * cosR,
-            -right.y * sinR + up.y * cosR,
-            -right.z * sinR + up.z * cosR
-        };
+        // ========== 构建局部坐标系到世界坐标系的旋转矩阵 ==========
+        // 注意：DirectX 使用行主序矩阵，矩阵的行（而非列）应表示局部轴在世界坐标系中的分量
+        // 所以每一行分别是 X 轴(forward)、Y 轴(left)、Z 轴(up)
+        DirectX::XMMATRIX rotLocalToWorld = DirectX::XMMatrixSet(
+            forward.x, forward.y, forward.z, 0.0f,    // 行0: X轴(forward)
+            left.x,    left.y,    left.z,    0.0f,    // 行1: Y轴(left)
+            up.x,      up.y,      up.z,      0.0f,    // 行2: Z轴(up)
+            0.0f,      0.0f,      0.0f,      1.0f
+        );
 
-        // ----- 计算摄像机世界位置 -----
-        const auto& offset = this->controlAdvancedView.localPositionOffset;
-        DirectX::XMFLOAT3 worldOffset = {
-            offset.x * rightRolled.x + offset.y * upRolled.x + offset.z * forwardDir.x,
-            offset.x * rightRolled.y + offset.y * upRolled.y + offset.z * forwardDir.y,
-            offset.x * rightRolled.z + offset.y * upRolled.z + offset.z * forwardDir.z
-        };
+        // ========== 构建局部旋转偏移矩阵 ==========
+        // 注意：旋转顺序应该是Yaw→Pitch→Roll，与注释一致
+        float pitchRad = this->controlAdvancedView.localRotationOffset.x * (DirectX::XM_PI / 180.0f);
+        float yawRad = this->controlAdvancedView.localRotationOffset.y * (DirectX::XM_PI / 180.0f);
+        float rollRad = this->controlAdvancedView.localRotationOffset.z * (DirectX::XM_PI / 180.0f);
+
+        // 创建旋转四元数（使用正确的旋转顺序）
+        DirectX::XMVECTOR quatYaw = DirectX::XMQuaternionRotationAxis(DirectX::XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f), yawRad);
+        DirectX::XMVECTOR quatPitch = DirectX::XMQuaternionRotationAxis(DirectX::XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f), pitchRad);
+        DirectX::XMVECTOR quatRoll = DirectX::XMQuaternionRotationAxis(DirectX::XMVectorSet(1.0f, 0.0f, 0.0f, 0.0f), rollRad);
+
+        // 组合顺序：先yaw，再pitch，最后roll
+        DirectX::XMVECTOR quatTemp = DirectX::XMQuaternionMultiply(quatPitch, quatYaw);
+        DirectX::XMVECTOR quatLocalRot = DirectX::XMQuaternionMultiply(quatRoll, quatTemp);
+
+        // 将四元数转换为矩阵
+        DirectX::XMMATRIX rotLocalOffset = DirectX::XMMatrixRotationQuaternion(quatLocalRot);
+
+        // ========== 计算最终旋转矩阵 ==========
+        // 先应用局部旋转偏移，再变换到世界坐标系
+        DirectX::XMMATRIX rotFinal = DirectX::XMMatrixMultiply(rotLocalOffset, rotLocalToWorld);
+
+        // ========== 计算摄像机世界位置 ==========
+        // 将局部偏移变换到世界坐标系
+        DirectX::XMVECTOR localOffset = DirectX::XMLoadFloat3(&this->controlAdvancedView.localPositionOffset);
+
+        // 先应用局部旋转偏移
+        DirectX::XMVECTOR rotatedLocalOffset = DirectX::XMVector3TransformCoord(localOffset, rotLocalOffset);
+
+        // 再变换到世界坐标系
+        DirectX::XMVECTOR worldOffset = DirectX::XMVector3TransformCoord(rotatedLocalOffset, rotLocalToWorld);
+
+        DirectX::XMFLOAT3 worldOffsetVec;
+        DirectX::XMStoreFloat3(&worldOffsetVec, worldOffset);
+
+        // 计算最终摄像机位置
         DirectX::XMFLOAT3 targetCameraPos = {
-            refPoint.x + worldOffset.x,
-            refPoint.y + worldOffset.y,
-            refPoint.z + worldOffset.z
+            point3.origin.x + worldOffsetVec.x,
+            point3.origin.y + worldOffsetVec.y,
+            point3.origin.z + worldOffsetVec.z
         };
 
-        // ----- 计算摄像机注视点世界坐标 -----
-        const auto& targetOffset = this->controlAdvancedView.localTargetOffset;
-        DirectX::XMFLOAT3 worldTargetOffset = {
-            targetOffset.x * rightRolled.x + targetOffset.y * upRolled.x + targetOffset.z * forwardDir.x,
-            targetOffset.x * rightRolled.y + targetOffset.y * upRolled.y + targetOffset.z * forwardDir.y,
-            targetOffset.x * rightRolled.z + targetOffset.y * upRolled.z + targetOffset.z * forwardDir.z
-        };
-        DirectX::XMFLOAT3 targetPoint = {
-            refPoint.x + worldTargetOffset.x,
-            refPoint.y + worldTargetOffset.y,
-            refPoint.z + worldTargetOffset.z
-        };
+        // ========== 计算摄像机世界旋转 ==========
+        // 从最终旋转矩阵中提取四元数
+        DirectX::XMVECTOR quatFinal = DirectX::XMQuaternionRotationMatrix(rotFinal);
+        DirectX::XMFLOAT4 quatF;
+        DirectX::XMStoreFloat4(&quatF, quatFinal);
 
-        // ----- 计算摄像机需要指向的方向 -----
-        DirectX::XMFLOAT3 lookDir = {
-            targetPoint.x - targetCameraPos.x,
-            targetPoint.y - targetCameraPos.y,
-            targetPoint.z - targetCameraPos.z
-        };
-        len = sqrtf(lookDir.x * lookDir.x + lookDir.y * lookDir.y + lookDir.z * lookDir.z);
-        if (len < 0.0001f) return 6;
-        lookDir.x /= len; lookDir.y /= len; lookDir.z /= len;
-
-        // 将方向转换为欧拉角（pitch, yaw, roll）
+        // 将四元数转换为欧拉角
         DirectX::XMFLOAT3 targetCameraAngle;
-        MulNX::Math::CSDirToEuler(lookDir, targetCameraAngle);
+        MulNX::Math::CSQuatToEuler(quatF, targetCameraAngle);
 
-        // 应用滚转角到欧拉角的 roll 分量（注意：此处的滚转角可能与之前计算的方向滚转重复，但通常我们只保留一个）
-        // 如果希望摄像机自身带有滚转（倾斜），直接设置 z 分量即可
-        targetCameraAngle.z = this->controlAdvancedView.rollDegrees;  // 或者直接保留 CSDirToEuler 计算出的 z
+        // 规范化角度
+        while (targetCameraAngle.y > 180.0f) targetCameraAngle.y -= 360.0f;
+        while (targetCameraAngle.y < -180.0f) targetCameraAngle.y += 360.0f;
 
-        // ----- 平滑处理（保留原有逻辑）-----
-        if (!this->controlAdvancedView.initialized) {
-            this->controlAdvancedView.smoothCameraPos = targetCameraPos;
-            this->controlAdvancedView.smoothCameraAngle = targetCameraAngle;
-            this->controlAdvancedView.initialized = true;
-        }
-
-        // 指数平滑位置
-        float factor = this->controlAdvancedView.SMOOTH_FACTOR.load();
-        this->controlAdvancedView.smoothCameraPos.x += (targetCameraPos.x - this->controlAdvancedView.smoothCameraPos.x) * factor;
-        this->controlAdvancedView.smoothCameraPos.y += (targetCameraPos.y - this->controlAdvancedView.smoothCameraPos.y) * factor;
-        this->controlAdvancedView.smoothCameraPos.z += (targetCameraPos.z - this->controlAdvancedView.smoothCameraPos.z) * factor;
-
-        // 指数平滑角度（处理环绕）
-        auto angleDiff = [](float target, float current) -> float {
-            float diff = target - current;
-            if (diff > 180.0f) diff -= 360.0f;
-            if (diff < -180.0f) diff += 360.0f;
-            return diff;
-            };
-        this->controlAdvancedView.smoothCameraAngle.x += angleDiff(targetCameraAngle.x, this->controlAdvancedView.smoothCameraAngle.x) * factor;
-        this->controlAdvancedView.smoothCameraAngle.y += angleDiff(targetCameraAngle.y, this->controlAdvancedView.smoothCameraAngle.y) * factor;
-        this->controlAdvancedView.smoothCameraAngle.z += angleDiff(targetCameraAngle.z, this->controlAdvancedView.smoothCameraAngle.z) * factor;
-
+        return std::expected<MulNX::Math::View, int>(MulNX::Math::View(targetCameraPos, targetCameraAngle, 90.0f));
     }
     catch (...) {
-        this->controlAdvancedView.initialized = false;
-        return 0xffff;
+        return std::unexpected(0xFFFF);
     }
-    return 0;
 }
 
 bool CSController::UINodeFunc(MulNXUINode* node) {
@@ -234,6 +237,10 @@ bool CSController::UINodeFunc(MulNXUINode* node) {
     }
     auto w = MulNX::UI::RAIIWindow("快捷操作", this->ShowWindow);
     if (!w)return true;
+    MulNX::TransInfo info;
+    info.pMatrix = this->GetViewMatrix();
+    info.windowHeight = this->GetWinHeight();
+    info.windowWidth = this->GetWinWidth();
 
     static float gameTimeScale = 1.0f;
     static float virtualTimeScale = 1.0f;
@@ -268,30 +275,65 @@ bool CSController::UINodeFunc(MulNXUINode* node) {
     }
     if (ImGui::CollapsingHeader("高级视角控制")) {
         MulNX::UI::Checkbox("启用高级视角控制", this->controlAdvancedView.Enable);
+        MulNX::UI::Checkbox("覆盖自视角", this->controlAdvancedView.OverrideSelfView);
+        MulNX::UI::Checkbox("始终计算视角", this->controlAdvancedView.AlwaysCaulate);
 
-        // 骨骼选择
+        // 骨骼选择（三点定义坐标系）
         MulNX::UI::SliderInt("骨骼起点 (原点)", this->controlAdvancedView.boneIndex1, 0, 127);
         MulNX::UI::SliderInt("骨骼终点 (前向)", this->controlAdvancedView.boneIndex2, 0, 127);
-        MulNX::UI::SliderInt("骨骼辅助 (可选上向)", this->controlAdvancedView.boneIndex3, 0, 127);
-        MulNX::UI::Checkbox("使用第三骨骼辅助定义垂直轴", this->controlAdvancedView.useThirdBoneForUp);
+        MulNX::UI::SliderInt("骨骼辅助 (上向参考)", this->controlAdvancedView.boneIndex3, 0, 127);
 
-        // 位置偏移
-        ImGui::Text("摄像机局部偏移 (右,上,前)");
-        ImGui::SliderFloat("右移 (X)", &this->controlAdvancedView.localPositionOffset.x, -200.0f, 200.0f);
-        ImGui::SliderFloat("上移 (Y)", &this->controlAdvancedView.localPositionOffset.y, -200.0f, 200.0f);
-        ImGui::SliderFloat("前移 (Z)", &this->controlAdvancedView.localPositionOffset.z, -200.0f, 200.0f);
+        // 位置偏移（前, 左, 上） — 与输入系统约定对应：localPositionOffset (x=前, y=左, z=上)
+        ImGui::Text("摄像机局部偏移 (前,左,上)");
+        ImGui::SliderFloat("前移 (X)", &this->controlAdvancedView.localPositionOffset.x, -200.0f, 200.0f);
+        ImGui::SliderFloat("左移 (Y)", &this->controlAdvancedView.localPositionOffset.y, -200.0f, 200.0f);
+        ImGui::SliderFloat("上移 (Z)", &this->controlAdvancedView.localPositionOffset.z, -200.0f, 200.0f);
 
-        // 注视点偏移
-        ImGui::Text("注视点局部偏移 (右,上,前)");
-        ImGui::SliderFloat("注视点右移 (X)", &this->controlAdvancedView.localTargetOffset.x, -200.0f, 200.0f);
-        ImGui::SliderFloat("注视点上移 (Y)", &this->controlAdvancedView.localTargetOffset.y, -200.0f, 200.0f);
-        ImGui::SliderFloat("注视点前移 (Z)", &this->controlAdvancedView.localTargetOffset.z, -200.0f, 200.0f);
-
-        // 滚转角
-        ImGui::SliderFloat("滚转角 (度)", &this->controlAdvancedView.rollDegrees, -180.0f, 180.0f);
+        // 旋转偏移（统一为：俯仰, 偏航, 滚转）
+        ImGui::Text("摄像机局部旋转 (俯仰,偏航,滚转)");
+        ImGui::SliderFloat("俯仰 (Pitch)", &this->controlAdvancedView.localRotationOffset.x, -89.0f, 89.0f);
+        ImGui::SliderFloat("偏航 (Yaw)", &this->controlAdvancedView.localRotationOffset.y, -180.0f, 180.0f);
+        ImGui::SliderFloat("滚转 (Roll)", &this->controlAdvancedView.localRotationOffset.z, -180.0f, 180.0f);
 
         // 平滑系数
-        MulNX::UI::SliderFloat("平滑系数", this->controlAdvancedView.SMOOTH_FACTOR, 0.0f, 1.0f);
+        MulNX::UI::SliderFloat("平滑系数", this->viewBuffer.SMOOTH_FACTOR, 0.0f, 1.0f);
+
+        // 上向反转选项
+        MulNX::UI::Checkbox("反转上向", this->controlAdvancedView.InvertUp);
+        // 绘制选项：原始骨骼点与坐标轴
+        MulNX::UI::Checkbox("显示原始骨骼点", this->controlAdvancedView.ShowOriginalBones);
+        MulNX::UI::Checkbox("显示坐标轴", this->controlAdvancedView.ShowCoordinateAxes);
+        MulNX::UI::SliderFloat("坐标轴长度", this->controlAdvancedView.AxisLength, 1.0f, 200.0f);
+        // 骨骼来源模式：武器 / 人体
+        MulNX::UI::Checkbox("人体骨骼模式", this->controlAdvancedView.UseBodyBones);
+
+        // 绘制当前骨骼位置（调试用）
+        auto boneInfo = this->controlAdvancedView.CurrentBoneInfo.load(std::memory_order_acquire);
+        if (boneInfo) {
+            // 分两部分绘制：原始骨骼点 与 坐标轴
+            if (this->controlAdvancedView.ShowOriginalBones.load(std::memory_order_acquire)) {
+                MulNX::UI::DrawWorldPoint(boneInfo->PosOrigin, info, "Origin");
+                MulNX::UI::DrawWorldPoint(boneInfo->PosForward, info, "Forward");
+                MulNX::UI::DrawWorldPoint(boneInfo->PosUp, info, "Up");
+            }
+
+            if (this->controlAdvancedView.ShowCoordinateAxes.load(std::memory_order_acquire)) {
+                float axisLen = this->controlAdvancedView.AxisLength.load(std::memory_order_acquire);
+                DirectX::XMFLOAT3 org = boneInfo->PosOrigin;
+                DirectX::XMFLOAT3 f_end = { org.x + boneInfo->AxisForward.x * axisLen, org.y + boneInfo->AxisForward.y * axisLen, org.z + boneInfo->AxisForward.z * axisLen };
+                DirectX::XMFLOAT3 u_end = { org.x + boneInfo->AxisUp.x * axisLen, org.y + boneInfo->AxisUp.y * axisLen, org.z + boneInfo->AxisUp.z * axisLen };
+                DirectX::XMFLOAT3 r_end = { org.x + boneInfo->AxisLeft.x * axisLen, org.y + boneInfo->AxisLeft.y * axisLen, org.z + boneInfo->AxisLeft.z * axisLen };
+
+                MulNX::UI::DrawWorldLine(org, f_end, info, ImColor(255, 0, 0), 2.0f);
+                MulNX::UI::DrawWorldLine(org, u_end, info, ImColor(0, 255, 0), 2.0f);
+                MulNX::UI::DrawWorldLine(org, r_end, info, ImColor(0, 0, 255), 2.0f);
+
+                // 在轴端点绘制点与标签
+                MulNX::UI::DrawWorldPoint(f_end, info, "F");
+                MulNX::UI::DrawWorldPoint(u_end, info, "U");
+                MulNX::UI::DrawWorldPoint(r_end, info, "L");
+            }
+        }
     }
 
     // 自由摄像机控制

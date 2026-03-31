@@ -24,5 +24,15 @@ namespace MulNX {
 
         //移动点
         bool MovePoint(DirectX::XMFLOAT3& SourcePoint, const DirectX::XMFLOAT3& TargetPoint);
+
+        bool BuildLocalCoordinateSystem(
+            const DirectX::XMFLOAT3& origin,
+            const DirectX::XMFLOAT3& forwardPoint,
+            const DirectX::XMFLOAT3& upPoint,
+            DirectX::XMFLOAT3& forward,
+            DirectX::XMFLOAT3& left,
+            DirectX::XMFLOAT3& up,
+            bool invertUp = false
+        );
     };
 };

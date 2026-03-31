@@ -11,6 +11,8 @@
 #include "C_CSGameRules/C_CSGameRules.hpp"
 #include "Client/Client.hpp"
 
+#include <expected>
+
 class C_Modules {
 public:
     CS2::Module::Client client{};
@@ -59,40 +61,45 @@ public:
     Dofs dofs{};
 };
 
-class ControlAdvancedView {
+class BoneInfo{
 public:
+    DirectX::XMFLOAT3 PosOrigin;
+    DirectX::XMFLOAT3 PosForward;
+    DirectX::XMFLOAT3 PosUp;
+    // PosLeft 仍然保留为用于可视化
+    DirectX::XMFLOAT3 PosLeft;
+
+    // 轴向单位向量（局部坐标系的三轴）
+    DirectX::XMFLOAT3 AxisForward;
+    DirectX::XMFLOAT3 AxisLeft;
+    DirectX::XMFLOAT3 AxisUp;
+};
+
+struct ControlAdvancedView {
     std::atomic<bool> Enable = false;
-    
-    std::atomic<int> boneIndex1 = 8;
-    std::atomic<int> boneIndex2 = 9;
-    std::atomic<int> boneIndex3 = 10;
+    std::atomic<bool> OverrideSelfView = false;
+    std::atomic<bool> AlwaysCaulate = false;
 
-    std::atomic<float> distance = 50.0f;
+    // 骨骼索引
+    std::atomic<int> boneIndex1{ 0 };
+    std::atomic<int> boneIndex2{ 1 };
+    std::atomic<int> boneIndex3{ 2 };
 
-    // 平滑系数 (0.0 ~ 1.0)，值越小越平滑
-    std::atomic<float> SMOOTH_FACTOR = 0.35f;
+    // 位置和旋转偏移
+    DirectX::XMFLOAT3 localPositionOffset = { 0.0f, 0.0f, 0.0f };
+    DirectX::XMFLOAT3 localRotationOffset = { 0.0f, 0.0f, 0.0f };
 
-    // 静态平滑状态（仅在第一次成功时初始化，异常时重置）
-    DirectX::XMFLOAT3 smoothCameraPos{};
-    DirectX::XMFLOAT3 smoothCameraAngle{};
-    bool initialized = false;  // 是否已初始化过平滑值
-
-    // 新增：摄像机相对于武器坐标系的位置偏移（右、上、前）
-    DirectX::XMFLOAT3 localPositionOffset{ -50.0f, 20.0f, -30.0f };  // 默认：左后方
-
-    // 新增：滚转角（度），绕前向轴旋转
-    float rollDegrees{ 0.0f };
-
-    // 新增：注视点相对于武器坐标系的偏移（右、上、前）
-    // 如果为零向量，则摄像机指向武器自身（枪口位置）
-    DirectX::XMFLOAT3 localTargetOffset{ 0.0f, 0.0f, 0.0f };
-
-    // 启用/禁用高级模式（现在旧模式已删除，此开关可省略，但保留以便UI控制）
-    bool useAdvancedMode{ true };
-
-    // 可选：是否使用第三个骨骼辅助定义局部坐标系的垂直轴
-    // 若为 true，则使用骨骼1→骨骼3 作为临时上向参考；否则使用世界向上
-    std::atomic<bool> useThirdBoneForUp{ false };
+    // 调试信息
+    std::atomic<std::shared_ptr<BoneInfo>> CurrentBoneInfo;
+    // 是否反转上向（用于修正骨骼上向方向）
+    std::atomic<bool> InvertUp{ false };
+    // 绘制选项
+    std::atomic<bool> ShowOriginalBones{ true };
+    std::atomic<bool> ShowCoordinateAxes{ true };
+    // 绘制坐标轴的长度（世界单位）
+    std::atomic<float> AxisLength{ 30.0f };
+    // 是否使用人体骨骼而非武器骨骼
+    std::atomic<bool> UseBodyBones{ false };
 };
 
 class CSController final :public MulNX::IAbstractLayer3D {
@@ -101,7 +108,9 @@ private:
 
     ControlSmoke controlSmoke{};
     ControlView controlView{};
+
     ControlAdvancedView controlAdvancedView{};
+    MulNX::Math::ViewBuffer viewBuffer{};
 
     // 自由摄像机控制
     std::atomic<bool> EnableFreeCameraControl = false;
@@ -114,14 +123,16 @@ private:
     C_GlobalVars* CSGlobalVars{};
     
     void ESP();
-    void QuaternionToEuler(const DirectX::XMVECTOR& quat, float& pitch, float& yaw, float& roll);
 public:
     std::atomic<bool> ESPDraw = false;
     
     std::unique_ptr<MulNX::Memory::HookEx> MyHook = nullptr;
     void HandleOverrideView(CS2::CViewSetup* viewSetup);
-    int HandleSelfViewUpdate();
-    //bool UINodeFunc(MulNXUINode* ThisNode)override;
+
+    CS2::C_CSPlayerPawn* GetObserverTargetPawn();
+    std::expected<MulNX::Math::Point3, int> GetPoint3();
+    std::expected<MulNX::Math::View, int> HandleSelfViewUpdate();
+
     bool Init()override;
     bool UINodeFunc(MulNXUINode* node);
     void VirtualMain()override;

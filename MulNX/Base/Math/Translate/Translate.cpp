@@ -134,6 +134,51 @@ bool MulNX::Math::WorldToScreen(const DirectX::XMFLOAT3& pWorldPos, DirectX::XMF
     return true;
 }
 
+bool MulNX::Math::BuildLocalCoordinateSystem(
+    const DirectX::XMFLOAT3& origin,
+    const DirectX::XMFLOAT3& forwardPoint,
+    const DirectX::XMFLOAT3& upPoint,
+    DirectX::XMFLOAT3& forward,
+    DirectX::XMFLOAT3& left,
+    DirectX::XMFLOAT3& up,
+    bool invertUp) {
+
+    // 1. 前向轴：原点 → 前向点
+    forward = forwardPoint - origin;
+    float len = sqrtf(forward.x * forward.x + forward.y * forward.y + forward.z * forward.z);
+    if (len < 0.0001f) return false;
+    forward.x /= len; forward.y /= len; forward.z /= len;
+
+    // 2. 上向候选轴：原点 → 上点
+    DirectX::XMFLOAT3 upCandidate = upPoint - origin;
+    len = sqrtf(upCandidate.x * upCandidate.x + upCandidate.y * upCandidate.y + upCandidate.z * upCandidate.z);
+    if (len < 0.0001f) return false;
+    upCandidate.x /= len; upCandidate.y /= len; upCandidate.z /= len;
+    if (invertUp) {
+        upCandidate.x = -upCandidate.x;
+        upCandidate.y = -upCandidate.y;
+        upCandidate.z = -upCandidate.z;
+    }
+
+    // 3. 使用叉乘计算左向量：left = cross(upCandidate, forward) 归一化
+    DirectX::XMVECTOR f = DirectX::XMLoadFloat3(&forward);
+    DirectX::XMVECTOR uc = DirectX::XMLoadFloat3(&upCandidate);
+    DirectX::XMVECTOR leftVec = DirectX::XMVector3Normalize(DirectX::XMVector3Cross(uc, f)); // 注意顺序：up × forward
+
+    float leftLenSq = 0.0f;
+    DirectX::XMStoreFloat(&leftLenSq, DirectX::XMVector3LengthSq(leftVec));
+    if (leftLenSq < 0.0001f) return false;
+
+    DirectX::XMStoreFloat3(&left, leftVec);
+
+    // 4. 重新正交化上轴：up = cross(forward, left) 归一化
+    DirectX::XMVECTOR upVec = DirectX::XMVector3Normalize(DirectX::XMVector3Cross(f, leftVec));
+    DirectX::XMStoreFloat3(&up, upVec);
+
+    return true;
+}
+
+// TODO：这是错的，只是临时的，后续需要重写
 DirectX::XMFLOAT3 MulNX::Math::RotatePoint(
     const DirectX::XMFLOAT3& inputPoint,
     float pitchDegrees,  // 绕Y轴旋转（俯仰）
