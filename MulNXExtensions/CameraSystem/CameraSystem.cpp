@@ -168,6 +168,10 @@ void CameraSystem::MenuElement() {
         // 创建成功则清空输入框
         // 创建自由摄像机轨道
         if (ImGui::Button("新的自由摄像机轨道")) {
+            if (CreateElementName.empty()) {
+                this->ISys().LogError("请输入元素名！");
+                return;
+            }
             if (this->EManager.Element_Create<FreeCameraPath>(CreateElementName)) {
                 CreateElementName.clear();
             }
@@ -218,6 +222,10 @@ void CameraSystem::MenuSolution() {
         ImGui::SameLine();
         // 创建成功则清空输入框
         if (ImGui::Button("创建解决方案")) {
+            if (CreateSolutionName.empty()) {
+                this->ISys().LogError("请输入解决方案名！");
+                return;
+            }
             if (this->SManager.Solution_Create(CreateSolutionName)) {
                 CreateSolutionName.clear();
             }
@@ -263,6 +271,10 @@ void CameraSystem::MenuProject() {
         ImGui::InputText("##CreateProject", &CreateProjectName);
         ImGui::SameLine();
         if (ImGui::Button("创建")) {
+            if (CreateProjectName.empty()) {
+                this->ISys().LogError("请输入项目名！");
+                return;
+            }
             if (this->PManager.Project_Create(CreateProjectName)) {
                 CreateProjectName.clear();
             }
@@ -285,6 +297,10 @@ void CameraSystem::MenuWorkspace() {
     ImGui::InputText("##TargetWorkspaceName", &TargetWorkspaceName);
     ImGui::SameLine();
     if (ImGui::Button("切换")) {
+        if (TargetWorkspaceName.empty()) {
+            this->ISys().LogError("请输入工作区名！");
+            return;
+        }
         if (!this->WManager.Workspace_Set(TargetWorkspaceName))return;
 
     }
