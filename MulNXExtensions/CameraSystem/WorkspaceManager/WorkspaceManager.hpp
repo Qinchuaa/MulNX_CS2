@@ -22,8 +22,6 @@ public:
 
     //初始化
     bool Init()override;
-    //依赖注入
-    void InjectDependence(ElementManager* EManager, SolutionManager* SManager, ProjectManager* PManager);
     //逻辑主函数
     void VirtualMain()override;
 

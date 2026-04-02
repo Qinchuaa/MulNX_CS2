@@ -33,6 +33,8 @@ bool ProjectManager::UINodeFunc(MulNXUINode* node) {
 }
 
 bool ProjectManager::Init() {
+    this->EManager = this->Core->ModuleManager()->FindModule<ElementManager>("ElementManager");
+    this->SManager = this->Core->ModuleManager()->FindModule<SolutionManager>("SolutionManager");
     this->SendUINode(this->GetName(), [this](MulNXUINode* node) {return this->UINodeFunc(node);});
     auto* PathManager = this->ISys().PathManager();
     if (PathManager->CreateKey("CurrentProject", {},
@@ -62,11 +64,6 @@ bool ProjectManager::Init() {
     }
 
     return true;
-}
-void ProjectManager::InjectDependence(ElementManager* EManager, SolutionManager* SManager) {
-    //系统服务
-    this->EManager = EManager;
-    this->SManager = SManager;
 }
 void ProjectManager::VirtualMain() {
     this->Traversal();

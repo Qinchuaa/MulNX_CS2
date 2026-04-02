@@ -8,6 +8,10 @@ bool CameraSystem::Init() {
     // 传递指针，注入依赖，提升性能，直接调用
     // 注意，本模块所有级别的管理器相互显示注入，其它服务借助Core隐式注入
     this->CamDrawer.Init(20.0, 30.0, 15.0, 10.0, IM_COL32(255, 0, 255, 255));
+    this->EManager = this->Core->ModuleManager()->FindModule<ElementManager>("ElementManager");
+    this->SManager = this->Core->ModuleManager()->FindModule<SolutionManager>("SolutionManager");
+    this->PManager = this->Core->ModuleManager()->FindModule<ProjectManager>("ProjectManager");
+    this->WManager = this->Core->ModuleManager()->FindModule<WorkspaceManager>("WorkspaceManager");
 
     auto* PathManager = this->ISys().PathManager();
     if (PathManager->CreateKey("CurrentWorkspace", {},
@@ -33,23 +37,6 @@ bool CameraSystem::Init() {
         auto Workspaces = this->ISys().PathGet("Workspaces");
         PathManager->KeyBindStatic("CurrentWorkspace", Workspaces);
     }
-
-    this->WManager.SetName("WorkspaceManager");
-    this->WManager.EntryInit(this->Core);
-    this->WManager.InjectDependence(&this->EManager, &this->SManager, &this->PManager);
-
-    this->PManager.SetName("ProjectManager");
-    this->PManager.EntryInit(this->Core);
-    this->PManager.InjectDependence(&this->EManager, &this->SManager);
-
-    this->SManager.SetName("SolutionManager");
-    this->SManager.EntryInit(this->Core);
-    this->SManager.InjectDependence(&this->CamDrawer, &this->EManager, &this->PManager);
-
-    this->EManager.SetName("ElementManager");
-    this->EManager.EntryInit(this->Core);
-    this->EManager.InjectDependence(&this->CamDrawer, &this->SManager, &this->PManager);
-
     this->SendUINode(this->GetName(), [this](MulNXUINode* node) {return this->UINodeFunc(node);});
     return true;
 }
@@ -58,20 +45,20 @@ bool CameraSystem::UINodeFunc(MulNXUINode* ThisNode) {
     // 顶部：工作区信息（始终显示）
     ImGui::BeginChild("工作区面板", ImVec2(0, 150), true); {
         // 工作区状态
-        ImGui::Text("工作区状态: %s", this->WManager.InWorkspace ? "已进入" : "未进入");
+        ImGui::Text("工作区状态: %s", this->WManager->InWorkspace ? "已进入" : "未进入");
         // 未进入工作区允许打开默认工作区
-        if (!this->WManager.InWorkspace) {
+        if (!this->WManager->InWorkspace) {
             ImGui::SameLine();
             if (ImGui::Button("打开默认工作区")) {
-                this->WManager.Workspace_Set("DefaultWorkspace");
+                this->WManager->Workspace_Set("DefaultWorkspace");
             }
         }
         // 打开工作区后允许保存工作区
-        if (this->WManager.InWorkspace) {
-            ImGui::Text("当前工作区: %s", this->WManager.CurrentWorkspace->Name.c_str());
+        if (this->WManager->InWorkspace) {
+            ImGui::Text("当前工作区: %s", this->WManager->CurrentWorkspace->Name.c_str());
             ImGui::SameLine();
             if (ImGui::Button("保存工作区")) {
-                this->WManager.Workspace_Save();
+                this->WManager->Workspace_Save();
             }
         }
         // 详情信息
@@ -85,7 +72,7 @@ bool CameraSystem::UINodeFunc(MulNXUINode* ThisNode) {
     ImGui::EndChild();
 
 
-    if (!this->WManager.InWorkspace) {
+    if (!this->WManager->InWorkspace) {
         // 如果不在工作区，显示提示信息
         ImGui::BeginChild("提示", ImVec2(0, 0), true);
         ImGui::Text("请先进入工作区");
@@ -113,9 +100,9 @@ bool CameraSystem::UINodeFunc(MulNXUINode* ThisNode) {
     // 右侧三类控制区
     ImGui::BeginChild("内容", ImVec2(0, 0), true);
     bool InProject = false;
-    if (this->PManager.ActiveProject) {
+    if (this->PManager->ActiveProject) {
         InProject = true;
-        ImGui::Text(("当前项目：" + this->PManager.ActiveProject->Name).c_str());
+        ImGui::Text(("当前项目：" + this->PManager->ActiveProject->Name).c_str());
     }
     else {
         ImGui::Text("当前未进入任何项目");
@@ -150,14 +137,14 @@ bool CameraSystem::UINodeFunc(MulNXUINode* ThisNode) {
 
 void CameraSystem::MenuElement() {
     // 展示预览功能相关状态
-    ImGui::Text(("预览状态： " + std::string(this->EManager.OnPreview ? "开启" : "关闭") +
-        "   预览元素名： " + (this->EManager.Preview_CurrentElement ? this->EManager.Preview_CurrentElement->GetName() : "无") +
-        "   预览时间偏移： " + std::to_string(this->EManager.Preview_TimeSchema)).c_str());
+    ImGui::Text(("预览状态： " + std::string(this->EManager->OnPreview ? "开启" : "关闭") +
+        "   预览元素名： " + (this->EManager->Preview_CurrentElement ? this->EManager->Preview_CurrentElement->GetName() : "无") +
+        "   预览时间偏移： " + std::to_string(this->EManager->Preview_TimeSchema)).c_str());
     ImGui::Separator();
     // 元素总设置
     if (ImGui::CollapsingHeader("元素设置")) {
-        ImGui::Checkbox("预览插值摄像机绘制", &this->EManager.Config.PreviewDraw);
-        ImGui::Checkbox("预览插值摄像机覆盖", &this->EManager.Config.PreviewOverride);
+        ImGui::Checkbox("预览插值摄像机绘制", &this->EManager->Config.PreviewDraw);
+        ImGui::Checkbox("预览插值摄像机覆盖", &this->EManager->Config.PreviewOverride);
     }
     // 创建元素
     if (ImGui::CollapsingHeader("元素创建")) {
@@ -172,7 +159,7 @@ void CameraSystem::MenuElement() {
                 this->ISys().LogError("请输入元素名！");
                 return;
             }
-            if (this->EManager.Element_Create<FreeCameraPath>(CreateElementName)) {
+            if (this->EManager->Element_Create<FreeCameraPath>(CreateElementName)) {
                 CreateElementName.clear();
             }
         }
@@ -186,7 +173,7 @@ void CameraSystem::MenuElement() {
         ImGui::SameLine();
         // 载入成功则清空输入框
         if (ImGui::Button("载入##元素")) {
-            if (this->EManager.Element_Load(this->ISys().PathManager()->PathGetFromKey("Elements") / (LoadElementName + ".yaml"))) {
+            if (this->EManager->Element_Load(this->ISys().PathManager()->PathGetFromKey("Elements") / (LoadElementName + ".yaml"))) {
                 LoadElementName.clear();
             }
         }
@@ -194,24 +181,24 @@ void CameraSystem::MenuElement() {
     // 展示修改元素
     if (ImGui::CollapsingHeader("元素列表")) {
         // 输出是否打开了元素调试窗口
-        ImGui::Text(("元素调试窗口状态：" + std::string(this->EManager.ShowWindow.load(std::memory_order_acquire) ? "打开" : "关闭")).c_str());
+        ImGui::Text(("元素调试窗口状态：" + std::string(this->EManager->ShowWindow.load(std::memory_order_acquire) ? "打开" : "关闭")).c_str());
         // 使用迭代器遍历所有元素
-        for (const auto& element : this->EManager.Elements) {
-            this->EManager.Element_ShowInLine(element);
+        for (const auto& element : this->EManager->Elements) {
+            this->EManager->Element_ShowInLine(element);
         }
     }
 
     return;
 }
 void CameraSystem::MenuSolution() {
-    ImGui::Text(("播放状态：" + std::string(this->SManager.Playing ? "播放中" : "关闭") +
-        "  活跃解决方案名：" + (this->SManager.Playing_pSolution ? this->SManager.Playing_pSolution->GetName() : "无")).c_str());
+    ImGui::Text(("播放状态：" + std::string(this->SManager->Playing ? "播放中" : "关闭") +
+        "  活跃解决方案名：" + (this->SManager->Playing_pSolution ? this->SManager->Playing_pSolution->GetName() : "无")).c_str());
     ImGui::Separator();
     // 解决方案总设置
     if (ImGui::CollapsingHeader("解决方案设置")) {
-        ImGui::Checkbox("解决方案快捷键检测系统", &this->SManager.Config.SolutionShortcutEnable);
-        ImGui::Checkbox("解决方案插值摄像机绘制", &this->SManager.Config.PlayingDraw);
-        ImGui::Checkbox("解决方案插值覆盖", &this->SManager.Config.PlayingOverride);
+        ImGui::Checkbox("解决方案快捷键检测系统", &this->SManager->Config.SolutionShortcutEnable);
+        ImGui::Checkbox("解决方案插值摄像机绘制", &this->SManager->Config.PlayingDraw);
+        ImGui::Checkbox("解决方案插值覆盖", &this->SManager->Config.PlayingOverride);
     }
     // 创建解决方案
     if (ImGui::CollapsingHeader("解决方案创建")) {
@@ -226,7 +213,7 @@ void CameraSystem::MenuSolution() {
                 this->ISys().LogError("请输入解决方案名！");
                 return;
             }
-            if (this->SManager.Solution_Create(CreateSolutionName)) {
+            if (this->SManager->Solution_Create(CreateSolutionName)) {
                 CreateSolutionName.clear();
             }
         }
@@ -240,7 +227,7 @@ void CameraSystem::MenuSolution() {
         ImGui::SameLine();
         // 载入成功则清空输入框
         if (ImGui::Button("载入解决方案")) {
-            if (this->SManager.Solution_Load(this->ISys().PathManager()->PathGetFromKey("Solutions") / (LoadSolutionName + ".yaml"))) {
+            if (this->SManager->Solution_Load(this->ISys().PathManager()->PathGetFromKey("Solutions") / (LoadSolutionName + ".yaml"))) {
                 this->ISys().LogSucc(("加载解决方案成功：" + LoadSolutionName).c_str());
                 LoadSolutionName.clear();
             }
@@ -252,8 +239,8 @@ void CameraSystem::MenuSolution() {
     // 展示修改解决方案
     if (ImGui::CollapsingHeader("解决方案列表")) {
         // 输出是否打开了解决方案调试窗口
-        ImGui::Text(("解决方案调试窗口状态：" + std::string(this->SManager.ShowWindow.load(std::memory_order_acquire) ? "打开" : "关闭")).c_str());
-        this->SManager.Solution_ShowAllInLines();
+        ImGui::Text(("解决方案调试窗口状态：" + std::string(this->SManager->ShowWindow.load(std::memory_order_acquire) ? "打开" : "关闭")).c_str());
+        this->SManager->Solution_ShowAllInLines();
     }
 
     return;
@@ -261,7 +248,7 @@ void CameraSystem::MenuSolution() {
 void CameraSystem::MenuProject() {
     // 项目总设置
     if (ImGui::CollapsingHeader("项目设置")) {
-        ImGui::Checkbox("项目快捷键检测系统", &this->PManager.Config.ProjectShortcutEnable);
+        ImGui::Checkbox("项目快捷键检测系统", &this->PManager->Config.ProjectShortcutEnable);
     }
     // 创建项目
     if (ImGui::CollapsingHeader("项目创建")) {
@@ -275,7 +262,7 @@ void CameraSystem::MenuProject() {
                 this->ISys().LogError("请输入项目名！");
                 return;
             }
-            if (this->PManager.Project_Create(CreateProjectName)) {
+            if (this->PManager->Project_Create(CreateProjectName)) {
                 CreateProjectName.clear();
             }
         }
@@ -284,8 +271,8 @@ void CameraSystem::MenuProject() {
     // 展示修改项目
     if (ImGui::CollapsingHeader("项目列表")) {
         // 输出是否打开了项目调试窗口
-        ImGui::Text(("项目调试窗口状态：" + std::string(this->PManager.ShowWindow.load(std::memory_order_acquire) ? "打开" : "关闭")).c_str());
-        this->PManager.Project_ShowAllInLines();
+        ImGui::Text(("项目调试窗口状态：" + std::string(this->PManager->ShowWindow.load(std::memory_order_acquire) ? "打开" : "关闭")).c_str());
+        this->PManager->Project_ShowAllInLines();
     }
 
     return;
@@ -301,15 +288,15 @@ void CameraSystem::MenuWorkspace() {
             this->ISys().LogError("请输入工作区名！");
             return;
         }
-        if (!this->WManager.Workspace_Set(TargetWorkspaceName))return;
+        if (!this->WManager->Workspace_Set(TargetWorkspaceName))return;
 
     }
 
-    if (!this->WManager.CurrentWorkspace) {// 无工作区
+    if (!this->WManager->CurrentWorkspace) {// 无工作区
         ImGui::Text("当前未打开任何工作区");
         return;
     }
-    this->WManager.InWorkspace = true;
+    this->WManager->InWorkspace = true;
 
     return;
 }
@@ -319,21 +306,13 @@ void CameraSystem::MenuWorkspace() {
 // 其它功能
 
 void CameraSystem::VirtualMain() {
-    // 四大管理器逻辑主函数
-    // 摄像机绘制器更新 
-    // 注意调用顺序，元素管理器在前，项目管理器在后
-    // 每次循环，前管理器执行操作，后管理器可以安全地读取前管理器的状态
     this->CamDrawer.Update(this->AL3D->GetViewMatrix(), this->AL3D->GetWinWidth(), this->AL3D->GetWinHeight());
-    this->EManager.VirtualMain();
-    this->SManager.VirtualMain();
-    this->PManager.VirtualMain();
-    this->WManager.VirtualMain();
     return;
 }
 void CameraSystem::MemoryClear() {
-    this->EManager.Element_ClearAll();
-    this->SManager.Solution_ClearAll();
-    this->PManager.Project_ClearAll();
+    this->EManager->Element_ClearAll();
+    this->SManager->Solution_ClearAll();
+    this->PManager->Project_ClearAll();
     return;
 }
 
@@ -353,8 +332,8 @@ bool CameraSystem::CallProject(const std::string& ProjectName) {
     return true;
 }
 bool CameraSystem::CallSolution(const std::string& SolutionName) {
-    if (this->SManager.Playing_SetSolution(SolutionName)) {
-        this->SManager.Playing_Enable();
+    if (this->SManager->Playing_SetSolution(SolutionName)) {
+        this->SManager->Playing_Enable();
         return true;
     }
     else {
@@ -362,8 +341,8 @@ bool CameraSystem::CallSolution(const std::string& SolutionName) {
     }
 }
 bool CameraSystem::CallSolution(const MulNX::Message& Msg) {
-    if (this->PManager.Playing_AutoCall(Msg)) {
-        this->SManager.Playing_Enable();
+    if (this->PManager->Playing_AutoCall(Msg)) {
+        this->SManager->Playing_Enable();
         return true;
     }
     else {
@@ -372,10 +351,10 @@ bool CameraSystem::CallSolution(const MulNX::Message& Msg) {
 }
 bool CameraSystem::ShutDown() {
     this->ISys().LogWarning("ShutDown被调用！");
-    this->EManager.Preview_Disable();
-    this->SManager.Playing_Disable();
+    this->EManager->Preview_Disable();
+    this->SManager->Playing_Disable();
     return true;
 }
 bool CameraSystem::Save() {
-    return this->WManager.Workspace_Save();
+    return this->WManager->Workspace_Save();
 }

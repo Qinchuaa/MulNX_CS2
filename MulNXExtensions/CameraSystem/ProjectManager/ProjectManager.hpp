@@ -37,8 +37,6 @@ public:
     bool Init()override;
     // UI
     bool UINodeFunc(MulNXUINode* node);
-    // 依赖注入
-    void InjectDependence(ElementManager* EManager, SolutionManager* SManager);
     // 逻辑主函数
     void VirtualMain()override;
     // 遍历

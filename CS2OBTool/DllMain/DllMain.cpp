@@ -105,8 +105,12 @@ DWORD MulNX_CS2_Start(void*) {
             .BindAbstractLayer3D<CSController>("CSController")// 创建CS控制器模块为AbstractLayer3D模块，ID固定自动分配为系统模块最大ID 100
             .CreateModule<WebSocketManager>("WebSocketManager", 101)// 网络管理模块
             .CreateModule<CameraSystem>("CameraSystem", 102)// 摄像机系统模块
-            .CreateModule<MiniMap>("MiniMap", 103)// 小地图模块
-            .CreateModule<VirtualUser>("VirtualUser", 104)// 虚拟用户模块
+            .CreateModule<WorkspaceManager>("WorkspaceManager", 103)// 工作区管理模块
+            .CreateModule<ProjectManager>("ProjectManager", 104)// 项目管理模块
+            .CreateModule<SolutionManager>("SolutionManager", 105)// 解决方案管理模块
+            .CreateModule<ElementManager>("ElementManager", 106)// 元素管理模块
+            .CreateModule<MiniMap>("MiniMap", 113)// 小地图模块
+            .CreateModule<VirtualUser>("VirtualUser", 114)// 虚拟用户模块
             .CreateModule<GameCfgManager>("GameCfgManager", 206)// 游戏配置管理模块
             .CreateModule<DemoHelper>("DemoHelper", 207)// Demo辅助模块
             .CreateModule<GameSettingsManager>("GameSettingsManager", 208)// 游戏设置管理模块

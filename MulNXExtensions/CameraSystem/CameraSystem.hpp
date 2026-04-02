@@ -36,14 +36,14 @@
 // 摄像机系统
 class CameraSystem final :public ICameraSystem {
 private:
+    // 四大管理器
+    ElementManager* EManager{};
+    SolutionManager* SManager{};
+    ProjectManager* PManager{};
+    WorkspaceManager* WManager{};
+public:
     // 渲染器
     CameraDrawer CamDrawer{};
-    // 四大管理器
-    ElementManager EManager{};
-    SolutionManager SManager{};
-    ProjectManager PManager{};
-    WorkspaceManager WManager{};
-public:
     // 初始化
     bool Init()override;
     // 菜单

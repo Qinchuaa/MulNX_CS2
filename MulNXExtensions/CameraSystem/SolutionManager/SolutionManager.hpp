@@ -53,8 +53,6 @@ public:
     bool Init()override;
     // UI绘制
     bool UINodeFunc(MulNXUINode* node);
-    // 依赖注入
-    void InjectDependence(CameraDrawer* CamDrawer, ElementManager* EManager, ProjectManager* PManager);
     // 逻辑主函数
     void VirtualMain();
     // 遍历，用于迭代处理每个解决方案

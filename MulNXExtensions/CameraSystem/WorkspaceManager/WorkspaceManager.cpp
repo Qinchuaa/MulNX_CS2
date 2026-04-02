@@ -7,13 +7,10 @@
 #include <MulNXThirdParty/All_pugixml.hpp>
 
 bool WorkspaceManager::Init() {
-    
+    this->EManager = this->Core->ModuleManager()->FindModule<ElementManager>("ElementManager");
+    this->SManager = this->Core->ModuleManager()->FindModule<SolutionManager>("SolutionManager");
+    this->PManager = this->Core->ModuleManager()->FindModule<ProjectManager>("ProjectManager");
     return true;
-}
-void WorkspaceManager::InjectDependence(ElementManager* EManager, SolutionManager* SManager, ProjectManager* PManager) {
-    this->EManager = EManager;
-    this->SManager = SManager;
-    this->PManager = PManager;
 }
 void WorkspaceManager::VirtualMain() {
     return;

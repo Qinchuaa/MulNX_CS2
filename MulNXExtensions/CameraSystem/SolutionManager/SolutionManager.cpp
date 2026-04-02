@@ -1,6 +1,7 @@
 #include "SolutionManager.hpp"
 
 #include <MulNX/MulNX.hpp>
+#include <MulNXExtensions/CameraSystem/CameraSystem.hpp>
 #include <MulNXExtensions/CameraSystem/CameraDrawer/CameraDrawer.hpp>
 #include <MulNXExtensions/CameraSystem/ElementManager/ElementManager.hpp>
 #include <MulNXExtensions/CameraSystem/ProjectManager/ProjectManager.hpp>
@@ -8,6 +9,9 @@
 //解决方案管理器
 
 bool SolutionManager::Init() {
+    this->CamDrawer = &this->Core->ModuleManager()->FindModule<CameraSystem>("CameraSystem")->CamDrawer;
+    this->EManager = this->Core->ModuleManager()->FindModule<ElementManager>("ElementManager");
+    this->PManager = this->Core->ModuleManager()->FindModule<ProjectManager>("ProjectManager");
     this->SendUINode(this->GetName(), [this](MulNXUINode* node) {return this->UINodeFunc(node);});
     auto* PathManager = this->ISys().PathManager();
     if (PathManager->CreateKey("Solutions", "Solutions",
@@ -19,12 +23,6 @@ bool SolutionManager::Init() {
         PathManager->KeyBindDynamic("Solutions", "CurrentProject");
     }
     return true;
-}
-void SolutionManager::InjectDependence(CameraDrawer* CamDrawer, ElementManager* EManager, ProjectManager* PManager) {
-    //系统服务
-    this->CamDrawer = CamDrawer;
-    this->EManager = EManager;
-    this->PManager = PManager;
 }
 void SolutionManager::VirtualMain() {
     //判断需不需要刷新所有

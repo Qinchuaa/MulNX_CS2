@@ -107,7 +107,7 @@ CS2::C_CSPlayerPawn* CSController::GetSelfViewTargetPawn() {
 }
 
 std::expected<MulNX::Math::Point3, int> CSController::GetPoint3(CS2::CViewSetup* viewSetup) {
-    // 如何是头模式，那么根据viewSetup的位置和角度计算出一个假想的头部位置，并且基于欧拉角，给出恰好的三点
+    // 如果是头模式，那么根据viewSetup的位置和角度计算出一个假想的头部位置，并且基于欧拉角，给出恰好的三点
     if (this->controlAdvancedView.forceHeadMode.load(std::memory_order_acquire)) {
         MulNX::Math::Point3 point3{};
 

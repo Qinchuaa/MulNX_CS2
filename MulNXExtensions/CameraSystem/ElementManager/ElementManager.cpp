@@ -1,5 +1,6 @@
 #include "ElementManager.hpp"
 #include <MulNX/MulNX.hpp>
+#include <MulNXExtensions/CameraSystem/CameraSystem.hpp>
 #include <MulNXExtensions/CameraSystem/CameraDrawer/CameraDrawer.hpp>
 #include <MulNXExtensions/CameraSystem/SolutionManager/SolutionManager.hpp>
 #include <MulNXExtensions/CameraSystem/ProjectManager/ProjectManager.hpp>
@@ -20,6 +21,9 @@ bool ElementManager::UINodeFunc(MulNXUINode* node) {
 }
 //元素管理器基本函数
 bool ElementManager::Init() {
+    this->CamDrawer = &this->Core->ModuleManager()->FindModule<CameraSystem>("CameraSystem")->CamDrawer;
+    this->SManager = this->Core->ModuleManager()->FindModule<SolutionManager>("SolutionManager");
+    this->PManager = this->Core->ModuleManager()->FindModule<ProjectManager>("ProjectManager");
     this->SendUINode(this->GetName(), [this](MulNXUINode* node) {return this->UINodeFunc(node);});
 
     auto* PathManager = this->ISys().PathManager();
@@ -32,12 +36,6 @@ bool ElementManager::Init() {
         PathManager->KeyBindDynamic("Elements", "CurrentProject");
     }
     return true;
-}
-void ElementManager::InjectDependence(CameraDrawer* CamDrawer, SolutionManager* SManager, ProjectManager* PManager) {
-    //摄像机系统服务
-    this->CamDrawer = CamDrawer;
-    this->SManager = SManager;
-    this->PManager = PManager;
 }
 void ElementManager::VirtualMain() {
     for (auto& elem : this->Elements) {

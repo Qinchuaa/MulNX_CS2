@@ -43,8 +43,6 @@ public:
 
     // 初始化
     bool Init()override;
-    // 依赖注入
-    void InjectDependence(CameraDrawer* CamDrawer, SolutionManager* SManager, ProjectManager* PManager);
     // UI
     bool UINodeFunc(MulNXUINode* node);
     // 逻辑主函数
