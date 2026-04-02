@@ -9,10 +9,7 @@
 #include <MulNX/Systems/InputSystem/InputSystem.hpp>
 #include <MulNX/Base/Math/Translate/Translate.hpp>
 
-void CSController::HandleOverrideView(CS2::CViewSetup* viewSetup) {
-    this->controlView.currentView.WindowWidth.store(*viewSetup->pWidth(), std::memory_order_relaxed);
-    this->controlView.currentView.WindowHeight.store(*viewSetup->pHeight(), std::memory_order_relaxed);
-
+void CSController::HandleCameraSystemPlay(CS2::CViewSetup* viewSetup) {
     // 加载来自摄像机系统的View
     auto view = this->controlView.ViewToGame.load(std::memory_order_acquire);
     if (view) {
@@ -28,11 +25,38 @@ void CSController::HandleOverrideView(CS2::CViewSetup* viewSetup) {
             *viewSetup->pFov() = view->FOV;
         }
     }
+}
+
+void CSController::HandleOverrideView(CS2::CViewSetup* viewSetup) {
+    // 同步窗口尺寸到ControlView
+    this->controlView.currentView.WindowWidth.store(*viewSetup->pWidth(), std::memory_order_relaxed);
+    this->controlView.currentView.WindowHeight.store(*viewSetup->pHeight(), std::memory_order_relaxed);
 
     // 执行roll覆盖
     viewSetup->pViewAngles()->z = this->controlView.InputRoll.load(std::memory_order_acquire);
-    // 如果启用自由摄像机控制，同步角度到InputSystem
+
+    // 如果启用了高级视角控制，尝试更新视角数据，注意这里只是更新，不涉及具体的视角控制逻辑，视角控制逻辑在后面根据状态分流执行
+    if (this->controlAdvancedView.Enable.load(std::memory_order_acquire)) {
+        // 通过时间桥判断是否需要更新视角，防止抖动
+        static auto lastTime = this->AL3D->Time()->GetReal();
+        auto currentTime = this->AL3D->Time()->GetReal();
+        if (currentTime > lastTime || lastTime - currentTime > 0.015f || this->controlAdvancedView.AlwaysCaulate.load(std::memory_order_acquire)) {
+            auto result = this->HandleSelfViewUpdate();
+            if (result.has_value()) {
+                auto newView = result.value();
+                this->viewBuffer.Push(newView);
+            }
+            else {
+                this->ISys().LogWarning(std::format("HandleSelfViewUpdate failed with code: 0x{:X}", result.error()));
+            }
+            lastTime = currentTime;
+        }
+    }
+
+    // 根据状态调用不同的视角控制逻辑
+    // 自由摄像机优先级最高，其次是高级视角控制，最后是普通摄像机系统控制
     if (this->EnableFreeCameraControl.load(std::memory_order_acquire)) {
+        // 如果启用自由摄像机控制，同步角度到InputSystem
         auto* inputSys = this->pInputSystem;
         auto& freeCam = inputSys->GetFreeCamera();
         freeCam.Rotation = *viewSetup->pViewAngles();
@@ -40,6 +64,14 @@ void CSController::HandleOverrideView(CS2::CViewSetup* viewSetup) {
         viewSetup->pViewOrigin()->x = freeCam.Position.x;
         viewSetup->pViewOrigin()->y = freeCam.Position.y;
         viewSetup->pViewOrigin()->z = freeCam.Position.z;
+    }
+    else if (this->controlAdvancedView.OverrideSelfView.load(std::memory_order_acquire)) {
+        // 输出平滑后的值
+        *viewSetup->pViewOrigin() = this->viewBuffer.Get().position;
+        *viewSetup->pViewAngles() = this->viewBuffer.Get().rotation;
+    }
+    else {
+        this->HandleCameraSystemPlay(viewSetup);
     }
 
     // 记录视角数据
@@ -52,28 +84,6 @@ void CSController::HandleOverrideView(CS2::CViewSetup* viewSetup) {
     this->controlView.currentView.AnglesZ.store(viewSetup->pViewAngles()->z, std::memory_order_release);
 
     this->controlView.currentView.FOV.store(*viewSetup->pFov(), std::memory_order_release);
-
-    if (!this->controlAdvancedView.Enable.load(std::memory_order_acquire))return;
-
-    // 通过时间桥判断是否需要更新视角，防止抖动
-    static auto lastTime = this->AL3D->Time()->GetReal();
-    auto currentTime = this->AL3D->Time()->GetReal();
-    if (currentTime > lastTime || lastTime - currentTime > 0.015f|| this->controlAdvancedView.AlwaysCaulate.load(std::memory_order_acquire)) {
-        auto result = this->HandleSelfViewUpdate();
-        if (result.has_value()) {
-            auto newView = result.value();
-            this->viewBuffer.Push(newView);
-        }
-        else {
-            this->ISys().LogWarning(std::format("HandleSelfViewUpdate failed with code: 0x{:X}", result.error()));
-        }
-        lastTime = currentTime;
-    }
-    if (this->controlAdvancedView.OverrideSelfView.load(std::memory_order_acquire)) {
-        // 输出平滑后的值
-        *viewSetup->pViewOrigin() = this->viewBuffer.Get().position;
-        *viewSetup->pViewAngles() = this->viewBuffer.Get().rotation;
-    }
 }
 
 CS2::C_CSPlayerPawn* CSController::GetObserverTargetPawn() {
@@ -143,7 +153,7 @@ std::expected<MulNX::Math::View, int> CSController::HandleSelfViewUpdate() {
         }
 
         // 存储调试信息
-        auto boneInfo = std::make_shared<BoneInfo>();
+        auto boneInfo = std::make_shared<AxisInfo>();
         boneInfo->PosOrigin = point3.origin;
         boneInfo->PosForward = point3.forward;
         boneInfo->PosUp = point3.up;
@@ -151,11 +161,7 @@ std::expected<MulNX::Math::View, int> CSController::HandleSelfViewUpdate() {
         boneInfo->AxisLeft = left;
         boneInfo->AxisUp = up;
         float axisLen = this->controlAdvancedView.AxisLength.load(std::memory_order_acquire);
-        boneInfo->PosLeft = {
-            point3.origin.x + left.x * axisLen,
-            point3.origin.y + left.y * axisLen,
-            point3.origin.z + left.z * axisLen
-        };
+
         this->controlAdvancedView.CurrentBoneInfo.store(boneInfo, std::memory_order_release);
 
         // ========== 构建局部坐标系到世界坐标系的旋转矩阵 ==========
@@ -167,28 +173,6 @@ std::expected<MulNX::Math::View, int> CSController::HandleSelfViewUpdate() {
             up.x,      up.y,      up.z,      0.0f,    // 行2: Z轴(up)
             0.0f,      0.0f,      0.0f,      1.0f
         );
-
-        // ========== 构建局部旋转偏移矩阵 ==========
-        // 注意：旋转顺序应该是Yaw→Pitch→Roll，与注释一致
-        float pitchRad = this->controlAdvancedView.localRotationOffset.x * (DirectX::XM_PI / 180.0f);
-        float yawRad = this->controlAdvancedView.localRotationOffset.y * (DirectX::XM_PI / 180.0f);
-        float rollRad = this->controlAdvancedView.localRotationOffset.z * (DirectX::XM_PI / 180.0f);
-
-        // 创建旋转四元数（使用正确的旋转顺序）
-        DirectX::XMVECTOR quatYaw = DirectX::XMQuaternionRotationAxis(DirectX::XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f), yawRad);
-        DirectX::XMVECTOR quatPitch = DirectX::XMQuaternionRotationAxis(DirectX::XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f), pitchRad);
-        DirectX::XMVECTOR quatRoll = DirectX::XMQuaternionRotationAxis(DirectX::XMVectorSet(1.0f, 0.0f, 0.0f, 0.0f), rollRad);
-
-        // 组合顺序：先yaw，再pitch，最后roll
-        DirectX::XMVECTOR quatTemp = DirectX::XMQuaternionMultiply(quatPitch, quatYaw);
-        DirectX::XMVECTOR quatLocalRot = DirectX::XMQuaternionMultiply(quatRoll, quatTemp);
-
-        // 将四元数转换为矩阵
-        DirectX::XMMATRIX rotLocalOffset = DirectX::XMMatrixRotationQuaternion(quatLocalRot);
-
-        // ========== 计算最终旋转矩阵 ==========
-        // 先应用局部旋转偏移，再变换到世界坐标系
-        DirectX::XMMATRIX rotFinal = DirectX::XMMatrixMultiply(rotLocalOffset, rotLocalToWorld);
 
         // ========== 计算摄像机世界位置 ==========
         // 将局部偏移变换到世界坐标系
@@ -202,13 +186,31 @@ std::expected<MulNX::Math::View, int> CSController::HandleSelfViewUpdate() {
         DirectX::XMStoreFloat3(&worldOffsetVec, worldOffset);
 
         // 计算最终摄像机位置
-        DirectX::XMFLOAT3 targetCameraPos = {
-            point3.origin.x + worldOffsetVec.x,
-            point3.origin.y + worldOffsetVec.y,
-            point3.origin.z + worldOffsetVec.z
-        };
+        DirectX::XMFLOAT3 targetCameraPos = point3.origin + worldOffsetVec;
 
         // ========== 计算摄像机世界旋转 ==========
+        // 构建局部旋转偏移矩阵
+        // 注意：旋转顺序应该是Yaw→Pitch→Roll
+        float pitchRad = this->controlAdvancedView.localRotationOffset.x * (DirectX::XM_PI / 180.0f);
+        float yawRad = this->controlAdvancedView.localRotationOffset.y * (DirectX::XM_PI / 180.0f);
+        float rollRad = this->controlAdvancedView.localRotationOffset.z * (DirectX::XM_PI / 180.0f);
+
+        // 创建旋转四元数
+        DirectX::XMVECTOR quatYaw = DirectX::XMQuaternionRotationAxis(DirectX::XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f), yawRad);
+        DirectX::XMVECTOR quatPitch = DirectX::XMQuaternionRotationAxis(DirectX::XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f), pitchRad);
+        DirectX::XMVECTOR quatRoll = DirectX::XMQuaternionRotationAxis(DirectX::XMVectorSet(1.0f, 0.0f, 0.0f, 0.0f), rollRad);
+
+        // 组合顺序
+        DirectX::XMVECTOR quatTemp = DirectX::XMQuaternionMultiply(quatPitch, quatYaw);
+        DirectX::XMVECTOR quatLocalRot = DirectX::XMQuaternionMultiply(quatRoll, quatTemp);
+
+        // 将四元数转换为矩阵
+        DirectX::XMMATRIX rotLocalOffset = DirectX::XMMatrixRotationQuaternion(quatLocalRot);
+
+        // 计算最终旋转矩阵
+        // 先应用局部旋转偏移，再变换到世界坐标系
+        DirectX::XMMATRIX rotFinal = DirectX::XMMatrixMultiply(rotLocalOffset, rotLocalToWorld);
+
         // 从最终旋转矩阵中提取四元数
         DirectX::XMVECTOR quatFinal = DirectX::XMQuaternionRotationMatrix(rotFinal);
         DirectX::XMFLOAT4 quatF;
@@ -259,7 +261,6 @@ bool CSController::UINodeFunc(MulNXUINode* node) {
 
     auto* pGlobalFOV = this->CvarSystem.GetCvar("fov_cs_debug")->GetPtr<float>();
     ImGui::SliderFloat("fov调整", pGlobalFOV, 0, 179.99f);
-    //MulNX::UI::Checkbox("摄像机模式", this->controlView.CameraMode);
     if (ImGui::Button("一键归正")) {
         this->controlView.InputRoll.store(0, std::memory_order_release);
         *pGlobalFOV = 0;
@@ -318,9 +319,9 @@ bool CSController::UINodeFunc(MulNXUINode* node) {
             if (this->controlAdvancedView.ShowCoordinateAxes.load(std::memory_order_acquire)) {
                 float axisLen = this->controlAdvancedView.AxisLength.load(std::memory_order_acquire);
                 DirectX::XMFLOAT3 org = boneInfo->PosOrigin;
-                DirectX::XMFLOAT3 f_end = { org.x + boneInfo->AxisForward.x * axisLen, org.y + boneInfo->AxisForward.y * axisLen, org.z + boneInfo->AxisForward.z * axisLen };
-                DirectX::XMFLOAT3 u_end = { org.x + boneInfo->AxisUp.x * axisLen, org.y + boneInfo->AxisUp.y * axisLen, org.z + boneInfo->AxisUp.z * axisLen };
-                DirectX::XMFLOAT3 r_end = { org.x + boneInfo->AxisLeft.x * axisLen, org.y + boneInfo->AxisLeft.y * axisLen, org.z + boneInfo->AxisLeft.z * axisLen };
+                DirectX::XMFLOAT3 f_end = (boneInfo->AxisForward * axisLen) + org;
+                DirectX::XMFLOAT3 u_end = (boneInfo->AxisUp * axisLen) + org;
+                DirectX::XMFLOAT3 r_end = (boneInfo->AxisLeft * axisLen) + org;
 
                 MulNX::UI::DrawWorldLine(org, f_end, info, ImColor(255, 0, 0), 2.0f);
                 MulNX::UI::DrawWorldLine(org, u_end, info, ImColor(0, 255, 0), 2.0f);
@@ -340,9 +341,11 @@ bool CSController::UINodeFunc(MulNXUINode* node) {
         if (ImGui::Checkbox("启用自由摄像机位置控制", &currentEnable)) {
             if (currentEnable && !this->EnableFreeCameraControl.load(std::memory_order_acquire)) {
                 // 从未启用到启用：读取当前游戏位置和角度
-                DirectX::XMFLOAT3 gamePos{ this->controlView.currentView.OriginX.load(std::memory_order_acquire),
+                DirectX::XMFLOAT3 gamePos{
+                    this->controlView.currentView.OriginX.load(std::memory_order_acquire),
                     this->controlView.currentView.OriginY.load(std::memory_order_acquire),
-                    this->controlView.currentView.OriginZ.load(std::memory_order_acquire) };
+                    this->controlView.currentView.OriginZ.load(std::memory_order_acquire)
+                };
                 this->pInputSystem->GetFreeCamera().Position = gamePos;
             }
             this->EnableFreeCameraControl.store(currentEnable, std::memory_order_release);
@@ -360,49 +363,7 @@ bool CSController::UINodeFunc(MulNXUINode* node) {
             }
         }
     }
-#ifdef _DEBUG
 
-    // try {
-    //     for (int i = 0;i <= this->Modules.client.dwGameEntitySystem_highestEntityIndex();i++) {
-    //         auto* pEntity = this->Modules.client.GetBaseEntity(i);
-    //         if (!pEntity)continue;
-    //         auto hPawn = MulNX::MRead(pEntity->As<CS2::CBasePlayerController>()->hPawn());
-    //         if (!hPawn.Valid())continue;
-    //         auto* pPawn = this->Modules.client.GetBaseEntityFromHandle(hPawn)->As<CS2::C_CSPlayerPawn>();
-    //         if (!pPawn)continue;
-    //         auto* pGameSceneNode = MulNX::MRead(pPawn->pGameSceneNode());
-    //         if (!pGameSceneNode)continue;
-    //         auto* bones = MulNX::MRead(static_cast<CS2::CSkeletonInstance*>(pGameSceneNode)->unkBoneArray());
-    //         if (!bones)continue;
-
-    //         auto* pWeaponServices = MulNX::MRead(pPawn->pWeaponServices());
-    //         auto hAc = MulNX::MRead(pWeaponServices->hActiveWeapon());
-    //         auto* pWeapon = this->Modules.client.GetBaseEntityFromHandle(hAc)->As<CS2::C_BasePlayerWeapon>();
-    //         auto* pWeaponsGameSceneNode = MulNX::MRead(pWeapon->pGameSceneNode());
-    //         auto* bones2 = MulNX::MRead(static_cast<CS2::CSkeletonInstance*>(pWeaponsGameSceneNode)->unkBoneArray());
-
-    //         auto* pGlow = pPawn->Glow();
-    //         auto* pGlowColor = pGlow->fGlowColor();;
-
-    //         MulNX::TransInfo info;
-    //         info.pMatrix = this->GetViewMatrix();
-    //         info.windowHeight = this->GetWinHeight();
-    //         info.windowWidth = this->GetWinWidth();
-
-    //         for (int i = 0;i < 34;++i) {
-    //             DirectX::XMFLOAT3 pos = MulNX::MRead(bones->at(i));
-    //             DirectX::XMFLOAT3 pos2 = MulNX::MRead(bones2->at(i));
-    //             MulNX::UI::DrawWorldPoint(pos, info, std::to_string(i).c_str());
-    //             MulNX::UI::DrawWorldPoint(pos2, info, std::to_string(i).c_str());
-    //         }
-    //     }
-    // }
-    // catch (const std::runtime_error& e) {
-    //     this->ISys().LogWarning("捕获到在绘制时发生的异常");
-    // }
-
-
-#endif
     return true;
 }
 

@@ -61,13 +61,11 @@ public:
     Dofs dofs{};
 };
 
-class BoneInfo{
+class AxisInfo {
 public:
     DirectX::XMFLOAT3 PosOrigin;
     DirectX::XMFLOAT3 PosForward;
     DirectX::XMFLOAT3 PosUp;
-    // PosLeft 仍然保留为用于可视化
-    DirectX::XMFLOAT3 PosLeft;
 
     // 轴向单位向量（局部坐标系的三轴）
     DirectX::XMFLOAT3 AxisForward;
@@ -90,7 +88,7 @@ struct ControlAdvancedView {
     DirectX::XMFLOAT3 localRotationOffset = { 0.0f, 0.0f, 0.0f };
 
     // 调试信息
-    std::atomic<std::shared_ptr<BoneInfo>> CurrentBoneInfo;
+    std::atomic<std::shared_ptr<AxisInfo>> CurrentBoneInfo;
     // 是否反转上向（用于修正骨骼上向方向）
     std::atomic<bool> InvertUp{ false };
     // 绘制选项
@@ -131,6 +129,7 @@ public:
 
     CS2::C_CSPlayerPawn* GetObserverTargetPawn();
     std::expected<MulNX::Math::Point3, int> GetPoint3();
+    void HandleCameraSystemPlay(CS2::CViewSetup* viewSetup);
     std::expected<MulNX::Math::View, int> HandleSelfViewUpdate();
 
     bool Init()override;
