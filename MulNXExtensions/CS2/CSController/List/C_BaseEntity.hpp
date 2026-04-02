@@ -205,6 +205,8 @@ namespace CS2 {
     public:
 
         CHandle<C_BasePlayerPawn>* hPawn() { return reinterpret_cast<CHandle<C_BasePlayerPawn>*>(reinterpret_cast<uintptr_t>(this) + cs2_dumper::schemas::client_dll::CBasePlayerController::m_hPawn); }
+        char* m_iszPlayerName() { return reinterpret_cast<char*>(reinterpret_cast<uintptr_t>(this) + cs2_dumper::schemas::client_dll::CBasePlayerController::m_iszPlayerName); } // char[128]
+        uint64_t* m_steamID() { return reinterpret_cast<uint64_t*>(reinterpret_cast<uintptr_t>(this) + cs2_dumper::schemas::client_dll::CBasePlayerController::m_steamID); } // uint64
     };
 
     class CCSPlayerController :public CBasePlayerController {

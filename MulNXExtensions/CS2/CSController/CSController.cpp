@@ -157,10 +157,8 @@ std::expected<MulNX::Math::Point3, int> CSController::GetPoint3(CS2::CViewSetup*
         if (!target) return std::unexpected(3);
 
         // 根据模式选择骨骼来源（武器或人体），二选一（不回退）
-        bool useBody = this->controlAdvancedView.UseBodyBones.load(std::memory_order_acquire);
         MulNX::Math::Point3 point3{};
-
-        if (useBody) {
+        if (this->controlAdvancedView.UseBodyBones.load(std::memory_order_acquire)) {
             // 从人体读取骨骼
             point3.origin = target->GetBonePos(this->controlAdvancedView.boneIndex1.load());
             point3.forward = target->GetBonePos(this->controlAdvancedView.boneIndex2.load());
@@ -417,10 +415,6 @@ bool CSController::UINodeFunc(MulNXUINode* node) {
     return true;
 }
 
-void CSController::VirtualMain() {
-    this->EntryProcessMsg();
-    return;
-}
 void CSController::ProcessMsg(MulNX::Message& Msg) {
     switch (Msg.type) {
     case "Core/ReHook"_hash: {
@@ -548,6 +542,7 @@ void CSController::ThreadMain() {
     while (this->MyThreadRunning) {
         try {
             this->GetMsgResult = this->TryGetMsg();
+            this->EntryProcessMsg();
         }
         catch (const std::runtime_error& e) {
             this->ISys().LogWarning("在更新数据时捕获到异常：" + std::string(e.what()));

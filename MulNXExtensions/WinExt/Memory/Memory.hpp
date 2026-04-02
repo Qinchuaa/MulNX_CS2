@@ -92,8 +92,8 @@ namespace MulNX {
                 }
             }
         }
-        // 安全读取字符串（ANSI/UTF-8），逐字节读取直到遇到空字符或达到缓冲大小
-        bool ReadString(const uintptr_t Address, char* Buffer, size_t BufferSize);
+        // 逐字节读取直到遇到空字符
+        std::string ReadString(const char* target);
         // 安全读取宽字符串（UTF-16），逐字符读取直到遇到空字符或达到缓冲字符数
         bool ReadWString(const uintptr_t Address, wchar_t* Buffer, size_t BufferCount);
     }

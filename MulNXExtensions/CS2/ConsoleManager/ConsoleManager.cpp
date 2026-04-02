@@ -15,6 +15,7 @@ bool ConsoleManager::UINodeFunc(MulNXUINode* ThisNode) {
     MulNX::UI::Checkbox("游戏配置管理器窗口", this->Core->ModuleManager()->FindModule("GameCfgManager")->ShowWindow);
     MulNX::UI::Checkbox("快捷操作窗口", this->Core->ModuleManager()->FindModule("CSController")->ShowWindow);
     MulNX::UI::Checkbox("Demo辅助窗口", this->Core->ModuleManager()->FindModule("DemoHelper")->ShowWindow);
+    MulNX::UI::Checkbox("玩家信息管理窗口", this->Core->ModuleManager()->FindModule("PlayerHub")->ShowWindow);
 
 	if (ImGui::CollapsingHeader("CS2控制台")) {
 		if (ImGui::Button("解限所有CS2控制台变量")) {

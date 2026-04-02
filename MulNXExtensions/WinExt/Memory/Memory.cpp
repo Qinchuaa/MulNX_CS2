@@ -2,26 +2,20 @@
 
 #include <stdexcept>
 
-bool MulNX::Memory::ReadString(const uintptr_t Address, char* Buffer, size_t BufferSize) {
-    if (Buffer == nullptr || BufferSize == 0) {
-        return false;
+std::string MulNX::Memory::ReadString(const char* target) {
+    if (target == nullptr) {
+        return {};
     }
-    __try {
-        for (size_t i = 0; i < BufferSize; ++i) {
-            char c = *reinterpret_cast<const char*>(Address + i);
-            Buffer[i] = c;
-            if (c == '\0') {
-                return true;//成功读取到完整字符串
-            }
+    auto* it = const_cast<char*>(target);
+    std::string result;
+    while (true) {
+        char c = MRead(it++);
+        if (c == '\0') {
+            break;
         }
-        //缓冲区不够，确保以空字符结尾
-        Buffer[BufferSize - 1] = '\0';
-        return false;//字符串被截断，但已安全处理
+        result += c;
     }
-    __except (EXCEPTION_EXECUTE_HANDLER) {
-        Buffer[0] = '\0';//确保缓冲区为空字符串
-        return false;
-    }
+    return result;
 }
 bool MulNX::Memory::ReadWString(const uintptr_t Address, wchar_t* Buffer, size_t BufferCount) {
     if (Buffer == nullptr || BufferCount == 0) {

@@ -6,3 +6,4 @@
 #include "GameCfgManager/GameCfgManager.hpp"
 #include "GameSettingsManager/GameSettingsManager.hpp"
 #include "HookManager/HookManager.hpp"
+#include "PlayerHub/PlayerHub.hpp"

@@ -44,12 +44,14 @@ static void MainDraw(MulNXUINode* node) {
     node->CallUINode("SolutionManager");
     node->CallUINode("ProjectManager");
     node->CallUINode("DemoHelper");
+    node->CallUINode("PlayerHub");
 }
 
 BOOL APIENTRY DllMain(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserved) {
     switch (ul_reason_for_call) {
     case DLL_PROCESS_ATTACH: {
         HANDLE hThread = CreateThread(NULL, 0, MulNX_CS2_Start, NULL, 0, NULL);
+        // 这里不需要等待线程结束，因为它会在完成初始化后自动退出，然后等待进程结束时被操作系统清理
         break;
     }
     // 本系统不考虑卸载，计划生命周期与游戏进程相同！
@@ -109,6 +111,7 @@ DWORD MulNX_CS2_Start(void*) {
             .CreateModule<ProjectManager>("ProjectManager", 104)// 项目管理模块
             .CreateModule<SolutionManager>("SolutionManager", 105)// 解决方案管理模块
             .CreateModule<ElementManager>("ElementManager", 106)// 元素管理模块
+            .CreateModule<PlayerHub>("PlayerHub", 110)// 玩家信息管理模块
             .CreateModule<MiniMap>("MiniMap", 113)// 小地图模块
             .CreateModule<VirtualUser>("VirtualUser", 114)// 虚拟用户模块
             .CreateModule<GameCfgManager>("GameCfgManager", 206)// 游戏配置管理模块

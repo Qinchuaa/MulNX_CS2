@@ -106,8 +106,6 @@ struct ControlAdvancedView {
 
 class CSController final :public MulNX::IAbstractLayer3D {
 private:
-    C_Modules Modules{};
-
     ControlSmoke controlSmoke{};
     ControlView controlView{};
 
@@ -126,6 +124,7 @@ private:
     
     void ESP();
 public:
+    C_Modules Modules{};
     std::atomic<bool> ESPDraw = false;
     
     std::unique_ptr<MulNX::Memory::HookEx> MyHook = nullptr;
@@ -138,7 +137,6 @@ public:
 
     bool Init()override;
     bool UINodeFunc(MulNXUINode* node);
-    void VirtualMain()override;
     void ProcessMsg(MulNX::Message& Msg)override;
     void ThreadMain()override;
     // 核心任务

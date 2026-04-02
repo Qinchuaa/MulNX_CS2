@@ -75,7 +75,7 @@ public:
 
     template<typename T>
     static IVClass* Assume(T* pClass) {
-        return static_cast<IVClass*>(pClass);
+        return reinterpret_cast<IVClass*>(pClass);
     }
 
     static IVClass* Assume(uintptr_t pClass) {
