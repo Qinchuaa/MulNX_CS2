@@ -41,7 +41,7 @@ void CSController::HandleOverrideView(CS2::CViewSetup* viewSetup) {
         static auto lastTime = this->AL3D->Time()->GetReal();
         auto currentTime = this->AL3D->Time()->GetReal();
         if (currentTime > lastTime || lastTime - currentTime > 0.015f || this->controlAdvancedView.AlwaysCaulate.load(std::memory_order_acquire)) {
-            auto result = this->HandleSelfViewUpdate();
+            auto result = this->HandleSelfViewUpdate(viewSetup);
             if (result.has_value()) {
                 auto newView = result.value();
                 this->viewBuffer.Push(newView);
@@ -86,14 +86,16 @@ void CSController::HandleOverrideView(CS2::CViewSetup* viewSetup) {
     this->controlView.currentView.FOV.store(*viewSetup->pFov(), std::memory_order_release);
 }
 
-CS2::C_CSPlayerPawn* CSController::GetObserverTargetPawn() {
+CS2::C_CSPlayerPawn* CSController::GetSelfViewTargetPawn() {
     try {
         auto* localController = this->Modules.client.dwLocalPlayerController();
         if (!localController) return nullptr;
         auto hLocalPawn = MulNX::MRead(localController->hPawn());
         auto* localPawn = this->Modules.client.GetBaseEntityFromHandle(hLocalPawn)->As<CS2::C_CSPlayerPawn>();
         if (!localPawn) return nullptr;
-
+        if (this->controlAdvancedView.useLocalPawn.load(std::memory_order_acquire)) {
+            return localPawn;
+        }
         auto hObserverTarget = localPawn->GetHandleObserverTarget();
         auto* target = this->Modules.client.GetBaseEntityFromHandle(hObserverTarget)->As<CS2::C_CSPlayerPawn>();
         return target;
@@ -104,9 +106,54 @@ CS2::C_CSPlayerPawn* CSController::GetObserverTargetPawn() {
     }
 }
 
-std::expected<MulNX::Math::Point3, int> CSController::GetPoint3() {
+std::expected<MulNX::Math::Point3, int> CSController::GetPoint3(CS2::CViewSetup* viewSetup) {
+    // 如何是头模式，那么根据viewSetup的位置和角度计算出一个假想的头部位置，并且基于欧拉角，给出恰好的三点
+    if (this->controlAdvancedView.forceHeadMode.load(std::memory_order_acquire)) {
+        MulNX::Math::Point3 point3{};
+
+        // 使用 viewSetup 的位置和角度来构造一个假想的头部三点：
+        // - origin: 摄像机位置（视点）
+        // - forward: origin 沿视向方向的一点
+        // - up: origin 沿上方向的一点
+
+        // 读取视点位置与角度（角度按 x=pitch, y=yaw, z=roll）
+        DirectX::XMFLOAT3 camPos = *viewSetup->pViewOrigin();
+        DirectX::XMFLOAT3 ang = *viewSetup->pViewAngles();
+
+        // 角度转弧度（保持与工程中其它位置使用的顺序一致：yaw->pitch->roll）
+        float pitchRad = ang.x * (DirectX::XM_PI / 180.0f);
+        float yawRad = ang.y * (DirectX::XM_PI / 180.0f);
+        float rollRad = ang.z * (DirectX::XM_PI / 180.0f);
+
+        // 使用与其它代码一致的轴：yaw 绕 Z, pitch 绕 Y, roll 绕 X
+        DirectX::XMVECTOR quatYaw = DirectX::XMQuaternionRotationAxis(DirectX::XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f), yawRad);
+        DirectX::XMVECTOR quatPitch = DirectX::XMQuaternionRotationAxis(DirectX::XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f), pitchRad);
+        DirectX::XMVECTOR quatRoll = DirectX::XMQuaternionRotationAxis(DirectX::XMVectorSet(1.0f, 0.0f, 0.0f, 0.0f), rollRad);
+
+        DirectX::XMVECTOR quatTemp = DirectX::XMQuaternionMultiply(quatPitch, quatYaw);
+        DirectX::XMVECTOR quatView = DirectX::XMQuaternionMultiply(quatRoll, quatTemp);
+        DirectX::XMMATRIX rotView = DirectX::XMMatrixRotationQuaternion(quatView);
+
+        // 局部基向量（注意：本代码将 X 视为 forward, Z 视为 up）
+        DirectX::XMVECTOR vForward = DirectX::XMVector3TransformNormal(DirectX::XMVectorSet(1.0f, 0.0f, 0.0f, 0.0f), rotView);
+        DirectX::XMVECTOR vUp = DirectX::XMVector3TransformNormal(DirectX::XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f), rotView);
+
+        DirectX::XMFLOAT3 fwd; DirectX::XMFLOAT3 up;
+        DirectX::XMStoreFloat3(&fwd, vForward);
+        DirectX::XMStoreFloat3(&up, vUp);
+
+        // 选取合适的参考长度（只要不为 0 即可），用 16 单位作为默认尺度
+        const float refLen = 16.0f;
+
+        point3.origin = camPos;
+        point3.forward = (fwd * refLen) + camPos;
+        point3.up = (up * refLen) + camPos;
+
+        return point3;
+    }
+
     try {
-        auto* target = this->GetObserverTargetPawn();
+        auto* target = this->GetSelfViewTargetPawn();
         if (!target) return std::unexpected(3);
 
         // 根据模式选择骨骼来源（武器或人体），二选一（不回退）
@@ -128,7 +175,7 @@ std::expected<MulNX::Math::Point3, int> CSController::GetPoint3() {
             point3.forward = pWeapon->GetBonePos(this->controlAdvancedView.boneIndex2.load());
             point3.up = pWeapon->GetBonePos(this->controlAdvancedView.boneIndex3.load());
         }
-        return std::expected<MulNX::Math::Point3, int>(point3);
+        return point3;
     }
     catch (const std::exception& e) {
         this->ISys().LogWarning(std::format("GetObserverTargetBonePos exception: {}", e.what()));
@@ -136,9 +183,9 @@ std::expected<MulNX::Math::Point3, int> CSController::GetPoint3() {
     }
 }
 
-std::expected<MulNX::Math::View, int> CSController::HandleSelfViewUpdate() {
+std::expected<MulNX::Math::View, int> CSController::HandleSelfViewUpdate(CS2::CViewSetup* viewSetup) {
     try {
-        auto point3Result = this->GetPoint3();
+        auto point3Result = this->GetPoint3(viewSetup);
         if (!point3Result.has_value()) {
             return std::unexpected(point3Result.error());
         }
@@ -169,9 +216,9 @@ std::expected<MulNX::Math::View, int> CSController::HandleSelfViewUpdate() {
         // 所以每一行分别是 X 轴(forward)、Y 轴(left)、Z 轴(up)
         DirectX::XMMATRIX rotLocalToWorld = DirectX::XMMatrixSet(
             forward.x, forward.y, forward.z, 0.0f,    // 行0: X轴(forward)
-            left.x,    left.y,    left.z,    0.0f,    // 行1: Y轴(left)
-            up.x,      up.y,      up.z,      0.0f,    // 行2: Z轴(up)
-            0.0f,      0.0f,      0.0f,      1.0f
+            left.x, left.y, left.z, 0.0f,    // 行1: Y轴(left)
+            up.x, up.y, up.z, 0.0f,    // 行2: Z轴(up)
+            0.0f, 0.0f, 0.0f, 1.0f
         );
 
         // ========== 计算摄像机世界位置 ==========
@@ -277,6 +324,11 @@ bool CSController::UINodeFunc(MulNXUINode* node) {
         MulNX::UI::Checkbox("覆盖自视角", this->controlAdvancedView.OverrideSelfView);
         MulNX::UI::Checkbox("始终计算视角", this->controlAdvancedView.AlwaysCaulate);
 
+        MulNX::UI::Checkbox("使用本地Pawn", this->controlAdvancedView.useLocalPawn);
+        MulNX::UI::Checkbox("强制头模式", this->controlAdvancedView.forceHeadMode);
+        // 骨骼来源模式：武器 / 人体
+        MulNX::UI::Checkbox("人体骨骼模式", this->controlAdvancedView.UseBodyBones);
+
         // 骨骼选择（三点定义坐标系）
         MulNX::UI::SliderInt("骨骼起点 (原点)", this->controlAdvancedView.boneIndex1, 0, 127);
         MulNX::UI::SliderInt("骨骼终点 (前向)", this->controlAdvancedView.boneIndex2, 0, 127);
@@ -303,8 +355,6 @@ bool CSController::UINodeFunc(MulNXUINode* node) {
         MulNX::UI::Checkbox("显示原始骨骼点", this->controlAdvancedView.ShowOriginalBones);
         MulNX::UI::Checkbox("显示坐标轴", this->controlAdvancedView.ShowCoordinateAxes);
         MulNX::UI::SliderFloat("坐标轴长度", this->controlAdvancedView.AxisLength, 1.0f, 200.0f);
-        // 骨骼来源模式：武器 / 人体
-        MulNX::UI::Checkbox("人体骨骼模式", this->controlAdvancedView.UseBodyBones);
 
         // 绘制当前骨骼位置（调试用）
         auto boneInfo = this->controlAdvancedView.CurrentBoneInfo.load(std::memory_order_acquire);

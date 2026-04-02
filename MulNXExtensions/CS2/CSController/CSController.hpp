@@ -78,6 +78,12 @@ struct ControlAdvancedView {
     std::atomic<bool> OverrideSelfView = false;
     std::atomic<bool> AlwaysCaulate = false;
 
+    std::atomic<bool> useLocalPawn = false;
+    // 强制头模式
+    std::atomic<bool> forceHeadMode = false;
+    // 是否使用人体骨骼而非武器骨骼
+    std::atomic<bool> UseBodyBones = false;
+
     // 骨骼索引
     std::atomic<int> boneIndex1{ 0 };
     std::atomic<int> boneIndex2{ 1 };
@@ -96,8 +102,6 @@ struct ControlAdvancedView {
     std::atomic<bool> ShowCoordinateAxes{ true };
     // 绘制坐标轴的长度（世界单位）
     std::atomic<float> AxisLength{ 30.0f };
-    // 是否使用人体骨骼而非武器骨骼
-    std::atomic<bool> UseBodyBones{ false };
 };
 
 class CSController final :public MulNX::IAbstractLayer3D {
@@ -127,10 +131,10 @@ public:
     std::unique_ptr<MulNX::Memory::HookEx> MyHook = nullptr;
     void HandleOverrideView(CS2::CViewSetup* viewSetup);
 
-    CS2::C_CSPlayerPawn* GetObserverTargetPawn();
-    std::expected<MulNX::Math::Point3, int> GetPoint3();
+    CS2::C_CSPlayerPawn* GetSelfViewTargetPawn();
+    std::expected<MulNX::Math::Point3, int> GetPoint3(CS2::CViewSetup* viewSetup);
     void HandleCameraSystemPlay(CS2::CViewSetup* viewSetup);
-    std::expected<MulNX::Math::View, int> HandleSelfViewUpdate();
+    std::expected<MulNX::Math::View, int> HandleSelfViewUpdate(CS2::CViewSetup* viewSetup);
 
     bool Init()override;
     bool UINodeFunc(MulNXUINode* node);
