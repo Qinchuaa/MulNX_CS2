@@ -194,11 +194,9 @@ std::expected<MulNX::Math::View, int> CSController::HandleSelfViewUpdate() {
         // 将局部偏移变换到世界坐标系
         DirectX::XMVECTOR localOffset = DirectX::XMLoadFloat3(&this->controlAdvancedView.localPositionOffset);
 
-        // 先应用局部旋转偏移
-        DirectX::XMVECTOR rotatedLocalOffset = DirectX::XMVector3TransformCoord(localOffset, rotLocalOffset);
-
-        // 再变换到世界坐标系
-        DirectX::XMVECTOR worldOffset = DirectX::XMVector3TransformCoord(rotatedLocalOffset, rotLocalToWorld);
+        // 位置去耦：直接使用局部坐标系到世界坐标系的变换，
+        // 使 localRotationOffset 不影响最终位置（旋转仅用于方向）
+        DirectX::XMVECTOR worldOffset = DirectX::XMVector3TransformCoord(localOffset, rotLocalToWorld);
 
         DirectX::XMFLOAT3 worldOffsetVec;
         DirectX::XMStoreFloat3(&worldOffsetVec, worldOffset);
