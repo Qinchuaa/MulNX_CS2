@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.31)
 # 项目定义
 project("MulNX_CS2")
 # 版本定义
-add_definitions(-DMulNXVersion=\"B0.1.0C0.11.0\")
+add_definitions(-DMulNXVersion=\"B0.1.0C0.11.1\")
 
 # 启用 LTO（仅 Release 配置）
 include(CheckIPOSupported)
