@@ -12,6 +12,7 @@ class HookManager final :public MulNX::Core::CoreStarterBase {
 public:
     inline static HookManager* pInstance = nullptr;
 private:
+    MulNX::IUISystem* pUISystem = nullptr;
     std::atomic<bool>GuardPleaseAction = false;
 
     std::unique_ptr<MulNX::Memory::HookEx> hkPre = nullptr;

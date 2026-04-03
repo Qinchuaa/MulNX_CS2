@@ -38,12 +38,7 @@ namespace MulNX {
             // 主循环
             void VirtualMain();
 
-            // 获取系统模块的接口
-
-            MulNX::IMessageManager& IMessageManager();
-            MulNX::IUISystem& IUISystem();
-            MulNX::IPCer& IPCer();
-            MulNX::IHandleSystem& IHandleSystem();
+            // 获取模块的接口
             ModuleManager* ModuleManager();
 
             // 获取启动器

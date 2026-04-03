@@ -70,7 +70,6 @@ private:
 
     AdvancedViewController* pAdvancedViewController = nullptr;
     
-
     // 自由摄像机控制
     std::atomic<bool> EnableFreeCameraControl = false;
 
@@ -83,7 +82,6 @@ private:
     
     void ESP();
 public:
-    MulNX::Math::ViewBuffer viewBuffer{};
     C_Modules Modules{};
     std::atomic<bool> ESPDraw = false;
     
@@ -93,7 +91,6 @@ public:
     CS2::C_CSPlayerPawn* GetSelfViewTargetPawn();
     std::expected<MulNX::Math::Point3, int> GetPoint3(CS2::CViewSetup* viewSetup);
     void HandleCameraSystemPlay(CS2::CViewSetup* viewSetup);
-    std::expected<MulNX::Math::View, int> HandleSelfViewUpdate(CS2::CViewSetup* viewSetup);
 
     bool Init()override;
     bool UINodeFunc(MulNXUINode* node);

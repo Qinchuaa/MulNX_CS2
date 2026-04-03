@@ -35,6 +35,7 @@ bool ProjectManager::UINodeFunc(MulNXUINode* node) {
 bool ProjectManager::Init() {
     this->EManager = this->Core->ModuleManager()->FindModule<ElementManager>("ElementManager");
     this->SManager = this->Core->ModuleManager()->FindModule<SolutionManager>("SolutionManager");
+    this->pIPCer = this->Core->ModuleManager()->FindModule<MulNX::IPCer>("IPCer");
     this->SendUINode(this->GetName(), [this](MulNXUINode* node) {return this->UINodeFunc(node);});
     auto* PathManager = this->ISys().PathManager();
     if (PathManager->CreateKey("CurrentProject", {},
@@ -190,14 +191,14 @@ bool ProjectManager::Project_Apply(const std::shared_ptr<Project> Project) {
     }
     //获取元素文件夹路径
     std::filesystem::path ElementsPath = this->ISys().PathManager()->PathGetFromKey("Elements");
-    std::vector<std::string>Elements = this->Core->IPCer().GetFileNamesByPath(ElementsPath);
+    std::vector<std::string>Elements = this->pIPCer->GetFileNamesByPath(ElementsPath);
     //遍历加载元素
     for (const std::string& Element : Elements) {
         this->EManager->Element_Load(ElementsPath / Element);
     }
     //获取解决方案文件夹路径
     std::filesystem::path SolutionsPath = this->ISys().PathManager()->PathGetFromKey("Solutions");
-    std::vector<std::string>Solutions = this->Core->IPCer().GetFileNamesByPath(SolutionsPath);
+    std::vector<std::string>Solutions = this->pIPCer->GetFileNamesByPath(SolutionsPath);
     //遍历加载解决方案
     for (const std::string& Solution : Solutions) {
         this->SManager->Solution_Load(SolutionsPath / Solution);

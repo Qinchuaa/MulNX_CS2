@@ -10,12 +10,9 @@ bool WorkspaceManager::Init() {
     this->EManager = this->Core->ModuleManager()->FindModule<ElementManager>("ElementManager");
     this->SManager = this->Core->ModuleManager()->FindModule<SolutionManager>("SolutionManager");
     this->PManager = this->Core->ModuleManager()->FindModule<ProjectManager>("ProjectManager");
+    this->pIPCer = this->Core->ModuleManager()->FindModule<MulNX::IPCer>("IPCer");
     return true;
 }
-void WorkspaceManager::VirtualMain() {
-    return;
-}
-
 
 bool WorkspaceManager::Workspace_Save() {
     //生成配置文件
@@ -53,7 +50,7 @@ bool WorkspaceManager::Workspace_Set(const std::string& Name) {
     this->InWorkspace = true;
     // 自动加载所有项目到内存中
     auto ProPath = PathManager->PathGetFromKey("CurrentWorkspace");
-    std::vector<std::string> ProjectsNames = this->Core->IPCer().GetProjectsNames(ProPath);
+    std::vector<std::string> ProjectsNames = this->pIPCer->GetProjectsNames(ProPath);
     if (!ProjectsNames.empty()) {
         for (const auto& ProjectName : ProjectsNames) {
             std::filesystem::path ProjectPath = PathManager->PathGetFromKey("CurrentWorkspace") / ProjectName;

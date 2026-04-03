@@ -30,37 +30,6 @@ MulNX::Core::ModuleManager* MulNX::Core::Core::ModuleManager() {
     return this->pModuleManager.get();
 }
 
-// 获取子模块的接口实现
-
-MulNX::IHandleSystem& MulNX::Core::Core::IHandleSystem() {
-    static MulNX::IHandleSystem* pIHandleSystem = nullptr;
-    if (!pIHandleSystem) {
-        pIHandleSystem = this->ModuleManager()->FindModule<MulNX::IHandleSystem>("HandleSystem");
-    }
-    return *pIHandleSystem;
-}
-MulNX::IUISystem& MulNX::Core::Core::IUISystem() {
-    static MulNX::IUISystem* pIUISystem = nullptr;
-    if (!pIUISystem) {
-        pIUISystem = this->ModuleManager()->FindModule<MulNX::IUISystem>("UISystem");
-    }
-    return *pIUISystem;
-}
-MulNX::IPCer& MulNX::Core::Core::IPCer() {
-    static MulNX::IPCer* pIPCer = nullptr;
-    if (!pIPCer) {
-        pIPCer = this->ModuleManager()->FindModule<MulNX::IPCer>("IPCer");
-    }
-    return *pIPCer;
-}
-MulNX::IMessageManager& MulNX::Core::Core::IMessageManager() {
-    static MulNX::IMessageManager* pIMessageManager = nullptr;
-    if (!pIMessageManager) {
-        pIMessageManager = this->ModuleManager()->FindModule<MulNX::IMessageManager>("MessageManager");
-    }
-    return *pIMessageManager;
-}
-
 // 专用初始化函数
 void MulNX::Core::Core::Init() {
     // 核心启动器初始化

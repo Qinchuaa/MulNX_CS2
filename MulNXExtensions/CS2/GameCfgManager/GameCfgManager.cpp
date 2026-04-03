@@ -5,7 +5,7 @@
 
 bool GameCfgManager::Init() {
     //基础服务
-	this->IPCer = &this->Core->IPCer();
+	this->IPCer = this->Core->ModuleManager()->FindModule<MulNX::IPCer>("IPCer");
     //路径绑定
     this->ToolPath = this->ISys().PathGet("CS2Configs");
 	this->GamePath = this->IPCer->PathGet_CS_cfg();

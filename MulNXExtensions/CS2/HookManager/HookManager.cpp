@@ -11,6 +11,7 @@
 static bool AllowReHook = false;// 允许重hook
 bool HookManager::Init() {
     this->pInstance = this;
+    this->pUISystem = this->Core->ModuleManager()->FindModule<MulNX::IUISystem>("UISystem");
     MH_Initialize();
     return true;
 }
@@ -127,7 +128,7 @@ DWORD HookManager::CreateHook() {
 			this->pd3dDevice->Release();
 			this->pSwapChain->Release();
 
-			this->Core->IUISystem().SetFrameBefore([this]()->void {
+			this->pUISystem->SetFrameBefore([this]()->void {
 
 				this->d3dInit(this->pSwapChain);
 				ImGui_ImplDX11_NewFrame();
@@ -136,7 +137,7 @@ DWORD HookManager::CreateHook() {
 
 				return;
 				});
-			this->Core->IUISystem().SetFrameBehind([this]()->void {
+			this->pUISystem->SetFrameBehind([this]()->void {
 
 				ImGui::EndFrame();
 				ImGui::Render();
@@ -213,7 +214,7 @@ LRESULT __stdcall HookManager::EntryMyWndProc(HWND hwnd, UINT uMsg, WPARAM wPara
 // ImGui窗口处理函数导入
 extern LRESULT ImGui_ImplWin32_WndProcHandler(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 LRESULT __stdcall HookManager::MyWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
-	std::unique_lock lock(this->Core->IUISystem().UIMtx);
+	std::unique_lock lock(this->pUISystem->UIMtx);
 	if (ImGui_ImplWin32_WndProcHandler(hwnd, uMsg, wParam, lParam)) {
 		return true;
 	}
@@ -235,7 +236,7 @@ HRESULT __stdcall HookManager::MyPresent(IDXGISwapChain* swapChain, UINT syncInt
 		this->OriginWndProc = (WNDPROC)SetWindowLongPtrW(this->CS2hWnd, GWLP_WNDPROC, (LONG_PTR)HookManager::pInstance->EntryMyWndProc);
 	if (this->GlobalVars->SystemReady.load(std::memory_order_acquire)) {
 		this->pSwapChain = swapChain;
-		this->Core->IUISystem().Render();
+		this->pUISystem->Render();
 	}
 	return 0;
 }

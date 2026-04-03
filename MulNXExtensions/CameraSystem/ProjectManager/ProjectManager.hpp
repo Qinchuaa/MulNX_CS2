@@ -12,6 +12,7 @@ class ProjectManager final :public MulNX::ModuleBase {
 private:
     ElementManager* EManager = nullptr;
     SolutionManager* SManager = nullptr;
+    MulNX::IPCer* pIPCer = nullptr;
 
     bool OpenProjectKCPackDebugWindow = false;
     bool OpenProjectNameDebugWindow = false;

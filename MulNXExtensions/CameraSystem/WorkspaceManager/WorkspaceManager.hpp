@@ -13,6 +13,7 @@ private:
     ElementManager* EManager = nullptr;
     SolutionManager* SManager = nullptr;
     ProjectManager* PManager = nullptr;
+    MulNX::IPCer* pIPCer = nullptr;
 public:
     bool InWorkspace = false;
     //数据存储
@@ -22,9 +23,6 @@ public:
 
     //初始化
     bool Init()override;
-    //逻辑主函数
-    void VirtualMain()override;
-
 
     //工作区
 
