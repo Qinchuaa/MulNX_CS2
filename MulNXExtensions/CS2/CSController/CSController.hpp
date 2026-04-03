@@ -11,6 +11,8 @@
 #include "C_CSGameRules/C_CSGameRules.hpp"
 #include "Client/Client.hpp"
 
+#include <MulNXExtensions/CS2/AdvancedViewController/AdvancedViewController.hpp>
+
 #include <expected>
 
 class C_Modules {
@@ -61,56 +63,13 @@ public:
     Dofs dofs{};
 };
 
-class AxisInfo {
-public:
-    DirectX::XMFLOAT3 PosOrigin;
-    DirectX::XMFLOAT3 PosForward;
-    DirectX::XMFLOAT3 PosUp;
-
-    // 轴向单位向量（局部坐标系的三轴）
-    DirectX::XMFLOAT3 AxisForward;
-    DirectX::XMFLOAT3 AxisLeft;
-    DirectX::XMFLOAT3 AxisUp;
-};
-
-struct ControlAdvancedView {
-    std::atomic<bool> Enable = false;
-    std::atomic<bool> OverrideSelfView = false;
-    std::atomic<bool> AlwaysCaulate = false;
-
-    std::atomic<bool> useLocalPawn = false;
-    // 强制头模式
-    std::atomic<bool> forceHeadMode = false;
-    // 是否使用人体骨骼而非武器骨骼
-    std::atomic<bool> UseBodyBones = false;
-
-    // 骨骼索引
-    std::atomic<int> boneIndex1{ 0 };
-    std::atomic<int> boneIndex2{ 1 };
-    std::atomic<int> boneIndex3{ 2 };
-
-    // 位置和旋转偏移
-    DirectX::XMFLOAT3 localPositionOffset = { 0.0f, 0.0f, 0.0f };
-    DirectX::XMFLOAT3 localRotationOffset = { 0.0f, 0.0f, 0.0f };
-
-    // 调试信息
-    std::atomic<std::shared_ptr<AxisInfo>> CurrentBoneInfo;
-    // 是否反转上向（用于修正骨骼上向方向）
-    std::atomic<bool> InvertUp{ false };
-    // 绘制选项
-    std::atomic<bool> ShowOriginalBones{ true };
-    std::atomic<bool> ShowCoordinateAxes{ true };
-    // 绘制坐标轴的长度（世界单位）
-    std::atomic<float> AxisLength{ 30.0f };
-};
-
 class CSController final :public MulNX::IAbstractLayer3D {
 private:
     ControlSmoke controlSmoke{};
     ControlView controlView{};
 
-    ControlAdvancedView controlAdvancedView{};
-    MulNX::Math::ViewBuffer viewBuffer{};
+    AdvancedViewController* pAdvancedViewController = nullptr;
+    
 
     // 自由摄像机控制
     std::atomic<bool> EnableFreeCameraControl = false;
@@ -124,6 +83,7 @@ private:
     
     void ESP();
 public:
+    MulNX::Math::ViewBuffer viewBuffer{};
     C_Modules Modules{};
     std::atomic<bool> ESPDraw = false;
     

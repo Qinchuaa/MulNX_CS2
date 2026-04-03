@@ -8,6 +8,7 @@ add_library(MulNXCS2Ext
     "CSController/List/C_BaseEntity.cpp"
     
     "PlayerHub/PlayerHub.cpp"
+    "AdvancedViewController/AdvancedViewController.cpp"
 
     "ConsoleManager/ConsoleManager.cpp"
     "DemoHelper/DemoHelper.cpp"

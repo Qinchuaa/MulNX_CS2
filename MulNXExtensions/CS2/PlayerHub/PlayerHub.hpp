@@ -2,7 +2,6 @@
 
 #include <MulNX/MulNX.hpp>
 #include <MulNXExtensions/WinExt/WinExt.hpp>
-#include <MulNXExtensions/CS2/CSController/List/C_BaseEntity.hpp>
 
 class CSController;
 class PlayerHub final :public MulNX::ModuleBase {
