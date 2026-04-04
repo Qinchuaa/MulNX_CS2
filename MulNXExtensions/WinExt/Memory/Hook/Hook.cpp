@@ -1,7 +1,5 @@
 #include "Hook.hpp"
 
-#include <MulNX/Config/Config.hpp>
-#include <MulNXExtensions/WinExt/WinException/WinException.hpp>
 #include <Windows.h>
 #include <atomic>
 #include <algorithm>
@@ -72,7 +70,7 @@ void* TryAlloc(uintptr_t target, size_t size) {
     return nullptr;
 }
 
-std::unique_ptr<MulNX::Memory::HookEx> MulNX::Memory::HookEx::Create(uint8_t* Target, int Len, bool extraStackAdjust, std::function<bool(RegContext*, HookEx*)>&& callback) {
+std::expected<std::unique_ptr<MulNX::Memory::HookEx>, std::string> MulNX::Memory::HookEx::Create(uint8_t* Target, int Len, bool extraStackAdjust, std::function<bool(RegContext*, HookEx*)>&& callback) {
     // 首先创建HookEx实例
     auto HookExInstance = std::make_unique<HookEx>();
     HookExInstance->hookTarget = Target;
@@ -84,11 +82,11 @@ std::unique_ptr<MulNX::Memory::HookEx> MulNX::Memory::HookEx::Create(uint8_t* Ta
     // 为调度器汇编部分分配空间    
     auto* alloced = TryAlloc((uintptr_t)Target, 4096);
     if (!alloced) {
-        MulNX::ErrorTerminate("windows内存分配失败！");
+        return std::unexpected("windows内存分配失败！");
     }
     if (std::abs(static_cast<long long>(reinterpret_cast<uintptr_t>(alloced) -
         reinterpret_cast<uintptr_t>(Target))) > 1024ULL * 1024 * 1024) {
-        MulNX::ErrorTerminate("windows内存分配失败！");
+        return std::unexpected("windows内存分配失败！");
     }
     HookExInstance->pAsmDispatcher = alloced;
     {
@@ -195,10 +193,13 @@ std::unique_ptr<MulNX::Memory::HookEx> MulNX::Memory::HookEx::Create(uint8_t* Ta
         HookExInstance->pMaybeRawFunc = (uintptr_t)HookExInstance->pAsmDispatcher + HookExInstance->dispatcherAsmCode.size();
 
         // 修复原始指令
-        MulNX::Memory::Asm::Code fixed =
-            FixRIPRelativeInstructions(HookExInstance->hookTargetRawCode,
-                (uintptr_t)HookExInstance->hookTarget,
-                (uintptr_t)HookExInstance->pAsmDispatcher + HookExInstance->dispatcherAsmCode.size());
+        auto result = FixRIPRelativeInstructions(HookExInstance->hookTargetRawCode,
+            (uintptr_t)HookExInstance->hookTarget,
+            (uintptr_t)HookExInstance->pAsmDispatcher + HookExInstance->dispatcherAsmCode.size());
+        if (!result.has_value())return std::unexpected(result.error());
+
+        MulNX::Memory::Asm::Code fixed = result.value();
+            
 
         // 追加原始指令
         HookExInstance->dispatcherAsmCode.append_range(std::move(fixed));

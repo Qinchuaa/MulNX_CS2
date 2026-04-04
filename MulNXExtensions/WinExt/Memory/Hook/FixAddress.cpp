@@ -1,13 +1,12 @@
 #include "Hook.hpp"
 
 #include <Zydis/Zydis.h>
-#include <MulNX/Config/Config.hpp>
 
 // 修复原始指令中的RIP相对寻址
 // raw_code: 原始机器码
 // old_base: 原始代码地址（hookTarget）
 // new_base: 调度器中的新地址（pAsmDispatcher + 已生成代码大小）
-std::vector<uint8_t> MulNX::Memory::HookEx::FixRIPRelativeInstructions(
+std::expected<std::vector<uint8_t>, std::string> MulNX::Memory::HookEx::FixRIPRelativeInstructions(
     const std::vector<uint8_t>& raw_code,
     uintptr_t old_base,
     uintptr_t new_base) {
@@ -57,7 +56,7 @@ std::vector<uint8_t> MulNX::Memory::HookEx::FixRIPRelativeInstructions(
                 if (new_disp < -2147483648LL || new_disp > 2147483647LL) {
                     // 超出范围，需要更复杂的处理（比如蹦床），此处可记录错误或断言
                     // 暂时仍赋值，但可能导致崩溃
-                    MulNX::ErrorTerminate("无法成功！");
+                    return std::unexpected("无法成功！");
                 }
 
                 // 定位指令中的位移字段并修改

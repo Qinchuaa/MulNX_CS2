@@ -9,24 +9,14 @@
 class HookManager final :public MulNX::Core::CoreStarterBase {
     friend MulNX::Core::Core;
     friend class MulNXiCoreImpl;
-public:
-    inline static HookManager* pInstance = nullptr;
 private:
     MulNX::IUISystem* pUISystem = nullptr;
     std::atomic<bool>GuardPleaseAction = false;
 
-    std::unique_ptr<MulNX::Memory::HookEx> hkPre = nullptr;
-    // Hook Present
-    using Present_t = HRESULT __stdcall(IDXGISwapChain* swapChain, UINT syncInterval, UINT flags);
-    MulNX::Base::HookUtility::HookUtility<Present_t>& hkPresent = MulNX::Base::HookUtility::HookUtility<Present_t>::GetInstance();
-    HRESULT __stdcall MyPresent(IDXGISwapChain* swapChain, UINT syncInterval, UINT flags);
-    // Hook Release
-    using Release_t = ULONG __stdcall(IUnknown* pThis);
-    MulNX::Base::HookUtility::HookUtility<Release_t>& hkRelease = MulNX::Base::HookUtility::HookUtility<Release_t>::GetInstance();
-    ULONG __stdcall MyRelease(IUnknown* pThis);
-    // 窗口处理函数处理，这里不适用Hook
-    WNDPROC OriginWndProc = nullptr;
-    static LRESULT __stdcall EntryMyWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+    std::unique_ptr<MulNX::Memory::HookEx> hkPresent = nullptr;
+    
+    // 窗口处理函数
+    std::unique_ptr<MulNX::Memory::HookEx> hkWndProc = nullptr;
     LRESULT __stdcall MyWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
     std::atomic<bool>ReHook = false;

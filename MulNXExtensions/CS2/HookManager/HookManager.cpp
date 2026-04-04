@@ -10,9 +10,7 @@
 
 static bool AllowReHook = false;// 允许重hook
 bool HookManager::Init() {
-    this->pInstance = this;
     this->pUISystem = this->Core->ModuleManager()->FindModule<MulNX::IUISystem>("UISystem");
-    MH_Initialize();
     return true;
 }
 void HookManager::StartAll() {
@@ -39,9 +37,6 @@ void HookManager::CheckHook() {
         // std::this_thread::sleep_for(std::chrono::milliseconds(1000));
         // 执行重新Hook逻辑
         // 先清理Hook
-        this->hkPresent.Clear();
-        this->hkRelease.Clear();
-
 
         // 重置状态
         this->d3dInited = false;
@@ -104,26 +99,15 @@ DWORD HookManager::CreateHook() {
 			nullptr,
 			nullptr);
 
-		if (this->pSwapChain) {
-			auto pVtable = (void***)(this->pSwapChain);
-			auto Vtable = *pVtable;
-
-            // 经检验，单版本可以手动适配，但不够普适，故不切换
-            // uint8_t* targetPr = (uint8_t*)Vtable[2]+5;
-            // this->hkPre = MulNX::Memory::HookEx::Create(targetPr, （覆盖字节）, true, [this](RegContext* ctx)->void {
-            //     this->MyPresent((IDXGISwapChain*)ctx->rcx, ctx->rdx, ctx->r8);
-            //     });
-            // this->hkPre->Attach();
-
-            this->hkRelease.SetTarget(Vtable[2]);
-			this->hkRelease.SetMyFunction([this](auto&&... args) {
-				return this->MyRelease(std::forward<decltype(args)>(args)...); });
-			this->hkRelease.CreateAndEnable();
-
-			this->hkPresent.SetTarget(Vtable[8]);
-			this->hkPresent.SetMyFunction([this](auto&&... args) {
-				return this->MyPresent(std::forward<decltype(args)>(args)...); });
-			this->hkPresent.CreateAndEnable();
+        if (this->pSwapChain) {
+            this->hkPresent = MulNX::Memory::HookEx::Create((uint8_t*)IVClass::Assume(this->pSwapChain)->GetVFuncPtr(8) + 5, 5, false, [this](RegContext* ctx, MulNX::Memory::HookEx* hk)->bool {
+                if (this->GlobalVars->SystemReady.load(std::memory_order_acquire)) {
+                    this->pSwapChain = (IDXGISwapChain*)ctx->rcx;
+                    this->pUISystem->Render();
+                }
+                return true;
+                }).value();
+            this->hkPresent->Attach();
 
 			this->pd3dDevice->Release();
 			this->pSwapChain->Release();
@@ -147,8 +131,8 @@ DWORD HookManager::CreateHook() {
 				});
 
 			this->GuardPleaseAction = false;
-			this->NeedReHook = false;
-		}
+            this->NeedReHook = false;
+        }
 	}
 	return 0;
 }
@@ -159,7 +143,13 @@ void HookManager::d3dInit(IDXGISwapChain* _this) {
 
 		DXGI_SWAP_CHAIN_DESC sd;
 		_this->GetDesc(&sd);
-		this->CS2hWnd = sd.OutputWindow;
+        this->CS2hWnd = sd.OutputWindow;
+        // hook窗口过程
+        this->hkWndProc = MulNX::Memory::HookEx::Create((uint8_t*)GetWindowLongPtrW(this->CS2hWnd, GWLP_WNDPROC), 9, false, [this](RegContext* ctx, MulNX::Memory::HookEx* hk)->bool {
+            ctx->rax = this->MyWndProc((HWND)ctx->rcx, ctx->rdx, ctx->r8, ctx->r9);
+            return ctx->rax;
+            }).value();
+        this->hkWndProc->Attach();
 
 		ID3D11Texture2D* buf = nullptr;
 		_this->GetBuffer(0, __uuidof(ID3D11Texture2D), (void**)&buf);
@@ -202,48 +192,22 @@ void HookManager::d3dInit(IDXGISwapChain* _this) {
 	}
 }
 
-LRESULT __stdcall HookManager::EntryMyWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
-	if (HookManager::pInstance->MyWndProc(hwnd, uMsg, wParam, lParam)) {
-		return true;
-	}	
-	return CallWindowProcW(HookManager::pInstance->OriginWndProc, hwnd, uMsg, wParam, lParam);
-}
-
-
-
 // ImGui窗口处理函数导入
 extern LRESULT ImGui_ImplWin32_WndProcHandler(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 LRESULT __stdcall HookManager::MyWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 	std::unique_lock lock(this->pUISystem->UIMtx);
 	if (ImGui_ImplWin32_WndProcHandler(hwnd, uMsg, wParam, lParam)) {
-		return true;
+		return 0;
 	}
 
 	ImGuiIO& io = ImGui::GetIO();
 	// 鼠标：当ImGui想要捕获时总是拦截
 	if (io.WantCaptureMouse && MulNX::Base::WIN32Msg::IsMouseMessage(uMsg)) {
-		return true;
+		return 0;
 	}
 	// 键盘：只在WantTextInput为true时拦截（表示输入框激活）
 	else if (io.WantTextInput && MulNX::Base::WIN32Msg::IsKeyboardMessage(uMsg)) {
-		return true;
+		return 0;
 	}
-
-	return false;
-}
-HRESULT __stdcall HookManager::MyPresent(IDXGISwapChain* swapChain, UINT syncInterval, UINT flags) {
-	if(!this->OriginWndProc)
-		this->OriginWndProc = (WNDPROC)SetWindowLongPtrW(this->CS2hWnd, GWLP_WNDPROC, (LONG_PTR)HookManager::pInstance->EntryMyWndProc);
-	if (this->GlobalVars->SystemReady.load(std::memory_order_acquire)) {
-		this->pSwapChain = swapChain;
-		this->pUISystem->Render();
-	}
-	return 0;
-}
-ULONG __stdcall HookManager::MyRelease(IUnknown* pThis) {
-	//MessageBoxW(NULL, L"交换链被释放", L"D3D11SwapChain", NULL);
-	this->NeedReHook = true;
-	this->GuardPleaseAction = true;
-
-	return 0;
+	return 1;
 }

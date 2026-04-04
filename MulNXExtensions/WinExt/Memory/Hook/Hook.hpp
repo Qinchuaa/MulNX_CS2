@@ -6,6 +6,7 @@
 #include <functional>
 #include <vector>
 #include <shared_mutex>
+#include <expected>
 
 struct RegContext {
     uint64_t rax, rcx, rdx, rbx, rsp, rbp, rsi, rdi;
@@ -33,13 +34,13 @@ namespace MulNX {
 
             void* pAsmDispatcher = nullptr;
             MulNX::Memory::Asm::Code dispatcherAsmCode{};
-            
+
             uint8_t* hookTarget = nullptr;
             size_t overrideSize = 0;
             MulNX::Memory::Asm::Code hookTargetRawCode;
             MulNX::Memory::Asm::Code jumperAsmCode{};
         private:
-            static std::vector<uint8_t> FixRIPRelativeInstructions(const std::vector<uint8_t>& raw_code,
+            static std::expected<std::vector<uint8_t>, std::string> FixRIPRelativeInstructions(const std::vector<uint8_t>& raw_code,
                 uintptr_t old_base, uintptr_t new_base);
             static uintptr_t Dispatch(HookEx* pHookExInstance, RegContext* ctx);
 
@@ -49,7 +50,9 @@ namespace MulNX {
             uintptr_t pMaybeRawFunc = 0;// 可能的原函数地址（如果覆盖的指令是一个完整函数的开头）
             HookEx() = default;
             ~HookEx();
-            static std::unique_ptr<HookEx> Create(uint8_t* Target, int Len, bool extraStackAdjust, std::function<bool(RegContext*, HookEx*)>&& callback);
+
+            // 关于栈调整参数，当其为false时，模拟原始栈状态进行回调；当其为true时，则认为栈状态非16字节对齐，内部进行对齐操作（常常是函数中间Hook）
+            static std::expected<std::unique_ptr<HookEx>, std::string> Create(uint8_t* Target, int Len, bool extraStackAdjust, std::function<bool(RegContext*, HookEx*)>&& callback);
             Result Attach();
             Result Detach();
         };

@@ -7,11 +7,6 @@ add_library(MulNXThirdParty
     "imgui_d11/imgui_tables.cpp"
     "imgui_d11/imgui_widgets.cpp"
     "pugixml/pugixml.cpp"
-    "minhook/src/buffer.c"
-    "minhook/src/hook.c"
-    "minhook/src/trampoline.c"
-    "minhook/src/hde/hde32.c"
-    "minhook/src/hde/hde64.c"
 )
 
 add_subdirectory("yaml-cpp-master")

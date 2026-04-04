@@ -2,12 +2,10 @@
 
 #include <MulNX/MulNX.hpp>
 #include <MulNX/Base/UI/UI.hpp>
+#include <MulNX/Base/Math/Translate/Translate.hpp>
 #include <MulNXExtensions/CS2/Signatures.hpp>
 #include <MulNXExtensions/CameraSystem/CameraSystemIO/CameraSystemIO.hpp>
 #include <MulNXThirdParty/All_cs2_dumper.hpp>
-#include <MulNXThirdParty/All_MinHook.hpp>
-#include <MulNX/Systems/InputSystem/InputSystem.hpp>
-#include <MulNX/Base/Math/Translate/Translate.hpp>
 
 void CSController::HandleCameraSystemPlay(CS2::CViewSetup* viewSetup) {
     // 加载来自摄像机系统的View
@@ -185,7 +183,7 @@ bool CSController::Init() {
                 this->MyHook = MulNX::Memory::HookEx::Create(target.Data(), 16, true, [this](RegContext* ctx, MulNX::Memory::HookEx* hookEx)->bool {
                     this->HandleOverrideView((CS2::CViewSetup*)ctx->rsi);
                     return true;
-                });
+                }).value();
                 this->MyHook->Attach();
             }
         }
