@@ -6,9 +6,14 @@
 #include <atomic>
 #include <algorithm>
 
-void MulNX::Memory::HookEx::Dispatch(HookEx* pHookExInstance, RegContext* ctx) {
-    pHookExInstance->callback(ctx);
-    return;
+uintptr_t MulNX::Memory::HookEx::Dispatch(HookEx* pHookExInstance, RegContext* ctx) {
+    // 返回true继续执行剩余指令，返回false则在恢复寄存器后直接ret
+    if (pHookExInstance->callback(ctx, pHookExInstance)) {
+        return pHookExInstance->jmpTarget1;
+    }
+    else {
+        return pHookExInstance->jmpTarget0;
+    }
 }
 
 void* TryAlloc(uintptr_t target, size_t size) {
@@ -67,7 +72,7 @@ void* TryAlloc(uintptr_t target, size_t size) {
     return nullptr;
 }
 
-std::unique_ptr<MulNX::Memory::HookEx> MulNX::Memory::HookEx::Create(uint8_t* Target, int Len, bool extraStackAdjust, std::function<void(RegContext*)>&& callback) {
+std::unique_ptr<MulNX::Memory::HookEx> MulNX::Memory::HookEx::Create(uint8_t* Target, int Len, bool extraStackAdjust, std::function<bool(RegContext*, HookEx*)>&& callback) {
     // 首先创建HookEx实例
     auto HookExInstance = std::make_unique<HookEx>();
     HookExInstance->hookTarget = Target;
@@ -86,7 +91,6 @@ std::unique_ptr<MulNX::Memory::HookEx> MulNX::Memory::HookEx::Create(uint8_t* Ta
         MulNX::ErrorTerminate("windows内存分配失败！");
     }
     HookExInstance->pAsmDispatcher = alloced;
-
     {
         // 创建编译器
         using enum MulNX::Memory::Asm::Reg;
@@ -96,7 +100,7 @@ std::unique_ptr<MulNX::Memory::HookEx> MulNX::Memory::HookEx::Create(uint8_t* Ta
         // 计算结构体大小（保证16字节对齐）
         constexpr size_t ctxSize = (sizeof(RegContext) + 15) & ~15;
         size_t frameSize = ctxSize;
-        if (extraStackAdjust)frameSize += 8;
+        if (!extraStackAdjust)frameSize += 8;
 
         Asm
             .sub(RSP, frameSize) // 分配栈空间
@@ -126,8 +130,44 @@ std::unique_ptr<MulNX::Memory::HookEx> MulNX::Memory::HookEx::Create(uint8_t* Ta
             .mov(RAX, (uintptr_t)&MulNX::Memory::HookEx::Dispatch)// 绑定分发函数
             .sub(RSP, 32)// 分配影子空间
             .call(RAX)// 调用函数，进入CPP语言空间
-            .add(RSP, 32);// 回收影子空间
+            .add(RSP, 32)// 回收影子空间
+            .jmp(RAX);// 某种意义上，这里是一个分支操作，但是这个分支实际上是由CPP语言层面决定的，因此我们在汇编层面上并不需要区分真假分支，直接让它无条件跳转到jmpTarget即可
+        HookExInstance->dispatcherAsmCode = Asm.Release();
 
+        // 分支0
+        HookExInstance->jmpTarget0 = (uintptr_t)HookExInstance->pAsmDispatcher + HookExInstance->dispatcherAsmCode.size();
+        // 恢复区
+        Asm
+            .mov(RAX, Mem(RSP, offsetof(RegContext, rax)))
+            .mov(RCX, Mem(RSP, offsetof(RegContext, rcx)))
+            .mov(RDX, Mem(RSP, offsetof(RegContext, rdx)))
+            .mov(RBX, Mem(RSP, offsetof(RegContext, rbx)))
+            // 不恢复 rsp
+            .mov(RBP, Mem(RSP, offsetof(RegContext, rbp)))
+            .mov(RSI, Mem(RSP, offsetof(RegContext, rsi)))
+            .mov(RDI, Mem(RSP, offsetof(RegContext, rdi)))
+            .mov(R8, Mem(RSP, offsetof(RegContext, r8)))
+            .mov(R9, Mem(RSP, offsetof(RegContext, r9)))
+            .mov(R10, Mem(RSP, offsetof(RegContext, r10)))
+            .mov(R11, Mem(RSP, offsetof(RegContext, r11)))
+            .mov(R12, Mem(RSP, offsetof(RegContext, r12)))
+            .mov(R13, Mem(RSP, offsetof(RegContext, r13)))
+            .mov(R14, Mem(RSP, offsetof(RegContext, r14)))
+            .mov(R15, Mem(RSP, offsetof(RegContext, r15)))
+            // 释放上下文空间
+            .add(RSP, frameSize)
+            .ret();// 从分发函数返回
+
+        HookExInstance->dispatcherAsmCode.append_range(std::move(Asm.Release()));
+
+
+
+
+
+
+
+        // 分支1
+        HookExInstance->jmpTarget1 = (uintptr_t)HookExInstance->pAsmDispatcher + HookExInstance->dispatcherAsmCode.size();
         // 恢复区
         Asm
             .mov(RAX, Mem(RSP, offsetof(RegContext, rax)))
@@ -149,10 +189,13 @@ std::unique_ptr<MulNX::Memory::HookEx> MulNX::Memory::HookEx::Create(uint8_t* Ta
             // 释放上下文空间
             .add(RSP, frameSize);
 
-        HookExInstance->dispatcherAsmCode = Asm.Release();
-    
+        HookExInstance->dispatcherAsmCode.append_range(std::move(Asm.Release()));
+
+        // 这里恰好可以记录一个可能是原函数地址的位置（如果覆盖的指令是一个完整函数的开头），供回调函数使用
+        HookExInstance->pMaybeRawFunc = (uintptr_t)HookExInstance->pAsmDispatcher + HookExInstance->dispatcherAsmCode.size();
+
         // 修复原始指令
-        auto fixed =
+        MulNX::Memory::Asm::Code fixed =
             FixRIPRelativeInstructions(HookExInstance->hookTargetRawCode,
                 (uintptr_t)HookExInstance->hookTarget,
                 (uintptr_t)HookExInstance->pAsmDispatcher + HookExInstance->dispatcherAsmCode.size());
@@ -165,11 +208,37 @@ std::unique_ptr<MulNX::Memory::HookEx> MulNX::Memory::HookEx::Create(uint8_t* Ta
         
         HookExInstance->dispatcherAsmCode.append_range(std::move(Asm.Release()));
 
+
+
+
+
+
+
+
+
+
+
+
+
         // 复制机器码到VirtualAlloc分配的内存
         memcpy(HookExInstance->pAsmDispatcher,
             HookExInstance->dispatcherAsmCode.data(),
             HookExInstance->dispatcherAsmCode.size());
 
+
+
+        
+
+
+        
+
+
+
+
+
+
+
+        
         // 生成用于覆盖原位置的代码
         Asm.jmp((uintptr_t)HookExInstance->pAsmDispatcher - (uintptr_t)Target - 5);
         //Asm.jmp64((uintptr_t)HookExInstance->pAsmDispatcher);

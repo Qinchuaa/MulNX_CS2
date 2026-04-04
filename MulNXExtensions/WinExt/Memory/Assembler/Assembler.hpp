@@ -65,6 +65,8 @@ namespace MulNX {
                 Assembler& call(Mem R);
                 Assembler& nop();
 
+                Assembler& ret();
+
                 Assembler& push(Reg r);
                 Assembler& push(Mem m);
                 Assembler& pop(Reg r);

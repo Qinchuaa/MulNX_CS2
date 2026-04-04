@@ -12,14 +12,6 @@ struct RegContext {
     uint64_t r8, r9, r10, r11, r12, r13, r14, r15;
 };
 
-using HookCallBack = void(*)(RegContext*);
-
-struct HookInfo {
-    int var1;
-    int var2;
-    HookCallBack callback;
-};
-
 namespace MulNX {
     namespace Memory {
         class HookEx {
@@ -36,7 +28,7 @@ namespace MulNX {
             const static size_t allocSize = 1000;
 
             bool attached = false;
-            std::function<void(RegContext*)> callback;
+            std::function<bool(RegContext*, HookEx*)> callback;
             size_t threadNumInAsm = 0;
 
             void* pAsmDispatcher = nullptr;
@@ -49,11 +41,15 @@ namespace MulNX {
         private:
             static std::vector<uint8_t> FixRIPRelativeInstructions(const std::vector<uint8_t>& raw_code,
                 uintptr_t old_base, uintptr_t new_base);
-            static void Dispatch(HookEx* pHookExInstance, RegContext* ctx);
+            static uintptr_t Dispatch(HookEx* pHookExInstance, RegContext* ctx);
+
+            uintptr_t jmpTarget0 = 0;
+            uintptr_t jmpTarget1 = 0;
         public:
+            uintptr_t pMaybeRawFunc = 0;// 可能的原函数地址（如果覆盖的指令是一个完整函数的开头）
             HookEx() = default;
             ~HookEx();
-            static std::unique_ptr<HookEx> Create(uint8_t* Target, int Len, bool extraStackAdjust, std::function<void(RegContext*)>&& callback);
+            static std::unique_ptr<HookEx> Create(uint8_t* Target, int Len, bool extraStackAdjust, std::function<bool(RegContext*, HookEx*)>&& callback);
             Result Attach();
             Result Detach();
         };

@@ -15,6 +15,7 @@ add_library(WinExt STATIC
     "Memory/Assembler/do/push.cpp"
     "Memory/Assembler/do/jmp.cpp"
     "Memory/Assembler/do/nop.cpp"
+    "Memory/Assembler/do/ret.cpp"
 
 
     "Memory/DllModule/DllModule.cpp"
