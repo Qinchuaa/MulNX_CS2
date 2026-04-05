@@ -73,8 +73,8 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserv
 
 DWORD MulNX_CS2_Start(void*) {
     try {
-        // 得到唯一核心，必须设置核心名称，路径管理依赖核心名
-        auto* core = MulNX::Core::Core::Create("CS2OBTool");// 注意此函数只允许被调用一次，除此之外会报错
+        // 创建核心
+        auto* core = MulNX::Core::Core::Create("CS2OBTool");
 
         // 创建核心启动器实例
         std::unique_ptr<MulNX::Core::CoreStarterBase> starter = std::make_unique<HookManager>();

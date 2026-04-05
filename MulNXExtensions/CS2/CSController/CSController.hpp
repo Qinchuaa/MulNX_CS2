@@ -3,6 +3,7 @@
 #include <MulNX/MulNX.hpp>
 #include <MulNX/Base/Math/Math.hpp>
 #include <MulNXExtensions/WinExt/WinExt.hpp>
+#include <MulNXExtensions/CS2/Signatures.hpp>
 
 #include "ConVarSystem/ConVarSystem.hpp"
 #include "GlobalVars/GlobalVars.hpp"

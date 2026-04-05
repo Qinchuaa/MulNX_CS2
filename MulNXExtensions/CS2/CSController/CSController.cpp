@@ -3,7 +3,6 @@
 #include <MulNX/MulNX.hpp>
 #include <MulNX/Base/UI/UI.hpp>
 #include <MulNX/Base/Math/Translate/Translate.hpp>
-#include <MulNXExtensions/CS2/Signatures.hpp>
 #include <MulNXExtensions/CameraSystem/CameraSystemIO/CameraSystemIO.hpp>
 #include <MulNXThirdParty/All_cs2_dumper.hpp>
 

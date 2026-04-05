@@ -1,0 +1,10 @@
+config:
+  elements:
+    PreviewDraw: true
+    PreviewOverride: true
+  solutions:
+    shortcutEnable: true
+    PlayingDraw: true
+    PlayingOverride: true
+  projects:
+    ProjectShortcutEnable: true

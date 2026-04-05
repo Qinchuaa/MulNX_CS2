@@ -2,6 +2,7 @@
 
 #include <stdfloat>
 #include <MulNX/Base/Math/Math.hpp>
+#include <MulNXExtensions/WinExt/vtable/vtable.hpp>
 #include <MulNXThirdParty/All_cs2_dumper.hpp>
 
 using GameTime_t = float;
@@ -63,7 +64,7 @@ namespace CS2 {
         BoneArray** unkBoneArray() { return reinterpret_cast<BoneArray**>(reinterpret_cast<uintptr_t>(this) + cs2_dumper::schemas::client_dll::CSkeletonInstance::m_modelState + unkSchema); }
     };
 
-    class C_BaseEntity {
+    class C_BaseEntity :public IVClass {
     public:
         template<typename T>
             requires std::derived_from<T, CS2::C_BaseEntity>

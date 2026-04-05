@@ -1,10 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Path>
-    <Template>
-        <Path Name="Saves"/>
-        <Path Name="Config"/>
-    </Template>
-
     <Shared>
         <Path Name="Saves"/>
         <Path Name="Config"/>
@@ -16,4 +11,13 @@
         <Directory Name="CS2Injector"/>
         <Directory Name="CS2OBTool"/>
     </Subdirectory>
+
+    <Keys>
+        <Static>
+            <Key Name="cs2" WindowName="Counter-Strike 2"/>
+        </Static>
+        <Dynamic>
+            
+        </Dynamic>
+    </Keys>
 </Path>

@@ -18,12 +18,7 @@ bool MulNX::Core::Core::SetCoreStarter(std::unique_ptr<CoreStarterBase> Starter)
 }
 
 MulNX::Core::Core* MulNX::Core::Core::Create(std::string&& CoreName) {
-    static MulNX::Core::Core* pCore = nullptr;
-    if (pCore) {
-        MulNX::ErrorTerminate("核心创建函数只允许被调用一次！");
-    }
-    pCore = new MulNX::Core::Core(std::move(CoreName));
-    return pCore;
+    return new MulNX::Core::Core(std::move(CoreName));
 }
 
 MulNX::Core::ModuleManager* MulNX::Core::Core::ModuleManager() {
