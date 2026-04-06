@@ -100,7 +100,7 @@ DWORD HookManager::CreateHook() {
 			nullptr);
 
         if (this->pSwapChain) {
-            this->hkPresent = MulNX::Memory::HookEx::Create((uint8_t*)IVClass::Assume(this->pSwapChain)->GetVFuncPtr(8) + 5, 5, false, [this](RegContext* ctx, MulNX::Memory::HookEx* hk)->bool {
+            this->hkPresent = MulNX::Memory::HookEx::Create((uint8_t*)IVClass::Assume(this->pSwapChain)->GetVFuncPtr(8), 5, false, [this](RegContext* ctx, MulNX::Memory::HookEx* hk)->bool {
                 if (this->GlobalVars->SystemReady.load(std::memory_order_acquire)) {
                     this->pSwapChain = (IDXGISwapChain*)ctx->rcx;
                     this->pUISystem->Render();

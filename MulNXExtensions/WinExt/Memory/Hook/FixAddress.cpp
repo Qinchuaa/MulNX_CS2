@@ -1,11 +1,12 @@
 #include "Hook.hpp"
 
 #include <Zydis/Zydis.h>
+#include <cstring>
+#include <vector>
+#include <expected>
+#include <string>
+#include <cstdint>
 
-// 修复原始指令中的RIP相对寻址
-// raw_code: 原始机器码
-// old_base: 原始代码地址（hookTarget）
-// new_base: 调度器中的新地址（pAsmDispatcher + 已生成代码大小）
 std::expected<std::vector<uint8_t>, std::string> MulNX::Memory::HookEx::FixRIPRelativeInstructions(
     const std::vector<uint8_t>& raw_code,
     uintptr_t old_base,
@@ -24,7 +25,7 @@ std::expected<std::vector<uint8_t>, std::string> MulNX::Memory::HookEx::FixRIPRe
             &instr, operands);
 
         if (!ZYAN_SUCCESS(status)) {
-            // 解码失败，直接复制剩余字节（理论上不应发生，但做保护）
+            // 解码失败，直接复制剩余字节
             fixed.insert(fixed.end(), raw_code.begin() + offset, raw_code.end());
             break;
         }
@@ -32,46 +33,71 @@ std::expected<std::vector<uint8_t>, std::string> MulNX::Memory::HookEx::FixRIPRe
         uintptr_t old_instr_addr = old_base + offset;
         uintptr_t new_instr_addr = new_base + fixed.size();
 
-        // 提取当前指令原始字节（将用于修改）
+        // 提取当前指令原始字节
         std::vector<uint8_t> instr_bytes(
             raw_code.begin() + offset,
             raw_code.begin() + offset + instr.length);
 
-        // 遍历操作数，查找RIP相对寻址
-        for (size_t i = 0; i < instr.operand_count; ++i) {
-            const auto& op = operands[i];
-            if (op.type == ZYDIS_OPERAND_TYPE_MEMORY &&
-                op.mem.base == ZYDIS_REGISTER_RIP) {
-                // 获取原始位移（注意可能是负值）
-                // Zydis stores displacement info in `disp.size`/`disp.value` (no `has_displacement` flag)
-                int64_t orig_disp = (op.mem.disp.size != 0) ? op.mem.disp.value : 0;
+        bool handled = false;
 
-                // 原始目标地址 = 旧指令地址 + 指令长度 + 原始位移
-                uint64_t target = old_instr_addr + instr.length + orig_disp;
+        // ---------- 1. 处理相对转移指令 (jmp/call/jcc rel32) ----------
+        if (instr.meta.branch_type == ZYDIS_BRANCH_TYPE_NEAR &&
+            (instr.attributes & ZYDIS_ATTRIB_IS_RELATIVE)) {
+            for (size_t i = 0; i < instr.operand_count; ++i) {
+                const auto& op = operands[i];
+                if (op.type == ZYDIS_OPERAND_TYPE_IMMEDIATE && op.imm.is_relative) {
+                    // 获取该立即数在指令中的偏移和大小（字节）
+                    // 注意：instr.raw.imm[i] 与操作数索引 i 对应
+                    size_t imm_offset = instr.raw.imm[i].offset;
+                    size_t imm_size = instr.raw.imm[i].size / 8;  // 通常为4 (rel32)
 
-                // 新位移 = 目标 - (新指令地址 + 指令长度)
-                int64_t new_disp = target - (new_instr_addr + instr.length);
+                    // 读取原始32位相对偏移（有符号）
+                    int32_t orig_disp = 0;
+                    memcpy(&orig_disp, raw_code.data() + offset + imm_offset, imm_size);
 
-                // 检查32位范围（RIP相对寻址使用有符号32位）
-                if (new_disp < -2147483648LL || new_disp > 2147483647LL) {
-                    // 超出范围，需要更复杂的处理（比如蹦床），此处可记录错误或断言
-                    // 暂时仍赋值，但可能导致崩溃
-                    return std::unexpected("无法成功！");
+                    // 原始目标地址 = 当前指令地址 + 指令长度 + 原始偏移
+                    uint64_t target = old_instr_addr + instr.length + orig_disp;
+
+                    // 新偏移 = 目标 - (新指令地址 + 指令长度)
+                    int64_t new_disp = static_cast<int64_t>(target) - (new_instr_addr + instr.length);
+
+                    if (new_disp < INT32_MIN || new_disp > INT32_MAX) {
+                        return std::unexpected("相对跳转偏移超出32位范围，无法修复");
+                    }
+
+                    int32_t new_disp32 = static_cast<int32_t>(new_disp);
+                    memcpy(instr_bytes.data() + imm_offset, &new_disp32, imm_size);
+                    handled = true;
+                    break;
                 }
-
-                // 定位指令中的位移字段并修改
-                // `instr.raw.disp.size` is zero when no displacement bytes are present
-                if (instr.raw.disp.size != 0) {
-                    size_t disp_offset = instr.raw.disp.offset;               // 字节偏移
-                    size_t disp_size = instr.raw.disp.size / 8;             // 字节数（通常为4）
-                    int32_t disp_to_write = static_cast<int32_t>(new_disp);
-                    memcpy(instr_bytes.data() + disp_offset, &disp_to_write, disp_size);
-                }
-                break;  // 一条指令一般只有一个RIP相对操作数
             }
         }
 
-        // 将修复后的指令加入结果
+        // ---------- 2. 处理 RIP 相对寻址 ----------
+        if (!handled) {
+            for (size_t i = 0; i < instr.operand_count; ++i) {
+                const auto& op = operands[i];
+                if (op.type == ZYDIS_OPERAND_TYPE_MEMORY &&
+                    op.mem.base == ZYDIS_REGISTER_RIP) {
+                    int64_t orig_disp = (op.mem.disp.size != 0) ? op.mem.disp.value : 0;
+                    uint64_t target = old_instr_addr + instr.length + orig_disp;
+                    int64_t new_disp = target - (new_instr_addr + instr.length);
+
+                    if (new_disp < INT32_MIN || new_disp > INT32_MAX) {
+                        return std::unexpected("RIP相对偏移超出32位范围，无法修复");
+                    }
+
+                    if (instr.raw.disp.size != 0) {
+                        size_t disp_offset = instr.raw.disp.offset;
+                        size_t disp_size = instr.raw.disp.size / 8;
+                        int32_t disp_to_write = static_cast<int32_t>(new_disp);
+                        memcpy(instr_bytes.data() + disp_offset, &disp_to_write, disp_size);
+                    }
+                    break;
+                }
+            }
+        }
+
         fixed.insert(fixed.end(), instr_bytes.begin(), instr_bytes.end());
         offset += instr.length;
     }
