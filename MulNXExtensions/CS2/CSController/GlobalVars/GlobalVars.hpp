@@ -5,8 +5,6 @@
 
 class C_GlobalVars {
 public:
-    // uintptr_t Address;
-
     // float RealTime{};
     // int FrameCount{};
     // int MaxClients{};

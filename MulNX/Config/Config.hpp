@@ -65,3 +65,8 @@ template<typename R, typename... Args>
 struct MulNXFunc<R(Args...)> {
     using type = R(*)(Args...);
 };
+
+template<typename T>
+T* Schema(auto* pThis, std::ptrdiff_t dif) {
+    return reinterpret_cast<T*>(reinterpret_cast<uintptr_t>(pThis) + dif);
+}

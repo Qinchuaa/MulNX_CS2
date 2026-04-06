@@ -45,6 +45,7 @@ namespace MulNX {
         bool RefreshVirtual(bool virtualTimePlaying, float scale);
         float GetReal();
         bool JumpReal(float time);
+        bool JumpRealRel(float time);
         float GetVirtual();
         float Get();
     };

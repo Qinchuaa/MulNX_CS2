@@ -25,25 +25,33 @@ MulNX::Math::View CSController::GetView()const {
     return view;
 }
 float CSController::GetTime() {
-    float time = 0;
     try {
-        time = MulNX::MRead<float>(this->CSGlobalVars->fCurrentTime());
+        float time = MulNX::MRead(this->CSGlobalVars->fCurrentTime());
+        // float timereal = MulNX::MRead(this->CSGlobalVars->fRealTime());
+        // auto iTime2 = MulNX::MRead(this->CSGlobalVars->iTickCount());
+        // auto fTime2 = static_cast<float>(iTime2) / 64.0f;
+        // 经过验证，fCurrentTime更稳定一点
+        return time;
     }
     catch (const std::runtime_error& e) {
         this->ISys().LogError("读取游戏时间失败");
+        return 0;
     }
-    return time;
+    
 }
 bool CSController::JumpTime(const float time) {
     // 这个函数的实现思路是通过demo_gototick命令跳转到指定时间的tick上，CS2每秒钟有64个tick，所以需要将时间转换为tick
-    float startTime = MulNX::MRead(this->Modules.client.dwGameRules()->fWarmupPeriodEnd());
+    //auto* pStartTime = this->Modules.client.dwGameRules()->m_flGameStartTime();
+    auto* pStartTime2 = this->Modules.client.dwGameRules()->m_fWarmupPeriodEnd();
+    // 经过验证，m_fWarmupPeriodEnd更稳定一点
+    float startTime = MulNX::MRead(pStartTime2);
     float targetGameTime = time - startTime;
     if (targetGameTime < 0) {
         // 时间不能为负
         return false;
     }
     int tick = static_cast<int>(targetGameTime * 64.0f);
-    std::string command = "demo_gototick " + std::to_string(tick);
+    std::string command = std::format("demo_gototick {}", tick);
     this->ExecuteCommand(command);
     return true;
 }

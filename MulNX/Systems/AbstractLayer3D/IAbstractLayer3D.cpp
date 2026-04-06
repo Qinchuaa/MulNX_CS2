@@ -33,6 +33,10 @@ bool MulNX::TimeBridge::JumpReal(float time) {
     return this->pAL3D->JumpTime(time);
 }
 
+bool MulNX::TimeBridge::JumpRealRel(float time) {
+    return this->JumpReal(time + this->GetReal());
+}
+
 float MulNX::TimeBridge::GetVirtual() {
     // 这里不需要更新，因为虚拟时间的更新是由RefreshVirtual控制的，GetVirtual只负责计算当前的虚拟时间
     auto now = std::chrono::steady_clock::now();

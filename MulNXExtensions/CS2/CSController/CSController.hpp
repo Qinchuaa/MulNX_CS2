@@ -19,7 +19,7 @@
 class C_Modules {
 public:
     CS2::Module::Client client{};
-    MulNX::Memory::DllModule engine2{};
+    CS2::Module::engine2 engine2{};
     MulNX::Memory::DllModule tier0{};
 };
 

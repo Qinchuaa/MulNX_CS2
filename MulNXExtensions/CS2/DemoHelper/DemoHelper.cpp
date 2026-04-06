@@ -11,26 +11,50 @@ bool DemoHelper::UINodeFunc(MulNXUINode* node) {
         MulNX::Message msg("DemoHelper/MarkTime"_hash);
         node->PublishAsync(std::move(msg));
 	}
-	ImGui::Text("目前，时间列表容器是");
-	ImGui::SameLine();
-    if (ReadData->TimeMarks.empty()) {
-		ImGui::Text("空的");
-	}
-	else{
-        ImGui::Text("有 %d 个时间点的", (int)ReadData->TimeMarks.size());
+	ImGui::Text("时间列表:");
+    if (!ReadData->TimeMarks.empty()) {
         for (auto time : ReadData->TimeMarks) {
-			ImGui::Text("时间点： %.3f 秒", time);
-			ImGui::SameLine();
-			std::string str = "跳转##" + std::to_string(time);
-			if (ImGui::Button(str.c_str())) {
+            ImGui::Text("时间点： %.3f 秒", time);
+            ImGui::SameLine();
+            std::string str = "跳转##" + std::to_string(time);
+            if (ImGui::Button(str.c_str())) {
                 MulNX::Message Msg("DemoHelper/JumpTIme"_hash);
-				Msg.p1.f = time;
+                Msg.p1.f = time;
                 node->PublishAsync(std::move(Msg));
-			}
-		}
-	}
+            }
+        }
+    }
+    else {
+        ImGui::Text("空的");
+    }
+    ImGui::SeparatorText("快捷时间");
+    if (ImGui::Button("五秒前")) {
+        this->AL3D->Time()->JumpRealRel(-5.0f);
+    }
+    ImGui::SameLine();
+    if (ImGui::Button("一秒前")) {
+        this->AL3D->Time()->JumpRealRel(-1.0f);
+    }
+    ImGui::SameLine();
+    if (ImGui::Button("一秒后")) {
+        this->AL3D->Time()->JumpRealRel(1.0f);
+    }
+    ImGui::SameLine();
+    if (ImGui::Button("五秒后")) {
+        this->AL3D->Time()->JumpRealRel(5.0f);
+    }
+    ImGui::Separator();
+    static float delta = 0.5f;
+    ImGui::SliderFloat("自定义时间差", &delta, 0.0f, 60.0f);
+    if (ImGui::Button("前跳")) {
+        this->AL3D->Time()->JumpRealRel(-delta);
+    }
+    ImGui::SameLine();
+    if (ImGui::Button("后跳")) {
+        this->AL3D->Time()->JumpRealRel(delta);
+    }
 
-	return true;
+    return true;
 }
 
 bool DemoHelper::Init() {

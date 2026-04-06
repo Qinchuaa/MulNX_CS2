@@ -1,5 +1,6 @@
 #pragma once
 
+#include <MulNX/Config/Config.hpp>
 #include <MulNXExtensions/WinExt/WinExt.hpp>
 #include <MulNXExtensions/CS2/CSController/List/C_BaseEntity.hpp>
 #include <MulNXExtensions/CS2/CSController/C_CSGameRules/C_CSGameRules.hpp>
@@ -21,6 +22,23 @@ namespace CS2 {
 
             CS2::C_BaseEntity* GetBaseEntity(int index);
             CS2::C_BaseEntity* GetBaseEntityFromHandle(CS2::CHandleBase handle);
+        };
+
+        class engine2 : public MulNX::Memory::DllModule {
+        public:
+            using MulNX::Memory::DllModule::DllModule;
+
+            void** ppBuildNumber() { return Schema<void*>(this, cs2_dumper::offsets::engine2_dll::dwBuildNumber); }
+            void** ppNetworkGameClient() { return Schema<void*>(this, cs2_dumper::offsets::engine2_dll::dwNetworkGameClient); }
+            void** ppClientTickCount() { return Schema<void*>(this, cs2_dumper::offsets::engine2_dll::dwNetworkGameClient_clientTickCount); }
+            void** ppDeltaTick() { return Schema<void*>(this, cs2_dumper::offsets::engine2_dll::dwNetworkGameClient_deltaTick); }
+            void** ppIsBackgroundMap() { return Schema<void*>(this, cs2_dumper::offsets::engine2_dll::dwNetworkGameClient_isBackgroundMap); }
+            void** ppLocalPlayer() { return Schema<void*>(this, cs2_dumper::offsets::engine2_dll::dwNetworkGameClient_localPlayer); }
+            void** ppMaxClients() { return Schema<void*>(this, cs2_dumper::offsets::engine2_dll::dwNetworkGameClient_maxClients); }
+            void** ppServerTickCount() { return Schema<void*>(this, cs2_dumper::offsets::engine2_dll::dwNetworkGameClient_serverTickCount); }
+            void** ppSignOnState() { return Schema<void*>(this, cs2_dumper::offsets::engine2_dll::dwNetworkGameClient_signOnState); }
+            void** ppWindowHeight() { return Schema<void*>(this, cs2_dumper::offsets::engine2_dll::dwWindowHeight); }
+            void** ppWindowWidth() { return Schema<void*>(this, cs2_dumper::offsets::engine2_dll::dwWindowWidth); }
         };
     }
 }

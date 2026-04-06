@@ -159,7 +159,7 @@ bool CSController::Init() {
     this->pAdvancedViewController = this->Core->ModuleManager()->FindModule<AdvancedViewController>("AdvancedViewController");
 
     this->Modules.client = CS2::Module::Client(L"client.dll");
-    this->Modules.engine2 = MulNX::Memory::DllModule(L"engine2.dll");
+    this->Modules.engine2 = CS2::Module::engine2(L"engine2.dll");
     this->Modules.tier0 = MulNX::Memory::DllModule(L"tier0.dll");
 
     this->Source2EngineToClient001 =
@@ -201,11 +201,11 @@ int CSController::BasicUpdate() {
     // 获取CS2全局变量
     this->CSGlobalVars = MulNX::MRead<C_GlobalVars*>(this->Modules.client.GetBaseAddress() + cs2_dumper::offsets::client_dll::dwGlobalVars);
 
-    static int OldRoundStartCount = MulNX::MRead(this->Modules.client.dwGameRules()->nRoundStartCount());
-    if (OldRoundStartCount != MulNX::MRead(this->Modules.client.dwGameRules()->nRoundStartCount())) {
+    static int OldRoundStartCount = MulNX::MRead(this->Modules.client.dwGameRules()->m_nRoundStartCount());
+    if (OldRoundStartCount != MulNX::MRead(this->Modules.client.dwGameRules()->m_nRoundStartCount())) {
         MulNX::Message Msg("Game/NewRound"_hash);
         this->ISys().PublishAsync(std::move(Msg));
-        OldRoundStartCount = MulNX::MRead(this->Modules.client.dwGameRules()->nRoundStartCount());
+        OldRoundStartCount = MulNX::MRead(this->Modules.client.dwGameRules()->m_nRoundStartCount());
     }
     for (int i = 0;i <= this->Modules.client.dwGameEntitySystem_highestEntityIndex();i++) {
         auto entity = this->Modules.client.GetBaseEntity(i);
@@ -258,14 +258,16 @@ int CSController::EntityListUpdate() {
             handle(controller, pawn);
         }
 
-        auto& AL3DEntity = this->AL3DGameData.Players[playerNum];
-        AL3DEntity.Position = MulNX::MRead(pawn->vOldOrigin());
-        AL3DEntity.EyePosition = MulNX::MRead(pawn->vOldOrigin()) + MulNX::MRead(pawn->vecViewOffset());
-        AL3DEntity.Rotation = MulNX::MRead(pawn->angEyeAngles());
-        AL3DEntity.HP = MulNX::MRead(pawn->iHealth());
-        AL3DEntity.Team = team;
-        AL3DEntity.Alive = AL3DEntity.HP;
-        AL3DEntity.IndexInMap = playerNum;
+        if (playerNum <= 10) {
+            auto& AL3DEntity = this->AL3DGameData.Players[playerNum];
+            AL3DEntity.Position = MulNX::MRead(pawn->vOldOrigin());
+            AL3DEntity.EyePosition = MulNX::MRead(pawn->vOldOrigin()) + MulNX::MRead(pawn->vecViewOffset());
+            AL3DEntity.Rotation = MulNX::MRead(pawn->angEyeAngles());
+            AL3DEntity.HP = MulNX::MRead(pawn->iHealth());
+            AL3DEntity.Team = team;
+            AL3DEntity.Alive = AL3DEntity.HP;
+            AL3DEntity.IndexInMap = playerNum;
+        }
     }
 
     return 0;
