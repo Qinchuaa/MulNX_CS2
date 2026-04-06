@@ -83,6 +83,7 @@ private:
     
     void ESP();
 public:
+    std::vector<std::function<bool(CS2::CCSPlayerController*, CS2::C_CSPlayerPawn*)>>handlesControlPlayer{};
     C_Modules Modules{};
     std::atomic<bool> ESPDraw = false;
     

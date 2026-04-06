@@ -193,7 +193,14 @@ namespace CS2 {
 
     class C_CSPlayerPawnBase :public C_BasePlayerPawn {
     public:
-
+        float* m_flFlashBangTime() { return reinterpret_cast<float*>(reinterpret_cast<uintptr_t>(this) + cs2_dumper::schemas::client_dll::C_CSPlayerPawnBase::m_flFlashBangTime); }
+        float* m_flFlashScreenshotAlpha() { return reinterpret_cast<float*>(reinterpret_cast<uintptr_t>(this) + cs2_dumper::schemas::client_dll::C_CSPlayerPawnBase::m_flFlashScreenshotAlpha); }
+        float* m_flFlashOverlayAlpha() { return reinterpret_cast<float*>(reinterpret_cast<uintptr_t>(this) + cs2_dumper::schemas::client_dll::C_CSPlayerPawnBase::m_flFlashOverlayAlpha); }
+        bool* m_bFlashBuildUp() { return reinterpret_cast<bool*>(reinterpret_cast<uintptr_t>(this) + cs2_dumper::schemas::client_dll::C_CSPlayerPawnBase::m_bFlashBuildUp); }
+        bool* m_bFlashDspHasBeenCleared() { return reinterpret_cast<bool*>(reinterpret_cast<uintptr_t>(this) + cs2_dumper::schemas::client_dll::C_CSPlayerPawnBase::m_bFlashDspHasBeenCleared); }
+        bool* m_bFlashScreenshotHasBeenGrabbed() { return reinterpret_cast<bool*>(reinterpret_cast<uintptr_t>(this) + cs2_dumper::schemas::client_dll::C_CSPlayerPawnBase::m_bFlashScreenshotHasBeenGrabbed); }
+        float* m_flFlashMaxAlpha() { return reinterpret_cast<float*>(reinterpret_cast<uintptr_t>(this) + cs2_dumper::schemas::client_dll::C_CSPlayerPawnBase::m_flFlashMaxAlpha); }
+        float* m_flFlashDuration() { return reinterpret_cast<float*>(reinterpret_cast<uintptr_t>(this) + cs2_dumper::schemas::client_dll::C_CSPlayerPawnBase::m_flFlashDuration); }
     };
 
 
@@ -212,6 +219,6 @@ namespace CS2 {
 
     class CCSPlayerController :public CBasePlayerController {
     public:
-
+        CHandle<C_CSPlayerPawn>* m_hPlayerPawn() { return reinterpret_cast<CHandle<C_CSPlayerPawn>*>(reinterpret_cast<uintptr_t>(this) + cs2_dumper::schemas::client_dll::CCSPlayerController::m_hPlayerPawn); }
     };
 }

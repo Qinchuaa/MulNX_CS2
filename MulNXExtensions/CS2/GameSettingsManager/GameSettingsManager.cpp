@@ -32,10 +32,10 @@ bool GameSettingsManager::UINodeFunc(MulNXUINode* ThisNode) {
 
     ImGui::Checkbox("作弊模式", this->sv_cheats);
 
-    this->SettingGraphFloat("游戏速度", this->GameSettings.host_timescale, 0.001f, 10.000f);
+    ImGui::SliderFloat("游戏速度", this->GameSettings.host_timescale, 0.001f, 10.000f);
 
     if (ImGui::CollapsingHeader("画面设置")) {
-        this->SettingGraphInt("FPS上限", this->GameSettings.fps_max, 0, 1000);
+        ImGui::SliderInt("FPS上限", this->GameSettings.fps_max, 0, 1000);
 
         if (ImGui::TreeNode("UI设置")) {
             ImGui::Checkbox("显示HUD", this->GameSettings.cl_drawhud);
@@ -148,44 +148,6 @@ bool GameSettingsManager::Init() {
 
     this->SendUINode(this->GetName(), [this](MulNXUINode* node) {return this->UINodeFunc(node);});
     return true;
-}
-
-void GameSettingsManager::SettingGraphFloat(const char* Label, float* V, const float& min, const float& max) {
-	ImGui::SliderFloat(Label, V, min, max, "%.3f");
-	if (ImGui::Button("-1"))*V -= 1; ImGui::SameLine();
-	if (ImGui::Button("-0.1"))*V -= 0.1; ImGui::SameLine();
-	if (ImGui::Button("-0.01"))*V -= 0.01; ImGui::SameLine();
-	if (ImGui::Button("-0.001"))*V -= 0.001; ImGui::SameLine();
-	if (ImGui::Button("+0.001"))*V += 0.001; ImGui::SameLine();
-	if (ImGui::Button("+0.01"))*V += 0.01; ImGui::SameLine();
-	if (ImGui::Button("+0.1"))*V += 0.1; ImGui::SameLine();
-	if (ImGui::Button("+1"))*V += 1;
-
-	if (ImGui::Button("0.1"))*V = 0.1; ImGui::SameLine();
-	if (ImGui::Button("0.25"))*V = 0.25; ImGui::SameLine();
-	if (ImGui::Button("0.5"))*V = 0.5; ImGui::SameLine();
-	if (ImGui::Button("1"))*V = 1; ImGui::SameLine();
-	if (ImGui::Button("2"))*V = 2; ImGui::SameLine();
-	if (ImGui::Button("3"))*V = 3;
-}
-
-void GameSettingsManager::SettingGraphInt(const char* Label, int* V, const int& min, const int& max) {
-	ImGui::SliderInt(Label, V, min, max);
-	if (ImGui::Button("-10"))*V -= 10; ImGui::SameLine();
-	if (ImGui::Button("-5"))*V -= 5; ImGui::SameLine();
-	if (ImGui::Button("-1"))*V -= 1; ImGui::SameLine();
-	if (ImGui::Button("+1"))*V += 1; ImGui::SameLine();
-	if (ImGui::Button("+5"))*V += 5; ImGui::SameLine();
-	if (ImGui::Button("+10"))*V += 10;
-
-	if (ImGui::Button("0"))*V = 0; ImGui::SameLine();
-	if (ImGui::Button("30"))*V = 30; ImGui::SameLine();
-	if (ImGui::Button("60"))*V = 60; ImGui::SameLine();
-	if (ImGui::Button("90"))*V = 90; ImGui::SameLine();
-	if (ImGui::Button("120"))*V = 120; ImGui::SameLine();
-	if (ImGui::Button("144"))*V = 144; ImGui::SameLine();
-	if (ImGui::Button("200"))*V = 200; ImGui::SameLine();
-	if (ImGui::Button("240"))*V = 240;
 }
 
 void GameSettingsManager::VirtualMain() {

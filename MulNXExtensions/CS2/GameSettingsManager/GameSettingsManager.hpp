@@ -80,7 +80,4 @@ public:
     bool Init()override;
     bool UINodeFunc(MulNXUINode* node);
     void VirtualMain()override;
-
-    void SettingGraphFloat(const char* Label, float* V, const float& min, const float& max);
-    void SettingGraphInt(const char* Label, int* V, const int& min, const int& max);
 };

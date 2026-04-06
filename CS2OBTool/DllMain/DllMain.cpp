@@ -54,7 +54,7 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserv
         // 这里不需要等待线程结束，因为它会在完成初始化后自动退出，然后等待进程结束时被操作系统清理
         break;
     }
-    // 本系统不考虑卸载，计划生命周期与游戏进程相同！
+                           // 本系统不考虑卸载，计划生命周期与游戏进程相同！
     case DLL_THREAD_ATTACH: {
         break;
     }
@@ -113,6 +113,7 @@ DWORD MulNX_CS2_Start(void*) {
             .CreateModule<ElementManager>("ElementManager", 106)// 元素管理模块
             .CreateModule<PlayerHub>("PlayerHub", 110)// 玩家信息管理模块
             .CreateModule<AdvancedViewController>("AdvancedViewController", 111)// 高级视角控制模块
+            .CreateModule<PlayerFlashController>("PlayerFlashController", 112)// 闪光控制模块
             .CreateModule<MiniMap>("MiniMap", 113)// 小地图模块
             .CreateModule<VirtualUser>("VirtualUser", 114)// 虚拟用户模块
             .CreateModule<GameCfgManager>("GameCfgManager", 206)// 游戏配置管理模块

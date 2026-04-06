@@ -17,9 +17,9 @@ bool PlayerHub::Window(MulNXUINode* node) {
     static bool needClearBuffer = false;        // 标记是否需要清空缓冲区
 
     try {
+        std::shared_lock lock(this->GetMutex());
         // 当选中 SteamID 变化时，自动加载已有名称到缓冲区
         if (needClearBuffer || (choosingSteamID != 0 && newNameBuffer.empty())) {
-            std::shared_lock lock(this->GetMutex());
             auto it = this->nameReplaceInfo.find(choosingSteamID);
             if (it != this->nameReplaceInfo.end()) {
                 newNameBuffer = this->nameReplace[it->second];
@@ -36,7 +36,6 @@ bool PlayerHub::Window(MulNXUINode* node) {
         ImGui::SliderInt("搜索的最大数量", &showMax, 1, 255);
 
         int playerNum = 0;
-        std::shared_lock lock(this->GetMutex());
 
         for (int i = 0; i <= std::min(this->CS->Modules.client.dwGameEntitySystem_highestEntityIndex(), showMax); ++i) {
             auto* baseEntity = this->CS->Modules.client.GetBaseEntity(i);
@@ -71,6 +70,13 @@ bool PlayerHub::Window(MulNXUINode* node) {
             }
             ImGui::Separator();
         }
+
+        if (ImGui::CollapsingHeader("所有已设置的替换规则")) {
+            for (auto& pair : this->nameReplaceInfo) {
+                ImGui::Text("SteamID: %llu  ->  %s", pair.first, this->nameReplace[pair.second]);
+            }
+        }
+
         lock.unlock();
 
         // ---------- 编辑区域 ----------
@@ -78,77 +84,61 @@ bool PlayerHub::Window(MulNXUINode* node) {
         ImGui::Text("当前选中的 SteamID: %llu", choosingSteamID);
         if (choosingSteamID == 0) {
             ImGui::TextDisabled("请先在上方列表中选择一名玩家");
+            return true;
         }
-        else {
-            ImGui::InputText("新名称 (最多127字符)", &newNameBuffer);
-            ImGui::SameLine();
-            if (ImGui::Button("保存/更新")) {
-                if (newNameBuffer.size() >= 128) {
-                    this->ISys().LogError("名称长度不能超过127个字符！");
+        ImGui::InputText("新名称 (最多127字符)", &newNameBuffer);
+        ImGui::SameLine();
+        if (ImGui::Button("保存/更新")) {
+            if (newNameBuffer.size() >= 128) {
+                this->ISys().LogError("名称长度不能超过127个字符！");
+            }
+            else {
+                std::unique_lock lock(this->GetMutex());
+                auto it = this->nameReplaceInfo.find(choosingSteamID);
+                int idx = -1;
+
+                if (it != this->nameReplaceInfo.end()) {
+                    // 更新现有条目
+                    idx = it->second;
                 }
                 else {
-                    std::unique_lock lock(this->GetMutex());
-                    auto it = this->nameReplaceInfo.find(choosingSteamID);
-                    int idx = -1;
-
-                    if (it != this->nameReplaceInfo.end()) {
-                        // 更新现有条目
-                        idx = it->second;
+                    // 寻找空闲索引
+                    for (int i = 0; i < 64; ++i) {
+                        bool used = false;
+                        for (auto& pair : this->nameReplaceInfo) {
+                            if (pair.second == i) { used = true; break; }
+                        }
+                        if (!used) { idx = i; break; }
+                    }
+                    if (idx == -1) {
+                        this->ISys().LogError("名称替换槽位已满 (最多64条)！");
                     }
                     else {
-                        // 寻找空闲索引
-                        for (int i = 0; i < 64; ++i) {
-                            bool used = false;
-                            for (auto& pair : this->nameReplaceInfo) {
-                                if (pair.second == i) { used = true; break; }
-                            }
-                            if (!used) { idx = i; break; }
-                        }
-                        if (idx == -1) {
-                            this->ISys().LogError("名称替换槽位已满 (最多64条)！");
-                        }
-                        else {
-                            this->nameReplaceInfo[choosingSteamID] = idx;
-                        }
-                    }
-
-                    if (idx != -1) {
-                        // 安全复制字符串
-                        strncpy_s(this->nameReplace[idx], newNameBuffer.c_str(), 127);
-                        this->nameReplace[idx][127] = '\0';
-                        this->ISys().LogInfo(std::format("已为 SteamID {} 设置替换名称: {}", choosingSteamID, newNameBuffer));
+                        this->nameReplaceInfo[choosingSteamID] = idx;
                     }
                 }
-            }
 
-            // 删除按钮（仅当存在替换规则时显示）
-            {
-                std::shared_lock lock(this->GetMutex());
-                if (this->nameReplaceInfo.find(choosingSteamID) != this->nameReplaceInfo.end()) {
-                    ImGui::SameLine();
-                    if (ImGui::Button("删除")) {
-                        std::unique_lock lock(this->GetMutex());
-                        auto it = this->nameReplaceInfo.find(choosingSteamID);
-                        if (it != this->nameReplaceInfo.end()) {
-                            int idx = it->second;
-                            this->nameReplaceInfo.erase(it);
-                            memset(this->nameReplace[idx], 0, 128);   // 清空槽位
-                            newNameBuffer.clear();
-                            this->ISys().LogInfo(std::format("已删除 SteamID {} 的名称替换规则", choosingSteamID));
-                        }
-                    }
+                if (idx != -1) {
+                    // 安全复制字符串
+                    strncpy_s(this->nameReplace[idx], newNameBuffer.c_str(), 127);
+                    this->nameReplace[idx][127] = '\0';
+                    this->ISys().LogInfo(std::format("已为 SteamID {} 设置替换名称: {}", choosingSteamID, newNameBuffer));
                 }
             }
         }
 
-        // 可选：显示所有已存在的替换规则列表（便于管理）
-        if (ImGui::CollapsingHeader("所有已设置的替换规则")) {
-            std::shared_lock lock(this->GetMutex());
-            for (auto& pair : this->nameReplaceInfo) {
-                ImGui::Text("SteamID: %llu  ->  %s", pair.first, this->nameReplace[pair.second]);
+        // 删除按钮（仅当存在替换规则时显示）
+        if (ImGui::Button("删除")) {
+            std::unique_lock lock(this->GetMutex());
+            auto it = this->nameReplaceInfo.find(choosingSteamID);
+            if (it != this->nameReplaceInfo.end()) {
+                int idx = it->second;
+                this->nameReplaceInfo.erase(it);
+                memset(this->nameReplace[idx], 0, 128);   // 清空槽位
+                newNameBuffer.clear();
+                this->ISys().LogInfo(std::format("已删除 SteamID {} 的名称替换规则", choosingSteamID));
             }
         }
-
     }
     catch (const std::exception& e) {
         this->ISys().LogWarning(std::format("在绘制玩家信息时捕获到异常：{}", e.what()));

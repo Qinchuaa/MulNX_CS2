@@ -105,6 +105,7 @@ bool CSController::UINodeFunc(MulNXUINode* node) {
         MulNX::UI::SliderFloat("色彩G", this->controlSmoke.G, 0, 255);
         MulNX::UI::SliderFloat("色彩B", this->controlSmoke.B, 0, 255);
     }
+    node->CallUINode("PlayerFlashController");
     node->CallUINode("AdvancedViewController");
     // 自由摄像机控制
     if (ImGui::CollapsingHeader("自由摄像机控制")) {
@@ -240,31 +241,40 @@ int CSController::BasicUpdate() {
 }
 int CSController::EntityListUpdate() {
     std::unique_lock lock(this->GetMutex());
-    // 玩家控制器，地图上从1到10，位于索引1到10处
-    for (int i = 1; i <= 10; ++i) {
+    // 玩家控制器，地图上从1到10
+    int playerNum = 0;
+    for (int i = 0; i < this->Modules.client.dwGameEntitySystem_highestEntityIndex(); ++i) {
         auto* controller = this->Modules.client.GetBaseEntity(i)->As<CS2::CCSPlayerController>();
         if (!controller)continue;
-        auto hPawn = MulNX::MRead(controller->hPawn());
+        auto hPawn = MulNX::MRead(controller->m_hPlayerPawn());
         auto* pawn = this->Modules.client.GetBaseEntityFromHandle(hPawn.GetIndexInEntityList())->As<CS2::C_CSPlayerPawn>();
         if (!pawn)continue;
 
         auto team = MulNX::MRead(pawn->iTeamNum());
         if (team != 2 && team != 3)continue;
+        ++playerNum;
 
-        auto& AL3DEntity = this->AL3DGameData.Players[i];
+        for (const auto& handle : this->handlesControlPlayer) {
+            handle(controller, pawn);
+        }
+
+        auto& AL3DEntity = this->AL3DGameData.Players[playerNum];
         AL3DEntity.Position = MulNX::MRead(pawn->vOldOrigin());
         AL3DEntity.EyePosition = MulNX::MRead(pawn->vOldOrigin()) + MulNX::MRead(pawn->vecViewOffset());
         AL3DEntity.Rotation = MulNX::MRead(pawn->angEyeAngles());
         AL3DEntity.HP = MulNX::MRead(pawn->iHealth());
         AL3DEntity.Team = team;
         AL3DEntity.Alive = AL3DEntity.HP;
-        AL3DEntity.IndexInMap = i;
+        AL3DEntity.IndexInMap = playerNum;
     }
 
     return 0;
 }
 
 void CSController::ThreadMain() {
+    while (!this->GlobalVars->SystemReady.load()) {
+        std::this_thread::sleep_for(std::chrono::milliseconds(this->MyThreadDelta));
+    }
     while (this->MyThreadRunning) {
         try {
             this->GetMsgResult = this->TryGetMsg();
