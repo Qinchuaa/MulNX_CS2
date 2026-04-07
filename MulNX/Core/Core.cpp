@@ -9,16 +9,19 @@ MulNX::Core::Core::Core(std::string&& Name) :
     this->pModuleManager = std::make_unique<MulNX::Core::ModuleManager>();
 }
 
-bool MulNX::Core::Core::SetCoreStarter(std::unique_ptr<CoreStarterBase> Starter) {
-	if (!Starter) {
+bool MulNX::Core::Core::SetCoreStarter(std::unique_ptr<CoreStarterBase> starter) {
+	if (!starter) {
 		return false;
 	}
-	this->pCoreStarter = std::move(Starter);
+	this->pCoreStarter = std::move(starter);
 	return true;
 }
 
-MulNX::Core::Core* MulNX::Core::Core::Create(std::string&& CoreName) {
-    return new MulNX::Core::Core(std::move(CoreName));
+MulNX::Core::Core* MulNX::Core::Core::Create(std::string&& coreName) {
+    auto core = std::make_unique<MulNX::Core::Core>(std::move(coreName));
+    auto& Myself = core->pMyself;
+    core->pMyself = std::move(core);
+    return Myself.get();
 }
 
 MulNX::Core::ModuleManager* MulNX::Core::Core::ModuleManager() {

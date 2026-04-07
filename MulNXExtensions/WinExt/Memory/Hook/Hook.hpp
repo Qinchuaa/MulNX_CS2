@@ -15,6 +15,17 @@ struct RegContext {
 
 namespace MulNX {
     namespace Memory {
+        class AsmCmdInfo {
+        public:
+            uint8_t* addr;
+            size_t size;
+            MulNX::Memory::Asm::Code code;
+        };
+        class HookTargetInfo {
+        public:
+            std::vector<AsmCmdInfo>Cmds;
+        };
+
         class HookEx {
             enum class Result :uint8_t {
                 Attached,
@@ -35,14 +46,17 @@ namespace MulNX {
             void* pAsmDispatcher = nullptr;
             MulNX::Memory::Asm::Code dispatcherAsmCode{};
 
+            HookTargetInfo hookTargetInfo{};
             uint8_t* hookTarget = nullptr;
             size_t overrideSize = 0;
-            MulNX::Memory::Asm::Code hookTargetRawCode;
+            MulNX::Memory::Asm::Code hookTargetRawCode{};
             MulNX::Memory::Asm::Code jumperAsmCode{};
         private:
-            static std::expected<std::vector<uint8_t>, std::string> FixRIPRelativeInstructions(const std::vector<uint8_t>& raw_code,
+            static std::expected<MulNX::Memory::Asm::Code, std::string> FixRIPRelativeInstructions(const MulNX::Memory::Asm::Code& raw_code,
                 uintptr_t old_base, uintptr_t new_base);
             static uintptr_t Dispatch(HookEx* pHookExInstance, RegContext* ctx);
+            // 这个函数要求，至少它分析的确实是一个汇编指令的开头
+            static HookTargetInfo AnalyseTarget(uint8_t* target);
 
             uintptr_t jmpTarget0 = 0;
             uintptr_t jmpTarget1 = 0;

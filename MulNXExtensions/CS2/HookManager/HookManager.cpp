@@ -100,7 +100,7 @@ DWORD HookManager::CreateHook() {
 			nullptr);
 
         if (this->pSwapChain) {
-            this->hkPresent = MulNX::Memory::HookEx::Create((uint8_t*)IVClass::Assume(this->pSwapChain)->GetVFuncPtr(8), 5, false, [this](RegContext* ctx, MulNX::Memory::HookEx* hk)->bool {
+            this->hkPresent = MulNX::Memory::HookEx::Create((uint8_t*)IVClass::Assume(this->pSwapChain)->GetVFuncPtr(8), 0, false, [this](RegContext* ctx, MulNX::Memory::HookEx* hk)->bool {
                 if (this->GlobalVars->SystemReady.load(std::memory_order_acquire)) {
                     this->pSwapChain = (IDXGISwapChain*)ctx->rcx;
                     this->pUISystem->Render();
@@ -145,7 +145,7 @@ void HookManager::d3dInit(IDXGISwapChain* _this) {
 		_this->GetDesc(&sd);
         this->CS2hWnd = sd.OutputWindow;
         // hook窗口过程
-        this->hkWndProc = MulNX::Memory::HookEx::Create((uint8_t*)GetWindowLongPtrW(this->CS2hWnd, GWLP_WNDPROC), 9, false, [this](RegContext* ctx, MulNX::Memory::HookEx* hk)->bool {
+        this->hkWndProc = MulNX::Memory::HookEx::Create((uint8_t*)GetWindowLongPtrW(this->CS2hWnd, GWLP_WNDPROC), 0, false, [this](RegContext* ctx, MulNX::Memory::HookEx* hk)->bool {
             ctx->rax = this->MyWndProc((HWND)ctx->rcx, ctx->rdx, ctx->r8, ctx->r9);
             return ctx->rax;
             }).value();

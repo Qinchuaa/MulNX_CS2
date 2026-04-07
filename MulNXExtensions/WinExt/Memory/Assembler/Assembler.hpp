@@ -48,7 +48,10 @@ namespace MulNX {
 
             RegInfo get_reg_info(Reg r);
 
-            using Code = std::vector<uint8_t>;
+            class Code final :public std::vector<uint8_t> {
+            public:
+                using std::vector<uint8_t>::vector;
+            };
 
             class Assembler {
                 Code Asm{};

@@ -151,7 +151,7 @@ bool PlayerHub::Init() {
     this->SendUINode(this->GetName(), [this](MulNXUINode* node) {return this->Window(node);});
 
     auto FnGetDecoratedPlayerName = this->CS->Modules.client.GetTextRegion().FindRegion(MulNX::CS2::Signatures::GetDecoratedPlayerName);
-    this->hkGetDecoratedPlayerName = MulNX::Memory::HookEx::Create(FnGetDecoratedPlayerName.Data(), 5, false,
+    this->hkGetDecoratedPlayerName = MulNX::Memory::HookEx::Create(FnGetDecoratedPlayerName.Data(), 0, false,
         [this](RegContext* ctx, MulNX::Memory::HookEx* hk)->bool {
             std::shared_lock lock(this->GetMutex());
 
@@ -190,7 +190,7 @@ bool PlayerHub::Init() {
 
 void PlayerHub::HandleVHook(CS2::CCSPlayerController* pPlayerController) {
     if (this->bGetPlayerNameHooked)return;
-    this->hkGetPlayerName = MulNX::Memory::HookEx::Create(reinterpret_cast<uint8_t*>(pPlayerController->GetVFuncPtr(223)), 6, false,
+    this->hkGetPlayerName = MulNX::Memory::HookEx::Create(reinterpret_cast<uint8_t*>(pPlayerController->GetVFuncPtr(223)), 0, false,
         [this](RegContext* ctx, MulNX::Memory::HookEx* hk)->bool {
             std::shared_lock lock(this->GetMutex());
 

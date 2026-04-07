@@ -7,11 +7,51 @@
 #include <string>
 #include <cstdint>
 
-std::expected<std::vector<uint8_t>, std::string> MulNX::Memory::HookEx::FixRIPRelativeInstructions(
-    const std::vector<uint8_t>& raw_code,
+MulNX::Memory::HookTargetInfo MulNX::Memory::HookEx::AnalyseTarget(uint8_t* target) {
+    ZydisDecoder decoder;
+    ZydisDecoderInit(&decoder, ZYDIS_MACHINE_MODE_LONG_64, ZYDIS_STACK_WIDTH_64);
+
+    MulNX::Memory::HookTargetInfo targetInfo{};
+
+    uint8_t* currentBegin = target;
+    std::ptrdiff_t currentCmdSize = 1;
+    for (;;++currentCmdSize) {
+        MulNX::Memory::Asm::Code currentCmd(currentBegin, currentBegin + currentCmdSize);
+
+        ZydisDecodedInstruction instr;
+        ZydisDecodedOperand operands[ZYDIS_MAX_OPERAND_COUNT];
+        ZyanStatus status = ZydisDecoderDecodeFull(&decoder,
+            currentCmd.data(),
+            currentCmd.size(),
+            &instr, operands);
+
+        if (!ZYAN_SUCCESS(status)) {
+            continue;
+        }
+        else {
+            MulNX::Memory::AsmCmdInfo info;
+            info.addr = currentBegin;
+            info.size = currentCmdSize;
+            info.code = currentCmd;
+            targetInfo.Cmds.push_back(std::move(info));
+
+            currentBegin += currentCmdSize;
+            currentCmdSize = 0;
+        }
+        if (reinterpret_cast<uintptr_t>(currentBegin) - reinterpret_cast<uintptr_t>(target) > 20) {
+            break;
+        }
+    }
+    return targetInfo;
+}
+
+std::expected<MulNX::Memory::Asm::Code, std::string> MulNX::Memory::HookEx::FixRIPRelativeInstructions(
+    const MulNX::Memory::Asm::Code& raw_code,
     uintptr_t old_base,
     uintptr_t new_base) {
-    std::vector<uint8_t> fixed;
+
+    
+    MulNX::Memory::Asm::Code fixed;
     ZydisDecoder decoder;
     ZydisDecoderInit(&decoder, ZYDIS_MACHINE_MODE_LONG_64, ZYDIS_STACK_WIDTH_64);
 

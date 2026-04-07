@@ -11,22 +11,23 @@ namespace MulNX {
         private:
             // 数据存储：
 
+            // 自身指针
+            std::unique_ptr<Core> pMyself = nullptr;
             // 核心名称（文件系统路径管理需要用）
             std::string CoreName;
             // 模块管理器指针
             std::unique_ptr<ModuleManager> pModuleManager;
-
 			// 核心启动器指针
             std::unique_ptr<MulNX::Core::CoreStarterBase> pCoreStarter = nullptr;
 
             Core() = delete;
-            // 构造函数
-            Core(std::string&& CoreName);
             // 删除拷贝构造
             Core(const Core&) = delete;
             // 删除拷贝赋值
             Core& operator=(const Core&) = delete;
         public:
+            // 构造函数
+            Core(std::string&& CoreName);
             // 析构函数
             ~Core() = default;
             

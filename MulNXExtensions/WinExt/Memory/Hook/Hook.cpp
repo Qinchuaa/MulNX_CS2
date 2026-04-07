@@ -3,6 +3,7 @@
 #include <Windows.h>
 #include <atomic>
 #include <algorithm>
+#include <format>
 
 uintptr_t MulNX::Memory::HookEx::Dispatch(HookEx* pHookExInstance, RegContext* ctx) {
     // 返回true继续执行剩余指令，返回false则在恢复寄存器后直接ret
@@ -71,24 +72,37 @@ void* TryAlloc(uintptr_t target, size_t size) {
 }
 
 std::expected<std::unique_ptr<MulNX::Memory::HookEx>, std::string> MulNX::Memory::HookEx::Create(uint8_t* Target, int Len, bool extraStackAdjust, std::function<bool(RegContext*, HookEx*)>&& callback) {
-    // 首先创建HookEx实例
+    if (0 < Len && Len < 5) {
+        return std::unexpected(std::format("参数指定的长度是：{}  ，这个长度怎么可能放得下一个jmp rel32？？", Len));
+    }
+    if (Len == 0) {
+        // 自动分析法，info至少提供20个空间
+        auto info = MulNX::Memory::HookEx::AnalyseTarget(Target);
+        for (int i = 0;Len < 5;++i) {
+            Len += info.Cmds.at(i).size;
+        }
+    }
+
+    // 创建HookEx实例
     auto HookExInstance = std::make_unique<HookEx>();
     HookExInstance->hookTarget = Target;
     HookExInstance->callback = std::move(callback);
     HookExInstance->overrideSize = Len;
     // 复制覆盖处指令
-    HookExInstance->hookTargetRawCode = std::vector<uint8_t>(Target, Target + HookExInstance->overrideSize);
+    HookExInstance->hookTargetRawCode = MulNX::Memory::Asm::Code(Target, Target + HookExInstance->overrideSize);
 
     // 为调度器汇编部分分配空间    
     auto* alloced = TryAlloc((uintptr_t)Target, 4096);
     if (!alloced) {
-        return std::unexpected("windows内存分配失败！");
+        return std::unexpected("windows内存分配失败！无法找到空间");
     }
+    // 进行raii绑定，防止内存泄露
+    HookExInstance->pAsmDispatcher = alloced;
     if (std::abs(static_cast<long long>(reinterpret_cast<uintptr_t>(alloced) -
         reinterpret_cast<uintptr_t>(Target))) > 1024ULL * 1024 * 1024) {
-        return std::unexpected("windows内存分配失败！");
+        return std::unexpected("windows内存分配失败！分配空间不合适");
     }
-    HookExInstance->pAsmDispatcher = alloced;
+    
     {
         // 创建编译器
         using enum MulNX::Memory::Asm::Reg;
