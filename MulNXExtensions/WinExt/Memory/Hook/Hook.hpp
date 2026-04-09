@@ -8,9 +8,27 @@
 #include <shared_mutex>
 #include <expected>
 
-struct RegContext {
+class RegContext {
+public:
     uint64_t rax, rcx, rdx, rbx, rsp, rbp, rsi, rdi;
     uint64_t r8, r9, r10, r11, r12, r13, r14, r15;
+
+    template<typename T>
+    T* P1() {
+        return reinterpret_cast<T*>(&this->rcx);
+    }
+    template<typename T>
+    T* P2() {
+        return reinterpret_cast<T*>(&this->rdx);
+    }
+    template<typename T>
+    T* P3() {
+        return reinterpret_cast<T*>(&this->r8);
+    }
+    template<typename T>
+    T* P4() {
+        return reinterpret_cast<T*>(&this->r9);
+    }
 };
 
 namespace MulNX {

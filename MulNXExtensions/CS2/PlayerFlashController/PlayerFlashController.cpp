@@ -3,9 +3,8 @@
 #include <MulNXExtensions/CS2/CSController/CSController.hpp>
 
 bool PlayerFlashController::Init() {
-    this->CS = this->Core->ModuleManager()->FindModule<CSController>("CSController");
     this->SendUINode(this->GetName(), [this](MulNXUINode* node) {return this->Menu(node);});
-    this->CS->handlesControlPlayer.push_back([this](CS2::CCSPlayerController* controller, CS2::C_CSPlayerPawn* pawn) {return this->HandleForceFlash(controller, pawn);});
+    this->CS2()->handlesControlPlayer.push_back([this](CS2::CCSPlayerController* controller, CS2::C_CSPlayerPawn* pawn) {return this->HandleForceFlash(controller, pawn);});
     return true;
 }
 

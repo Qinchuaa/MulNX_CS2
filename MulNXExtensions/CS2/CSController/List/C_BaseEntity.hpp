@@ -2,6 +2,7 @@
 
 #include <stdfloat>
 #include <MulNX/Base/Math/Math.hpp>
+#include <MulNX/Config/Config.hpp>
 #include <MulNXExtensions/WinExt/vtable/vtable.hpp>
 #include <MulNXThirdParty/All_cs2_dumper.hpp>
 
@@ -32,7 +33,7 @@ namespace CS2 {
     template<typename T>
     class CHandle :public CHandleBase {
     public:
-        
+
     };
 
     class C_ClassInfo {
@@ -42,14 +43,14 @@ namespace CS2 {
 
     class CGameSceneNode {
     public:
-        DirectX::XMFLOAT3* vecAbsOrigin() { return reinterpret_cast<DirectX::XMFLOAT3*>(reinterpret_cast<uintptr_t>(this) + cs2_dumper::schemas::client_dll::CGameSceneNode::m_vecAbsOrigin); }
-        DirectX::XMFLOAT3* vecOrigin() { return reinterpret_cast<DirectX::XMFLOAT3*>(reinterpret_cast<uintptr_t>(this) + cs2_dumper::schemas::client_dll::CGameSceneNode::m_vecOrigin); }
-        DirectX::XMFLOAT3* angAbsRotation() { return reinterpret_cast<DirectX::XMFLOAT3*>(reinterpret_cast<uintptr_t>(this) + cs2_dumper::schemas::client_dll::CGameSceneNode::m_angAbsRotation); }
-        DirectX::XMFLOAT3* angRotation() { return reinterpret_cast<DirectX::XMFLOAT3*>(reinterpret_cast<uintptr_t>(this) + cs2_dumper::schemas::client_dll::CGameSceneNode::m_angRotation); }
-        DirectX::XMFLOAT3* vecWrappedLocalOrigin() { return reinterpret_cast<DirectX::XMFLOAT3*>(reinterpret_cast<uintptr_t>(this) + cs2_dumper::schemas::client_dll::CGameSceneNode::m_vecWrappedLocalOrigin); }
-        DirectX::XMFLOAT3* angWrappedLocalRotation() { return reinterpret_cast<DirectX::XMFLOAT3*>(reinterpret_cast<uintptr_t>(this) + cs2_dumper::schemas::client_dll::CGameSceneNode::m_angWrappedLocalRotation); }
-        DirectX::XMFLOAT3* vRenderOrigin() { return reinterpret_cast<DirectX::XMFLOAT3*>(reinterpret_cast<uintptr_t>(this) + cs2_dumper::schemas::client_dll::CGameSceneNode::m_vRenderOrigin); }
-        bool* bDebugAbsOriginChanges() { return reinterpret_cast<bool*>(reinterpret_cast<uintptr_t>(this) + cs2_dumper::schemas::client_dll::CGameSceneNode::m_bDebugAbsOriginChanges); }
+        DirectX::XMFLOAT3* vecAbsOrigin() { return Schema<DirectX::XMFLOAT3>(this, cs2_dumper::schemas::client_dll::CGameSceneNode::m_vecAbsOrigin); }
+        DirectX::XMFLOAT3* vecOrigin() { return Schema<DirectX::XMFLOAT3>(this, cs2_dumper::schemas::client_dll::CGameSceneNode::m_vecOrigin); }
+        DirectX::XMFLOAT3* angAbsRotation() { return Schema<DirectX::XMFLOAT3>(this, cs2_dumper::schemas::client_dll::CGameSceneNode::m_angAbsRotation); }
+        DirectX::XMFLOAT3* angRotation() { return Schema<DirectX::XMFLOAT3>(this, cs2_dumper::schemas::client_dll::CGameSceneNode::m_angRotation); }
+        DirectX::XMFLOAT3* vecWrappedLocalOrigin() { return Schema<DirectX::XMFLOAT3>(this, cs2_dumper::schemas::client_dll::CGameSceneNode::m_vecWrappedLocalOrigin); }
+        DirectX::XMFLOAT3* angWrappedLocalRotation() { return Schema<DirectX::XMFLOAT3>(this, cs2_dumper::schemas::client_dll::CGameSceneNode::m_angWrappedLocalRotation); }
+        DirectX::XMFLOAT3* vRenderOrigin() { return Schema<DirectX::XMFLOAT3>(this, cs2_dumper::schemas::client_dll::CGameSceneNode::m_vRenderOrigin); }
+        bool* bDebugAbsOriginChanges() { return Schema<bool>(this, cs2_dumper::schemas::client_dll::CGameSceneNode::m_bDebugAbsOriginChanges); }
     };
 
     class BoneArray {
@@ -70,37 +71,44 @@ namespace CS2 {
             requires std::derived_from<T, CS2::C_BaseEntity>
         T* As() { return reinterpret_cast<T*>(this); }
 
-        C_ClassInfo** pClassInfo() { return reinterpret_cast<C_ClassInfo**>(reinterpret_cast<uintptr_t>(this) + 0x10); }
-        CGameSceneNode** pGameSceneNode() { return reinterpret_cast<CGameSceneNode**>(reinterpret_cast<uintptr_t>(this) + cs2_dumper::schemas::client_dll::C_BaseEntity::m_pGameSceneNode); }
-        int32_t* iHealth() { return reinterpret_cast<int32_t*>(reinterpret_cast<uintptr_t>(this) + cs2_dumper::schemas::client_dll::C_BaseEntity::m_iHealth); }
-        uint8_t* iTeamNum() { return reinterpret_cast<uint8_t*>(reinterpret_cast<uintptr_t>(this) + cs2_dumper::schemas::client_dll::C_BaseEntity::m_iTeamNum); }
+        C_ClassInfo** pClassInfo() { return Schema<C_ClassInfo*>(this, 0x10); }
+        CGameSceneNode** pGameSceneNode() { return Schema<CGameSceneNode*>(this, cs2_dumper::schemas::client_dll::C_BaseEntity::m_pGameSceneNode); }
+        int32_t* iHealth() { return Schema<int32_t>(this, cs2_dumper::schemas::client_dll::C_BaseEntity::m_iHealth); }
+        uint8_t* iTeamNum() { return Schema<uint8_t>(this, cs2_dumper::schemas::client_dll::C_BaseEntity::m_iTeamNum); }
+        CHandle<C_BaseEntity>* m_hEffectEntity() { return Schema<CHandle<C_BaseEntity>>(this, cs2_dumper::schemas::client_dll::C_BaseEntity::m_hEffectEntity); }
+        CHandle<C_BaseEntity>* m_hOwnerEntity() { return Schema<CHandle<C_BaseEntity>>(this, cs2_dumper::schemas::client_dll::C_BaseEntity::m_hOwnerEntity); }
 
         DirectX::XMFLOAT3 GetBonePos(int index);
     };
 
     class C_SoundEventEntity :public C_BaseEntity {
     public:
-        
+
     };
 
-    class CGlowProperty{
+    class C_BaseModelEntity;
+    class CGlowProperty {
     public:
-        void* fGlowColor() { return reinterpret_cast<void*>(reinterpret_cast<uintptr_t>(this) + cs2_dumper::schemas::client_dll::CGlowProperty::m_fGlowColor); }
-        int32_t* iGlowType() { return reinterpret_cast<int32_t*>(reinterpret_cast<uintptr_t>(this) + cs2_dumper::schemas::client_dll::CGlowProperty::m_iGlowType); }
-        int32_t* iGlowTeam() { return reinterpret_cast<int32_t*>(reinterpret_cast<uintptr_t>(this) + cs2_dumper::schemas::client_dll::CGlowProperty::m_iGlowTeam); }
-        int32_t* nGlowRange() { return reinterpret_cast<int32_t*>(reinterpret_cast<uintptr_t>(this) + cs2_dumper::schemas::client_dll::CGlowProperty::m_nGlowRange); }
-        int32_t* nGlowRangeMin() { return reinterpret_cast<int32_t*>(reinterpret_cast<uintptr_t>(this) + cs2_dumper::schemas::client_dll::CGlowProperty::m_nGlowRangeMin); }
-        void* glowColorOverride() { return reinterpret_cast<void*>(reinterpret_cast<uintptr_t>(this) + cs2_dumper::schemas::client_dll::CGlowProperty::m_glowColorOverride); }
-        bool* bFlashing() { return reinterpret_cast<bool*>(reinterpret_cast<uintptr_t>(this) + cs2_dumper::schemas::client_dll::CGlowProperty::m_bFlashing); }
-        float* flGlowTime() { return reinterpret_cast<float*>(reinterpret_cast<uintptr_t>(this) + cs2_dumper::schemas::client_dll::CGlowProperty::m_flGlowTime); }
-        float* flGlowStartTime() { return reinterpret_cast<float*>(reinterpret_cast<uintptr_t>(this) + cs2_dumper::schemas::client_dll::CGlowProperty::m_flGlowStartTime); }
-        bool* bEligibleForScreenHighlight() { return reinterpret_cast<bool*>(reinterpret_cast<uintptr_t>(this) + cs2_dumper::schemas::client_dll::CGlowProperty::m_bEligibleForScreenHighlight); }
-        bool* bGlowing() { return reinterpret_cast<bool*>(reinterpret_cast<uintptr_t>(this) + cs2_dumper::schemas::client_dll::CGlowProperty::m_bGlowing); }
+        C_BaseModelEntity* GetOwner() { return Schema<C_BaseModelEntity>(this, -cs2_dumper::schemas::client_dll::C_BaseModelEntity::m_Glow); }
+
+        void* fGlowColor() { return Schema<void>(this, cs2_dumper::schemas::client_dll::CGlowProperty::m_fGlowColor); }
+        int32_t* iGlowType() { return Schema<int32_t>(this, cs2_dumper::schemas::client_dll::CGlowProperty::m_iGlowType); }
+        int32_t* iGlowTeam() { return Schema<int32_t>(this, cs2_dumper::schemas::client_dll::CGlowProperty::m_iGlowTeam); }
+        int32_t* nGlowRange() { return Schema<int32_t>(this, cs2_dumper::schemas::client_dll::CGlowProperty::m_nGlowRange); }
+        int32_t* nGlowRangeMin() { return Schema<int32_t>(this, cs2_dumper::schemas::client_dll::CGlowProperty::m_nGlowRangeMin); }
+        void* glowColorOverride() { return Schema<void>(this, cs2_dumper::schemas::client_dll::CGlowProperty::m_glowColorOverride); }
+        bool* bFlashing() { return Schema<bool>(this, cs2_dumper::schemas::client_dll::CGlowProperty::m_bFlashing); }
+        float* flGlowTime() { return Schema<float>(this, cs2_dumper::schemas::client_dll::CGlowProperty::m_flGlowTime); }
+        float* flGlowStartTime() { return Schema<float>(this, cs2_dumper::schemas::client_dll::CGlowProperty::m_flGlowStartTime); }
+        bool* bEligibleForScreenHighlight() { return Schema<bool>(this, cs2_dumper::schemas::client_dll::CGlowProperty::m_bEligibleForScreenHighlight); }
+        bool* bGlowing() { return Schema<bool>(this, cs2_dumper::schemas::client_dll::CGlowProperty::m_bGlowing); }
     };
 
     class C_BaseModelEntity :public C_BaseEntity {
     public:
-        CGlowProperty* Glow() { return reinterpret_cast<CGlowProperty*>(reinterpret_cast<uintptr_t>(this) + cs2_dumper::schemas::client_dll::C_BaseModelEntity::m_Glow); }
+
+
+        CGlowProperty* Glow() { return Schema<CGlowProperty>(this, cs2_dumper::schemas::client_dll::C_BaseModelEntity::m_Glow); }
         DirectX::XMFLOAT3* vecViewOffset() { return reinterpret_cast<DirectX::XMFLOAT3*>(reinterpret_cast<uintptr_t>(this) + cs2_dumper::schemas::client_dll::C_BaseModelEntity::m_vecViewOffset); }
     };
 
@@ -109,9 +117,9 @@ namespace CS2 {
 
     };
 
-    class C_PlantedC4 :public CBaseAnimGraph{
+    class C_PlantedC4 :public CBaseAnimGraph {
     public:
-        
+
     };
 
     class C_BaseFlex :public CBaseAnimGraph {
@@ -131,10 +139,10 @@ namespace CS2 {
 
     class C_SmokeGrenadeProjectile :public C_BaseCSGrenadeProjectile {
     public:
-        int32_t* nSmokeEffectTickBegin() { return reinterpret_cast<int32_t*>(reinterpret_cast<uintptr_t>(this) + cs2_dumper::schemas::client_dll::C_SmokeGrenadeProjectile::m_nSmokeEffectTickBegin); }
-        bool* bDidSmokeEffect() { return reinterpret_cast<bool*>(reinterpret_cast<uintptr_t>(this) + cs2_dumper::schemas::client_dll::C_SmokeGrenadeProjectile::m_bDidSmokeEffect); }
-        bool* bSmokeEffectSpawned() { return reinterpret_cast<bool*>(reinterpret_cast<uintptr_t>(this) + cs2_dumper::schemas::client_dll::C_SmokeGrenadeProjectile::m_bSmokeEffectSpawned); }
-        DirectX::XMFLOAT3* vSmokeColor() { return reinterpret_cast<DirectX::XMFLOAT3*>(reinterpret_cast<uintptr_t>(this) + cs2_dumper::schemas::client_dll::C_SmokeGrenadeProjectile::m_vSmokeColor); }
+        int32_t* nSmokeEffectTickBegin() { return Schema<int32_t>(this, cs2_dumper::schemas::client_dll::C_SmokeGrenadeProjectile::m_nSmokeEffectTickBegin); }
+        bool* bDidSmokeEffect() { return Schema<bool>(this, cs2_dumper::schemas::client_dll::C_SmokeGrenadeProjectile::m_bDidSmokeEffect); }
+        bool* bSmokeEffectSpawned() { return Schema<bool>(this, cs2_dumper::schemas::client_dll::C_SmokeGrenadeProjectile::m_bSmokeEffectSpawned); }
+        DirectX::XMFLOAT3* vSmokeColor() { return Schema<DirectX::XMFLOAT3>(this, cs2_dumper::schemas::client_dll::C_SmokeGrenadeProjectile::m_vSmokeColor); }
 
     };
 
@@ -155,7 +163,7 @@ namespace CS2 {
 
     class C_BasePlayerWeapon :public C_EconEntity {
     public:
-        
+
     };
 
     class C_CSWeaponBase :public C_BasePlayerWeapon {
@@ -171,21 +179,22 @@ namespace CS2 {
     using ObserverMode_t = uint32_t;
     class CPlayer_ObserverServices :public CPlayerPawnComponent {
     public:
-        uint8_t* iObserverMode() { return reinterpret_cast<uint8_t*>(reinterpret_cast<uintptr_t>(this) + cs2_dumper::schemas::client_dll::CPlayer_ObserverServices::m_iObserverMode); }
-        CHandle<C_BaseEntity>* hObserverTarget() { return reinterpret_cast<CHandle<C_BaseEntity>*>(reinterpret_cast<uintptr_t>(this) + cs2_dumper::schemas::client_dll::CPlayer_ObserverServices::m_hObserverTarget); }
-        ObserverMode_t* iObserverLastMode() { return reinterpret_cast<ObserverMode_t*>(reinterpret_cast<uintptr_t>(this) + cs2_dumper::schemas::client_dll::CPlayer_ObserverServices::m_iObserverLastMode); }
-        bool* bForcedObserverMode() { return reinterpret_cast<bool*>(reinterpret_cast<uintptr_t>(this) + cs2_dumper::schemas::client_dll::CPlayer_ObserverServices::m_bForcedObserverMode); }
-        float* flObserverChaseDistance() { return reinterpret_cast<float*>(reinterpret_cast<uintptr_t>(this) + cs2_dumper::schemas::client_dll::CPlayer_ObserverServices::m_flObserverChaseDistance); }
-        GameTime_t* flObserverChaseDistanceCalcTime() { return reinterpret_cast<GameTime_t*>(reinterpret_cast<uintptr_t>(this) + cs2_dumper::schemas::client_dll::CPlayer_ObserverServices::m_flObserverChaseDistanceCalcTime); }
+        uint8_t* iObserverMode() { return Schema<uint8_t>(this, cs2_dumper::schemas::client_dll::CPlayer_ObserverServices::m_iObserverMode); }
+        CHandle<C_BaseEntity>* hObserverTarget() { return Schema<CHandle<C_BaseEntity>>(this, cs2_dumper::schemas::client_dll::CPlayer_ObserverServices::m_hObserverTarget); }
+        ObserverMode_t* iObserverLastMode() { return Schema<ObserverMode_t>(this, cs2_dumper::schemas::client_dll::CPlayer_ObserverServices::m_iObserverLastMode); }
+        bool* bForcedObserverMode() { return Schema<bool>(this, cs2_dumper::schemas::client_dll::CPlayer_ObserverServices::m_bForcedObserverMode); }
+        float* flObserverChaseDistance() { return Schema<float>(this, cs2_dumper::schemas::client_dll::CPlayer_ObserverServices::m_flObserverChaseDistance); }
+        GameTime_t* flObserverChaseDistanceCalcTime() { return Schema<GameTime_t>(this, cs2_dumper::schemas::client_dll::CPlayer_ObserverServices::m_flObserverChaseDistanceCalcTime); }
     };
 
+    class CBasePlayerController;
     class C_BasePlayerPawn :public C_BaseCombatCharacter {
     public:
-        CPlayer_ObserverServices** pObserverServices() { return reinterpret_cast<CPlayer_ObserverServices**>(reinterpret_cast<uintptr_t>(this) + cs2_dumper::schemas::client_dll::C_BasePlayerPawn::m_pObserverServices); }
-        DirectX::XMFLOAT3* vOldOrigin() { return reinterpret_cast<DirectX::XMFLOAT3*>(reinterpret_cast<uintptr_t>(this) + cs2_dumper::schemas::client_dll::C_BasePlayerPawn::m_vOldOrigin); }
+        CPlayer_ObserverServices** pObserverServices() { return Schema<CPlayer_ObserverServices*>(this, cs2_dumper::schemas::client_dll::C_BasePlayerPawn::m_pObserverServices); }
+        DirectX::XMFLOAT3* vOldOrigin() { return Schema<DirectX::XMFLOAT3>(this, cs2_dumper::schemas::client_dll::C_BasePlayerPawn::m_vOldOrigin); }
         //DirectX::XMFLOAT3 GetEyePos(){}
-        CPlayer_WeaponServices** pWeaponServices() { return reinterpret_cast<CPlayer_WeaponServices**>(reinterpret_cast<uintptr_t>(this) + cs2_dumper::schemas::client_dll::C_BasePlayerPawn::m_pWeaponServices); }
-
+        CPlayer_WeaponServices** pWeaponServices() { return Schema<CPlayer_WeaponServices*>(this, cs2_dumper::schemas::client_dll::C_BasePlayerPawn::m_pWeaponServices); }
+        CHandle<CBasePlayerController>* m_hController() { return Schema<CHandle<CBasePlayerController>>(this, cs2_dumper::schemas::client_dll::C_BasePlayerPawn::m_hController); }
 
         CHandle<C_BasePlayerWeapon> GetHandleActiveWeapon();
         CHandle<C_BaseEntity> GetHandleObserverTarget();
@@ -193,14 +202,14 @@ namespace CS2 {
 
     class C_CSPlayerPawnBase :public C_BasePlayerPawn {
     public:
-        float* m_flFlashBangTime() { return reinterpret_cast<float*>(reinterpret_cast<uintptr_t>(this) + cs2_dumper::schemas::client_dll::C_CSPlayerPawnBase::m_flFlashBangTime); }
-        float* m_flFlashScreenshotAlpha() { return reinterpret_cast<float*>(reinterpret_cast<uintptr_t>(this) + cs2_dumper::schemas::client_dll::C_CSPlayerPawnBase::m_flFlashScreenshotAlpha); }
-        float* m_flFlashOverlayAlpha() { return reinterpret_cast<float*>(reinterpret_cast<uintptr_t>(this) + cs2_dumper::schemas::client_dll::C_CSPlayerPawnBase::m_flFlashOverlayAlpha); }
-        bool* m_bFlashBuildUp() { return reinterpret_cast<bool*>(reinterpret_cast<uintptr_t>(this) + cs2_dumper::schemas::client_dll::C_CSPlayerPawnBase::m_bFlashBuildUp); }
-        bool* m_bFlashDspHasBeenCleared() { return reinterpret_cast<bool*>(reinterpret_cast<uintptr_t>(this) + cs2_dumper::schemas::client_dll::C_CSPlayerPawnBase::m_bFlashDspHasBeenCleared); }
-        bool* m_bFlashScreenshotHasBeenGrabbed() { return reinterpret_cast<bool*>(reinterpret_cast<uintptr_t>(this) + cs2_dumper::schemas::client_dll::C_CSPlayerPawnBase::m_bFlashScreenshotHasBeenGrabbed); }
-        float* m_flFlashMaxAlpha() { return reinterpret_cast<float*>(reinterpret_cast<uintptr_t>(this) + cs2_dumper::schemas::client_dll::C_CSPlayerPawnBase::m_flFlashMaxAlpha); }
-        float* m_flFlashDuration() { return reinterpret_cast<float*>(reinterpret_cast<uintptr_t>(this) + cs2_dumper::schemas::client_dll::C_CSPlayerPawnBase::m_flFlashDuration); }
+        float* m_flFlashBangTime() { return Schema<float>(this, cs2_dumper::schemas::client_dll::C_CSPlayerPawnBase::m_flFlashBangTime); }
+        float* m_flFlashScreenshotAlpha() { return Schema<float>(this, cs2_dumper::schemas::client_dll::C_CSPlayerPawnBase::m_flFlashScreenshotAlpha); }
+        float* m_flFlashOverlayAlpha() { return Schema<float>(this, cs2_dumper::schemas::client_dll::C_CSPlayerPawnBase::m_flFlashOverlayAlpha); }
+        bool* m_bFlashBuildUp() { return Schema<bool>(this, cs2_dumper::schemas::client_dll::C_CSPlayerPawnBase::m_bFlashBuildUp); }
+        bool* m_bFlashDspHasBeenCleared() { return Schema<bool>(this, cs2_dumper::schemas::client_dll::C_CSPlayerPawnBase::m_bFlashDspHasBeenCleared); }
+        bool* m_bFlashScreenshotHasBeenGrabbed() { return Schema<bool>(this, cs2_dumper::schemas::client_dll::C_CSPlayerPawnBase::m_bFlashScreenshotHasBeenGrabbed); }
+        float* m_flFlashMaxAlpha() { return Schema<float>(this, cs2_dumper::schemas::client_dll::C_CSPlayerPawnBase::m_flFlashMaxAlpha); }
+        float* m_flFlashDuration() { return Schema<float>(this, cs2_dumper::schemas::client_dll::C_CSPlayerPawnBase::m_flFlashDuration); }
     };
 
 
@@ -212,13 +221,13 @@ namespace CS2 {
     class CBasePlayerController :public C_BaseEntity {
     public:
 
-        CHandle<C_BasePlayerPawn>* hPawn() { return reinterpret_cast<CHandle<C_BasePlayerPawn>*>(reinterpret_cast<uintptr_t>(this) + cs2_dumper::schemas::client_dll::CBasePlayerController::m_hPawn); }
-        char* m_iszPlayerName() { return reinterpret_cast<char*>(reinterpret_cast<uintptr_t>(this) + cs2_dumper::schemas::client_dll::CBasePlayerController::m_iszPlayerName); } // char[128]
-        uint64_t* m_steamID() { return reinterpret_cast<uint64_t*>(reinterpret_cast<uintptr_t>(this) + cs2_dumper::schemas::client_dll::CBasePlayerController::m_steamID); } // uint64
+        CHandle<C_BasePlayerPawn>* hPawn() { return Schema<CHandle<C_BasePlayerPawn>>(this, cs2_dumper::schemas::client_dll::CBasePlayerController::m_hPawn); }
+        char* m_iszPlayerName() { return Schema<char>(this, cs2_dumper::schemas::client_dll::CBasePlayerController::m_iszPlayerName); } // char[128]
+        uint64_t* m_steamID() { return Schema<uint64_t>(this, cs2_dumper::schemas::client_dll::CBasePlayerController::m_steamID); } // uint64
     };
 
     class CCSPlayerController :public CBasePlayerController {
     public:
-        CHandle<C_CSPlayerPawn>* m_hPlayerPawn() { return reinterpret_cast<CHandle<C_CSPlayerPawn>*>(reinterpret_cast<uintptr_t>(this) + cs2_dumper::schemas::client_dll::CCSPlayerController::m_hPlayerPawn); }
+        CHandle<C_CSPlayerPawn>* m_hPlayerPawn() { return Schema<CHandle<C_CSPlayerPawn>>(this, cs2_dumper::schemas::client_dll::CCSPlayerController::m_hPlayerPawn); }
     };
 }

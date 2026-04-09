@@ -6,7 +6,6 @@
 
 bool ConsoleManager::Init() {
     this->SendUINode(this->GetName(), [this](MulNXUINode* node) {return this->UINodeFunc(node);});
-    this->pCSController = this->Core->ModuleManager()->FindModule<CSController>("CSController");
     return true;
 }
 
@@ -20,32 +19,32 @@ bool ConsoleManager::UINodeFunc(MulNXUINode* ThisNode) {
 	if (ImGui::CollapsingHeader("CS2控制台")) {
 		if (ImGui::Button("解限所有CS2控制台变量")) {
 			int Count = 0;
-            this->pCSController->GetCvarSystem().UnlockHiddenCVars(Count);
+            this->CS2()->GetCvarSystem().UnlockHiddenCVars(Count);
 			this->ISys().LogSucc("成功解限" + std::to_string(Count) + "个控制台命令！");
 		}
 		if (ImGui::Button("限住所有CS2控制台变量")) {
 			int Count = 0;
-            this->pCSController->GetCvarSystem().LockAllCvars(Count);
+            this->CS2()->GetCvarSystem().LockAllCvars(Count);
 			this->ISys().LogSucc("成功限住" + std::to_string(Count) + "个控制台命令！");
 		}
 		if(ImGui::Button("列出所有CS2控制台变量")) {
             this->ISys().LogLine();
 			uint64_t idx = 0;
-            this->pCSController->GetCvarSystem().GetFirstCvarIterator(idx);
+            this->CS2()->GetCvarSystem().GetFirstCvarIterator(idx);
 			while (idx!=0xFFFFFFFF) {
-                C_ConVar* var = this->pCSController->GetCvarSystem().GetCVarByIndex(idx);
+                C_ConVar* var = this->CS2()->GetCvarSystem().GetCVarByIndex(idx);
 				if (var) {
 					std::string Name = var->szName ? var->szName : "未知";
 					this->ISys().LogInfo("控制台命令：" + Name);
 				}
-                this->pCSController->GetCvarSystem().GetNextCvarIterator(idx);
+                this->CS2()->GetCvarSystem().GetNextCvarIterator(idx);
 			}
             this->ISys().LogLine();
 		}
     }
 
     if (ImGui::CollapsingHeader("渲染增强")) {
-        MulNX::UI::Checkbox("方框透视", this->pCSController->ESPDraw);
+        MulNX::UI::Checkbox("方框透视", this->CS2()->ESPDraw);
     }
     return true;
 }

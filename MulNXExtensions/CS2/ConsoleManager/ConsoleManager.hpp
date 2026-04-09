@@ -1,12 +1,8 @@
 #pragma once
 
-#include <MulNX/MulNX.hpp>
+#include <MulNXExtensions/CS2/CSModuleBase.hpp>
 
-class CSController;
-class ConsoleManager final :public MulNX::ModuleBase {
-private:
-    int TargetTick = 0;
-    CSController* pCSController = nullptr;
+class ConsoleManager final :public CSModuleBase {
 public:
     bool Init()override;
     void VirtualMain()override;

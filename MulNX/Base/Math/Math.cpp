@@ -61,6 +61,25 @@ DirectX::XMVECTOR MulNX::Math::View::ToDOFPack() {
 void MulNX::Math::ViewBuffer::Push(MulNX::Math::View newView) {
     float factor = this->SMOOTH_FACTOR.load();
 
+    // 1. 验证平滑因子有效性：应为有限值且位于 [0, 1] 区间
+    if (!std::isfinite(factor) || factor < 0.0f || factor > 1.0f) {
+        return;  // 无效因子，放弃本次更新
+    }
+
+    // 2. 验证新视图的位置分量有效性
+    if (!std::isfinite(newView.position.x) ||
+        !std::isfinite(newView.position.y) ||
+        !std::isfinite(newView.position.z)) {
+        return;
+    }
+
+    // 3. 验证新视图的旋转分量有效性
+    if (!std::isfinite(newView.rotation.x) ||
+        !std::isfinite(newView.rotation.y) ||
+        !std::isfinite(newView.rotation.z)) {
+        return;
+    }
+
     // 位置指数平滑
     if (factor > 0.99f) {
         this->view.position = newView.position;
@@ -93,20 +112,11 @@ std::string MulNX::Math::CameraKeyframe::GetMsg()const {
     DirectX::XMFLOAT4 PositionAndFOV = this->GetPositionAndFOV();
     DirectX::XMFLOAT3 Euler = this->GetRotationEuler();
     auto dof = this->GetDOF();
-    std::ostringstream oss;
-
-    oss << std::fixed << std::setprecision(6)
-        << "  时间： " << this->time
-        << "  坐标： X：" << PositionAndFOV.x
-        << "  Y：" << PositionAndFOV.y
-        << "  Z：" << PositionAndFOV.z
-        << "  FOV:" << PositionAndFOV.w
-        << "  角度： 俯仰：" << Euler.x
-        << "  偏航：" << Euler.y
-        << "  滚转：" << Euler.z
-        << "  景深： 近模糊：" << dof.NearBlurry
-        << "  近清晰：" << dof.NearCrisp
-        << "  远清晰：" << dof.FarCrisp
-        << "  远模糊：" << dof.FarBlurry;
-    return oss.str();
+    auto msg = std::format("时间：{}  坐标（XYZ）：{}，{}，{}  FOV：{}  角度： 俯仰：{}  偏航：{}  滚转：{}  景深： 近模糊：{}  近清晰：{}  远清晰：{}  远模糊：{}",
+        this->time,
+        PositionAndFOV.x, PositionAndFOV.y, PositionAndFOV.z, PositionAndFOV.w,
+        Euler.x, Euler.y, Euler.z,
+        dof.NearBlurry, dof.NearCrisp, dof.FarCrisp, dof.FarBlurry
+    );
+    return msg;
 }

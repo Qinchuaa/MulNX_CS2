@@ -1,8 +1,6 @@
 #pragma once
 
-#include "../CSController/CSController.hpp"
-
-#include <MulNX/MulNX.hpp>
+#include <MulNXExtensions/CS2/CSModuleBase.hpp>
 
 class ScreenSettings {
 public:
@@ -60,9 +58,8 @@ public:
     float* r_dof_override_tilt_to_ground = nullptr;
 };
 
-class GameSettingsManager final :public MulNX::ModuleBase {
+class GameSettingsManager final :public CSModuleBase {
 private:
-    CSController* CS = nullptr;
     C_GameSettings GameSettings{};
 
     dof dof{};
@@ -70,11 +67,6 @@ private:
 
     MulNXHandle hContext{};
 public:
-    GameSettingsManager() : ModuleBase() {
-        //this->Type = MulNX::ModuleType::GameSettingsManager;
-    }
-
-
     //基类接口实现
 
     bool Init()override;

@@ -2,11 +2,9 @@
 
 #include <MulNX/MulNX.hpp>
 #include <MulNXExtensions/WinExt/WinExt.hpp>
-#include <MulNXExtensions/CS2/CSController/List/C_BaseEntity.hpp>
+#include <MulNXExtensions/CS2/CSModuleBase.hpp>
 
 #include <expected>
-
-class CSController;
 
 class AxisInfo {
 public:
@@ -20,10 +18,8 @@ public:
     DirectX::XMFLOAT3 AxisUp;
 };
 
-class AdvancedViewController final :public MulNX::ModuleBase {
+class AdvancedViewController final :public CSModuleBase {
 private:
-    CSController* CS = nullptr;
-
     std::atomic<bool> Enable = false;
     std::atomic<bool> OverrideSelfView = false;
     std::atomic<bool> AlwaysCaulate = false;

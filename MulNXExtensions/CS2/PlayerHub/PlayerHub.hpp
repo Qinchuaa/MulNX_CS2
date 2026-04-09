@@ -1,13 +1,9 @@
 #pragma once
 
-#include <MulNX/MulNX.hpp>
-#include <MulNXExtensions/WinExt/WinExt.hpp>
-#include <MulNXExtensions/CS2/CSController/List/C_BaseEntity.hpp>
+#include <MulNXExtensions/CS2/CSModuleBase.hpp>
 
-class CSController;
-class PlayerHub final :public MulNX::ModuleBase {
+class PlayerHub final :public CSModuleBase {
 private:
-    CSController* CS = nullptr;
     std::array<char[128], 64>nameReplace{};
     std::map<uint64_t, int>nameReplaceInfo{};
     std::unique_ptr<MulNX::Memory::HookEx>hkGetDecoratedPlayerName = nullptr;
@@ -15,6 +11,8 @@ private:
     bool bGetPlayerNameHooked = false;
     void HandleVHook(CS2::CCSPlayerController* pPlayerController);
 public:
+    std::vector<CSModuleBase*> ModulesAboutPlayer{};
+    
     bool Init()override;
     bool Window(MulNXUINode* node);
 };

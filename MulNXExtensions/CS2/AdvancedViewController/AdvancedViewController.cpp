@@ -4,7 +4,6 @@
 #include <MulNXExtensions/CS2/CSController/CSController.hpp>
 
 bool AdvancedViewController::Init() {
-    this->CS = this->Core->ModuleManager()->FindModule<CSController>("CSController");
     this->SendUINode(this->GetName(), [this](MulNXUINode* node) {return this->Menu(node); });
 
     return true;
@@ -52,9 +51,9 @@ bool AdvancedViewController::Menu(MulNXUINode* node) {
         auto boneInfo = this->CurrentBoneInfo.load(std::memory_order_acquire);
         if (boneInfo) {
             MulNX::TransInfo info;
-            info.pMatrix = this->CS->GetViewMatrix();
-            info.windowHeight = this->CS->GetWinHeight();
-            info.windowWidth = this->CS->GetWinWidth();
+            info.pMatrix = this->CS2()->GetViewMatrix();
+            info.windowHeight = this->CS2()->GetWinHeight();
+            info.windowWidth = this->CS2()->GetWinWidth();
 
             // 分两部分绘制：原始骨骼点 与 坐标轴
             if (this->ShowOriginalBones.load(std::memory_order_acquire)) {
@@ -166,7 +165,7 @@ std::expected<MulNX::Math::Point3, int> AdvancedViewController::GetPoint3(CS2::C
         else {
             // 从武器读取骨骼
             auto hActiveWeapon = target->GetHandleActiveWeapon();
-            auto* pWeapon = this->CS->Modules.client.GetBaseEntityFromHandle(hActiveWeapon)->As<CS2::C_BasePlayerWeapon>();
+            auto* pWeapon = this->CS2()->Modules.client.GetBaseEntityFromHandle(hActiveWeapon)->As<CS2::C_BasePlayerWeapon>();
             if (!pWeapon) return std::unexpected(4);
             point3.origin = pWeapon->GetBonePos(this->boneIndex1.load());
             point3.forward = pWeapon->GetBonePos(this->boneIndex2.load());
@@ -182,16 +181,16 @@ std::expected<MulNX::Math::Point3, int> AdvancedViewController::GetPoint3(CS2::C
 
 CS2::C_CSPlayerPawn* AdvancedViewController::GetSelfViewTargetPawn() {
     try {
-        auto* localController = this->CS->Modules.client.dwLocalPlayerController();
+        auto* localController = this->CS2()->Modules.client.dwLocalPlayerController();
         if (!localController) return nullptr;
         auto hLocalPawn = MulNX::MRead(localController->hPawn());
-        auto* localPawn = this->CS->Modules.client.GetBaseEntityFromHandle(hLocalPawn)->As<CS2::C_CSPlayerPawn>();
+        auto* localPawn = this->CS2()->Modules.client.GetBaseEntityFromHandle(hLocalPawn)->As<CS2::C_CSPlayerPawn>();
         if (!localPawn) return nullptr;
         if (this->useLocalPawn.load(std::memory_order_acquire)) {
             return localPawn;
         }
         auto hObserverTarget = localPawn->GetHandleObserverTarget();
-        auto* target = this->CS->Modules.client.GetBaseEntityFromHandle(hObserverTarget)->As<CS2::C_CSPlayerPawn>();
+        auto* target = this->CS2()->Modules.client.GetBaseEntityFromHandle(hObserverTarget)->As<CS2::C_CSPlayerPawn>();
         return target;
     }
     catch (const std::exception& e) {

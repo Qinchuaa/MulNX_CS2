@@ -10,12 +10,15 @@ add_library(MulNXCS2Ext
     "PlayerHub/PlayerHub.cpp"
     "AdvancedViewController/AdvancedViewController.cpp"
     "PlayerFlashController/PlayerFlashController.cpp"
+    "GlowController/GlowController.cpp"
 
     "ConsoleManager/ConsoleManager.cpp"
     "DemoHelper/DemoHelper.cpp"
     "GameCfgManager/GameCfgManager.cpp"
     "GameSettingsManager/GameSettingsManager.cpp"
     "HookManager/HookManager.cpp"
+
+    "CSModuleBase.cpp"
 )
 
 target_link_libraries(MulNXCS2Ext PUBLIC

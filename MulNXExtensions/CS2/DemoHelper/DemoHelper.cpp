@@ -10,8 +10,8 @@ bool DemoHelper::UINodeFunc(MulNXUINode* node) {
     if (ImGui::Button("标记当前时间")) {
         MulNX::Message msg("DemoHelper/MarkTime"_hash);
         node->PublishAsync(std::move(msg));
-	}
-	ImGui::Text("时间列表:");
+    }
+    ImGui::Text("时间列表:");
     if (!ReadData->TimeMarks.empty()) {
         for (auto time : ReadData->TimeMarks) {
             ImGui::Text("时间点： %.3f 秒", time);
@@ -64,11 +64,21 @@ bool DemoHelper::Init() {
         ;
 
     this->SendUINode(this->GetName(), [this](MulNXUINode* node) {return this->UINodeFunc(node);});
+
+    // auto msg = MulNX::Message::Create<MulNX::Task::RegistrationPacket>("Task/Create"_hash);
+    // auto pPack = msg.asp.get<MulNX::Task::RegistrationPacket>();
+    // pPack->targetWorker = "test";
+    // pPack->task = [this]()->bool {
+    //     std::this_thread::sleep_for(std::chrono::milliseconds(2000));
+    //     this->ISys().LogSucc("测试任务正在运行，频率2000ms一次");
+    //     return true;
+    //     };
+    // this->ISys().PublishAsync(std::move(msg));
     return true;
 }
 
 void DemoHelper::ProcessMsg(MulNX::Message& Msg) {
-	switch (Msg.type) {
+    switch (Msg.type) {
     case "DemoHelper/MarkTime"_hash: {
         this->MarkTime();
         break;
@@ -80,11 +90,11 @@ void DemoHelper::ProcessMsg(MulNX::Message& Msg) {
         this->AL3D->Time()->JumpReal(data);
         break;
     }
-	}
+    }
 }
 
 void DemoHelper::VirtualMain() {
-	this->EntryProcessMsg();
+    this->EntryProcessMsg();
 
     auto data = std::make_shared<DemoHelperPrivateData>();
     data->TimeMarks = this->Marks;
@@ -92,8 +102,8 @@ void DemoHelper::VirtualMain() {
 }
 
 bool DemoHelper::MarkTime() {
-	this->Marks.push_back(this->AL3D->Time()->GetReal());
+    this->Marks.push_back(this->AL3D->Time()->GetReal());
 
 
-	return true;
+    return true;
 }

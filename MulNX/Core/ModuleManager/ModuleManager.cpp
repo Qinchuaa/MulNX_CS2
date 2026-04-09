@@ -52,6 +52,7 @@ ModuleManager& ModuleManager::CreateSystemModules() {
         .CreateModule<MulNX::HandleSystem>("HandleSystem", 20)// 句柄系统模块
         .CreateModule<MulNX::InputSystem>("InputSystem", 50)// 输入系统模块
         .CreateModule<MulNX::GlobalVars>("GlobalVars", 70)// 全局变量模块
+        .CreateModule<MulNX::TaskSystem>("TaskSystem", 80)// 任务系统
         // ID 100(最后一个模块)分配给3D抽象层
         ;
 

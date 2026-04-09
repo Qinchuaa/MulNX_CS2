@@ -32,20 +32,20 @@ bool PlayerHub::Window(MulNXUINode* node) {
 
         // ---------- 玩家列表区域 ----------
         ImGui::TextUnformatted("检测到如下玩家信息：");
-        static int showMax = 10;
+        static int showMax = 20;
         ImGui::SliderInt("搜索的最大数量", &showMax, 1, 255);
 
         int playerNum = 0;
 
-        for (int i = 0; i <= std::min(this->CS->Modules.client.dwGameEntitySystem_highestEntityIndex(), showMax); ++i) {
-            auto* baseEntity = this->CS->Modules.client.GetBaseEntity(i);
+        for (int i = 0; i <= std::min(this->CS2()->Modules.client.dwGameEntitySystem_highestEntityIndex(), showMax); ++i) {
+            auto* baseEntity = this->CS2()->Modules.client.GetBaseEntity(i);
             if (!baseEntity) continue;
 
             auto* playerController = baseEntity->As<CS2::CCSPlayerController>();
             if (!playerController) continue;
 
             auto hPawn = MulNX::MRead(playerController->hPawn());
-            auto* pawn = this->CS->Modules.client.GetBaseEntityFromHandle(hPawn)->As<CS2::C_CSPlayerPawn>();
+            auto* pawn = this->CS2()->Modules.client.GetBaseEntityFromHandle(hPawn)->As<CS2::C_CSPlayerPawn>();
             if (!pawn) continue;
 
             uint64_t SteamID = MulNX::MRead(playerController->m_steamID());
@@ -56,6 +56,10 @@ bool PlayerHub::Window(MulNXUINode* node) {
             if (ImGui::Selectable(displayName.c_str(), choosingSteamID == SteamID)) {
                 choosingSteamID = SteamID;
                 needClearBuffer = true;   // 下次循环时刷新缓冲区
+            }
+            // 绘制展示句柄
+            for (auto& module : this->ModulesAboutPlayer) {
+                module->CheckMenu(SteamID);
             }
 
             auto naturalName = MulNX::Memory::ReadString(playerController->m_iszPlayerName());
@@ -81,6 +85,10 @@ bool PlayerHub::Window(MulNXUINode* node) {
 
         // ---------- 编辑区域 ----------
         ImGui::SeparatorText("名称替换设置");
+        for (auto& module : this->ModulesAboutPlayer) {
+            module->SetMenu(choosingSteamID);
+        }
+
         ImGui::Text("当前选中的 SteamID: %llu", choosingSteamID);
         if (choosingSteamID == 0) {
             ImGui::TextDisabled("请先在上方列表中选择一名玩家");
@@ -147,10 +155,9 @@ bool PlayerHub::Window(MulNXUINode* node) {
 }
 
 bool PlayerHub::Init() {
-    this->CS = this->Core->ModuleManager()->FindModule<CSController>("CSController");
     this->SendUINode(this->GetName(), [this](MulNXUINode* node) {return this->Window(node);});
 
-    auto FnGetDecoratedPlayerName = this->CS->Modules.client.GetTextRegion().FindRegion(MulNX::CS2::Signatures::GetDecoratedPlayerName);
+    auto FnGetDecoratedPlayerName = this->CS2()->Modules.client.GetTextRegion().FindRegion(MulNX::CS2::Signatures::GetDecoratedPlayerName);
     this->hkGetDecoratedPlayerName = MulNX::Memory::HookEx::Create(FnGetDecoratedPlayerName.Data(), 0, false,
         [this](RegContext* ctx, MulNX::Memory::HookEx* hk)->bool {
             std::shared_lock lock(this->GetMutex());

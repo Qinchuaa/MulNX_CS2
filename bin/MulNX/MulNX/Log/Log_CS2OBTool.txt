@@ -20,6 +20,8 @@
 [提示][InputSystem]申请了一个线程创建
 [成功][InputSystem]初始化成功!
 [成功][GlobalVars]初始化成功!
+[成功][TaskSystem]成功订阅消息：Task/Create
+[成功][TaskSystem]初始化成功!
 [成功][CSController]成功订阅消息：Core/ReHook
 [提示][CSController]发送了一个UI节点进入消息系统
 [提示][CSController]申请了一个线程创建
@@ -88,6 +90,9 @@
 [成功][UISystem]接收到一个UI节点
 [成功][UISystem]接收到一个UI节点
 [成功][UISystem]接收到一个UI节点
+[提示][TaskSystem]接收到一个任务！
+[成功][TaskSystem]成功创建工作者：test
+[成功][TaskSystem]成功将任务添加进入工作者：test
 [警告][CSController]在更新数据时捕获到异常：read error at: 0xF4C
 [警告][CSController]在更新数据时捕获到异常：read error at: 0xF4C
 [警告][CSController]在更新数据时捕获到异常：read error at: 0xF4C
@@ -185,88 +190,22 @@
 [警告][CSController]在更新数据时捕获到异常：read error at: 0xF4C
 [警告][CSController]在更新数据时捕获到异常：read error at: 0xF4C
 [警告][CSController]在更新数据时捕获到异常：read error at: 0xF4C
-[警告][CSController]在更新数据时捕获到异常：read error at: 0xF4C
-[警告][CSController]在更新数据时捕获到异常：read error at: 0xF4C
-[警告][CSController]在更新数据时捕获到异常：read error at: 0xF4C
-[警告][CSController]在更新数据时捕获到异常：read error at: 0xF4C
-[警告][CSController]在更新数据时捕获到异常：read error at: 0xF4C
-[警告][CSController]在更新数据时捕获到异常：read error at: 0xF4C
-[警告][CSController]在更新数据时捕获到异常：read error at: 0xF4C
-[警告][CSController]在更新数据时捕获到异常：read error at: 0xF4C
-[警告][CSController]在更新数据时捕获到异常：read error at: 0xF4C
-[警告][CSController]在更新数据时捕获到异常：read error at: 0xF4C
-[警告][CSController]在更新数据时捕获到异常：read error at: 0xF4C
-[警告][CSController]在更新数据时捕获到异常：read error at: 0xF4C
-[警告][CSController]在更新数据时捕获到异常：read error at: 0xF4C
-[警告][CSController]在更新数据时捕获到异常：read error at: 0xF4C
-[警告][CSController]在更新数据时捕获到异常：read error at: 0xF4C
-[警告][CSController]在更新数据时捕获到异常：read error at: 0xF4C
-[警告][CSController]在更新数据时捕获到异常：read error at: 0xF4C
-[警告][CSController]在更新数据时捕获到异常：read error at: 0xF4C
-[警告][CSController]在更新数据时捕获到异常：read error at: 0xF4C
-[警告][CSController]在更新数据时捕获到异常：read error at: 0xF4C
-[警告][CSController]在更新数据时捕获到异常：read error at: 0xF4C
-[警告][CSController]在更新数据时捕获到异常：read error at: 0xF4C
-[警告][CSController]在更新数据时捕获到异常：read error at: 0xF4C
-[警告][CSController]在更新数据时捕获到异常：read error at: 0xF4C
-[警告][CSController]在更新数据时捕获到异常：read error at: 0xF4C
-[警告][CSController]在更新数据时捕获到异常：read error at: 0xF4C
-[警告][CSController]在更新数据时捕获到异常：read error at: 0xF4C
-[警告][CSController]在更新数据时捕获到异常：read error at: 0xF4C
-[警告][CSController]在更新数据时捕获到异常：read error at: 0xF4C
-[警告][CSController]在更新数据时捕获到异常：read error at: 0xF4C
-[警告][CSController]在更新数据时捕获到异常：read error at: 0xF4C
-[警告][CSController]在更新数据时捕获到异常：read error at: 0xF4C
-[警告][CSController]在更新数据时捕获到异常：read error at: 0xF4C
-[警告][CSController]在更新数据时捕获到异常：read error at: 0xF4C
-[警告][CSController]在更新数据时捕获到异常：read error at: 0xF4C
-[警告][CSController]在更新数据时捕获到异常：read error at: 0xF4C
-[警告][CSController]在更新数据时捕获到异常：read error at: 0xF4C
-[警告][CSController]在更新数据时捕获到异常：read error at: 0xF4C
-[警告][CSController]在更新数据时捕获到异常：read error at: 0xF4C
-[警告][CSController]在更新数据时捕获到异常：read error at: 0xF4C
-[警告][CSController]在更新数据时捕获到异常：read error at: 0xF4C
-[警告][CSController]在更新数据时捕获到异常：read error at: 0xF4C
-[警告][CSController]在更新数据时捕获到异常：read error at: 0xF4C
-[警告][CSController]在更新数据时捕获到异常：read error at: 0xF4C
-[警告][CSController]在更新数据时捕获到异常：read error at: 0xF4C
-[警告][CSController]在更新数据时捕获到异常：read error at: 0xF4C
-[警告][CSController]在更新数据时捕获到异常：read error at: 0xF4C
-[警告][CSController]在更新数据时捕获到异常：read error at: 0xF4C
-[警告][CSController]在更新数据时捕获到异常：read error at: 0xF4C
-[警告][CSController]在更新数据时捕获到异常：read error at: 0xF4C
-[警告][CSController]在更新数据时捕获到异常：read error at: 0xF4C
-[警告][CSController]在更新数据时捕获到异常：read error at: 0xF4C
-[警告][CSController]在更新数据时捕获到异常：read error at: 0xF4C
-[警告][CSController]在更新数据时捕获到异常：read error at: 0xF4C
-[警告][CSController]在更新数据时捕获到异常：read error at: 0xF4C
-[警告][CSController]在更新数据时捕获到异常：read error at: 0xF4C
+[成功][DemoHelper]测试任务正在运行，频率2000ms一次
 [提示][VirtualUser]接收到新回合信息
 [提示][ProjectManager]项目管理器正在处理消息！
 [警告][ProjectManager]无活跃项目，无法执行自动操作
 [提示][VirtualUser]接收到新回合信息
 [提示][ProjectManager]项目管理器正在处理消息！
 [警告][ProjectManager]无活跃项目，无法执行自动操作
-[提示][VirtualUser]接收到新回合信息
-[提示][ProjectManager]项目管理器正在处理消息！
-[警告][ProjectManager]无活跃项目，无法执行自动操作
-[提示][VirtualUser]接收到新回合信息
-[提示][ProjectManager]项目管理器正在处理消息！
-[警告][ProjectManager]无活跃项目，无法执行自动操作
-[提示][VirtualUser]接收到新回合信息
-[提示][ProjectManager]项目管理器正在处理消息！
-[警告][ProjectManager]无活跃项目，无法执行自动操作
-[提示][VirtualUser]接收到新回合信息
-[提示][ProjectManager]项目管理器正在处理消息！
-[警告][ProjectManager]无活跃项目，无法执行自动操作
-[提示][VirtualUser]已触发自动保存（频率：每分钟）
-[提示][PlayerHub]已为 SteamID 76561199276046101 设置替换名称: ceshi
-[提示][VirtualUser]接收到新回合信息
-[提示][ProjectManager]项目管理器正在处理消息！
-[警告][ProjectManager]无活跃项目，无法执行自动操作
-[提示][VirtualUser]接收到新回合信息
-[提示][ProjectManager]项目管理器正在处理消息！
-[警告][ProjectManager]无活跃项目，无法执行自动操作
+[成功][DemoHelper]测试任务正在运行，频率2000ms一次
+[成功][DemoHelper]测试任务正在运行，频率2000ms一次
+[成功][DemoHelper]测试任务正在运行，频率2000ms一次
+[成功][DemoHelper]测试任务正在运行，频率2000ms一次
+[成功][DemoHelper]测试任务正在运行，频率2000ms一次
+[成功][DemoHelper]测试任务正在运行，频率2000ms一次
+[成功][DemoHelper]测试任务正在运行，频率2000ms一次
+[成功][DemoHelper]测试任务正在运行，频率2000ms一次
+[成功][DemoHelper]测试任务正在运行，频率2000ms一次
 [警告][ElementManager]当前没有任何元素，跳过清空操作！
 [提示][SolutionManager]已关闭播放
 [警告][SolutionManager]当前没有任何解决方案，跳过清空操作！
@@ -279,6 +218,7 @@
 [成功][ProjectManager]成功从文件加载项目：doftest
 [提示][ProjectManager]尝试从文件加载项目，文件路径：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace\Mtp\Mtp.yaml
 [成功][ProjectManager]成功从文件加载项目：Mtp
+[成功][DemoHelper]测试任务正在运行，频率2000ms一次
 [提示][SolutionManager]已关闭播放
 [警告][SolutionManager]当前没有任何解决方案，跳过清空操作！
 [警告][ElementManager]当前没有任何元素，跳过清空操作！
@@ -338,9 +278,15 @@
 [成功][ProjectManager]尝试加载解决方案总数：3
 [成功][ProjectManager]成功加载元素总数：13
 [成功][ProjectManager]成功加载解决方案总数：3
-[提示][SolutionManager]偏移时间轴播放，偏移时间设置为：1247.907593
+[提示][SolutionManager]偏移时间轴播放，偏移时间设置为：69.862442
 [提示][SolutionManager]已经切换至解决方案：begin
 [提示][SolutionManager]已开启播放
+[成功][DemoHelper]测试任务正在运行，频率2000ms一次
+[成功][DemoHelper]测试任务正在运行，频率2000ms一次
+[成功][DemoHelper]测试任务正在运行，频率2000ms一次
 [警告][CameraSystem]ShutDown被调用！
 [提示][ElementManager]已关闭预览
 [提示][SolutionManager]已关闭播放
+[成功][DemoHelper]测试任务正在运行，频率2000ms一次
+[成功][DemoHelper]测试任务正在运行，频率2000ms一次
+[成功][DemoHelper]测试任务正在运行，频率2000ms一次

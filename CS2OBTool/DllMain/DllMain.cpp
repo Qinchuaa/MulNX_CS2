@@ -114,8 +114,9 @@ DWORD MulNX_CS2_Start(void*) {
             .CreateModule<PlayerHub>("PlayerHub", 110)// 玩家信息管理模块
             .CreateModule<AdvancedViewController>("AdvancedViewController", 111)// 高级视角控制模块
             .CreateModule<PlayerFlashController>("PlayerFlashController", 112)// 闪光控制模块
-            .CreateModule<MiniMap>("MiniMap", 113)// 小地图模块
-            .CreateModule<VirtualUser>("VirtualUser", 114)// 虚拟用户模块
+            .CreateModule<GlowController>("GlowController", 113)
+            .CreateModule<MiniMap>("MiniMap", 153)// 小地图模块
+            .CreateModule<VirtualUser>("VirtualUser", 154)// 虚拟用户模块
             .CreateModule<GameCfgManager>("GameCfgManager", 206)// 游戏配置管理模块
             .CreateModule<DemoHelper>("DemoHelper", 207)// Demo辅助模块
             .CreateModule<GameSettingsManager>("GameSettingsManager", 208)// 游戏设置管理模块

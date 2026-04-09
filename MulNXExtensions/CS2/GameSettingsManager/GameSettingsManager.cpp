@@ -112,8 +112,7 @@ bool GameSettingsManager::UINodeFunc(MulNXUINode* ThisNode) {
 }
 
 bool GameSettingsManager::Init() {
-	this->CS = this->Core->ModuleManager()->FindModule<CSController>("CSController");
-	C_ConVarSystem& CVarSystem = this->CS->GetCvarSystem();
+	C_ConVarSystem& CVarSystem = this->CS2()->GetCvarSystem();
 
     this->GameSettings.ScreenSettings.spec_show_xray = CVarSystem.GetCvar("spec_show_xray")->GetPtr<int>();
     

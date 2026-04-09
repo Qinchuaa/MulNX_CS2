@@ -1,13 +1,11 @@
 #pragma once
 
 #include <MulNX/MulNX.hpp>
-#include <MulNXExtensions/WinExt/WinExt.hpp>
-#include <MulNXExtensions/CS2/CSController/List/C_BaseEntity.hpp>
+#include <MulNXExtensions/CS2/CSModuleBase.hpp>
 
 class CSController;
-class PlayerFlashController final :public MulNX::ModuleBase {
+class PlayerFlashController final :public CSModuleBase {
 private:
-    CSController* CS = nullptr;
     std::atomic<bool>bForceNoFlash = false;
 public:
     bool Init()override;

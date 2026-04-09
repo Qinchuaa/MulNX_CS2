@@ -9,3 +9,4 @@
 #include "Debugger/IDebugger.hpp"
 #include "AbstractLayer3D/IAbstractLayer3D.hpp"
 #include "PathManager/PathManager.hpp"
+#include "TaskSystem/TaskSystem.hpp"

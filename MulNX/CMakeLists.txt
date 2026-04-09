@@ -19,7 +19,6 @@ add_library(MulNX
     "Core/ModuleManager/ModuleManager.cpp"
     "Core/Cores.hpp"
 
-
     "Systems/AbstractLayer3D/IAbstractLayer3D.cpp"
     "Systems/Debugger/Debugger.cpp"
     "Systems/HandleSystem/HandleSystem.cpp"
@@ -33,6 +32,7 @@ add_library(MulNX
     "Systems/UISystem/UIContext/UINode/UINode.cpp"
     "Systems/PathManager/PathManager.cpp"
     "Systems/PathManager/FilePathNode/FilePathNode.cpp"
+    "Systems/TaskSystem/TaskSystem.cpp"
 
     "MulNX.cpp"
 )
