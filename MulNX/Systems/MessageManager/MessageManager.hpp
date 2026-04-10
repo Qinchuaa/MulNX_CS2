@@ -25,7 +25,6 @@ namespace MulNX {
         moodycamel::ConcurrentQueue<MulNX::Message>sharedBuffer;
     public:
         bool Init()override;
-        void ThreadMain()override;
         // 返回true表示正在处理消息，false表示没有消息可处理
         bool NextMsg();
 

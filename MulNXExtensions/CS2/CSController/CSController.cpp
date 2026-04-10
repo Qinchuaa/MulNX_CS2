@@ -75,19 +75,24 @@ bool CSController::UINodeFunc(MulNXUINode* node) {
     info.windowHeight = this->GetWinHeight();
     info.windowWidth = this->GetWinWidth();
 
-    static float gameTimeScale = 1.0f;
-    static float virtualTimeScale = 1.0f;
-    ImGui::SliderFloat("游戏时间流速", &gameTimeScale, 0.0f, 5.0f);
-    ImGui::SliderFloat("虚拟时间流速", &virtualTimeScale, 0.0f, 5.0f);
+    if (ImGui::CollapsingHeader("时间控制")) {
+        static float gameTimeScale = 1.0f;
+        static float virtualTimeScale = 1.0f;
+        ImGui::SliderFloat("游戏时间流速", &gameTimeScale, 0.0f, 5.0f);
+        ImGui::SliderFloat("虚拟时间流速", &virtualTimeScale, 0.0f, 5.0f);
 
-    if (ImGui::Button("启用时间虚拟化")) {
-        this->AL3D->ExecuteCommand(std::format("host_timescale {}", gameTimeScale));
-        this->AL3D->Time()->RefreshVirtual(true, virtualTimeScale);
-    }
-    ImGui::SameLine();
-    if (ImGui::Button("解除时间虚拟化")) {
-        this->AL3D->ExecuteCommand("host_timescale 1");
-        this->AL3D->Time()->RefreshVirtual(false, 1.0f);
+        if (ImGui::Button("启用时间虚拟化")) {
+            this->AL3D->ExecuteCommand(std::format("host_timescale {}", gameTimeScale));
+            this->AL3D->Time()->RefreshVirtual(true, virtualTimeScale);
+        }
+        ImGui::SameLine();
+        if (ImGui::Button("解除时间虚拟化")) {
+            this->AL3D->ExecuteCommand("host_timescale 1");
+            this->AL3D->Time()->RefreshVirtual(false, 1.0f);
+        }
+
+        MulNX::UI::Checkbox("自动分析tick", this->autoTick);
+        MulNX::UI::SliderInt("GameTick与DemoTick差值", this->deltaTick, 0, 10000);
     }
 
     MulNX::UI::SliderFloat("roll调整", this->controlView.InputRoll, -179.99f, 179.99f);
@@ -153,7 +158,6 @@ bool CSController::Init() {
     this->ShowWindow = true;
     this->ISys()
         .SubscribeAsync("Core/ReHook");
-    this->NeedThread(3);
     this->SendUINode(this->GetName(), [this](MulNXUINode* node) {return this->UINodeFunc(node);});
 
     this->pAdvancedViewController = this->Core->ModuleManager()->FindModule<AdvancedViewController>("AdvancedViewController");
@@ -194,6 +198,19 @@ bool CSController::Init() {
     this->controlView.dofs.pFarCrisp = this->CvarSystem.GetCvar("r_dof_override_far_crisp")->GetPtr<float>();
     this->controlView.dofs.pFarBlurry = this->CvarSystem.GetCvar("r_dof_override_far_blurry")->GetPtr<float>();
 
+    this->SendTask("CS2控制线程", [this]()->bool {
+        try {
+            this->GetMsgResult = this->TryGetMsg();
+            this->EntryProcessMsg();
+        }
+        catch (const std::runtime_error& e) {
+            this->ISys().LogWarning("在更新数据时捕获到异常：" + std::string(e.what()));
+        }
+
+        std::this_thread::sleep_for(std::chrono::milliseconds(this->MyThreadDelta));
+        return true;
+        });
+
     return true;
 }
 
@@ -201,12 +218,16 @@ int CSController::BasicUpdate() {
     // 获取CS2全局变量
     this->CSGlobalVars = MulNX::MRead<C_GlobalVars*>(this->Modules.client.GetBaseAddress() + cs2_dumper::offsets::client_dll::dwGlobalVars);
 
-    static int OldRoundStartCount = MulNX::MRead(this->Modules.client.dwGameRules()->m_nRoundStartCount());
-    if (OldRoundStartCount != MulNX::MRead(this->Modules.client.dwGameRules()->m_nRoundStartCount())) {
+    auto pGameRules = this->Modules.client.dwGameRules();
+    if (!pGameRules) return 1;
+
+    static int OldRoundStartCount = MulNX::MRead(pGameRules->m_nRoundStartCount());
+    if (OldRoundStartCount != MulNX::MRead(pGameRules->m_nRoundStartCount())) {
         MulNX::Message Msg("Game/NewRound"_hash);
         this->ISys().PublishAsync(std::move(Msg));
-        OldRoundStartCount = MulNX::MRead(this->Modules.client.dwGameRules()->m_nRoundStartCount());
+        OldRoundStartCount = MulNX::MRead(pGameRules->m_nRoundStartCount());
     }
+    
     for (int i = 0;i <= this->Modules.client.dwGameEntitySystem_highestEntityIndex();i++) {
         auto entity = this->Modules.client.GetBaseEntity(i);
         if (!entity)continue;
@@ -271,24 +292,6 @@ int CSController::EntityListUpdate() {
     }
 
     return 0;
-}
-
-void CSController::ThreadMain() {
-    while (!this->GlobalVars->SystemReady.load()) {
-        std::this_thread::sleep_for(std::chrono::milliseconds(this->MyThreadDelta));
-    }
-    while (this->MyThreadRunning) {
-        try {
-            this->GetMsgResult = this->TryGetMsg();
-            this->EntryProcessMsg();
-        }
-        catch (const std::runtime_error& e) {
-            this->ISys().LogWarning("在更新数据时捕获到异常：" + std::string(e.what()));
-        }
-
-        std::this_thread::sleep_for(std::chrono::milliseconds(this->MyThreadDelta));
-    }
-    return;
 }
 int CSController::TryGetMsg() {
     int Result = 0;

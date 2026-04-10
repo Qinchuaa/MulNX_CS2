@@ -42,7 +42,6 @@ public:
     bool Init()override;
     void StartAll()override;
     void CheckHook();
-    void ThreadMain()override;
     void ProcessMsg(MulNX::Message& Msg)override;
 
     DWORD CreateHook();//创建Hook   

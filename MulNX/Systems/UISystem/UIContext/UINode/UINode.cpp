@@ -24,15 +24,6 @@ MulNXUINode MulNXUINode::Create(MulNX::ModuleBase* MB) {
     node.buzy = &(MB->UIBusy);
     return std::move(node);
 }
-bool MulNXUINode::CreateAndRegiste(MulNX::ModuleBase* const MB, std::string&& Name, std::function<void(MulNXUINode*)>MyFunc) {
-    auto node = MulNXUINode::Create(MB);
-    node.name = std::move(Name);
-    node.MyFunc = MyFunc;
-    MulNX::Core::Core* pCore = MB->GetCore();
-    auto msg = MulNX::Message::Create<MulNXUINode>("UISystem/ModulePush"_hash);
-    MB->ISys().PublishAsync(std::move(msg));
-    return true;
-}
 
 bool MulNXUINode::PublishAsync(MulNX::Message&& Msg) {
     if (this->buzy->load(std::memory_order_acquire)) {

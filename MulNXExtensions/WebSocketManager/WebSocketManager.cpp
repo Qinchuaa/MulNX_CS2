@@ -31,8 +31,22 @@ bool WebSocketManager::Init() {
             }
         });
 
-    // 需要线程
-    this->NeedThread(1);
+    this->SendTask("网络线程（阻塞！）", [this]()->bool {
+        try {
+            while (!this->GlobalVars->SystemReady.load(std::memory_order_acquire)) {
+                std::this_thread::sleep_for(std::chrono::milliseconds(1));
+            }
+            this->server.listen(this->port);
+            this->server.start_accept();
+            this->ISys().LogSucc("正在监听端口：" + std::to_string(port));
+            // 阻塞调用
+            this->server.run();
+        }
+        catch (const std::exception& e) {
+            MulNX::ErrorTerminate("网络功能启动失败！\n" + *e.what());
+        }
+        return true;
+        });
     return true;
 }
 
@@ -64,24 +78,5 @@ void WebSocketManager::ProcessMsg(MulNX::Message& Msg) {
 
         break;
     }
-    }
-}
-
-void WebSocketManager::ThreadMain() {
-    while (this->MyThreadRunning) {
-        try {
-            while (!this->GlobalVars->SystemReady.load(std::memory_order_acquire)) {
-                std::this_thread::sleep_for(std::chrono::milliseconds(1));
-            }
-            this->server.listen(this->port);
-            this->server.start_accept();
-            this->ISys().LogSucc("正在监听端口：" + std::to_string(port));
-            // 阻塞调用
-            this->server.run();
-        }
-        catch (const std::exception& e) {
-            MulNX::ErrorTerminate("网络功能启动失败！\n" + *e.what());
-        }
-        std::this_thread::sleep_for(std::chrono::milliseconds(this->MyThreadDelta));
     }
 }

@@ -127,25 +127,6 @@ namespace CS2 {
 
     };
 
-    class C_BaseGrenade :public C_BaseFlex {
-    public:
-
-    };
-
-    class C_BaseCSGrenadeProjectile :public C_BaseGrenade {
-    public:
-
-    };
-
-    class C_SmokeGrenadeProjectile :public C_BaseCSGrenadeProjectile {
-    public:
-        int32_t* nSmokeEffectTickBegin() { return Schema<int32_t>(this, cs2_dumper::schemas::client_dll::C_SmokeGrenadeProjectile::m_nSmokeEffectTickBegin); }
-        bool* bDidSmokeEffect() { return Schema<bool>(this, cs2_dumper::schemas::client_dll::C_SmokeGrenadeProjectile::m_bDidSmokeEffect); }
-        bool* bSmokeEffectSpawned() { return Schema<bool>(this, cs2_dumper::schemas::client_dll::C_SmokeGrenadeProjectile::m_bSmokeEffectSpawned); }
-        DirectX::XMFLOAT3* vSmokeColor() { return Schema<DirectX::XMFLOAT3>(this, cs2_dumper::schemas::client_dll::C_SmokeGrenadeProjectile::m_vSmokeColor); }
-
-    };
-
     class C_BaseCombatCharacter :public C_BaseFlex {
     public:
 
@@ -229,5 +210,25 @@ namespace CS2 {
     class CCSPlayerController :public CBasePlayerController {
     public:
         CHandle<C_CSPlayerPawn>* m_hPlayerPawn() { return Schema<CHandle<C_CSPlayerPawn>>(this, cs2_dumper::schemas::client_dll::CCSPlayerController::m_hPlayerPawn); }
+    };
+
+    class C_BaseGrenade :public C_BaseFlex {
+    public:
+        CHandle<C_CSPlayerPawn>* m_hThrower() { return Schema<CHandle<C_CSPlayerPawn>>(this, cs2_dumper::schemas::client_dll::C_BaseGrenade::m_hThrower); }
+
+    };
+
+    class C_BaseCSGrenadeProjectile :public C_BaseGrenade {
+    public:
+
+    };
+
+    class C_SmokeGrenadeProjectile :public C_BaseCSGrenadeProjectile {
+    public:
+        int32_t* nSmokeEffectTickBegin() { return Schema<int32_t>(this, cs2_dumper::schemas::client_dll::C_SmokeGrenadeProjectile::m_nSmokeEffectTickBegin); }
+        bool* bDidSmokeEffect() { return Schema<bool>(this, cs2_dumper::schemas::client_dll::C_SmokeGrenadeProjectile::m_bDidSmokeEffect); }
+        bool* bSmokeEffectSpawned() { return Schema<bool>(this, cs2_dumper::schemas::client_dll::C_SmokeGrenadeProjectile::m_bSmokeEffectSpawned); }
+        DirectX::XMFLOAT3* vSmokeColor() { return Schema<DirectX::XMFLOAT3>(this, cs2_dumper::schemas::client_dll::C_SmokeGrenadeProjectile::m_vSmokeColor); }
+
     };
 }

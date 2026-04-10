@@ -6,6 +6,8 @@
 #include "GameCfgManager/GameCfgManager.hpp"
 #include "GameSettingsManager/GameSettingsManager.hpp"
 #include "HookManager/HookManager.hpp"
-#include "PlayerHub/PlayerHub.hpp"
 #include "PlayerFlashController/PlayerFlashController.hpp"
-#include "GlowController/GlowController.hpp"
+
+#include "PlayerHub/PlayerHub.hpp"
+#include "PlayerHub/NameController/NameController.hpp"
+#include "PlayerHub/GlowController/GlowController.hpp"

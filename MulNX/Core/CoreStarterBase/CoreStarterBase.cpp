@@ -16,16 +16,16 @@ bool CoreStarterBase::SystemInit(MulNX::Core::Core* pCore) {
 
 void CoreStarterBase::StartUIWith(std::string&& entryName) {
     // UI系统主界面初始化
-    auto msg = MulNX::Message::Create<std::string>("UISystem/Start"_hash, std::move(entryName));
+    auto [msg, rp] = MulNX::Message::Create<std::string>("UISystem/Start"_hash, std::move(entryName));
     this->ISys().PublishAsync(std::move(msg));
 }
 
 void CoreStarterBase::RegisterMainDrawWith(std::function<void(MulNXUINode*)>&& MainDrawFunc) {
-	// 注册主窗口UI上下文
+    // 注册主窗口UI上下文
     auto [UINode, pUINode] = MulNX::make_any_shared<MulNXUINode>();
-	pUINode->name = "MainDraw";
-	pUINode->MyFunc = MainDrawFunc;
-	MulNX::Message Msg("UISystem/ModulePush"_hash);
+    pUINode->name = "MainDraw";
+    pUINode->MyFunc = MainDrawFunc;
+    MulNX::Message Msg("UISystem/ModulePush"_hash);
     Msg.asp = std::move(UINode);
-	this->ISys().PublishAsync(std::move(Msg));
+    this->ISys().PublishAsync(std::move(Msg));
 }

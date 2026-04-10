@@ -25,11 +25,11 @@ namespace MulNX {
         Message& operator=(Message&& other) = default;
 
         template<typename T, typename... Args>
-        static Message Create(size_t type, Args&&... args) {
+        static std::pair<Message,T*> Create(size_t type, Args&&... args) {
             Message msg(type);
             auto [p, rp] = MulNX::make_any_shared<T>(std::forward<Args>(args)...);
             msg.asp = std::move(p);
-            return msg;
+            return std::make_pair(std::move(msg), rp);
         }
     };
 }

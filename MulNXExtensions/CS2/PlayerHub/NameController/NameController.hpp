@@ -1,0 +1,20 @@
+#pragma once
+
+#include <MulNXExtensions/CS2/CSModuleBase.hpp>
+
+class NameController final :public CSModuleBase {
+    std::array<char[128], 64>nameReplace{};
+    std::map<uint64_t, int>nameReplaceInfo{};
+    std::unique_ptr<MulNX::Memory::HookEx>hkGetDecoratedPlayerName = nullptr;
+    std::unique_ptr<MulNX::Memory::HookEx>hkGetPlayerName = nullptr;
+    bool bGetPlayerNameHooked = false;
+    void HandleVHook(CS2::CCSPlayerController* pPlayerController);
+
+    std::string newNameBuffer;
+public:
+    bool Init()override;
+    void CheckMenu(Steam64UID uid)override;
+    void SetMenu(Steam64UID uid)override;
+
+    bool SetReplace(Steam64UID uid, const std::string& newName);
+};

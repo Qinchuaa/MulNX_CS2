@@ -17,17 +17,11 @@ void GlowController::CheckMenu(Steam64UID uid) {
 }
 
 void GlowController::SetMenu(Steam64UID uid) {
-    ImGui::Text("颜色修改");
-
     // 1. 获取当前为该玩家设置的颜色（若存在），否则使用默认白色
     uint32_t currentColorU32 = IM_COL32(255, 255, 255, 255); // 默认白色
-    {
-        // 注意：读取 playerColors 也需要加锁，因为它可能被其他线程访问
-        std::shared_lock lock(this->Hub()->GetMutex());
-        auto it = this->playerColors.find(uid);
-        if (it != this->playerColors.end()) {
-            currentColorU32 = it->second;
-        }
+    auto it = this->playerColors.find(uid);
+    if (it != this->playerColors.end()) {
+        currentColorU32 = it->second;
     }
 
     // 2. 将 uint32_t 颜色转换为 ImVec4，以便使用 ImGui 颜色编辑器
@@ -35,7 +29,7 @@ void GlowController::SetMenu(Steam64UID uid) {
 
     // 3. 显示颜色选择器
     //    使用 ColorEdit4 可以同时展示预览色块和数值，也可以只用 ColorPicker4
-    if (ImGui::ColorEdit4("##PlayerGlowColor", (float*)&colorVec4,
+    if (ImGui::ColorEdit4("发光颜色修改", (float*)&colorVec4,
         ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel)) {
         // 颜色被修改后，转换回 uint32_t 并保存到 playerColors
         uint32_t newColorU32 = ImGui::ColorConvertFloat4ToU32(colorVec4);

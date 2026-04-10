@@ -7,10 +7,12 @@ add_library(MulNXCS2Ext
     "CSController/GlobalVars/GlobalVars.cpp"
     "CSController/List/C_BaseEntity.cpp"
 
-    "PlayerHub/PlayerHub.cpp"
     "AdvancedViewController/AdvancedViewController.cpp"
     "PlayerFlashController/PlayerFlashController.cpp"
-    "GlowController/GlowController.cpp"
+
+    "PlayerHub/PlayerHub.cpp"
+    "PlayerHub/GlowController/GlowController.cpp"
+    "PlayerHub/NameController/NameController.cpp"
 
     "ConsoleManager/ConsoleManager.cpp"
     "DemoHelper/DemoHelper.cpp"

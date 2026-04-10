@@ -56,7 +56,6 @@ namespace MulNX {
 		float LastUpdateTime = 0.0f; // 上次更新时间
 	public:
 		bool Init()override;
-		void ThreadMain()override;
 
 		bool UpdateKeysState();//更新
 		bool IsKeyPressed(const unsigned char vkCode)const;//读取是否被按下

@@ -83,21 +83,8 @@ void CameraModel::DrawCamera(const DirectX::XMFLOAT3& Position, const DirectX::X
     Model.Rotate(Rotation);
     Model.Move(Position);
     Model.ToScreen(pMatrix, WinWidth, WinHeight);
-    Model.Draw(nullptr);
+    Model.Draw(label);
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

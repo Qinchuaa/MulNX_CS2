@@ -15,7 +15,6 @@ bool HookManager::Init() {
 }
 void HookManager::StartAll() {
 	this->ReHook = true;
-    this->NeedThread(250);
     this->CheckHook();// 手动执行一次Hook
 }
 
@@ -57,12 +56,12 @@ void HookManager::CheckHook() {
     }
 }
 
-void HookManager::ThreadMain() {
-    while (this->MyThreadRunning) {
-        this->CheckHook();
-        std::this_thread::sleep_for(std::chrono::milliseconds(this->MyThreadDelta));
-    }
-}
+// void HookManager::ThreadMain() {
+//     while (this->MyThreadRunning) {
+//         this->CheckHook();
+//         std::this_thread::sleep_for(std::chrono::milliseconds(this->MyThreadDelta));
+//     }
+// }
 
 void HookManager::ProcessMsg(MulNX::Message& Msg) {
 	switch (Msg.type) {

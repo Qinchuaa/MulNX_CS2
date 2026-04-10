@@ -38,5 +38,4 @@ public:
     bool PublishAsync(MulNX::Message&& Msg);
 
     static MulNXUINode Create(MulNX::ModuleBase* MB);
-    static bool CreateAndRegiste(MulNX::ModuleBase* const MB, std::string&& Name, std::function<void(MulNXUINode*)>MyFunc);
 };

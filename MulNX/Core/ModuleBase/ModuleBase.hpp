@@ -23,8 +23,6 @@ namespace MulNX {
         MulNX::PathManager* pPathManager = nullptr;
         // 线程锁
         std::shared_mutex MyThreadMutex;
-        // 是否需要一个线程
-        bool InitNeedThread = false;
     protected:
         // 父模块句柄
         MulNXHandle hParent{};
@@ -75,8 +73,6 @@ namespace MulNX {
 
 		// 虚拟主循环，执行组件逻辑
         virtual void VirtualMain() {};
-		// 线程主循环，执行组件线程逻辑
-        virtual void ThreadMain() {};
 		// 消息处理函数，只需处理即可，消息会由入口点释放
         virtual void ProcessMsg(MulNX::Message& Msg) {};
 
@@ -101,13 +97,7 @@ namespace MulNX {
 		void EntryProcessMsg();
         // 通过任意函数，发送一个UI节点
         bool SendUINode(std::string&& name, std::function<void(MulNXUINode*)>&& func);
-       
-    private:
-        // 创建线程入口
-        bool CreateThread();
-    protected:
-        // 指示需要线程，在初始化中创建
-        void NeedThread(int TimeDelta);
+        void SendTask(std::string&& workerName, std::function<bool()>&& task);
     public:
         // 是否初始化
         bool IsInited()const { return this->Inited; }

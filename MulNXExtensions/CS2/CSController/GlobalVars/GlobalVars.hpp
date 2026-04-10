@@ -14,7 +14,7 @@ public:
     // float IntervalPerTick2{};
     // char* CurrentMapName = nullptr;
 
-    float* fRealTime() { return reinterpret_cast<float*>(reinterpret_cast<uintptr_t>(this) + 0x00); }
-    float* fCurrentTime() { return reinterpret_cast<float*>(reinterpret_cast<uintptr_t>(this) + 0x30); }
-    int* iTickCount() {return reinterpret_cast<int*>(reinterpret_cast<uintptr_t>(this) + 0x44); }
+    float* fRealTime() { return Schema<float>(this, 0x00); }
+    float* fCurrentTime() { return Schema<float>(this, 0x30); }
+    int* iTickCount() { return Schema<int>(this, 0x44); }
 };

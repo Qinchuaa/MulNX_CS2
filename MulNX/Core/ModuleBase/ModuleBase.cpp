@@ -53,23 +53,26 @@ bool MulNX::ModuleBase::BaseInit() {
 }
 
 bool MulNX::ModuleBase::SendUINode(std::string&& name, std::function<void(MulNXUINode*)>&& func) {
-    try {
-        // 创建UI节点
-        MulNXUINode UINode = MulNXUINode::Create(this);
-        // 设置UI节点属性
-        UINode.name = std::move(name);
-        UINode.MyFunc = std::move(func);
-        // 创建UI消息
-        auto msg = MulNX::Message::Create<MulNXUINode>("UISystem/ModulePush"_hash, std::move(UINode));
-        // 发送UI消息
-        this->ISys().PublishAsync(std::move(msg));
-        this->ISys().LogInfo("发送了一个UI节点进入消息系统");
-    }
-    catch (...) {
-        return false;
-    }
+    // 创建UI节点
+    MulNXUINode UINode = MulNXUINode::Create(this);
+    // 设置UI节点属性
+    UINode.name = std::move(name);
+    UINode.MyFunc = std::move(func);
+    // 创建UI消息
+    auto [msg, rp] = MulNX::Message::Create<MulNXUINode>("UISystem/ModulePush"_hash, std::move(UINode));
+    // 发送UI消息
+    this->ISys().PublishAsync(std::move(msg));
+    this->ISys().LogInfo("发送了一个UI节点进入消息系统");
     return true;
 }
+void MulNX::ModuleBase::SendTask(std::string&& workerName, std::function<bool()>&& task) {
+    auto [msg, rp] = MulNX::Message::Create<MulNX::Task::RegistrationPacket>("Task/Create"_hash);
+    rp->targetWorker = std::move(workerName);
+    rp->task = std::move(task);
+    this->ISys().PublishAsync(std::move(msg));
+    this->ISys().LogInfo("发送了一个任务进入消息系统");
+}
+
 bool MulNX::ModuleBase::EntryInit(MulNX::Core::Core* Core) {
     this->Core = Core;
     if (!this->BaseInit()) {
@@ -77,12 +80,6 @@ bool MulNX::ModuleBase::EntryInit(MulNX::Core::Core* Core) {
     }
     if (!this->Init()) {
         return false;
-    }
-    if (this->InitNeedThread) {
-        if (!this->CreateThread()) {
-            return false;
-        }
-        this->ISys().LogInfo("申请了一个线程创建");
     }
     this->ISys().LogSucc("初始化成功!");
     this->Inited = true;
@@ -95,33 +92,6 @@ void MulNX::ModuleBase::BaseVirtualMain() {
 void MulNX::ModuleBase::EntryVirtualMain() {
     this->BaseVirtualMain();
     this->VirtualMain();
-}
-// 线程创建
-void MulNX::ModuleBase::NeedThread(int TimeDelta) {
-    this->InitNeedThread = true;
-    this->SetMyThreadDelta(TimeDelta);
-}
-bool MulNX::ModuleBase::CreateThread() {
-    for (;;) {
-        //如果线程已经创建，则立即返回
-        if (this->MyThreadRunning) return true;
-        //尝试创建线程
-        try {
-            //打开线程
-            this->MyThread = std::thread([this]() {this->ThreadMain();});
-            //设置线程处于启动状态
-            this->MyThreadRunning = true;
-            //如果成功返回成功
-            return true;
-        }
-        //捕获所有创建异常
-        catch (...) {
-            //先把运行置空
-            this->MyThreadRunning = false;
-            //重新尝试，直到成功
-            continue;
-        }
-    }
 }
 // 消息处理
 void MulNX::ModuleBase::BaseProcessMsg(MulNX::Message* Msg) {

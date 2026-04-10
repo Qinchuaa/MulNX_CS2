@@ -45,19 +45,14 @@ void MulNX::KeyCheckPack::Refresh() {
 }
 
 bool MulNX::InputSystem::Init() {
-    this->NeedThread(3);
     this->LastUpdateTime = static_cast<float>(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - this->ClockEpoch).count()) / 1000.0f;
-    return true;
-}
-
-void MulNX::InputSystem::ThreadMain() {
-    while (this->MyThreadRunning) {
+    this->SendTask("输入检测线程", [this]()->bool {
         this->UpdateKeysState();
         std::this_thread::sleep_for(std::chrono::milliseconds(this->MyThreadDelta));
-    }
-    
+        return true;
+        });
+    return true;
 }
-
 bool MulNX::InputSystem::UpdateKeysState() {
     unsigned int Threshold = this->Threshold;
     unsigned int DThreshold = Threshold * 2;

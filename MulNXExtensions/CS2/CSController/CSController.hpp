@@ -80,7 +80,10 @@ private:
     // 逆向层数据备份
     C_ConVarSystem CvarSystem{};
     C_GlobalVars* CSGlobalVars{};
-    
+
+    std::atomic<bool> autoTick = true;
+    std::atomic<int> deltaTick = 0;
+
     void ESP();
 public:
     std::vector<std::function<bool(CS2::CCSPlayerController*, CS2::C_CSPlayerPawn*)>>handlesControlPlayer{};
@@ -97,7 +100,6 @@ public:
     bool Init()override;
     bool UINodeFunc(MulNXUINode* node);
     void ProcessMsg(MulNX::Message& Msg)override;
-    void ThreadMain()override;
     // 核心任务
     std::atomic<int> GetMsgResult = 0;
     int TryGetMsg();

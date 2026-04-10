@@ -64,16 +64,6 @@ bool DemoHelper::Init() {
         ;
 
     this->SendUINode(this->GetName(), [this](MulNXUINode* node) {return this->UINodeFunc(node);});
-
-    // auto msg = MulNX::Message::Create<MulNX::Task::RegistrationPacket>("Task/Create"_hash);
-    // auto pPack = msg.asp.get<MulNX::Task::RegistrationPacket>();
-    // pPack->targetWorker = "test";
-    // pPack->task = [this]()->bool {
-    //     std::this_thread::sleep_for(std::chrono::milliseconds(2000));
-    //     this->ISys().LogSucc("测试任务正在运行，频率2000ms一次");
-    //     return true;
-    //     };
-    // this->ISys().PublishAsync(std::move(msg));
     return true;
 }
 
