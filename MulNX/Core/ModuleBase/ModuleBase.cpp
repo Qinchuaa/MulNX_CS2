@@ -8,10 +8,6 @@ MulNX::ModuleBase::~ModuleBase() {
     this->CloseMyThread();
 }
 void MulNX::ModuleBase::CloseMyThread() {
-    if (this->MyThreadRunning) {
-        this->MyThreadRunning = false;
-        this->MyThread.join();
-    }
     return;
 }
 

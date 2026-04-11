@@ -27,7 +27,7 @@ bool MulNX::Debugger::Init() {
 void MulNX::Debugger::ProcessMsg(MulNX::Message& Msg) {
     switch (Msg.type) {
     case "Debugger/SetMaxInfoCount"_hash: {
-        this->ResetMaxMsgCount(Msg.p1.i);
+        this->ResetMaxMsgCount(Msg.p1.low<float>());
     }
     case "Debugger/SaveToFile"_hash: {
         this->SaveToFile();

@@ -24,7 +24,7 @@ bool MulNXController::UINodeFunc(MulNXUINode* ThisNode) {
     ImGui::SameLine();
     if (ImGui::Button("应用")) {
         MulNX::Message Msg("Debugger/SetMaxInfoCount"_hash);
-        Msg.p1.i = MaxDebugMsgs;
+        Msg.p1.low<int>() = MaxDebugMsgs;
         this->ISys().PublishAsync(std::move(Msg));
     }
     if (ImGui::Button("尝试拉取所有模块信息")) {

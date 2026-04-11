@@ -571,7 +571,6 @@ void SolutionManager::Playing_Call() {
 
     IO.SolutionTime = this->AL3D->Time()->Get();
     IO.FrameGameTime = this->AL3D->Time()->GetReal();
-    IO.PlayBackRate = this->PlaybackRate;
     IO.isPlaying = this->Playing;
 
     if (!this->Playing_pSolution->Call(&IO)) {

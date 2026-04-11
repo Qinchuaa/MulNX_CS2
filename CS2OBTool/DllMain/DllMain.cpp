@@ -30,6 +30,7 @@ static void MainDraw(MulNXUINode* node) {
             ImGui::EndTabItem();
         }
         if (ImGui::BeginTabItem("MulNX控制")) {
+            node->CallUINode("VirtualUser");
             node->CallUINode("MulNXController");
             ImGui::EndTabItem();
         }

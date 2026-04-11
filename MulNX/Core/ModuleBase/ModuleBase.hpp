@@ -32,10 +32,6 @@ namespace MulNX {
         MulNX::Core::Core* Core = nullptr;
 		// 全局变量指针
 		MulNX::GlobalVars* GlobalVars = nullptr;
-        // 运行标志
-        std::atomic<bool> Running = false;
-        // 线程对象成员
-        std::thread MyThread;
         // 线程运行状态
         std::atomic<bool>MyThreadRunning = false;
         // 线程执行间隔，默认以100Hz基准执行

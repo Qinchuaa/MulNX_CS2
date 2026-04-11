@@ -75,6 +75,14 @@ bool CSController::UINodeFunc(MulNXUINode* node) {
     info.windowHeight = this->GetWinHeight();
     info.windowWidth = this->GetWinWidth();
 
+    MulNX::UI::SliderFloat("roll调整", this->controlView.InputRoll, -179.99f, 179.99f);
+    auto* pGlobalFOV = this->CvarSystem.GetCvar("fov_cs_debug")->GetPtr<float>();
+    ImGui::SliderFloat("fov调整", pGlobalFOV, 0, 179.99f);
+    if (ImGui::Button("一键归正")) {
+        this->controlView.InputRoll.store(0, std::memory_order_release);
+        *pGlobalFOV = 0;
+    }
+
     if (ImGui::CollapsingHeader("时间控制")) {
         static float gameTimeScale = 1.0f;
         static float virtualTimeScale = 1.0f;
@@ -93,15 +101,6 @@ bool CSController::UINodeFunc(MulNXUINode* node) {
 
         MulNX::UI::Checkbox("自动分析tick", this->autoTick);
         MulNX::UI::SliderInt("GameTick与DemoTick差值", this->deltaTick, 0, 10000);
-    }
-
-    MulNX::UI::SliderFloat("roll调整", this->controlView.InputRoll, -179.99f, 179.99f);
-
-    auto* pGlobalFOV = this->CvarSystem.GetCvar("fov_cs_debug")->GetPtr<float>();
-    ImGui::SliderFloat("fov调整", pGlobalFOV, 0, 179.99f);
-    if (ImGui::Button("一键归正")) {
-        this->controlView.InputRoll.store(0, std::memory_order_release);
-        *pGlobalFOV = 0;
     }
     if (ImGui::CollapsingHeader("烟雾弹控制")) {
         MulNX::UI::Checkbox("启用烟雾弹控制", this->controlSmoke.Enbale);

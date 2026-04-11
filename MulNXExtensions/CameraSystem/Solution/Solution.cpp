@@ -175,7 +175,7 @@ bool Solution::Call(CameraSystemIO* IO) {
         //偏移时间轴播放
 
         //判断偏移后的时间是否位于解决方案持续范围之中（先统一计算偏移后时间，无论究竟有没有偏移）
-        float SolutionOffsetedTime = (IO->SolutionTime - this->SolutionOffset) * IO->PlayBackRate;
+        float SolutionOffsetedTime = IO->SolutionTime - this->SolutionOffset;
 
         if (this->EndTime < SolutionOffsetedTime) {
             //播放结束

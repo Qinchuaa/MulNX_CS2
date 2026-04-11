@@ -5,15 +5,41 @@
 #include <cstdint>
 
 namespace MulNX {
-	// MulNX消息
+
+    template<typename T>
+    concept Clike = std::is_trivially_copyable_v<T> && std::is_standard_layout_v<T>;
+
+    template<typename T>
+    concept Clike4 = Clike<T> && (sizeof(T) == 4);
+
+    template<typename T>
+    concept Clike8 = Clike<T> && (sizeof(T) == 8);
+
+    class Param {
+        uint64_t internal;
+    public:
+        template<Clike8 T>
+        T& as() {
+            return reinterpret_cast<T&>(internal);
+        }
+        template<Clike4 T>
+        T& low() {
+            return reinterpret_cast<T&>(*reinterpret_cast<uint32_t*>(&internal));
+        }
+        template<Clike4 T>
+        T& high() {
+            return reinterpret_cast<T&>(*reinterpret_cast<uint32_t*>(reinterpret_cast<char*>(&internal) + 4));
+        }
+    };
+    static_assert(alignof(Param) == 8, "Param 未按 8 字节对齐");
+
+    // MulNX消息
 	class Message {
 	public:
 		// 消息类型，用于区分消息
 		size_t type;
-        union { int i;float f; }p1;
-        union { int i;float f; }p2;
-        union { int i;float f; }p3;
-        union { int i;float f; }p4;
+        Param p1;
+        Param p2;
         // 8字节类型安全擦除共享指针，使用时需用get方法正确恢复，类型错误返回nullptr
         MulNX::any_shared_ptr asp = nullptr;
 

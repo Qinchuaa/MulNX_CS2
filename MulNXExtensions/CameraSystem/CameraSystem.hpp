@@ -19,7 +19,7 @@
 
 #pragma once
 
-#include "ICameraSystem.hpp"
+#include <MulNX/MulNX.hpp>
 
 #include "CameraDrawer/CameraDrawer.hpp"
 #include "ElementManager/ElementManager.hpp"
@@ -34,7 +34,7 @@
 #include <filesystem>
 
 // 摄像机系统
-class CameraSystem final :public ICameraSystem {
+class CameraSystem final :public MulNX::ModuleBase {
 private:
     // 四大管理器
     ElementManager* EManager{};
@@ -50,6 +50,8 @@ public:
     bool UINodeFunc(MulNXUINode* node);
     // 逻辑主函数
     void VirtualMain()override;
+
+    void ProcessMsg(MulNX::Message& msg)override;
 private:
     // 摄像机系统大菜单元素菜单
     void MenuElement();
@@ -62,18 +64,4 @@ private:
 public:
     // 清空内存，准备加载新工作区
     void MemoryClear();
-public:
-    // 接口实现：
-
-    void ResetCameraModule(const float CameraHigh, const float CameraX, const float CameraY, const float AxisLenth, const ImU32 Colour)override;
-    void DrawCameraByPAR(const DirectX::XMFLOAT3& Position, const DirectX::XMFLOAT3& Rotation, const char* label)override;
-
-    bool CallProject(const std::string& ProjectName)override;
-
-    bool CallSolution(const std::string& SolutionName)override;
-    bool CallSolution(const MulNX::Message& Msg)override;
-
-    bool ShutDown()override;
-
-    bool Save()override;
 };

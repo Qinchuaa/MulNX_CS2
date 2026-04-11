@@ -2,44 +2,6 @@
 
 #include <MulNX/MulNX.hpp>
 #include <MulNX/Base/UI/UI.hpp>
-// 摄像机系统
-
-bool CameraSystem::Init() {
-    // 传递指针，注入依赖，提升性能，直接调用
-    // 注意，本模块所有级别的管理器相互显示注入，其它服务借助Core隐式注入
-    this->CamDrawer.Init(20.0, 30.0, 15.0, 10.0, IM_COL32(255, 0, 255, 255));
-    this->EManager = this->Core->ModuleManager()->FindModule<ElementManager>("ElementManager");
-    this->SManager = this->Core->ModuleManager()->FindModule<SolutionManager>("SolutionManager");
-    this->PManager = this->Core->ModuleManager()->FindModule<ProjectManager>("ProjectManager");
-    this->WManager = this->Core->ModuleManager()->FindModule<WorkspaceManager>("WorkspaceManager");
-
-    auto* PathManager = this->ISys().PathManager();
-    if (PathManager->CreateKey("CurrentWorkspace", {},
-        [this](MulNX::PathManager* PathManager)->bool {
-            auto NewWorkspacePath = PathManager->PathGetFromKey("CurrentWorkspace");
-            // 检验文件夹是否已存在
-            if (!std::filesystem::exists(NewWorkspacePath)) {
-                this->ISys().LogInfo("指定的工作区文件夹不存在，需创建新的工作区文件夹！  路径：" + NewWorkspacePath.string());
-                // 创建文件夹
-                try {
-                    std::filesystem::create_directory(NewWorkspacePath);
-                    // 子文件夹由项目创建时创建
-                }
-                catch (const std::filesystem::filesystem_error& e) {
-                    this->ISys().LogError("创建工作区文件夹失败，错误信息：" + std::string(e.what()));
-                    return false;
-                }
-                this->ISys().LogSucc("成功创建工作区文件夹，路径：" + NewWorkspacePath.string());
-            }
-            this->ISys().LogSucc("成功设置工作区路径为：" + NewWorkspacePath.string());
-            return true;
-        })) {
-        auto Workspaces = this->ISys().PathGet("Workspaces");
-        PathManager->KeyBindStatic("CurrentWorkspace", Workspaces);
-    }
-    this->SendUINode(this->GetName(), [this](MulNXUINode* node) {return this->UINodeFunc(node);});
-    return true;
-}
 
 bool CameraSystem::UINodeFunc(MulNXUINode* ThisNode) {
     // 顶部：工作区信息（始终显示）
@@ -301,11 +263,82 @@ void CameraSystem::MenuWorkspace() {
     return;
 }
 
+bool CameraSystem::Init() {
+    // 传递指针，注入依赖，提升性能，直接调用
+    // 注意，本模块所有级别的管理器相互显示注入，其它服务借助Core隐式注入
+    this->CamDrawer.Init(20.0, 30.0, 15.0, 10.0, IM_COL32(255, 0, 255, 255));
+    this->EManager = this->Core->ModuleManager()->FindModule<ElementManager>("ElementManager");
+    this->SManager = this->Core->ModuleManager()->FindModule<SolutionManager>("SolutionManager");
+    this->PManager = this->Core->ModuleManager()->FindModule<ProjectManager>("ProjectManager");
+    this->WManager = this->Core->ModuleManager()->FindModule<WorkspaceManager>("WorkspaceManager");
 
+    auto* PathManager = this->ISys().PathManager();
+    if (PathManager->CreateKey("CurrentWorkspace", {},
+        [this](MulNX::PathManager* PathManager)->bool {
+            auto NewWorkspacePath = PathManager->PathGetFromKey("CurrentWorkspace");
+            // 检验文件夹是否已存在
+            if (!std::filesystem::exists(NewWorkspacePath)) {
+                this->ISys().LogInfo("指定的工作区文件夹不存在，需创建新的工作区文件夹！  路径：" + NewWorkspacePath.string());
+                // 创建文件夹
+                try {
+                    std::filesystem::create_directory(NewWorkspacePath);
+                    // 子文件夹由项目创建时创建
+                }
+                catch (const std::filesystem::filesystem_error& e) {
+                    this->ISys().LogError("创建工作区文件夹失败，错误信息：" + std::string(e.what()));
+                    return false;
+                }
+                this->ISys().LogSucc("成功创建工作区文件夹，路径：" + NewWorkspacePath.string());
+            }
+            this->ISys().LogSucc("成功设置工作区路径为：" + NewWorkspacePath.string());
+            return true;
+        })) {
+        auto Workspaces = this->ISys().PathGet("Workspaces");
+        PathManager->KeyBindStatic("CurrentWorkspace", Workspaces);
+    }
+    this->SendUINode(this->GetName(), [this](MulNXUINode* node) {return this->UINodeFunc(node);});
+    this->ISys()
+        .SubscribeAsync("Global/Save")
+        .SubscribeAsync("Global/Save/Strong")
+        .SubscribeAsync("Command/SpecPlayer")
+        .SubscribeAsync("Game/NewRound")
+        .SubscribeAsync("CameraSystem/Play/Shutdown");
+    return true;
+}
 
-// 其它功能
+void CameraSystem::ProcessMsg(MulNX::Message& msg) {
+    switch (msg.type) {
+    case "Global/Save"_hash: {
+        this->WManager->Workspace_Save();
+        break;
+    }
+    case "CameraSystem/Play/Shutdown"_hash: {
+        this->ISys().LogWarning("接收到播放停止消息");
+        this->EManager->Preview_Disable();
+        this->SManager->Playing_Disable();
+        break;
+    }
+    case "Game/NewRound"_hash: {
+        if (this->PManager->Playing_AutoCall(msg)) {
+            this->SManager->Playing_Enable();
+        }
+        break;
+    }
+    case "Command/SpecPlayer"_hash: {
+        this->ISys().LogInfo("因为操作停止播放");
+        this->EManager->Preview_Disable();
+        this->SManager->Playing_Disable();
+        break;
+    }
+    default:break;
+    }
+}
 
 void CameraSystem::VirtualMain() {
+    this->EntryProcessMsg();
+    if (this->pInputSystem->CheckWithPack(MulNX::KeyCheckPack{ true,false,false,true,'P',1 })) {
+        this->ISys().PublishAsync("CameraSystem/Play/Shutdown"_hash);
+    }
     this->CamDrawer.Update(this->AL3D->GetViewMatrix(), this->AL3D->GetWinWidth(), this->AL3D->GetWinHeight());
     return;
 }
@@ -314,47 +347,4 @@ void CameraSystem::MemoryClear() {
     this->SManager->Solution_ClearAll();
     this->PManager->Project_ClearAll();
     return;
-}
-
-
-
-// 接口实现：
-
-void CameraSystem::ResetCameraModule(const float CameraHigh, const float CameraX, const float CameraY, const float AxisLenth, const ImU32 Colour) {
-    this->CamDrawer.Init(CameraHigh, CameraX, CameraY, AxisLenth, Colour);
-    return;
-}
-void CameraSystem::DrawCameraByPAR(const DirectX::XMFLOAT3& Position, const DirectX::XMFLOAT3& Rotation, const char* label) {
-    this->CamDrawer.DrawCamera(Position, Rotation, label);
-    return;
-}
-bool CameraSystem::CallProject(const std::string& ProjectName) {
-    return true;
-}
-bool CameraSystem::CallSolution(const std::string& SolutionName) {
-    if (this->SManager->Playing_SetSolution(SolutionName)) {
-        this->SManager->Playing_Enable();
-        return true;
-    }
-    else {
-        return false;
-    }
-}
-bool CameraSystem::CallSolution(const MulNX::Message& Msg) {
-    if (this->PManager->Playing_AutoCall(Msg)) {
-        this->SManager->Playing_Enable();
-        return true;
-    }
-    else {
-        return false;
-    }
-}
-bool CameraSystem::ShutDown() {
-    this->ISys().LogWarning("ShutDown被调用！");
-    this->EManager->Preview_Disable();
-    this->SManager->Playing_Disable();
-    return true;
-}
-bool CameraSystem::Save() {
-    return this->WManager->Workspace_Save();
 }

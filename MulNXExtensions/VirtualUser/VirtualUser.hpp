@@ -2,20 +2,11 @@
 
 #include <MulNX/MulNX.hpp>
 
-class ICameraSystem;
-
 class VirtualUser final :public MulNX::ModuleBase {
-private:
-    ICameraSystem* CameraSystem = nullptr;
 public:
-    VirtualUser() : ModuleBase() {
-        //this->Type = MulNX::ModuleType::VirtualUser;
-    }
+    std::atomic<bool> Enabled = true;
+    bool Init()override;
 
-    bool Init()override final;
-
-    void VirtualMain()override final;
-    void ProcessMsg(MulNX::Message& Msg)override final;
-
-    void Menu();
+    void VirtualMain()override;
+    void ProcessMsg(MulNX::Message& Msg)override;
 };
