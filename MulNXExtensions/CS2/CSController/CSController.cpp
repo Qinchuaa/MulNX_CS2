@@ -149,6 +149,11 @@ void CSController::ProcessMsg(MulNX::Message& Msg) {
         this->ISys().LogSucc("已完成Hook重载！");
         break;
     }
+    case "Game/Command"_hash: {
+        auto cmd = Msg.asp.get<MulNX::NetExt>()->str1;
+        this->ExecuteCommand(cmd);
+        break;
+    }
 
     }
 }
@@ -156,7 +161,9 @@ void CSController::ProcessMsg(MulNX::Message& Msg) {
 bool CSController::Init() {
     this->ShowWindow = true;
     this->ISys()
-        .SubscribeAsync("Core/ReHook");
+        .SubscribeAsync("Core/ReHook")
+        .SubscribeAsync("Game/Command");
+        
     this->SendUINode(this->GetName(), [this](MulNXUINode* node) {return this->UINodeFunc(node);});
 
     this->pAdvancedViewController = this->Core->ModuleManager()->FindModule<AdvancedViewController>("AdvancedViewController");

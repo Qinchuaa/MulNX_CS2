@@ -1,5 +1,74 @@
 #include "WebSocketManager.hpp"
 
+#include <nlohmann/json.hpp>
+
+#include <string>
+#include <vector>
+#include <cstdint>
+
+// 简易 Base64 解码（RFC 4648）
+static const std::string base64_chars =
+"ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+"abcdefghijklmnopqrstuvwxyz"
+"0123456789+/";
+
+static inline bool is_base64(unsigned char c) {
+    return (isalnum(c) || (c == '+') || (c == '/'));
+}
+
+std::vector<uint8_t> base64_decode(const std::string& encoded_string) {
+    int in_len = encoded_string.size();
+    int i = 0, j = 0, in_ = 0;
+    unsigned char char_array_4[4], char_array_3[3];
+    std::vector<uint8_t> ret;
+
+    while (in_len-- && (encoded_string[in_] != '=') && is_base64(encoded_string[in_])) {
+        char_array_4[i++] = encoded_string[in_]; in_++;
+        if (i == 4) {
+            for (i = 0; i < 4; i++)
+                char_array_4[i] = base64_chars.find(char_array_4[i]);
+
+            char_array_3[0] = (char_array_4[0] << 2) + ((char_array_4[1] & 0x30) >> 4);
+            char_array_3[1] = ((char_array_4[1] & 0xf) << 4) + ((char_array_4[2] & 0x3c) >> 2);
+            char_array_3[2] = ((char_array_4[2] & 0x3) << 6) + char_array_4[3];
+
+            for (i = 0; i < 3; i++)
+                ret.push_back(char_array_3[i]);
+            i = 0;
+        }
+    }
+
+    if (i) {
+        for (j = i; j < 4; j++)
+            char_array_4[j] = 0;
+        for (j = 0; j < 4; j++)
+            char_array_4[j] = base64_chars.find(char_array_4[j]);
+
+        char_array_3[0] = (char_array_4[0] << 2) + ((char_array_4[1] & 0x30) >> 4);
+        char_array_3[1] = ((char_array_4[1] & 0xf) << 4) + ((char_array_4[2] & 0x3c) >> 2);
+        char_array_3[2] = ((char_array_4[2] & 0x3) << 6) + char_array_4[3];
+
+        for (j = 0; j < i - 1; j++) ret.push_back(char_array_3[j]);
+    }
+
+    return ret;
+}
+
+// 从 JSON 字段解析 Base64 编码的 8 字节数据到 uint64_t
+uint64_t parse_uint64_from_json_base64(const nlohmann::json& j) {
+    if (j.is_string()) {
+        std::string b64 = j.get<std::string>();
+        auto bytes = base64_decode(b64);
+        if (bytes.size() != 8) {
+            throw std::runtime_error("Base64 decoded p1/p2 must be exactly 8 bytes");
+        }
+        uint64_t val;
+        std::memcpy(&val, bytes.data(), sizeof(val));
+        return val;
+    }
+    throw std::invalid_argument("p1/p2 must be a base64 string");
+}
+
 bool WebSocketManager::Init() {
     this->ISys()
         .SubscribeAsync("WebSocketManager/Post");
@@ -23,7 +92,25 @@ bool WebSocketManager::Init() {
     this->server.set_message_handler(
         [this](websocketpp::connection_hdl hdl, Server::message_ptr msg) {
             try {
-                this->AL3D->ExecuteCommand(msg->get_payload());
+                // this->AL3D->ExecuteCommand(msg->get_payload());
+
+                // 先假设发了一个json
+                auto json = nlohmann::json::parse(msg->get_payload());
+
+                auto type = json["type"].get<std::string>();
+                uint64_t p1 = parse_uint64_from_json_base64(json["p1"]);
+                uint64_t p2 = parse_uint64_from_json_base64(json["p2"]);
+                std::string str1 = json["str1"].get<std::string>();
+                std::string str2 = json["str2"].get<std::string>();
+
+                auto [mmsg, rp] = MulNX::Message::Create<MulNX::NetExt>(MulNX::HashString(type));
+                mmsg.p1.as<uint64_t>() = p1;
+                mmsg.p2.as<uint64_t>() = p2;
+                rp->str1 = std::move(str1);
+                rp->str2 = std::move(str2);
+
+                this->ISys().PublishAsync(std::move(mmsg));
+
                 this->server.send(hdl, "已经执行控制台指令：" + msg->get_payload(), msg->get_opcode());
             }
             catch (const websocketpp::exception& e) {
