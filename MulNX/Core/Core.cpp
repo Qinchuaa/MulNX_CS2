@@ -48,7 +48,7 @@ void MulNX::Core::Core::Init() {
 // 主逻辑
 void MulNX::Core::Core::VirtualMain() {
 	// 包装的，所有的模块的VirtualMain
-	this->pModuleManager->EntryVirtualMain();
+    this->pModuleManager->VirtualMain();
 	return;
 }
 

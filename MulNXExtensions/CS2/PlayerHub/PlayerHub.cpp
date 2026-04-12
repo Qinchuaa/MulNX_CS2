@@ -6,11 +6,8 @@
 bool PlayerHub::Window(MulNXUINode* node) {
     auto w = MulNX::UI::RAIIWindow("玩家信息管理", this->ShowWindow);
     if (!w) return false;
-
-    static uint64_t choosingSteamID = 0;
-
     try {
-        std::shared_lock lock(this->GetMutex());
+        std::shared_lock lock(this->smutex);
         
         // ---------- 玩家列表区域 ----------
         ImGui::TextUnformatted("检测到如下玩家信息：");
@@ -35,33 +32,30 @@ bool PlayerHub::Window(MulNXUINode* node) {
 
             ++playerNum;
             std::string displayName = std::format("玩家 {} (SteamID: {})", playerNum, SteamID);
-            if (ImGui::Selectable(displayName.c_str(), choosingSteamID == SteamID)) {
-                choosingSteamID = SteamID;
+            if (ImGui::Selectable(displayName.c_str(), this->currentSteamId.load(std::memory_order_acquire) == SteamID)) {
+                this->currentSteamId.store(SteamID, std::memory_order_release);
+                this->ShowCompanionWindow.store(true, std::memory_order_release);
             }
 
             auto naturalName = MulNX::Memory::ReadString(playerController->m_iszPlayerName());
             ImGui::TextUnformatted(std::format("自然名字: {}", naturalName).c_str());
-
-            // 绘制展示句柄
-            for (auto& module : this->ModulesAboutPlayer) {
-                module->CheckMenu(SteamID);
-            }
-
             ImGui::Separator();
         }
+        auto pos=ImGui::GetWindowPos();
+        auto size = ImGui::GetWindowSize();
 
-        lock.unlock();
-
+        ImGui::SetNextWindowPos(ImVec2(pos.x + size.x, pos.y));
+        MulNX::UI::RAIIWindow infoWindow("玩家信息", this->ShowCompanionWindow);
+        if (!infoWindow) return true;
         ImGui::SeparatorText("进行修改");
 
-        ImGui::Text("当前选中的 SteamID: %llu", choosingSteamID);
-        if (choosingSteamID == 0) {
-            ImGui::TextDisabled("请先在上方列表中选择一名玩家");
+        ImGui::Text("当前选中的 SteamID: %llu", this->currentSteamId.load(std::memory_order_acquire));
+        if (this->currentSteamId.load(std::memory_order_acquire) == 0) {
+            ImGui::TextDisabled("请先在列表中选择一名玩家");
             return true;
         }
-        for (auto& module : this->ModulesAboutPlayer) {
-            module->SetMenu(choosingSteamID);
-        }
+        node->CallUINode("NameController");
+        node->CallUINode("GlowController");
     }
     catch (const std::exception& e) {
         this->ISys().LogWarning(std::format("在绘制玩家信息时捕获到异常：{}", e.what()));

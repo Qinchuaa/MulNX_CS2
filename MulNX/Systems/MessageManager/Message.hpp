@@ -33,6 +33,12 @@ namespace MulNX {
     };
     static_assert(alignof(Param) == 8, "Param 未按 8 字节对齐");
 
+    class NetExt {
+    public:
+        std::string str1;
+        std::string str2;
+    };
+
     // MulNX消息
 	class Message {
 	public:

@@ -39,7 +39,7 @@ void MulNX::Debugger::VirtualMain() {
 }
 
 void MulNX::Debugger::ResetMaxMsgCount(const int Max) {
-    std::unique_lock lock(this->GetMutex());
+    std::unique_lock lock(this->smutex);
     if (Max < 1) {
         this->AddError("最大信息条数不能小于一1!");
         return;
@@ -54,7 +54,7 @@ void MulNX::Debugger::ResetMaxMsgCount(const int Max) {
     return;
 }
 void MulNX::Debugger::SaveToFile() {
-    std::shared_lock lock(this->GetMutex());
+    std::shared_lock lock(this->smutex);
     std::string data;
     for (const auto& msg : this->DebugMsg) {
         data += msg + "\n";
@@ -121,22 +121,22 @@ void MulNX::Debugger::PushBack(const std::string& NewMsg, const std::string& pre
 }
 
 void MulNX::Debugger::AddInfo(const std::string& NewMsg) {
-    std::unique_lock lock(this->GetMutex());
+    std::unique_lock lock(this->smutex);
     this->PushBack(NewMsg, this->Info);
 }
 
 void MulNX::Debugger::AddSucc(const std::string& NewMsg) {
-    std::unique_lock lock(this->GetMutex());
+    std::unique_lock lock(this->smutex);
     this->PushBack(NewMsg, this->Succ);
 }
 
 void MulNX::Debugger::AddWarning(const std::string& NewMsg) {
-    std::unique_lock lock(this->GetMutex());
+    std::unique_lock lock(this->smutex);
     this->PushBack(NewMsg, this->Warning);
 }
 
 void MulNX::Debugger::AddError(const std::string& NewMsg) {
-    std::unique_lock lock(this->GetMutex());
+    std::unique_lock lock(this->smutex);
     this->PushBack(NewMsg, this->Error);
     if (this->ShowWhenError) {
         this->ShowWindow = true;
@@ -147,7 +147,7 @@ void MulNX::Debugger::AddError(const std::string& NewMsg) {
 bool MulNX::Debugger::UINodeFunc(MulNXUINode* ThisNode) {
     auto w = MulNX::UI::RAIIWindow("调试器", this->ShowWindow);
     if (!w)return true;
-    std::shared_lock lock(this->GetMutex());
+    std::shared_lock lock(this->smutex);
 
     // 在标签页内创建一个子窗口
     ImVec2 childSize = ImGui::GetContentRegionAvail();

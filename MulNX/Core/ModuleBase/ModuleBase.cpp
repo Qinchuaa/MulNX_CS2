@@ -4,13 +4,6 @@
 #include <MulNX/Core/Cores.hpp>
 #include <MulNX/Systems/ISystems.hpp>
 
-MulNX::ModuleBase::~ModuleBase() {
-    this->CloseMyThread();
-}
-void MulNX::ModuleBase::CloseMyThread() {
-    return;
-}
-
 bool MulNX::ModuleBase::SetName(std::string&& Name) {
     this->ModuleName = std::move(Name);
     return true;
@@ -81,26 +74,11 @@ bool MulNX::ModuleBase::EntryInit(MulNX::Core::Core* Core) {
     this->Inited = true;
     return true;
 }
-// 主循环
-void MulNX::ModuleBase::BaseVirtualMain() {
-    return;
-}
-void MulNX::ModuleBase::EntryVirtualMain() {
-    this->BaseVirtualMain();
-    this->VirtualMain();
-}
-// 消息处理
-void MulNX::ModuleBase::BaseProcessMsg(MulNX::Message* Msg) {
-    return;
-}
 void MulNX::ModuleBase::EntryProcessMsg() {
     MulNX::IMessageChannel* Channel = this->MainMsgChannel;
-    if (Channel != nullptr) {
-        MulNX::Message Msg{};
-        while (Channel->PullMessage(Msg)) {
-            this->BaseProcessMsg(&Msg);
-            this->ProcessMsg(Msg);
-        }
+    MulNX::Message Msg{};
+    while (Channel->PullMessage(Msg)) {
+        this->ProcessMsg(Msg);
     }
     this->UIBusy.store(false, std::memory_order_release);
     return;

@@ -260,7 +260,7 @@ int CSController::BasicUpdate() {
     return 0;
 }
 int CSController::EntityListUpdate() {
-    std::unique_lock lock(this->GetMutex());
+    std::unique_lock lock(this->smutex);
     // 玩家控制器，地图上从1到10
     int playerNum = 0;
     for (int i = 0; i < this->Modules.client.dwGameEntitySystem_highestEntityIndex(); ++i) {

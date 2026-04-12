@@ -22,6 +22,9 @@ bool SolutionManager::Init() {
         })) {
         PathManager->KeyBindDynamic("Solutions", "CurrentProject");
     }
+    this->ISys()
+        .SubscribeAsync("CameraSystem/Solution/Play");
+    
     return true;
 }
 void SolutionManager::VirtualMain() {

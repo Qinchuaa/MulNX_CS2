@@ -14,8 +14,4 @@ class CSModuleBase :public MulNX::ModuleBase {
 public:
     CSController* CS2() { return reinterpret_cast<CSController*>(this->AL3D); }
     PlayerHub* Hub();
-
-    virtual void GlobalMenu() {}
-    virtual void CheckMenu(Steam64UID steamUID) {}
-    virtual void SetMenu(Steam64UID steamUID) {}
 };

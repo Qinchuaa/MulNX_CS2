@@ -10,7 +10,7 @@ class GlowController final :public CSModuleBase {
     std::map<TeamNum, uint32_t>teamColors;
 public:
     bool Init()override;
+    void ProcessMsg(MulNX::Message& Msg)override;
     void MySetGlowColor(CS2::CGlowProperty* pGlowProperty, uint32_t* color);
-    void CheckMenu(Steam64UID uid);
-    void SetMenu(Steam64UID uid);
+    void Menu(MulNXUINode* node);
 };

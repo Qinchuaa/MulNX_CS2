@@ -27,7 +27,7 @@ bool MulNX::MessageManager::Init() {
 
 // 创建私有消息队列（但是生命周期仍然委托给消息管理器）
 MulNXHandle MulNX::MessageManager::CreateMessageChannel() {
-    std::unique_lock lock(this->GetMutex());
+    std::unique_lock lock(this->smutex);
 	std::unique_ptr<MessageChannel> Channel = std::make_unique<MessageChannel>(this);
 	MulNXHandle hChannel = MulNXHandle::CreateHandle();
 	Channel->hChannel = hChannel;
@@ -35,7 +35,7 @@ MulNXHandle MulNX::MessageManager::CreateMessageChannel() {
 	return hChannel;
 }
 MulNX::IMessageChannel* MulNX::MessageManager::GetMessageChannel(const MulNXHandle& hChannel) {
-    std::unique_lock lock(this->GetMutex());
+    std::unique_lock lock(this->smutex);
 	auto it = this->Channels.find(hChannel);
 	if (it == this->Channels.end())return nullptr;
 	return it->second.get();
@@ -65,7 +65,7 @@ bool MulNX::MessageManager::Subscribe(MessageChannel* const pChannel, const std:
 }
 
 bool MulNX::MessageManager::NextMsg() {
-    std::unique_lock lock(this->GetMutex());//只有切换消息时加锁，而等待组件处理消息时不加锁，不阻塞发布订阅
+    std::unique_lock lock(this->smutex);//只有切换消息时加锁，而等待组件处理消息时不加锁，不阻塞发布订阅
     MulNX::Message Msg;
     if (this->sharedBuffer.try_dequeue(Msg)) {
         // 检查是否存在管道订阅者

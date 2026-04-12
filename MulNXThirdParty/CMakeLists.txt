@@ -11,8 +11,10 @@ add_library(MulNXThirdParty
 
 add_subdirectory("yaml-cpp-master")
 add_subdirectory("zydis")
+add_subdirectory("nlohmann_json")
 
 target_link_libraries(MulNXThirdParty PUBLIC
+    nlohmann_json::nlohmann_json
     yaml-cpp::yaml-cpp
     Zydis::Zydis
 )

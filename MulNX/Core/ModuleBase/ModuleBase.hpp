@@ -21,8 +21,6 @@ namespace MulNX {
         MulNX::IMessageManager* IMsgManager = nullptr;
         // 路径管理器指针
         MulNX::PathManager* pPathManager = nullptr;
-        // 线程锁
-        std::shared_mutex MyThreadMutex;
     protected:
         // 父模块句柄
         MulNXHandle hParent{};
@@ -49,6 +47,8 @@ namespace MulNX {
         MulNX::IMessageChannel* MainMsgChannel = nullptr;
         // 用于指示UI不应该再发送消息
         std::atomic<bool> UIBusy = false;
+        // 线程锁
+        std::shared_mutex smutex;
     public:
 		// 删除不需要的构造函数
 		ModuleBase(const ModuleBase&) = delete;
@@ -57,37 +57,28 @@ namespace MulNX {
 		ModuleBase& operator=(ModuleBase&&) = delete;
         ModuleBase() = default;
 		// 虚析构函数确保正确调用析构函数
-        virtual ~ModuleBase();
+        virtual ~ModuleBase() = default;
 	private:
-		// 线程析构辅助函数
-		void CloseMyThread();
 
         // 虚函数要求：
         
-        // 初始化，拉取各种依赖
+        // 初始化
 		virtual bool Init() = 0;
 
-		// 虚拟主循环，执行组件逻辑
-        virtual void VirtualMain() {};
+		
 		// 消息处理函数，只需处理即可，消息会由入口点释放
         virtual void ProcessMsg(MulNX::Message& Msg) {};
 
 		// 基本函数：
 
 		// 基础初始化
-        bool BaseInit();
-        // 基础主循环
-		void BaseVirtualMain();
-		// 基础消息处理
-        void BaseProcessMsg(MulNX::Message* Msg);
-
-        
+        bool BaseInit();  
         // 入口点
-	public:
-		// 初始化入口
+    public:
+        // 虚拟主循环，执行组件逻辑
+        virtual void VirtualMain() {};
+        // 初始化入口
 		bool EntryInit(MulNX::Core::Core* Core);
-		// 主循环入口
-		void EntryVirtualMain();
 	protected:
 		// 消息处理入口
 		void EntryProcessMsg();
@@ -108,8 +99,6 @@ namespace MulNX {
         bool HasParent();
         // 便捷窗口显示标志
         std::atomic<bool> ShowWindow = false;
-        // 得到读写锁
-        std::shared_mutex& GetMutex() { return this->MyThreadMutex; }
         // 模块时间控制接口
         void SetMyThreadDelta(int Delta);
 

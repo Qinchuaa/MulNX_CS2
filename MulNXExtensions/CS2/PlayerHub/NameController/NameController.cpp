@@ -9,7 +9,8 @@ using GetDecoratedPlayerName_t = const char* (*)(CS2::CCSPlayerController* This_
 
 using GetPlayerName_t = const char* (*)(CS2::CCSPlayerController*);
 
-void NameController::CheckMenu(Steam64UID uid) {
+void NameController::Menu(MulNXUINode* node) {
+    auto uid = this->Hub()->currentSteamId.load(std::memory_order_acquire);
     auto it = this->nameReplaceInfo.find(uid);
     if (it != this->nameReplaceInfo.end()) {
         ImGui::TextUnformatted(std::format("替换名称: {}", this->nameReplace[it->second]).c_str());
@@ -17,64 +18,66 @@ void NameController::CheckMenu(Steam64UID uid) {
     else {
         ImGui::TextUnformatted("未设置替换名称");
     }
-}
-
-void NameController::SetMenu(Steam64UID uid) {
     ImGui::InputText("新名称 (最多127字符)", &this->newNameBuffer);
     ImGui::SameLine();
     if (ImGui::Button("设定（空则清除）")) {
-        if (this->SetReplace(uid, this->newNameBuffer)) {
-            this->newNameBuffer.clear();
-        }
+        auto [msg, rp] = MulNX::Message::Create<MulNX::NetExt>("Name/Player/Set"_hash);
+        msg.p1.as<Steam64UID>() = uid;
+        rp->str1 = this->newNameBuffer;
+        this->ISys().PublishAsync(std::move(msg));
+        this->newNameBuffer.clear();
     }
 }
 
 bool NameController::Init() {
-    this->Hub()->ModulesAboutPlayer.push_back(this);
-
     auto FnGetDecoratedPlayerName = this->CS2()->Modules.client.GetTextRegion().FindRegion(MulNX::CS2::Signatures::GetDecoratedPlayerName);
     this->hkGetDecoratedPlayerName = MulNX::Memory::HookEx::Create(FnGetDecoratedPlayerName.Data(), 0, false,
         [this](RegContext* ctx, MulNX::Memory::HookEx* hk)->bool {
-            std::shared_lock lock(this->Hub()->GetMutex());
-
+            // 这里注意，这里的名称获取，是需要进一步调用GetPlayerName的
+            // 我们借助这一个比较稳定的特征，创建延迟Hook
+            // 所以，这里同时不需要加锁，因为它已经满足上下文无关于我们的数据结构的访问了
+            // 这里也一定不能加锁，不然可能会被写锁请求打断，导致死锁！
             auto playerController = (CS2::CCSPlayerController*)ctx->rcx;
-            char* pBuffer = (char*)ctx->rdx;
-            unsigned int bufferSize = *reinterpret_cast<unsigned int*>(&ctx->r8);
-            unsigned int maybeShortenLength = *reinterpret_cast<unsigned int*>(&ctx->r9);
-
             this->HandleVHook(playerController);
-
-            // 调用原始函数，获取装饰名并写入 pBuffer
-            const char* result = reinterpret_cast<GetDecoratedPlayerName_t>(hk->pMaybeRawFunc)(
-                playerController, pBuffer, bufferSize, maybeShortenLength
-                );
-
-            // 获取玩家的 SteamID
-            uint64_t steamId = *playerController->m_steamID();
-            auto it = this->nameReplaceInfo.find(steamId);
-            if (it != this->nameReplaceInfo.end()) {
-                const char* newName = this->nameReplace[it->second];
-                memcpy(pBuffer, newName, 127);
-                pBuffer[127] = '\0';
-                ctx->rax = (uintptr_t)pBuffer;
-            }
-            else {
-                // 未找到替换规则，直接使用原始结果
-                ctx->rax = (uintptr_t)result;
-            }
-
-            return false; // 已经调用了原始函数，不再重复执行
+            return true; // 继续执行原始函数，获取装饰名并写入 pBuffer
         }).value();
     this->hkGetDecoratedPlayerName->Attach();
 
+    this->SendUINode(this->GetName(), [this](MulNXUINode* node) {
+        this->Menu(node);
+        return true;
+        });
+
+    this->SendTask("CS2控制线程", [this]() {
+        this->EntryProcessMsg();
+        return true;
+        });
+
+    this->ISys()
+        .SubscribeAsync("Name/Player/Set");
+
     return true;
+}
+
+void NameController::ProcessMsg(MulNX::Message& Msg) {
+    switch (Msg.type) {
+    case "Name/Player/Set"_hash: {
+        auto uid = Msg.p1.as<Steam64UID>();
+        auto newName = Msg.asp.get<MulNX::NetExt>()->str1;
+        this->SetReplace(uid, newName);
+        break;
+    }
+    default:
+        break;
+    }
 }
 
 void NameController::HandleVHook(CS2::CCSPlayerController* pPlayerController) {
     if (this->bGetPlayerNameHooked)return;
     this->hkGetPlayerName = MulNX::Memory::HookEx::Create(reinterpret_cast<uint8_t*>(pPlayerController->GetVFuncPtr(223)), 0, false,
         [this](RegContext* ctx, MulNX::Memory::HookEx* hk)->bool {
-            std::shared_lock lock(this->Hub()->GetMutex());
+            // 而在这里，我们则需要加锁，因为我们要访问替换表了
+            std::shared_lock lock(this->Hub()->smutex);
 
             auto playerController = (CS2::CCSPlayerController*)ctx->rcx;
 
@@ -100,7 +103,7 @@ void NameController::HandleVHook(CS2::CCSPlayerController* pPlayerController) {
 }
 
 bool NameController::SetReplace(Steam64UID uid, const std::string& newName) {
-    std::unique_lock lock(this->Hub()->GetMutex());
+    std::unique_lock lock(this->Hub()->smutex);
     if (newName.empty()) {
         auto it = this->nameReplaceInfo.find(uid);
         if (it == this->nameReplaceInfo.end()) {

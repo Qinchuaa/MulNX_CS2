@@ -3,10 +3,9 @@
 #include <MulNXExtensions/CS2/CSModuleBase.hpp>
 
 class PlayerHub final :public CSModuleBase {
-private:
-    
+    std::atomic<bool> ShowCompanionWindow = false;
 public:
-    std::vector<CSModuleBase*> ModulesAboutPlayer{};
+    std::atomic<Steam64UID> currentSteamId;
     
     bool Init()override;
     bool Window(MulNXUINode* node);

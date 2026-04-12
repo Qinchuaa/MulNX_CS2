@@ -4,7 +4,8 @@
 #include <MulNXExtensions/CS2/CSController/CSController.hpp>
 #include <MulNXExtensions/CS2/PlayerHub/PlayerHub.hpp>
 
-void GlowController::CheckMenu(Steam64UID uid) {
+void GlowController::Menu(MulNXUINode* node) {
+    auto uid = this->Hub()->currentSteamId.load(std::memory_order_acquire);
     auto itPlayer = this->playerColors.find(uid);
     if (itPlayer == this->playerColors.end()) {
         ImGui::Text("无颜色替换规则");
@@ -14,9 +15,7 @@ void GlowController::CheckMenu(Steam64UID uid) {
             ImGuiColorEditFlags_NoPicker | ImGuiColorEditFlags_NoTooltip,
             ImVec2(20, 20));
     }
-}
 
-void GlowController::SetMenu(Steam64UID uid) {
     // 1. 获取当前为该玩家设置的颜色（若存在），否则使用默认白色
     uint32_t currentColorU32 = IM_COL32(255, 255, 255, 255); // 默认白色
     auto it = this->playerColors.find(uid);
@@ -33,17 +32,18 @@ void GlowController::SetMenu(Steam64UID uid) {
         ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel)) {
         // 颜色被修改后，转换回 uint32_t 并保存到 playerColors
         uint32_t newColorU32 = ImGui::ColorConvertFloat4ToU32(colorVec4);
-
-        // 加锁写入
-        std::unique_lock lock(this->Hub()->GetMutex());
-        this->playerColors[uid] = newColorU32;
+        MulNX::Message msg("Glow/Player/Set"_hash);
+        msg.p1.as<Steam64UID>() = uid;
+        msg.p2.low<uint32_t>() = newColorU32;
+        this->ISys().PublishAsync(std::move(msg));
     }
 
     // 可选：添加一个重置按钮，删除该玩家的自定义颜色规则
     ImGui::SameLine();
     if (ImGui::Button("重置")) {
-        std::unique_lock lock(this->Hub()->GetMutex());
-        this->playerColors.erase(uid);
+        MulNX::Message msg("Glow/Player/Clear"_hash);
+        msg.p1.as<Steam64UID>() = uid;
+        this->ISys().PublishAsync(std::move(msg));
     }
 }
 
@@ -55,13 +55,63 @@ bool GlowController::Init() {
         return true;
         }).value();
     this->hkSetGlowColor->Attach();
-    this->Hub()->ModulesAboutPlayer.push_back(this);
+
+    this->SendUINode(this->GetName(), [this](MulNXUINode* node) {
+        this->Menu(node);
+        return true;
+        });
+
+
+    this->SendTask("CS2控制线程", [this]() {
+        this->EntryProcessMsg();
+        return true;
+        });
+
+    this->ISys()
+        .SubscribeAsync("Glow/Player/Set")
+        .SubscribeAsync("Glow/Player/Clear")
+        .SubscribeAsync("Glow/Player/ClearAll")
+        .SubscribeAsync("Glow/Team/Set")
+        .SubscribeAsync("Glow/Team/Clear")
+        .SubscribeAsync("Glow/Team/ClearAll")
+        .SubscribeAsync("Glow/ClearAll");
 
     return true;
 }
 
+void GlowController::ProcessMsg(MulNX::Message& Msg) {
+    switch (Msg.type) {
+    case "Glow/Player/Set"_hash: {
+        auto uid = Msg.p1.as<Steam64UID>();
+        auto color = Msg.p2.low<uint32_t>();
+        std::unique_lock lock(this->Hub()->smutex);
+        this->playerColors[uid] = color;
+        break;
+    }
+    case "Glow/Player/Clear"_hash: {
+        auto uid = Msg.p1.as<Steam64UID>();
+        std::unique_lock lock(this->Hub()->smutex);
+        this->playerColors.erase(uid);
+        break;
+    }
+    case "Glow/Player/ClearAll"_hash: {
+        std::unique_lock lock(this->Hub()->smutex);
+        this->playerColors.clear();
+        break;
+    }
+    case "Glow/ClearAll"_hash: {
+        std::unique_lock lock(this->Hub()->smutex);
+        this->playerColors.clear();
+        this->teamColors.clear();
+        break;
+    }
+    default:
+        break;
+    }
+}
+
 void GlowController::MySetGlowColor(CS2::CGlowProperty* pGlowProperty, uint32_t* color) {
-    std::shared_lock lock(this->Hub()->GetMutex());
+    std::shared_lock lock(this->Hub()->smutex);
     try {
         auto pBaseModelEntity = pGlowProperty->GetOwner();
         auto name = MulNX::MRead(MulNX::MRead(pBaseModelEntity->pClassInfo())->pName());

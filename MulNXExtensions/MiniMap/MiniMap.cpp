@@ -84,7 +84,7 @@ bool MiniMap::UINodeFunc(MulNXUINode* ThisNode) {
 
     // 绘制玩家并处理点击
     for (int i = 1; i <= 10; ++i) {
-        std::shared_lock lk(this->AL3D->GetMutex());
+        std::shared_lock lk(this->AL3D->smutex);
         D_Player& Player = this->AL3D->GetPlayerMsg(i);
         if (!Player.Alive)continue;
         ImVec2 PositionInMiniMap = ImVec2(centerScreen.x + Player.Position.x * worldToPixel, centerScreen.y - Player.Position.y * worldToPixel);

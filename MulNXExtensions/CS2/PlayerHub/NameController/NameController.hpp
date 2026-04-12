@@ -13,8 +13,8 @@ class NameController final :public CSModuleBase {
     std::string newNameBuffer;
 public:
     bool Init()override;
-    void CheckMenu(Steam64UID uid)override;
-    void SetMenu(Steam64UID uid)override;
+    void ProcessMsg(MulNX::Message& Msg)override;
+    void Menu(MulNXUINode* node);
 
     bool SetReplace(Steam64UID uid, const std::string& newName);
 };

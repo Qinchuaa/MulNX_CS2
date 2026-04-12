@@ -9,7 +9,7 @@ bool ModuleManager::Init() {
 	return true;
 }
 void ModuleManager::ProcessMsg(MulNX::Message& Msg) {
-	std::unique_lock lock(this->GetMutex());
+	std::unique_lock lock(this->smutex);
 	switch (Msg.type) {
 	case "ModuleManager/ModuleInfo/Request"_hash: {
 		auto [pInfo, raw] = MulNX::make_any_shared<ModuleInfo>();
@@ -28,7 +28,7 @@ void ModuleManager::VirtualMain() {
 }
 
 bool ModuleManager::RegisteModule(std::unique_ptr<MulNX::ModuleBase>&& Module, int Priority) {
-	std::unique_lock lock(this->GetMutex());
+	std::unique_lock lock(this->smutex);
 	if (!Module->HModule.IsValid()) {
 		Module->HModule = MulNXHandle::CreateHandle();
     }
@@ -59,7 +59,7 @@ ModuleManager& ModuleManager::CreateSystemModules() {
     return *this;
 }
 MulNX::ModuleBase* ModuleManager::FindModule(const std::string& Name) {
-	std::shared_lock lock(this->GetMutex());
+	std::shared_lock lock(this->smutex);
 	auto it = this->NameToHandleMap.find(Name);
     if (it == this->NameToHandleMap.end()) {
         MulNX::ErrorTerminate("查找模块错误 0x1");
@@ -78,7 +78,7 @@ MulNX::IAbstractLayer3D* ModuleManager::FindAbstractLayer3D() {
 }
 
 bool ModuleManager::PackedInit() {
-	std::shared_lock lock(this->GetMutex());
+	std::shared_lock lock(this->smutex);
     // 通过有序的初始化任务列表进行初始化，尽管Modules是无序的
     for (auto& [Priority, hModule] : this->PriorityToHandleMap) {
         auto* pModule = this->Modules[hModule].get();
@@ -97,11 +97,11 @@ bool ModuleManager::PackedInit() {
 }
 
 void ModuleManager::PackedVirtualMain() {
-	std::shared_lock lock(this->GetMutex());
+	std::shared_lock lock(this->smutex);
     for (const auto& [Priority, hModule] : this->PriorityToHandleMap) {
         auto* pModule = this->Modules[hModule].get();
         if (!pModule->HasParent()) {
-            pModule->EntryVirtualMain();
+            pModule->VirtualMain();
         }
     }
 }
