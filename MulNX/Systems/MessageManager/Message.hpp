@@ -39,7 +39,7 @@ namespace MulNX {
         std::string str2;
     };
 
-    // MulNX消息
+    // MulNX消息，8+8+8+8（asp8字节实现），32对齐，半个Cache Line
 	class Message {
 	public:
 		// 消息类型，用于区分消息

@@ -45,7 +45,7 @@ MulNX::Memory::HookTargetInfo MulNX::Memory::HookEx::AnalyseTarget(uint8_t* targ
     return targetInfo;
 }
 
-std::expected<MulNX::Memory::Asm::Code, std::string> MulNX::Memory::HookEx::FixRIPRelativeInstructions(
+std::expected<MulNX::Memory::Asm::Code, std::string> MulNX::Memory::HookEx::FixRelativeInstructions(
     const MulNX::Memory::Asm::Code& raw_code,
     uintptr_t old_base,
     uintptr_t new_base) {

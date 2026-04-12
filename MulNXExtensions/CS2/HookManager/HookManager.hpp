@@ -7,20 +7,16 @@
 #include <MulNXExtensions/WinExt/WinExt.hpp>
 
 class HookManager final :public MulNX::Core::CoreStarterBase {
-    friend MulNX::Core::Core;
-    friend class MulNXiCoreImpl;
 private:
     MulNX::IUISystem* pUISystem = nullptr;
-    std::atomic<bool>GuardPleaseAction = false;
 
+    // Present函数Hook
     std::unique_ptr<MulNX::Memory::HookEx> hkPresent = nullptr;
-    
-    // 窗口处理函数
+    // ResizeBuffers函数Hook
+    std::unique_ptr<MulNX::Memory::HookEx> hkResizeBuffers = nullptr;
+    // 窗口过程Hook
     std::unique_ptr<MulNX::Memory::HookEx> hkWndProc = nullptr;
     LRESULT __stdcall MyWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
-
-    std::atomic<bool>ReHook = false;
-    std::atomic<bool>NeedReHook = false;
 
     // D3D11指针组
 public:
@@ -31,18 +27,19 @@ public:
     bool d3dInited = false;
     HWND CS2hWnd = nullptr;//CS2窗口句柄
 
-    bool UIInited = false;
     bool ImGuiInited = false;
     std::filesystem::path imguiIniPath;
     std::string imguiIniPathString;
-    bool UIStyleInited()const { return this->UIInited; }
 private:
     void d3dInit(IDXGISwapChain* _this);
 public:
     bool Init()override;
     void StartAll()override;
     void CheckHook();
-    void ProcessMsg(MulNX::Message& Msg)override;
+
+    void ReleaseOld();
+    std::atomic<bool> needReBuild = false;
+    void BuildNew();
 
     DWORD CreateHook();//创建Hook   
 };

@@ -13,8 +13,6 @@ namespace MulNX {
         public:
             // 初始化Core的所有系统组件
             bool SystemInit(MulNX::Core::Core* pCore);
-            // UI系统启动辅助函数
-            void StartUIWith(std::string&& EntryName);
             // 注册主绘制函数
             void RegisterMainDrawWith(std::function<void(MulNXUINode*)>&& MainDrawFunc);
             // 核心完全初始化后回调

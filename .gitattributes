@@ -9,5 +9,5 @@
 *.exe binary
 *.dll binary
 
-.venv/** linguist-vendored
-MulNXThirdParty/** linguist-vendored
+*.py linguist-vendored
+*.html linguist-vendored

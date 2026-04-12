@@ -5,75 +5,34 @@
 #include <MulNX/Base/UI/UI.hpp>
 #include <MulNXThirdParty/imgui_d11/imgui_impl_dx11.h>
 #include <MulNXThirdParty/imgui_d11/imgui_impl_win32.h>
-#pragma comment(lib,"d3d11.lib")
 #include <chrono>
+#pragma comment(lib,"d3d11.lib")
 
-static bool AllowReHook = false;// 允许重hook
+using ResizeBuffers_t = HRESULT(__stdcall*)(IDXGISwapChain* This, UINT BufferCount, UINT Width, UINT Height, DXGI_FORMAT NewFormat, UINT SwapChainFlags);
+
 bool HookManager::Init() {
     this->pUISystem = this->Core->ModuleManager()->FindModule<MulNX::IUISystem>("UISystem");
     return true;
 }
 void HookManager::StartAll() {
-	this->ReHook = true;
     this->CheckHook();// 手动执行一次Hook
 }
 
 void HookManager::CheckHook() {
-    this->EntryProcessMsg();
+    // 重置状态
+    this->d3dInited = false;
 
-    if (this->GuardPleaseAction) {
-        AllowReHook = true;
-        this->GuardPleaseAction = false;
-        this->ISys().LogInfo("检测到D3D11波动，等待用户手动ReHook");
-    }
-    if (AllowReHook) {
-        if (this->pInputSystem->CheckComboClick(VK_INSERT, 3)) {
-            ReHook = true;
-            AllowReHook = false;
-        }
-    }
-    if (ReHook) {
-        // std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-        // 执行重新Hook逻辑
-        // 先清理Hook
+    this->CreateHook();
 
-        // 重置状态
-        this->d3dInited = false;
-        this->NeedReHook = true;
-
-        // 延迟重新创建Hook
-        std::this_thread::sleep_for(std::chrono::seconds(1));
-        this->CreateHook();
-
-        //发送重新Hook消息
-        MulNX::Message Msg("Core/ReHook"_hash);
-        this->ISys().PublishAsync(std::move(Msg));
-
-        ReHook = false;
-
-        // UI系统主界面初始化
-        this->StartUIWith("MainDraw");
-    }
-}
-
-// void HookManager::ThreadMain() {
-//     while (this->MyThreadRunning) {
-//         this->CheckHook();
-//         std::this_thread::sleep_for(std::chrono::milliseconds(this->MyThreadDelta));
-//     }
-// }
-
-void HookManager::ProcessMsg(MulNX::Message& Msg) {
-	switch (Msg.type) {
-
-	}
-	return;
+    //发送重新Hook消息
+    MulNX::Message Msg("Core/ReHook"_hash);
+    this->ISys().PublishAsync(std::move(Msg));
 }
 
 DWORD HookManager::CreateHook() {
 	this->pSwapChain = nullptr;
 	this->pd3dDevice = nullptr;
-	while (this->NeedReHook) {
+	while (true) {
 		const unsigned level_count = 2;
 		D3D_FEATURE_LEVEL levels[level_count] = { D3D_FEATURE_LEVEL_11_0, D3D_FEATURE_LEVEL_10_0 };
 		DXGI_SWAP_CHAIN_DESC sd{};
@@ -108,13 +67,20 @@ DWORD HookManager::CreateHook() {
                 }).value();
             this->hkPresent->Attach();
 
+            this->hkResizeBuffers = MulNX::Memory::HookEx::Create((uint8_t*)IVClass::Assume(this->pSwapChain)->GetVFuncPtr(13), 0, false, [this](RegContext* ctx, MulNX::Memory::HookEx* hk)->bool {
+                this->ReleaseOld();
+                return true;
+                }).value();
+            this->hkResizeBuffers->Attach();
+
 			this->pd3dDevice->Release();
 			this->pSwapChain->Release();
 
 			this->pUISystem->SetFrameBefore([this]()->void {
 
-				this->d3dInit(this->pSwapChain);
-				ImGui_ImplDX11_NewFrame();
+                this->d3dInit(this->pSwapChain);
+                this->BuildNew();
+                ImGui_ImplDX11_NewFrame();
 				ImGui_ImplWin32_NewFrame();
 				ImGui::NewFrame();
 
@@ -129,8 +95,7 @@ DWORD HookManager::CreateHook() {
 				return;
 				});
 
-			this->GuardPleaseAction = false;
-            this->NeedReHook = false;
+            break;
         }
 	}
 	return 0;
@@ -156,15 +121,10 @@ void HookManager::d3dInit(IDXGISwapChain* _this) {
 		this->pd3dDevice->CreateRenderTargetView(buf, nullptr, &this->view);
 		buf->Release();
 
-
-
 		if (!this->ImGuiInited) {
-
-
 			ImGui::CreateContext();
 			//设置ini文件路径
 			ImGuiIO& io = ImGui::GetIO();
-
 
 			ImGui_ImplWin32_Init(this->CS2hWnd);
 			ImGui_ImplDX11_Init(this->pd3dDevice, this->pd3dContext);
@@ -189,6 +149,25 @@ void HookManager::d3dInit(IDXGISwapChain* _this) {
 
 		this->d3dInited = true;
 	}
+}
+
+void HookManager::ReleaseOld() {
+    ImGui_ImplDX11_InvalidateDeviceObjects();
+    if (this->view) {
+        this->view->Release();
+        this->view = nullptr;
+    }
+    this->needReBuild.store(true, std::memory_order_release);
+}
+void HookManager::BuildNew() {
+    if (this->needReBuild.load(std::memory_order_acquire)) {
+        ID3D11Texture2D* buf = nullptr;
+        this->pSwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (void**)&buf);
+        if (buf == nullptr)return;
+        this->pd3dDevice->CreateRenderTargetView(buf, nullptr, &this->view);
+        buf->Release();
+        this->needReBuild.store(false, std::memory_order_release);
+    }
 }
 
 // ImGui窗口处理函数导入

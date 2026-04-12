@@ -111,11 +111,11 @@ std::expected<std::unique_ptr<MulNX::Memory::HookEx>, std::string> MulNX::Memory
 
         // 计算结构体大小（保证16字节对齐）
         constexpr size_t ctxSize = (sizeof(RegContext) + 15) & ~15;
-        size_t frameSize = ctxSize;
-        if (!extraStackAdjust)frameSize += 8;
+        HookExInstance->frameSize = ctxSize;
+        if (!extraStackAdjust)HookExInstance->frameSize += 8;
 
         Asm
-            .sub(RSP, frameSize) // 分配栈空间
+            .sub(RSP, HookExInstance->frameSize) // 分配栈空间
             // 保存所有寄存器到 [rsp + offset]
             .mov(Mem(RSP, offsetof(RegContext, rax)), RAX)
             .mov(Mem(RSP, offsetof(RegContext, rcx)), RCX)
@@ -167,7 +167,7 @@ std::expected<std::unique_ptr<MulNX::Memory::HookEx>, std::string> MulNX::Memory
             .mov(R14, Mem(RSP, offsetof(RegContext, r14)))
             .mov(R15, Mem(RSP, offsetof(RegContext, r15)))
             // 释放上下文空间
-            .add(RSP, frameSize)
+            .add(RSP, HookExInstance->frameSize)
             .ret();// 从分发函数返回
 
         HookExInstance->dispatcherAsmCode.append_range(std::move(Asm.Release()));
@@ -199,15 +199,15 @@ std::expected<std::unique_ptr<MulNX::Memory::HookEx>, std::string> MulNX::Memory
             .mov(R14, Mem(RSP, offsetof(RegContext, r14)))
             .mov(R15, Mem(RSP, offsetof(RegContext, r15)))
             // 释放上下文空间
-            .add(RSP, frameSize);
+            .add(RSP, HookExInstance->frameSize);
 
         HookExInstance->dispatcherAsmCode.append_range(std::move(Asm.Release()));
 
         // 这里恰好可以记录一个可能是原函数地址的位置（如果覆盖的指令是一个完整函数的开头），供回调函数使用
         HookExInstance->pMaybeRawFunc = (uintptr_t)HookExInstance->pAsmDispatcher + HookExInstance->dispatcherAsmCode.size();
 
-        // 修复原始指令
-        auto result = FixRIPRelativeInstructions(HookExInstance->hookTargetRawCode,
+        // 修复原始指令（包括jmp call rip相对寻址）
+        auto result = FixRelativeInstructions(HookExInstance->hookTargetRawCode,
             (uintptr_t)HookExInstance->hookTarget,
             (uintptr_t)HookExInstance->pAsmDispatcher + HookExInstance->dispatcherAsmCode.size());
         if (!result.has_value())return std::unexpected(result.error());
@@ -264,6 +264,12 @@ std::expected<std::unique_ptr<MulNX::Memory::HookEx>, std::string> MulNX::Memory
     }
 
     return HookExInstance;
+}
+
+void* MulNX::Memory::HookEx::GetRawStackAddr(RegContext* ctx) {
+    auto currentRsp = ctx->rsp;
+    auto rawStackAddr = currentRsp + (this->frameSize - sizeof(RegContext));
+    return reinterpret_cast<void*>(rawStackAddr);
 }
 
 MulNX::Memory::HookEx::Result MulNX::Memory::HookEx::Attach() {
