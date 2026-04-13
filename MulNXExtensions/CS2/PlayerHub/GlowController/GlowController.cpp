@@ -5,16 +5,16 @@
 #include <MulNXExtensions/CS2/PlayerHub/PlayerHub.hpp>
 
 void GlowController::Menu(MulNXUINode* node) {
-    auto uid = this->Hub()->currentSteamId.load(std::memory_order_acquire);
-    auto itPlayer = this->playerColors.find(uid);
-    if (itPlayer == this->playerColors.end()) {
-        ImGui::Text("无颜色替换规则");
+    auto view = this->Hub()->showView.load(std::memory_order_acquire);
+    if (view == PlayerHub::View::Player) {
+        this->MenuPlayer(node);
     }
     else {
-        ImGui::ColorButton("##ColorPreview", ImGui::ColorConvertU32ToFloat4(itPlayer->second),
-            ImGuiColorEditFlags_NoPicker | ImGuiColorEditFlags_NoTooltip,
-            ImVec2(20, 20));
+        this->MenuTeam(node);
     }
+}
+void GlowController::MenuPlayer(MulNXUINode* node) {
+    auto uid = this->Hub()->currentSteamId.load(std::memory_order_acquire);
 
     // 1. 获取当前为该玩家设置的颜色（若存在），否则使用默认白色
     uint32_t currentColorU32 = IM_COL32(255, 255, 255, 255); // 默认白色
@@ -22,12 +22,15 @@ void GlowController::Menu(MulNXUINode* node) {
     if (it != this->playerColors.end()) {
         currentColorU32 = it->second;
     }
+    else {
+        ImGui::Text("当前玩家没有自定义发光颜色，使用默认颜色");
+    }
 
     // 2. 将 uint32_t 颜色转换为 ImVec4，以便使用 ImGui 颜色编辑器
     ImVec4 colorVec4 = ImGui::ColorConvertU32ToFloat4(currentColorU32);
 
     // 3. 显示颜色选择器
-    //    使用 ColorEdit4 可以同时展示预览色块和数值，也可以只用 ColorPicker4
+    // 使用 ColorEdit4 可以同时展示预览色块和数值，也可以只用 ColorPicker4
     if (ImGui::ColorEdit4("发光颜色修改", (float*)&colorVec4,
         ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel)) {
         // 颜色被修改后，转换回 uint32_t 并保存到 playerColors
@@ -43,6 +46,36 @@ void GlowController::Menu(MulNXUINode* node) {
     if (ImGui::Button("重置")) {
         MulNX::Message msg("Glow/Player/Clear"_hash);
         msg.p1.as<Steam64UID>() = uid;
+        this->ISys().PublishAsync(std::move(msg));
+    }
+}
+void GlowController::MenuTeam(MulNXUINode* node) {
+    auto team = this->Hub()->currentTeam.load(std::memory_order_acquire);
+
+    uint32_t currentColorU32 = IM_COL32(255, 255, 255, 255); // 默认白色
+    auto it = this->teamColors.find(team);
+    if (it != this->teamColors.end()) {
+        currentColorU32 = it->second;
+    }
+    else {
+        ImGui::Text("当前队伍没有自定义发光颜色，使用默认颜色");
+    }
+
+    ImVec4 colorVec4 = ImGui::ColorConvertU32ToFloat4(currentColorU32);
+
+    if (ImGui::ColorEdit4("发光颜色修改", (float*)&colorVec4,
+        ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel)) {
+        uint32_t newColorU32 = ImGui::ColorConvertFloat4ToU32(colorVec4);
+        MulNX::Message msg("Glow/Team/Set"_hash);
+        msg.p1.low<uint32_t>() = newColorU32;
+        msg.p1.high<CS2::ui8TeamNum>() = team;
+        this->ISys().PublishAsync(std::move(msg));
+    }
+
+    ImGui::SameLine();
+    if (ImGui::Button("重置")) {
+        MulNX::Message msg("Glow/Team/Clear"_hash);
+        msg.p1.high<CS2::ui8TeamNum>() = team;
         this->ISys().PublishAsync(std::move(msg));
     }
 }
@@ -99,6 +132,25 @@ void GlowController::ProcessMsg(MulNX::Message& Msg) {
         this->playerColors.clear();
         break;
     }
+    case "Glow/Team/Set"_hash: {
+        auto team = Msg.p1.high<CS2::ui8TeamNum>();
+        auto color = Msg.p1.low<uint32_t>();
+        std::unique_lock lock(this->Hub()->smutex);
+        this->teamColors[team] = color;
+        break;
+    }
+    case "Glow/Team/Clear"_hash: {
+        auto team = Msg.p1.high<CS2::ui8TeamNum>();
+        std::unique_lock lock(this->Hub()->smutex);
+        this->teamColors.erase(team);
+        break;
+    }
+    case "Glow/Team/ClearAll"_hash: {
+        std::unique_lock lock(this->Hub()->smutex);
+        this->teamColors.clear();
+        break;
+    }
+
     case "Glow/ClearAll"_hash: {
         std::unique_lock lock(this->Hub()->smutex);
         this->playerColors.clear();
@@ -112,28 +164,33 @@ void GlowController::ProcessMsg(MulNX::Message& Msg) {
 
 void GlowController::MySetGlowColor(CS2::CGlowProperty* pGlowProperty, uint32_t* color) {
     std::shared_lock lock(this->Hub()->smutex);
-    try {
-        auto pBaseModelEntity = pGlowProperty->GetOwner();
-        auto name = MulNX::MRead(MulNX::MRead(pBaseModelEntity->pClassInfo())->pName());
 
-        auto hController = MulNX::MRead(pBaseModelEntity->As<CS2::C_BasePlayerPawn>()->m_hController());
-        auto pController = this->CS2()->Modules.client.GetBaseEntityFromHandle(hController)->As<CS2::CBasePlayerController>();
-        if (!pController)return;
-        Steam64UID uid = *pController->m_steamID();
-        auto itPlayer = this->playerColors.find(uid);
-        if (itPlayer != this->playerColors.end()) {
-            *color = itPlayer->second;
-            return;
-        }
-        auto team = *pController->iTeamNum();
-        auto itTeam = this->teamColors.find(team);
-        if (itTeam != this->teamColors.end()) {
-            *color = itTeam->second;
-            return;
-        }
+    auto pBaseModelEntity = pGlowProperty->GetOwner();
+    CS2::C_CSPlayerPawn* pPlayerPawn = nullptr;
+    if (pBaseModelEntity->IsPlayerPawn()) {
+        pPlayerPawn = pBaseModelEntity->As<CS2::C_CSPlayerPawn>();
     }
-    catch (...) {
-        
+    else {
+        auto hOwnerEntity = *pBaseModelEntity->m_hOwnerEntity();
+        pPlayerPawn = this->CS2()->Modules.client.GetBaseEntityFromHandle(hOwnerEntity)->As<CS2::C_BaseEntity>()->As<CS2::C_CSPlayerPawn>();
+    }
+    if (!pPlayerPawn)return;
+    auto hController = *pPlayerPawn->As<CS2::C_BasePlayerPawn>()->m_hController();
+    auto pController = this->CS2()->Modules.client.GetBaseEntityFromHandle(hController)->As<CS2::CBasePlayerController>();
+
+    if (!pController)return;
+    Steam64UID uid = *pController->m_steamID();
+
+    auto itPlayer = this->playerColors.find(uid);
+    if (itPlayer != this->playerColors.end()) {
+        *color = itPlayer->second;
+        return;
+    }
+    auto team = *pBaseModelEntity->iTeamNum();
+    auto itTeam = this->teamColors.find(team);
+    if (itTeam != this->teamColors.end()) {
+        *color = itTeam->second;
+        return;
     }
 
     return;

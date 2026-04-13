@@ -7,10 +7,13 @@
 class GlowController final :public CSModuleBase {
     std::unique_ptr<MulNX::Memory::HookEx> hkSetGlowColor = nullptr;
     std::unordered_map<Steam64UID, uint32_t>playerColors;
-    std::map<TeamNum, uint32_t>teamColors;
+    std::map<CS2::ui8TeamNum, uint32_t>teamColors;
 public:
     bool Init()override;
     void ProcessMsg(MulNX::Message& Msg)override;
     void MySetGlowColor(CS2::CGlowProperty* pGlowProperty, uint32_t* color);
+    void OverrideGlowColorDependPlayer(CS2::CGlowProperty* pGlowProperty, uint32_t* color);
     void Menu(MulNXUINode* node);
+    void MenuPlayer(MulNXUINode* node);
+    void MenuTeam(MulNXUINode* node);
 };

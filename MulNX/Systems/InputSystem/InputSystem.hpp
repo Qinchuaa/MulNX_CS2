@@ -37,7 +37,7 @@ namespace MulNX {
 	public:
 		DirectX::XMFLOAT3 Position = { 0.0f, 0.0f, 0.0f }; // 位置
 		DirectX::XMFLOAT3 Rotation = { 0.0f, 0.0f, 0.0f }; // 旋转角度 (pitch, yaw, roll)
-		float MoveSpeed = 100.0f; // 移动速度 (单位/秒)
+		std::atomic<float> MoveSpeed = 100.0f; // 移动速度 (单位/秒)
 
 		void Update(InputSystem* inputSystem);
 	};

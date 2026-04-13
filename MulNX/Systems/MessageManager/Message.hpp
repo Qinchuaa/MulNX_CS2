@@ -15,6 +15,9 @@ namespace MulNX {
     template<typename T>
     concept Clike8 = Clike<T> && (sizeof(T) == 8);
 
+    template<typename T>
+    concept ClikeUnder4 = Clike<T> && (sizeof(T) <= 4);
+
     class Param {
         uint64_t internal;
     public:
@@ -22,11 +25,11 @@ namespace MulNX {
         T& as() {
             return reinterpret_cast<T&>(internal);
         }
-        template<Clike4 T>
+        template<ClikeUnder4 T>
         T& low() {
             return reinterpret_cast<T&>(*reinterpret_cast<uint32_t*>(&internal));
         }
-        template<Clike4 T>
+        template<ClikeUnder4 T>
         T& high() {
             return reinterpret_cast<T&>(*reinterpret_cast<uint32_t*>(reinterpret_cast<char*>(&internal) + 4));
         }

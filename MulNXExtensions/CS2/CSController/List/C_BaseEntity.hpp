@@ -9,6 +9,11 @@
 using GameTime_t = float;
 
 namespace CS2 {
+    enum class ui8TeamNum :uint8_t {
+        T = 2,
+        CT = 3
+    };
+
     class CViewSetup {
     public:
         // 定位关键数据
@@ -74,11 +79,15 @@ namespace CS2 {
         C_ClassInfo** pClassInfo() { return Schema<C_ClassInfo*>(this, 0x10); }
         CGameSceneNode** pGameSceneNode() { return Schema<CGameSceneNode*>(this, cs2_dumper::schemas::client_dll::C_BaseEntity::m_pGameSceneNode); }
         int32_t* iHealth() { return Schema<int32_t>(this, cs2_dumper::schemas::client_dll::C_BaseEntity::m_iHealth); }
-        uint8_t* iTeamNum() { return Schema<uint8_t>(this, cs2_dumper::schemas::client_dll::C_BaseEntity::m_iTeamNum); }
+        ui8TeamNum* iTeamNum() { return Schema<ui8TeamNum>(this, cs2_dumper::schemas::client_dll::C_BaseEntity::m_iTeamNum); }
         CHandle<C_BaseEntity>* m_hEffectEntity() { return Schema<CHandle<C_BaseEntity>>(this, cs2_dumper::schemas::client_dll::C_BaseEntity::m_hEffectEntity); }
         CHandle<C_BaseEntity>* m_hOwnerEntity() { return Schema<CHandle<C_BaseEntity>>(this, cs2_dumper::schemas::client_dll::C_BaseEntity::m_hOwnerEntity); }
 
         DirectX::XMFLOAT3 GetBonePos(int index);
+        std::string GetName();
+
+        bool IsPlayerController();
+        bool IsPlayerPawn();
     };
 
     class C_SoundEventEntity :public C_BaseEntity {
@@ -202,7 +211,7 @@ namespace CS2 {
     class CBasePlayerController :public C_BaseEntity {
     public:
 
-        CHandle<C_BasePlayerPawn>* hPawn() { return Schema<CHandle<C_BasePlayerPawn>>(this, cs2_dumper::schemas::client_dll::CBasePlayerController::m_hPawn); }
+        CHandle<C_BasePlayerPawn>* m_hPawn() { return Schema<CHandle<C_BasePlayerPawn>>(this, cs2_dumper::schemas::client_dll::CBasePlayerController::m_hPawn); }
         char* m_iszPlayerName() { return Schema<char>(this, cs2_dumper::schemas::client_dll::CBasePlayerController::m_iszPlayerName); } // char[128]
         uint64_t* m_steamID() { return Schema<uint64_t>(this, cs2_dumper::schemas::client_dll::CBasePlayerController::m_steamID); } // uint64
     };

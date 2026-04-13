@@ -168,8 +168,11 @@ void MulNX::FreeCameraController::Update(InputSystem* inputSystem) {
     DirectX::XMStoreFloat3(&left, DirectX::XMVector3Rotate(DirectX::XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f), quatRot));
     DirectX::XMStoreFloat3(&up, DirectX::XMVector3Rotate(DirectX::XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f), quatRot));
 
+    auto speed = this->MoveSpeed.load(std::memory_order_acquire);
+    if(inputSystem->IsKeyPressed(VK_SHIFT)) speed *= 0.2f; // 按住 Shift 减速
+
     // 应用移动：前/后（moveDir.x）、左/右（moveDir.y，正值为左）、上/下（moveDir.z）
-    Position.x += (forward.x * moveDir.x + left.x * moveDir.y + up.x * moveDir.z) * MoveSpeed * deltaTime;
-    Position.y += (forward.y * moveDir.x + left.y * moveDir.y + up.y * moveDir.z) * MoveSpeed * deltaTime;
-    Position.z += (forward.z * moveDir.x + left.z * moveDir.y + up.z * moveDir.z) * MoveSpeed * deltaTime;
+    Position.x += (forward.x * moveDir.x + left.x * moveDir.y + up.x * moveDir.z) * speed * deltaTime;
+    Position.y += (forward.y * moveDir.x + left.y * moveDir.y + up.y * moveDir.z) * speed * deltaTime;
+    Position.z += (forward.z * moveDir.x + left.z * moveDir.y + up.z * moveDir.z) * speed * deltaTime;
 }

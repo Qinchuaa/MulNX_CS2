@@ -10,6 +10,10 @@ using GetDecoratedPlayerName_t = const char* (*)(CS2::CCSPlayerController* This_
 using GetPlayerName_t = const char* (*)(CS2::CCSPlayerController*);
 
 void NameController::Menu(MulNXUINode* node) {
+    if(this->Hub()->showView.load(std::memory_order_acquire) != PlayerHub::View::Player){
+        ImGui::TextUnformatted("请切换到玩家视图以设置名称替换");
+        return;
+    }
     auto uid = this->Hub()->currentSteamId.load(std::memory_order_acquire);
     auto it = this->nameReplaceInfo.find(uid);
     if (it != this->nameReplaceInfo.end()) {

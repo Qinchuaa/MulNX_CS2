@@ -11,7 +11,21 @@ DirectX::XMFLOAT3 CS2::C_BaseEntity::GetBonePos(int index) {
     return Pos;
 }
 
+std::string CS2::C_BaseEntity::GetName() {
+    auto* pClassInfo = MulNX::MRead(this->pClassInfo());
+    if (!pClassInfo) return{};
+    auto* pName= MulNX::MRead(pClassInfo->pName());
+    if (!pName) return{};
+    auto className = MulNX::Memory::ReadString(pName);
+    return className;
+}
 
+bool CS2::C_BaseEntity::IsPlayerController() {
+    return this->GetName() == "cs_player_controller";
+}
+bool CS2::C_BaseEntity::IsPlayerPawn() {
+    return this->GetName() == "c_cs_player_for_precache" || this->GetName() == "c_cs_observer_for_precache";
+}
 
 CS2::CHandle<CS2::C_BasePlayerWeapon> CS2::C_BasePlayerPawn::GetHandleActiveWeapon() {
     auto* pWeaponServices = MulNX::MRead(this->pWeaponServices());

@@ -29,11 +29,10 @@ void CSController::HandleOverrideView(CS2::CViewSetup* viewSetup) {
     this->controlView.currentView.WindowWidth.store(*viewSetup->pWidth(), std::memory_order_relaxed);
     this->controlView.currentView.WindowHeight.store(*viewSetup->pHeight(), std::memory_order_relaxed);
 
-    // 执行roll覆盖
+    // 执行roll覆盖，这是优先级最低的覆盖，保证运镜至少优先于此，且不影响于此
     viewSetup->pViewAngles()->z = this->controlView.InputRoll.load(std::memory_order_acquire);
     this->pAdvancedViewController->HandleUpdate(viewSetup);
     
-
     // 根据状态调用不同的视角控制逻辑
     // 自由摄像机优先级最高，其次是高级视角控制，最后是普通摄像机系统控制
     if (this->EnableFreeCameraControl.load(std::memory_order_acquire)) {
@@ -238,13 +237,8 @@ int CSController::BasicUpdate() {
         auto entity = this->Modules.client.GetBaseEntity(i);
         if (!entity)continue;
 
-        auto pClassInfo = MulNX::MRead(entity->pClassInfo());
-        if (!pClassInfo)continue;
-
-        auto pName = MulNX::MRead(((pClassInfo))->pName());
-        if (!pName)continue;
-
-        auto zname = std::string(pName);
+        auto zname = entity->GetName();
+        if(zname.empty())continue;
 
         if (zname.find("smokegrenade") != std::string::npos && zname.find("weapon") == std::string::npos) {
             if (this->controlSmoke.Enbale.load(std::memory_order_acquire)) {
@@ -278,7 +272,7 @@ int CSController::EntityListUpdate() {
         if (!pawn)continue;
 
         auto team = MulNX::MRead(pawn->iTeamNum());
-        if (team != 2 && team != 3)continue;
+        if (team != CS2::ui8TeamNum::T && team != CS2::ui8TeamNum::CT)continue;
         ++playerNum;
 
         for (const auto& handle : this->handlesControlPlayer) {
@@ -291,7 +285,7 @@ int CSController::EntityListUpdate() {
             AL3DEntity.EyePosition = MulNX::MRead(pawn->vOldOrigin()) + MulNX::MRead(pawn->vecViewOffset());
             AL3DEntity.Rotation = MulNX::MRead(pawn->angEyeAngles());
             AL3DEntity.HP = MulNX::MRead(pawn->iHealth());
-            AL3DEntity.Team = team;
+            AL3DEntity.Team = static_cast<int>(team);
             AL3DEntity.Alive = AL3DEntity.HP;
             AL3DEntity.IndexInMap = playerNum;
         }
@@ -334,7 +328,6 @@ void CSController::HandleFreeCameraPath(const CameraSystemIO* const IO) {
     view->AnglesX = rot.x;
     view->AnglesY = rot.y;
     view->AnglesZ = rot.z;
-    this->controlView.InputRoll.store(view->AnglesZ, std::memory_order_release);
     this->controlView.ViewToGame.store(view);
 
     *this->controlView.dofs.pNearBlurry = dof.NearBlurry;

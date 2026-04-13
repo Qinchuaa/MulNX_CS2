@@ -183,7 +183,7 @@ CS2::C_CSPlayerPawn* AdvancedViewController::GetSelfViewTargetPawn() {
     try {
         auto* localController = this->CS2()->Modules.client.dwLocalPlayerController();
         if (!localController) return nullptr;
-        auto hLocalPawn = MulNX::MRead(localController->hPawn());
+        auto hLocalPawn = MulNX::MRead(localController->m_hPlayerPawn());
         auto* localPawn = this->CS2()->Modules.client.GetBaseEntityFromHandle(hLocalPawn)->As<CS2::C_CSPlayerPawn>();
         if (!localPawn) return nullptr;
         if (this->useLocalPawn.load(std::memory_order_acquire)) {
