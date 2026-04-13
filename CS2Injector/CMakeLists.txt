@@ -18,19 +18,11 @@ add_executable(CS2Injector WIN32
     "MulNXeCore/MulNXeCore.cpp"
     "MulNXeCore/ConfigManager/ConfigManager.cpp"
     "MulNXeCore/IPCer/IPCer.cpp"
-
-    "ThirdParty/ImGui/imgui.cpp"
-    "ThirdParty/ImGui/imgui_draw.cpp"
-    "ThirdParty/ImGui/imgui_impl_dx11.cpp"
-    "ThirdParty/ImGui/imgui_impl_win32.cpp"
-    "ThirdParty/ImGui/imgui_tables.cpp"
-    "ThirdParty/ImGui/imgui_widgets.cpp"
-
-    "ThirdParty/pugixml/pugixml.cpp"
 )
 
 target_link_libraries(CS2Injector PUBLIC
     MulNXExtensions
+    MulNXThirdParty
 )
 
 add_dependencies(CS2Injector CS2OBTool)

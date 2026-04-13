@@ -6,9 +6,9 @@
 // - Documentation        https://dearimgui.com/docs (same as your local docs/ folder).
 // - Introduction, links and more at the top of imgui.cpp
 
-#include "../ThirdParty/ImGui/imgui.h"
-#include "../ThirdParty/ImGui/imgui_impl_win32.h"
-#include "../ThirdParty/ImGui/imgui_impl_dx11.h"
+#include <MulNXThirdParty/imgui_d11/imgui.h>
+#include <MulNXThirdParty/imgui_d11/imgui_impl_win32.h>
+#include <MulNXThirdParty/imgui_d11/imgui_impl_dx11.h>
 #include <d3d11.h>
 #include <tchar.h>
 #pragma comment(lib,"d3d11.lib")
@@ -69,7 +69,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
     // Setup scaling
     ImGuiStyle& style = ImGui::GetStyle();
     style.ScaleAllSizes(main_scale);        // Bake a fixed style scale. (until we have a solution for dynamic style scaling, changing this requires resetting Style + calling this again)
-    style.FontScaleDpi = main_scale;        // Set initial font scale. (using io.ConfigDpiScaleFonts=true makes this unnecessary. We leave both here for documentation purpose)
 
     // Setup Platform/Renderer backends
     ImGui_ImplWin32_Init(hwnd);

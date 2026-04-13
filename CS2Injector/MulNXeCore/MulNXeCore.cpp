@@ -3,7 +3,7 @@
 #include "IPCer/IPCer.hpp"
 #include "ConfigManager/ConfigManager.hpp"
 
-#include "../ThirdParty/ImGui/imgui.h"
+#include <MulNXThirdParty/imgui_d11/imgui.h>
 #include <MulNX/MulNX.hpp>
 
 //Impl

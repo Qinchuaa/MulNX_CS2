@@ -2,7 +2,7 @@
 
 #include"../MulNXeCore.hpp"
 
-#include"../../ThirdParty/All_pugixml.hpp"
+#include <MulNXThirdParty/All_pugixml.hpp>
 
 #include <windows.h>
 #include <ShObjIdl.h>
