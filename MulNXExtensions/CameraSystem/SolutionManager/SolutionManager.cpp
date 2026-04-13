@@ -283,8 +283,22 @@ void SolutionManager::Solution_ShowAllInLines() {
 bool SolutionManager::UINodeFunc(MulNXUINode* node) {
     if (this->ShowWindow.load(std::memory_order_acquire)) {
         this->Solution_DebugWindow();
+
+        if (!this->CurrentSolution) {
+            this->OpenSolutionKCPackDebugWindow = false;
+            this->OpenSolutionNameDebugWindow = false;
+        }
+
         if (this->OpenSolutionKCPackDebugWindow) {
-            this->Solution_KCPack_DebugWindow();
+            if (this->Buffer_KCPack.DebugWindow(this->OpenSolutionKCPackDebugWindow)) {
+                this->OpenSolutionKCPackDebugWindow.store(false, std::memory_order_release);
+                if (!this->Buffer_KCPack.Usable) {
+                    this->ISys().LogError("当前按键绑定不可用，无法使用这个绑键播放解决方案！");
+                }
+                else {
+                    this->CurrentSolution->KCPack = this->Buffer_KCPack;//更新绑键
+                }
+            }
         }
         if (this->OpenSolutionNameDebugWindow) {
             this->Solution_Name_DebugWindow();
@@ -384,89 +398,9 @@ void SolutionManager::Solution_DebugWindow() {
         ImGui::Text("当前未选择任何解决方案");
     }
 }
-void SolutionManager::Solution_KCPack_DebugWindow() {
-    ImGui::Begin("按键绑定", &this->OpenSolutionKCPackDebugWindow);
-
-    if (this->CurrentSolution) {
-        ImGui::Text(("当前绑键：" + this->CurrentSolution->KCPack.GetMsg()).c_str());
-        ImGui::Separator();
-
-        // 修饰键复选框
-        ImGui::Checkbox("Ctrl", &this->Buffer_KCPack.Ctrl);
-        ImGui::SameLine();
-        ImGui::Checkbox("Shift", &this->Buffer_KCPack.Shift);
-        ImGui::SameLine();
-        ImGui::Checkbox("Alt", &this->Buffer_KCPack.Alt);
-
-        // 按键选择下拉菜单
-        static constexpr const char* keyItems[] = {
-            "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M",
-            "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z",
-            "F1", "F2", "F3", "F4", "F5", "F6", "F7", "F8", "F9", "F10", "F11", "F12"
-        };
-
-        // 查找当前键码对应的索引
-        int currentKeyIndex = 0;
-        for (int i = 0; i < IM_ARRAYSIZE(keyItems); i++) {
-            if (i < 26) { // A-Z
-                if (this->Buffer_KCPack.vkCode == 0x41 + i) {
-                    currentKeyIndex = i;
-                    break;
-                }
-            }
-            else { // F1-F12
-                if (this->Buffer_KCPack.vkCode == 0x70 + (i - 26)) {
-                    currentKeyIndex = i;
-                    break;
-                }
-            }
-        }
-
-        ImGui::Text("按键:");
-        ImGui::SameLine();
-        if (ImGui::Combo("##KeyCombo", &currentKeyIndex, keyItems, IM_ARRAYSIZE(keyItems))) {
-            // 更新键码
-            if (currentKeyIndex < 26) {
-                this->Buffer_KCPack.vkCode = 0x41 + currentKeyIndex; // A-Z
-            }
-            else {
-                this->Buffer_KCPack.vkCode = 0x70 + (currentKeyIndex - 26); // F1-F12
-            }
-        }
-
-        // 连击数输入
-        int comboClick = static_cast<int>(this->Buffer_KCPack.ComboClick);
-        ImGui::Text("连击数:");
-        ImGui::SameLine();
-        if (ImGui::InputInt("##ComboClick", &comboClick, 1, 5)) {
-            // 限制在 1-255 范围内
-            comboClick = std::clamp(comboClick, 1, 255);
-            this->Buffer_KCPack.ComboClick = static_cast<unsigned char>(comboClick);
-        }
-
-        if (ImGui::Button("修改绑键")) {
-            this->CurrentSolution->SetKeyCheckPack(this->Buffer_KCPack);
-            this->OpenSolutionKCPackDebugWindow = false;
-            ImGui::End();
-            return;
-        }
-    }
-    else {
-        ImGui::Text("当前没有要调试的解决方案，无法修改按键绑定");
-    }
-
-    ImGui::Separator();
-
-    if (ImGui::Button("关闭按键绑定调试页面")) {
-        this->OpenSolutionKCPackDebugWindow = false;
-        ImGui::End();
-        return;
-    }
-
-    ImGui::End();
-}
 void SolutionManager::Solution_Name_DebugWindow() {
-    ImGui::Begin("解决方案重命名", &this->OpenSolutionNameDebugWindow);
+    auto w = MulNX::UI::RAIIWindow("解决方案重命名", this->OpenSolutionNameDebugWindow);
+    if (!w)return;
 
     if (this->CurrentSolution) {
         ImGui::Text(("当前名称：" + this->CurrentSolution->Name).c_str());
@@ -488,7 +422,6 @@ void SolutionManager::Solution_Name_DebugWindow() {
             if (ImGui::Button("修改名称")) {
                 this->CurrentSolution->ResetName(this->Buffer_Name);
                 this->OpenSolutionNameDebugWindow = false;
-                ImGui::End();
                 return;
             }
         }
@@ -501,11 +434,8 @@ void SolutionManager::Solution_Name_DebugWindow() {
 
     if (ImGui::Button("关闭解决方案名调试页面")) {
         this->OpenSolutionNameDebugWindow = false;
-        ImGui::End();
         return;
     }
-
-    ImGui::End();
 }
 
 

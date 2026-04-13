@@ -1,28 +1,12 @@
 #pragma once
 
 #include <MulNX/Core/ModuleBase/ModuleBase.hpp>
-#include <yaml-cpp/yaml.h>
-
+#include "Key/Key.hpp"
 #include <thread>
 #include <chrono>
 #include <DirectXMath.h>
 
 namespace MulNX {
-	//Usable Ctrl Shift Alt 虚拟键码 连击数
-	class KeyCheckPack {
-	public:
-		bool Usable = false;
-		bool Ctrl = false;
-		bool Shift = false;
-		bool Alt = false;
-
-		unsigned char vkCode = 0;
-		uint8_t ComboClick = 0;
-
-		std::string GetMsg()const;
-		void Refresh();
-	};
-
 	class KeyState {
 	public:
 		std::atomic<bool> Current{};//跨线程，原子化
@@ -67,40 +51,4 @@ namespace MulNX {
 		// 自由摄像机相关方法
 		FreeCameraController& GetFreeCamera() { return FreeCamera; }
 	};
-}
-
-namespace YAML {
-    template<>
-    struct convert<MulNX::KeyCheckPack> {
-        static Node encode(const MulNX::KeyCheckPack& KCP) {
-            Node node;
-            node["usable"] = KCP.Usable;
-            node["ctrl"] = KCP.Ctrl;
-            node["shift"] = KCP.Shift;
-            node["alt"] = KCP.Alt;
-            node["vkCode"] = static_cast<int>(KCP.vkCode);
-            node["comboClick"] = static_cast<int>(KCP.ComboClick);
-            return node;
-        }
-        static bool decode(const Node& node, MulNX::KeyCheckPack& KCP) {
-            if (!node.IsMap()) {
-                return false;
-            }
-            try {
-                MulNX::KeyCheckPack temp;
-                temp.Usable = node["usable"].as<bool>();
-                temp.Ctrl = node["ctrl"].as<bool>();
-                temp.Shift = node["shift"].as<bool>();
-                temp.Alt = node["alt"].as<bool>();
-                temp.vkCode = static_cast<unsigned char>(node["vkCode"].as<unsigned int>());
-                temp.ComboClick = static_cast<uint8_t>(node["comboClick"].as<unsigned int>());
-
-                KCP = std::move(temp);
-                return true;
-            }
-            catch (const YAML::Exception&) {
-                return false;
-            }
-        }
-    };
 }

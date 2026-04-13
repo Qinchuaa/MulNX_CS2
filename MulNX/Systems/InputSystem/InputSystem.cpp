@@ -5,45 +5,6 @@
 #include <DirectXMath.h>
 #include <MulNX/Base/Math/Translate/Translate.hpp>
 
-std::string MulNX::KeyCheckPack::GetMsg()const {
-    std::ostringstream oss;
-
-    if (this->Ctrl) oss << "Ctrl + ";
-    if (this->Shift) oss << "Shift + ";
-    if (this->Alt) oss << "Alt + ";
-
-    //虚拟键码到中文的映射
-    static const std::unordered_map<unsigned char, std::string> keyMap = {
-        {0x70, "F1"}, {0x71, "F2"}, {0x72, "F3"}, {0x73, "F4"},
-        {0x74, "F5"}, {0x75, "F6"}, {0x76, "F7"}, {0x77, "F8"},
-        {0x78, "F9"}, {0x79, "F10"}, {0x7A, "F11"}, {0x7B, "F12"}
-    };
-
-    //处理字母键 (A-Z)
-    if (this->vkCode >= 0x41 && this->vkCode <= 0x5A) {
-        oss << static_cast<char>(this->vkCode);
-    }
-    //处理功能键 (F1-F12)
-    else if (keyMap.find(this->vkCode) != keyMap.end()) {
-        oss << keyMap.at(this->vkCode);
-    }
-    // 其他键 - 格式化为两位十六进制
-    else {
-        unsigned char uc = static_cast<unsigned char>(this->vkCode);
-        oss << "键码[0x" << std::hex << std::setw(2) << std::setfill('0')
-            << static_cast<int>(uc) << "]";
-    }
-
-    // 始终显示连击数，包括x1
-    oss << "x" << static_cast<int>(this->ComboClick);
-
-    return oss.str();
-}
-void MulNX::KeyCheckPack::Refresh() {
-    this->Usable = this->vkCode && this->ComboClick;
-    return;
-}
-
 bool MulNX::InputSystem::Init() {
     this->LastUpdateTime = static_cast<float>(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - this->ClockEpoch).count()) / 1000.0f;
     this->SendTask("输入检测线程", [this]()->bool {

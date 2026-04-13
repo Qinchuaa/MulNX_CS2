@@ -26,9 +26,9 @@ private:
     //操作调试窗口
 private:
     //是否打开解决方案按键绑定调试窗口
-    bool OpenSolutionKCPackDebugWindow = false;
+    std::atomic<bool> OpenSolutionKCPackDebugWindow = false;
     //是否打开解决方案名称修改调试窗口
-    bool OpenSolutionNameDebugWindow = false;
+    std::atomic<bool> OpenSolutionNameDebugWindow = false;
     ////////////////////////////////////////
 public:
 
@@ -86,8 +86,6 @@ private:
     void Solution_DebugWindow();
     //按键调试缓存
     MulNX::KeyCheckPack Buffer_KCPack{};
-    //按键绑定菜单
-    void Solution_KCPack_DebugWindow();
     //名称修改缓存
     std::string Buffer_Name{};
     //名称修改窗口

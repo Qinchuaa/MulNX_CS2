@@ -6,7 +6,7 @@ KCP:
   shift: false
   alt: true
   vkCode: 88
-  comboClick: 2
+  comboClick: 3
 size: 3
 elements:
   - name: ttt

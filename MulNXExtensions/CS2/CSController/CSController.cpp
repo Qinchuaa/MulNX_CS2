@@ -132,10 +132,7 @@ bool CSController::UINodeFunc(MulNXUINode* node) {
             ImGui::Text("当前位置: X=%.2f, Y=%.2f, Z=%.2f",
                 freeCam.Position.x, freeCam.Position.y, freeCam.Position.z);
 
-            float speed = freeCam.MoveSpeed;
-            if (ImGui::SliderFloat("移动速度", &speed, 10.0f, 1000.0f)) {
-                freeCam.MoveSpeed = speed;
-            }
+            MulNX::UI::SliderFloat("移动速度", freeCam.MoveSpeed, 10.0f, 1000.0f);
         }
     }
 
