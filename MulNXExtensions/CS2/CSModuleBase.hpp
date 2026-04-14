@@ -1,7 +1,7 @@
 #pragma once
 
 #include <MulNX/MulNX.hpp>
-#include <MulNXExtensions/CS2/CSController/List/C_BaseEntity.hpp>
+#include <MulNXExtensions/CS2/CSClasses/tree/tree.hpp>
 #include <MulNXExtensions/WinExt/WinExt.hpp>
 
 class CSController;

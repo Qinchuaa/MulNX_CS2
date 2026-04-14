@@ -1,0 +1,14 @@
+add_library(CSController
+    "CSController.cpp"
+    "InterfaceImpl.cpp"
+    "Draw/DrawImpl.cpp"
+
+    "FreeCameraController/FreeCameraController.cpp"
+    "AdvancedViewController/AdvancedViewController.cpp"
+    "ConVarSystem/ConVarSystem.cpp"
+)
+
+target_link_libraries(CSController PUBLIC
+    MulNX
+    WinExt
+)

@@ -5,14 +5,14 @@
 #include <MulNXExtensions/WinExt/WinExt.hpp>
 #include <MulNXExtensions/CS2/Signatures.hpp>
 
+#include <MulNXExtensions/CS2/CSClasses/tree/tree.hpp>
+#include <MulNXExtensions/CS2/CSClasses/GlobalVars/GlobalVars.hpp>
+#include <MulNXExtensions/CS2/CSClasses/CSDll/CSDll.hpp>
+#include <MulNXExtensions/CS2/CSClasses/C_CSGameRules/C_CSGameRules.hpp>
+
 #include "ConVarSystem/ConVarSystem.hpp"
-#include "GlobalVars/GlobalVars.hpp"
-#include "List/C_BaseEntity.hpp"
-
-#include "C_CSGameRules/C_CSGameRules.hpp"
-#include "Client/Client.hpp"
-
-#include <MulNXExtensions/CS2/AdvancedViewController/AdvancedViewController.hpp>
+#include "FreeCameraController/FreeCameraController.hpp"
+#include "AdvancedViewController/AdvancedViewController.hpp"
 
 #include <expected>
 
@@ -59,10 +59,8 @@ class CSController final :public MulNX::IAbstractLayer3D {
 private:
     ControlView controlView{};
 
+    FreeCameraController* pFreeCameraController{};
     AdvancedViewController* pAdvancedViewController = nullptr;
-    
-    // 自由摄像机控制
-    std::atomic<bool> EnableFreeCameraControl = false;
 
     // 逆向层关键接口
     void* Source2EngineToClient001 = nullptr;
@@ -80,23 +78,14 @@ public:
     C_Modules Modules{};
     std::atomic<bool> ESPDraw = false;
     
-    std::unique_ptr<MulNX::Memory::HookEx> MyHook = nullptr;
+    std::unique_ptr<MulNX::Memory::HookEx> hkPosCallIsPlayingDemo = nullptr;
     void HandleOverrideView(CS2::CViewSetup* viewSetup);
-
-    CS2::C_CSPlayerPawn* GetSelfViewTargetPawn();
-    std::expected<MulNX::Math::Point3, int> GetPoint3(CS2::CViewSetup* viewSetup);
     void HandleCameraSystemPlay(CS2::CViewSetup* viewSetup);
 
     bool Init()override;
     bool UINodeFunc(MulNXUINode* node);
     void ProcessMsg(MulNX::Message& Msg)override;
-    // 核心任务
-    std::atomic<int> GetMsgResult = 0;
-    int TryGetMsg();
-    // 子任务集合
-    int BasicUpdate();
-    int EntityListUpdate();
-
+    void Update();
 
     // 核心接口
     bool ExecuteCommand(const std::string& cmd)override;

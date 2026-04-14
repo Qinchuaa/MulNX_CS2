@@ -6,9 +6,6 @@
 #include <thread>
 #include <functional>
 
-// 前向声明：MulNXController 位于 MulNXExtensions 命名空间
-namespace MulNXExtensions { class MulNXController; }
-
 namespace MulNX {
     // 模块基类
 	class ModuleBase {

@@ -35,14 +35,8 @@ void CSController::HandleOverrideView(CS2::CViewSetup* viewSetup) {
     
     // 根据状态调用不同的视角控制逻辑
     // 自由摄像机优先级最高，其次是高级视角控制，最后是普通摄像机系统控制
-    if (this->EnableFreeCameraControl.load(std::memory_order_acquire)) {
-        // 如果启用自由摄像机控制，同步角度到InputSystem
-        auto& freeCam = this->pInputSystem->GetFreeCamera();
-        freeCam.Rotation = *viewSetup->pViewAngles();
-        freeCam.Update(this->pInputSystem);
-        viewSetup->pViewOrigin()->x = freeCam.Position.x;
-        viewSetup->pViewOrigin()->y = freeCam.Position.y;
-        viewSetup->pViewOrigin()->z = freeCam.Position.z;
+    if (this->pFreeCameraController->HandleUpdate(viewSetup)) {
+        this->pFreeCameraController->HandleOverrideView(viewSetup);
     }
     else if (this->pAdvancedViewController->HandleOverrideView(viewSetup)) {
         
@@ -103,31 +97,7 @@ bool CSController::UINodeFunc(MulNXUINode* node) {
     }
     node->CallUINode("PlayerFlashController");
     node->CallUINode("AdvancedViewController");
-    // 自由摄像机控制
-    if (ImGui::CollapsingHeader("自由摄像机控制")) {
-        bool currentEnable = this->EnableFreeCameraControl.load(std::memory_order_acquire);
-        if (ImGui::Checkbox("启用自由摄像机位置控制", &currentEnable)) {
-            if (currentEnable && !this->EnableFreeCameraControl.load(std::memory_order_acquire)) {
-                // 从未启用到启用：读取当前游戏位置和角度
-                DirectX::XMFLOAT3 gamePos{
-                    this->controlView.currentView.OriginX.load(std::memory_order_acquire),
-                    this->controlView.currentView.OriginY.load(std::memory_order_acquire),
-                    this->controlView.currentView.OriginZ.load(std::memory_order_acquire)
-                };
-                this->pInputSystem->GetFreeCamera().Position = gamePos;
-            }
-            this->EnableFreeCameraControl.store(currentEnable, std::memory_order_release);
-        }
-
-        if (currentEnable) {
-            auto& freeCam = this->pInputSystem->GetFreeCamera();
-
-            ImGui::Text("当前位置: X=%.2f, Y=%.2f, Z=%.2f",
-                freeCam.Position.x, freeCam.Position.y, freeCam.Position.z);
-
-            MulNX::UI::SliderFloat("移动速度", freeCam.MoveSpeed, 10.0f, 1000.0f);
-        }
-    }
+    node->CallUINode("FreeCameraController");
 
     return true;
 }
@@ -156,6 +126,7 @@ bool CSController::Init() {
     this->SendUINode(this->GetName(), [this](MulNXUINode* node) {return this->UINodeFunc(node);});
 
     this->pAdvancedViewController = this->Core->ModuleManager()->FindModule<AdvancedViewController>("AdvancedViewController");
+    this->pFreeCameraController = this->Core->ModuleManager()->FindModule<FreeCameraController>("FreeCameraController");
 
     this->Modules.client = CS2::Module::Client(L"client.dll");
     this->Modules.engine2 = CS2::Module::engine2(L"engine2.dll");
@@ -179,11 +150,11 @@ bool CSController::Init() {
             auto target = textRegion.FindRegion(pattern);
 
             if (target.IsValid()) {
-                this->MyHook = MulNX::Memory::HookEx::Create(target.Data(), 0, true, [this](RegContext* ctx, MulNX::Memory::HookEx* hookEx)->bool {
+                this->hkPosCallIsPlayingDemo = MulNX::Memory::HookEx::Create(target.Data(), 0, true, [this](RegContext* ctx, MulNX::Memory::HookEx* hookEx)->bool {
                     this->HandleOverrideView((CS2::CViewSetup*)ctx->rsi);
                     return true;
                 }).value();
-                this->MyHook->Attach();
+                this->hkPosCallIsPlayingDemo->Attach();
             }
         }
     }
@@ -195,7 +166,7 @@ bool CSController::Init() {
 
     this->SendTask("CS2控制线程", [this]()->bool {
         try {
-            this->GetMsgResult = this->TryGetMsg();
+            this->Update();
             this->EntryProcessMsg();
         }
         catch (const std::runtime_error& e) {
@@ -209,12 +180,12 @@ bool CSController::Init() {
     return true;
 }
 
-int CSController::BasicUpdate() {
+void CSController::Update() {
     // 获取CS2全局变量
     this->CSGlobalVars = MulNX::MRead<C_GlobalVars*>(this->Modules.client.GetBaseAddress() + cs2_dumper::offsets::client_dll::dwGlobalVars);
 
     auto pGameRules = this->Modules.client.dwGameRules();
-    if (!pGameRules) return 1;
+    if (!pGameRules) return;
 
     static int OldRoundStartCount = MulNX::MRead(pGameRules->m_nRoundStartCount());
     if (OldRoundStartCount != MulNX::MRead(pGameRules->m_nRoundStartCount())) {
@@ -222,10 +193,7 @@ int CSController::BasicUpdate() {
         this->ISys().PublishAsync(std::move(Msg));
         OldRoundStartCount = MulNX::MRead(pGameRules->m_nRoundStartCount());
     }
-    
-    return 0;
-}
-int CSController::EntityListUpdate() {
+
     std::unique_lock lock(this->smutex);
     // 玩家控制器，地图上从1到10
     int playerNum = 0;
@@ -255,19 +223,7 @@ int CSController::EntityListUpdate() {
             AL3DEntity.IndexInMap = playerNum;
         }
     }
-
-    return 0;
-}
-int CSController::TryGetMsg() {
-    int Result = 0;
-    Result = this->BasicUpdate();
-    if (Result) {
-        return Result;
-    }
-    this->EntityListUpdate();
-
-
-    return 0;
+    return;
 }
 
 
@@ -276,13 +232,7 @@ void CSController::HandleFreeCameraPath(const CameraSystemIO* const IO) {
     const auto& fov = IO->Frame.view.FOV;
     const auto& rot = IO->Frame.view.rotation;
     const auto& dof = IO->Frame.view.dof;
-#ifdef _DEBUG
-    // static MulNX::Math::Frame thisFrame;
-    // if (thisFrame != IO->Frame) {
-    //     thisFrame = IO->Frame;
-    //     this->ISys().LogInfo(thisFrame.GetMsg());
-    // }
-#endif // _DEBUG
+
     auto view = std::make_shared<Views>();
     view->OriginX = pos.x;
     view->OriginY = pos.y;

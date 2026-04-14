@@ -1,10 +1,4 @@
-#include "Client.hpp"
-
-#pragma once
-
-#include <MulNXExtensions/WinExt/WinExt.hpp>
-#include <MulNXExtensions/CS2/CSController/List/C_BaseEntity.hpp>
-#include <MulNXExtensions/CS2/CSController/C_CSGameRules/C_CSGameRules.hpp>
+#include "CSDll.hpp"
 
 CS2::C_BaseEntity* CS2::Module::Client::GetBaseEntity(int index) {
     uintptr_t entListBase = MulNX::MRead<uintptr_t>(this->GetBaseAddress() + cs2_dumper::offsets::client_dll::dwEntityList);

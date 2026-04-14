@@ -1,13 +1,8 @@
 add_library(MulNXCS2Ext
-    "CSController/CSController.cpp"
-    "CSController/InterfaceImpl.cpp"
-    "CSController/Draw/DrawImpl.cpp"
-    "CSController/Client/Client.cpp"
-    "CSController/ConVarSystem/ConVarSystem.cpp"
-    "CSController/GlobalVars/GlobalVars.cpp"
-    "CSController/List/C_BaseEntity.cpp"
+    "CSClasses/CSDll/CSDll.cpp"
+    "CSClasses/GlobalVars/GlobalVars.cpp"
+    "CSClasses/tree/tree.cpp"
 
-    "AdvancedViewController/AdvancedViewController.cpp"
     "PlayerFlashController/PlayerFlashController.cpp"
 
     "PlayerHub/PlayerHub.cpp"
@@ -24,7 +19,10 @@ add_library(MulNXCS2Ext
     "CSModuleBase.cpp"
 )
 
+add_subdirectory("CSController")
+
 target_link_libraries(MulNXCS2Ext PUBLIC
     MulNX
     WinExt
+    CSController
 )

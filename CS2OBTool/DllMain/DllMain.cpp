@@ -112,19 +112,20 @@ DWORD MulNX_CS2_Start(void*) {
             .CreateModule<ProjectManager>("ProjectManager", 104)// 项目管理模块
             .CreateModule<SolutionManager>("SolutionManager", 105)// 解决方案管理模块
             .CreateModule<ElementManager>("ElementManager", 106)// 元素管理模块
-            .CreateModule<PlayerHub>("PlayerHub", 110)// 玩家信息管理模块
             .CreateModule<AdvancedViewController>("AdvancedViewController", 111)// 高级视角控制模块
-            .CreateModule<PlayerFlashController>("PlayerFlashController", 112)// 闪光控制模块
-            .CreateModule<NameController>("NameController", 113)
-            .CreateModule<GlowController>("GlowController", 114)
-            .CreateModule<SmokeController>("SmokeController", 115)
-            .CreateModule<MiniMap>("MiniMap", 153)// 小地图模块
-            .CreateModule<VirtualUser>("VirtualUser", 154)// 虚拟用户模块
-            .CreateModule<GameCfgManager>("GameCfgManager", 206)// 游戏配置管理模块
-            .CreateModule<DemoHelper>("DemoHelper", 207)// Demo辅助模块
-            .CreateModule<GameSettingsManager>("GameSettingsManager", 208)// 游戏设置管理模块
-            .CreateModule<ConsoleManager>("ConsoleManager", 209)// 控制台管理模块
-            .CreateModule<MulNXController>("MulNXController", 210)// MulNX控制器模块
+            .CreateModule<FreeCameraController>("FreeCameraController", 112)// 自由摄像机控制模块
+            .CreateModule<PlayerHub>("PlayerHub", 210)// 玩家信息管理模块
+            .CreateModule<PlayerFlashController>("PlayerFlashController", 212)// 闪光控制模块
+            .CreateModule<NameController>("NameController", 213)
+            .CreateModule<GlowController>("GlowController", 214)
+            .CreateModule<SmokeController>("SmokeController", 215)
+            .CreateModule<MiniMap>("MiniMap", 303)// 小地图模块
+            .CreateModule<VirtualUser>("VirtualUser", 304)// 虚拟用户模块
+            .CreateModule<GameCfgManager>("GameCfgManager", 406)// 游戏配置管理模块
+            .CreateModule<DemoHelper>("DemoHelper", 407)// Demo辅助模块
+            .CreateModule<GameSettingsManager>("GameSettingsManager", 408)// 游戏设置管理模块
+            .CreateModule<ConsoleManager>("ConsoleManager", 409)// 控制台管理模块
+            .CreateModule<MulNXController>("MulNXController", 410)// MulNX控制器模块
             ;
 
         // 启动核心
