@@ -16,7 +16,7 @@ private:
     std::unique_ptr<MulNX::Memory::HookEx> hkResizeBuffers = nullptr;
     // 窗口过程Hook
     std::unique_ptr<MulNX::Memory::HookEx> hkWndProc = nullptr;
-    LRESULT __stdcall MyWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+    bool MyWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
     // D3D11指针组
 public:
@@ -27,19 +27,16 @@ public:
     bool d3dInited = false;
     HWND CS2hWnd = nullptr;//CS2窗口句柄
 
-    bool ImGuiInited = false;
-    std::filesystem::path imguiIniPath;
-    std::string imguiIniPathString;
+    std::string ImguiIniPathString;
 private:
-    void d3dInit(IDXGISwapChain* _this);
+    void d3dInit();
 public:
     bool Init()override;
-    void StartAll()override;
-    void CheckHook();
+    void ActiveSystem()override;
 
     void ReleaseOld();
     std::atomic<bool> needReBuild = false;
     void BuildNew();
 
-    DWORD CreateHook();//创建Hook   
+    void CreateHook();//创建Hook   
 };

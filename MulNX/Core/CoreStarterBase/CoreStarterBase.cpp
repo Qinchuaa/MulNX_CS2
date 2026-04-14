@@ -3,18 +3,15 @@
 #include <MulNX/Core/Cores.hpp>
 #include <MulNX/Systems/ISystems.hpp>
 
-using namespace MulNX::Core;
-
-bool CoreStarterBase::SystemInit(MulNX::Core::Core* pCore) {
+bool MulNX::Core::CoreStarterBase::SystemInit(MulNX::Core::Core* pCore) {
     // 无依赖核心基础模块初始化
     this->Core->ModuleManager()->SetName("ModuleManager");
     this->Core->ModuleManager()->EntryInit(pCore);
-
-    this->ISys().LogSucc("核心系统组件初始化完成！");
+    this->ISys().LogSucc("模块管理器初始化完成，即将初始化核心基础模块...");
     return true;
 }
 
-void CoreStarterBase::RegisterMainDrawWith(std::function<void(MulNXUINode*)>&& MainDrawFunc) {
+void MulNX::Core::CoreStarterBase::RegisterMainDrawWith(std::function<void(MulNXUINode*)>&& MainDrawFunc) {
     // 注册主窗口UI上下文
     auto [UINode, pUINode] = MulNX::make_any_shared<MulNXUINode>();
     pUINode->name = "MainDraw";

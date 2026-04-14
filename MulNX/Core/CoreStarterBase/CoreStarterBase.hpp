@@ -17,8 +17,8 @@ namespace MulNX {
             void RegisterMainDrawWith(std::function<void(MulNXUINode*)>&& MainDrawFunc);
             // 核心完全初始化后回调
             std::function<void()>InitEndCall = nullptr;
-            // 所有系统全部启动启动启动！！！
-            virtual void StartAll() = 0;
+            // 激活系统，以开始工作
+            virtual void ActiveSystem() = 0;
         };
     }
 }

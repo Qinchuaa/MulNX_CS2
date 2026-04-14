@@ -37,9 +37,7 @@ void MulNX::Core::Core::Init() {
 	// 初始化注册模块
 	this->pModuleManager->PackedInit();
     // 开启系统
-    this->pCoreStarter->StartAll();
-    // 设置系统标志位
-    this->ModuleManager()->FindModule<MulNX::GlobalVars>("GlobalVars")->SystemReady.store(true, std::memory_order_release);
+    this->pCoreStarter->ActiveSystem();
     // 执行启动器回调
     this->pCoreStarter->InitEndCall();
 	return;

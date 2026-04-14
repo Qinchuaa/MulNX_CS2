@@ -32,14 +32,14 @@ void CSController::HandleOverrideView(CS2::CViewSetup* viewSetup) {
     // 执行roll覆盖，这是优先级最低的覆盖，保证运镜至少优先于此，且不影响于此
     viewSetup->pViewAngles()->z = this->controlView.InputRoll.load(std::memory_order_acquire);
     this->pAdvancedViewController->HandleUpdate(viewSetup);
-    
+
     // 根据状态调用不同的视角控制逻辑
     // 自由摄像机优先级最高，其次是高级视角控制，最后是普通摄像机系统控制
     if (this->pFreeCameraController->HandleUpdate(viewSetup)) {
         this->pFreeCameraController->HandleOverrideView(viewSetup);
     }
     else if (this->pAdvancedViewController->HandleOverrideView(viewSetup)) {
-        
+
     }
     else {
         this->HandleCameraSystemPlay(viewSetup);
@@ -113,6 +113,14 @@ void CSController::ProcessMsg(MulNX::Message& Msg) {
         this->ExecuteCommand(cmd);
         break;
     }
+    case "CameraSystem/Play/Started"_hash: {
+        this->ExecuteCommand("spec_mode 4");
+        break;
+    }
+    case "CameraSystem/Play/Ended"_hash: {
+        this->ExecuteCommand("spec_mode 2");
+        break;
+    }
 
     }
 }
@@ -121,8 +129,10 @@ bool CSController::Init() {
     this->ShowWindow = true;
     this->ISys()
         .SubscribeAsync("Core/ReHook")
-        .SubscribeAsync("Game/Command");
-        
+        .SubscribeAsync("Game/Command")
+        .SubscribeAsync("CameraSystem/Play/Started")
+        .SubscribeAsync("CameraSystem/Play/Ended");
+
     this->SendUINode(this->GetName(), [this](MulNXUINode* node) {return this->UINodeFunc(node);});
 
     this->pAdvancedViewController = this->Core->ModuleManager()->FindModule<AdvancedViewController>("AdvancedViewController");
@@ -153,7 +163,7 @@ bool CSController::Init() {
                 this->hkPosCallIsPlayingDemo = MulNX::Memory::HookEx::Create(target.Data(), 0, true, [this](RegContext* ctx, MulNX::Memory::HookEx* hookEx)->bool {
                     this->HandleOverrideView((CS2::CViewSetup*)ctx->rsi);
                     return true;
-                }).value();
+                    }).value();
                 this->hkPosCallIsPlayingDemo->Attach();
             }
         }
