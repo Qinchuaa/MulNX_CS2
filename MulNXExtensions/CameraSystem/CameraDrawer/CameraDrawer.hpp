@@ -35,14 +35,9 @@ public:
 };
 
 class CameraDrawer {
-public:
-    bool IfDraw = true;
 private:
-
     // Model源
     CameraModel CameraModel{};
-
-    ImDrawList* drawList{};
 
     float* pMatrixPtr{};
     float WinWidth{};
@@ -53,5 +48,4 @@ public:
     void Update(float* pMatrixPtr, float pWinWidth, float pWinHeight);
     void DrawCamera(DirectX::XMFLOAT3 Position, DirectX::XMFLOAT3 Rotation, const char* label);
     void DrawFrameCamera(const MulNX::Math::Frame& frame, const char* label);
-    //void DrawFirstPersonCamera(const char* label);
 };

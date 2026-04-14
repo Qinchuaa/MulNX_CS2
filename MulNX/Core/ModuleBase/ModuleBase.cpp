@@ -71,7 +71,6 @@ bool MulNX::ModuleBase::EntryInit(MulNX::Core::Core* Core) {
         return false;
     }
     this->ISys().LogSucc("初始化成功!");
-    this->Inited = true;
     return true;
 }
 void MulNX::ModuleBase::EntryProcessMsg() {

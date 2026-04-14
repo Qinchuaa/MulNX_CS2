@@ -14,8 +14,7 @@ private:
     SolutionManager* SManager = nullptr;
     MulNX::IPCer* pIPCer = nullptr;
 
-    bool OpenProjectKCPackDebugWindow = false;
-    bool OpenProjectNameDebugWindow = false;
+    std::atomic<bool> OpenProjectKCPackDebugWindow = false;
 
     std::vector<std::shared_ptr<Project>> Projects{};
 public:
@@ -25,11 +24,6 @@ public:
     std::shared_ptr<Project> ActiveProject = nullptr;
 
     ProjectConfig Config{};
-
-    //构造函数
-    ProjectManager();
-    //析构函数
-    ~ProjectManager();
 
     //项目管理器基本函数
     //初始化函数
@@ -82,13 +76,7 @@ private:
     //项目调试窗口及菜单
     void Project_DebugWindow();
     //快捷键修改缓存
-    MulNX::KeyCheckPack* Buffer_KCPack = nullptr;
-    //快捷键修改窗口
-    void Project_KCPack_DebugWindow();
-    //名称修改缓存
-    std::string Buffer_Name{};
-    //名称修改窗口
-    void Project_Name_DebugWindow();
+    MulNX::KeyCheckPack Buffer_KCPack{};
 public:
     const std::vector<std::string>* Active_GetRoundStart();
     const std::vector<std::string>* Active_GetRoundEnd();

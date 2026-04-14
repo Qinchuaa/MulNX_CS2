@@ -15,8 +15,6 @@ namespace MulNX {
         friend MulNX::Core::Core;
         friend C_ISys;
     private:
-        // 标记是否已经完成初始化，未完成前不允许执行主循环等操作
-        bool Inited = false;
         // 消息管理器指针
         MulNX::IMessageManager* IMsgManager = nullptr;
         // 路径管理器指针
@@ -59,13 +57,11 @@ namespace MulNX {
 		// 虚析构函数确保正确调用析构函数
         virtual ~ModuleBase() = default;
 	private:
-
         // 虚函数要求：
         
         // 初始化
 		virtual bool Init() = 0;
 
-		
 		// 消息处理函数，只需处理即可，消息会由入口点释放
         virtual void ProcessMsg(MulNX::Message& Msg) {};
 
@@ -86,8 +82,6 @@ namespace MulNX {
         bool SendUINode(std::string&& name, std::function<void(MulNXUINode*)>&& func);
         void SendTask(std::string&& workerName, std::function<bool()>&& task);
     public:
-        // 是否初始化
-        bool IsInited()const { return this->Inited; }
         // 设置模块名称
         bool SetName(std::string&& Name);
         std::string GetName()const;

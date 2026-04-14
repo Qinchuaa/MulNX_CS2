@@ -10,9 +10,6 @@ void Project::ResetName(const std::string& NewName) {
 }
 
 void Project::Refresh() {
-    //刷新元素和解决方案名称个数
-    //this->Size_Elements = this->ElementNames.size();
-    //this->Size_Solutions = this->SolutionNames.size();
     return;
 }
 

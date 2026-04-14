@@ -5,28 +5,15 @@
 #include <MulNXExtensions/CameraSystem/ElementManager/ElementManager.hpp>
 #include <MulNXExtensions/CameraSystem/SolutionManager/SolutionManager.hpp>
 
-//构造与析构函数
-
-ProjectManager::ProjectManager() {
-    this->Buffer_KCPack = new MulNX::KeyCheckPack();
-}
-ProjectManager::~ProjectManager() {
-    delete this->Buffer_KCPack;
-}
-
-//项目管理器基本函数
-
 bool ProjectManager::UINodeFunc(MulNXUINode* node) {
     if (this->ShowWindow.load(std::memory_order_acquire)) {
         //项目调试窗口
         this->Project_DebugWindow();
         if (this->OpenProjectKCPackDebugWindow) {
             //项目按键绑定调试窗口
-            this->Project_KCPack_DebugWindow();
-        }
-        if (this->OpenProjectNameDebugWindow) {
-            //项目名称调试窗口
-            this->Project_Name_DebugWindow();
+            if(this->Buffer_KCPack.DebugWindow(this->OpenProjectKCPackDebugWindow)) {
+                this->ControllingProject->KCPack = this->Buffer_KCPack;//修改按键绑定
+            }
         }
     }
     return true;
@@ -155,27 +142,7 @@ bool ProjectManager::Project_Save() {
         return false;
     }
 }
-//bool ProjectManager::Project_SaveAll() {
-//	if (this->Projects.empty()) {
-//		this->ISys().LogWarning("尝试在没有任何项目的情况下保存");
-//		return true;
-//	}
-//	
-//	//遍历所有项目保存
-//	for (const auto& Project : this->Projects) {
-//		std::filesystem::path Path = this->Core->IPCer().PathGet_CurrentWorkspace() / Project->Name;
-//		std::string Ruselt;
-//		if (Project->Save(Path, Ruselt)) {
-//			this->ISys().LogSucc(Ruselt);
-//		}
-//		else {
-//			this->ISys().LogError(Ruselt);
-//			return false;
-//		}
-//	}
-//	this->ISys().LogSucc("成功保存所有项目到文件！");
-//	return true;
-//}
+
 bool ProjectManager::Project_Apply(const std::shared_ptr<Project> Project) {
     //先尝试保存当前活跃项目
     this->Project_Save();
@@ -332,12 +299,8 @@ void ProjectManager::Project_DebugWindow() {
             return;
         }
         if (ImGui::Button("修改按键绑定")) {
-            *this->Buffer_KCPack = this->ControllingProject->KCPack;//缓存
+            this->Buffer_KCPack = this->ControllingProject->KCPack;//缓存
             this->OpenProjectKCPackDebugWindow = true;//打开窗口
-        }
-        if (ImGui::Button("修改项目名称")) {
-            this->Buffer_Name = this->ControllingProject->Name;//缓存
-            this->OpenProjectNameDebugWindow = true;//打开窗口
         }
         ImGui::Separator();
         ImGui::Separator();
@@ -383,126 +346,6 @@ void ProjectManager::Project_DebugWindow() {
     if (ImGui::Button("关闭项目调试页面")) {
         this->ShowWindow.store(false, std::memory_order_release);
     }
-}
-void ProjectManager::Project_KCPack_DebugWindow() {
-    ImGui::Begin("按键绑定##Project", &this->OpenProjectKCPackDebugWindow);
-
-    if (this->ControllingProject) {
-        ImGui::Text(("当前绑键：" + this->ControllingProject->KCPack.GetMsg()).c_str());
-        ImGui::Separator();
-
-        // 修饰键复选框
-        ImGui::Checkbox("Ctrl", &this->Buffer_KCPack->Ctrl);
-        ImGui::SameLine();
-        ImGui::Checkbox("Shift", &this->Buffer_KCPack->Shift);
-        ImGui::SameLine();
-        ImGui::Checkbox("Alt", &this->Buffer_KCPack->Alt);
-
-        // 按键选择下拉菜单
-        static const char* keyItems[] = {
-            "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M",
-            "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z",
-            "F1", "F2", "F3", "F4", "F5", "F6", "F7", "F8", "F9", "F10", "F11", "F12"
-        };
-
-        // 查找当前键码对应的索引
-        int currentKeyIndex = 0;
-        for (int i = 0; i < IM_ARRAYSIZE(keyItems); i++) {
-            if (i < 26) { // A-Z
-                if (this->Buffer_KCPack->vkCode == 0x41 + i) {
-                    currentKeyIndex = i;
-                    break;
-                }
-            }
-            else { // F1-F12
-                if (this->Buffer_KCPack->vkCode == 0x70 + (i - 26)) {
-                    currentKeyIndex = i;
-                    break;
-                }
-            }
-        }
-
-        ImGui::Text("按键:");
-        ImGui::SameLine();
-        if (ImGui::Combo("##ProjectKey", &currentKeyIndex, keyItems, IM_ARRAYSIZE(keyItems))) {
-            // 更新键码
-            if (currentKeyIndex < 26) {
-                this->Buffer_KCPack->vkCode = 0x41 + currentKeyIndex; // A-Z
-            }
-            else {
-                this->Buffer_KCPack->vkCode = 0x70 + (currentKeyIndex - 26); // F1-F12
-            }
-        }
-
-        // 连击数输入
-        int comboClick = static_cast<int>(this->Buffer_KCPack->ComboClick);
-        ImGui::Text("连击数:");
-        ImGui::SameLine();
-        if (ImGui::InputInt("##ProjectComboClick", &comboClick, 1, 5)) {
-            // 限制在 1-255 范围内
-            comboClick = std::clamp(comboClick, 1, 255);
-            this->Buffer_KCPack->ComboClick = static_cast<unsigned char>(comboClick);
-        }
-
-        if (ImGui::Button("修改项目绑键")) {
-            this->ControllingProject->KCPack = *this->Buffer_KCPack;
-            this->ControllingProject->KCPack.Refresh();
-            this->OpenProjectKCPackDebugWindow = false;
-            ImGui::End();
-            return;
-        }
-    }
-    else {
-        ImGui::Text("当前没有要调试的项目，无法修改按键绑定");
-    }
-
-    ImGui::Separator();
-
-    if (ImGui::Button("关闭项目按键绑定调试页面")) {
-        this->OpenProjectKCPackDebugWindow = false;
-        ImGui::End();
-        return;
-    }
-
-    ImGui::End();
-}
-void ProjectManager::Project_Name_DebugWindow() {
-    ImGui::Begin("项目重命名", &this->OpenProjectNameDebugWindow);
-
-    if (this->ControllingProject) {
-        ImGui::Text(("当前名称：" + this->ControllingProject->Name).c_str());
-        ImGui::Separator();
-
-        ImGui::Text("新项目名:");
-        ImGui::SameLine();
-        ImGui::InputText("##NewName", &this->Buffer_Name);
-
-        //检查是否已经存在该名称
-        if (this->Project_Get(this->Buffer_Name)) {
-            ImGui::Text("该名称已经被占用");
-        }
-        else {//没有被使用才允许修改
-            if (ImGui::Button("修改名称")) {
-                this->ControllingProject->ResetName(this->Buffer_Name);
-                this->OpenProjectNameDebugWindow = false;
-                ImGui::End();
-                return;
-            }
-        }
-    }
-    else {
-        ImGui::Text("当前没有要调试的项目，无法修改项目名");
-    }
-
-    ImGui::Separator();
-
-    if (ImGui::Button("关闭项目名调试页面")) {
-        this->OpenProjectNameDebugWindow = false;
-        ImGui::End();
-        return;
-    }
-
-    ImGui::End();
 }
 
 //信息接口

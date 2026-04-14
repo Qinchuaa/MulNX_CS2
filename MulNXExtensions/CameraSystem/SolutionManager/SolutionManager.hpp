@@ -27,8 +27,6 @@ private:
 private:
     //是否打开解决方案按键绑定调试窗口
     std::atomic<bool> OpenSolutionKCPackDebugWindow = false;
-    //是否打开解决方案名称修改调试窗口
-    std::atomic<bool> OpenSolutionNameDebugWindow = false;
     ////////////////////////////////////////
 public:
 

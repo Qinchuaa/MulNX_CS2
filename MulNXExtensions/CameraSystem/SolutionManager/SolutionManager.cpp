@@ -286,7 +286,6 @@ bool SolutionManager::UINodeFunc(MulNXUINode* node) {
 
         if (!this->CurrentSolution) {
             this->OpenSolutionKCPackDebugWindow = false;
-            this->OpenSolutionNameDebugWindow = false;
         }
 
         if (this->OpenSolutionKCPackDebugWindow) {
@@ -299,9 +298,6 @@ bool SolutionManager::UINodeFunc(MulNXUINode* node) {
                     this->CurrentSolution->KCPack = this->Buffer_KCPack;//更新绑键
                 }
             }
-        }
-        if (this->OpenSolutionNameDebugWindow) {
-            this->Solution_Name_DebugWindow();
         }
     }
     return true;
@@ -398,50 +394,6 @@ void SolutionManager::Solution_DebugWindow() {
         ImGui::Text("当前未选择任何解决方案");
     }
 }
-void SolutionManager::Solution_Name_DebugWindow() {
-    auto w = MulNX::UI::RAIIWindow("解决方案重命名", this->OpenSolutionNameDebugWindow);
-    if (!w)return;
-
-    if (this->CurrentSolution) {
-        ImGui::Text(("当前名称：" + this->CurrentSolution->Name).c_str());
-        ImGui::Separator();
-
-        ImGui::Text("新解决方案名:");
-        ImGui::SameLine();
-        ImGui::InputText("##NewName", &this->Buffer_Name);
-
-        static bool IfNewNameBeUsing = false;
-        //检查是否已经存在该名称
-        if (this->Solution_Get(this->Buffer_Name)) {
-            IfNewNameBeUsing = true;
-        }
-        if (IfNewNameBeUsing) {
-            ImGui::Text("该名称已经被占用");
-        }
-        else {//没有被使用才允许修改
-            if (ImGui::Button("修改名称")) {
-                this->CurrentSolution->ResetName(this->Buffer_Name);
-                this->OpenSolutionNameDebugWindow = false;
-                return;
-            }
-        }
-    }
-    else {
-        ImGui::Text("当前没有要调试的解决方案，无法修改解决方案名");
-    }
-
-    ImGui::Separator();
-
-    if (ImGui::Button("关闭解决方案名调试页面")) {
-        this->OpenSolutionNameDebugWindow = false;
-        return;
-    }
-}
-
-
-//播放相关
-
-//切换相关
 
 bool SolutionManager::Playing_SetSolution(Solution* const solution) {
     //这里只需要设置，播放结束解决方案本身自动归位
