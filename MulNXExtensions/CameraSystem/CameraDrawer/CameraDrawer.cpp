@@ -16,16 +16,23 @@ void CameraModel::Init(float CameraHigh, float CameraX, float CameraY, float Axi
 }
 
 void CameraModel::Rotate(const DirectX::XMFLOAT3& Rotation) {
-    this->Origin = MulNX::Math::RotatePoint(this->Origin, Rotation.x, Rotation.y, Rotation.z);
+    DirectX::XMVECTOR quat = MulNX::Math::CSEulerToQuatVec(Rotation);
+    quat = DirectX::XMQuaternionNormalize(quat);
 
-    this->Lens[0] = MulNX::Math::RotatePoint(this->Lens[0], Rotation.x, Rotation.y, Rotation.z);
-    this->Lens[1] = MulNX::Math::RotatePoint(this->Lens[1], Rotation.x, Rotation.y, Rotation.z);
-    this->Lens[2] = MulNX::Math::RotatePoint(this->Lens[2], Rotation.x, Rotation.y, Rotation.z);
-    this->Lens[3] = MulNX::Math::RotatePoint(this->Lens[3], Rotation.x, Rotation.y, Rotation.z);
+    auto rotatePoint = [&](const DirectX::XMFLOAT3& point) {
+        DirectX::XMFLOAT3 result;
+        DirectX::XMStoreFloat3(&result, DirectX::XMVector3Rotate(DirectX::XMLoadFloat3(&point), quat));
+        return result;
+    };
 
-    this->X = MulNX::Math::RotatePoint(this->X, Rotation.x, Rotation.y, Rotation.z);
-    this->Y = MulNX::Math::RotatePoint(this->Y, Rotation.x, Rotation.y, Rotation.z);
-    this->Z = MulNX::Math::RotatePoint(this->Z, Rotation.x, Rotation.y, Rotation.z);
+    this->Origin = rotatePoint(this->Origin);
+    this->Lens[0] = rotatePoint(this->Lens[0]);
+    this->Lens[1] = rotatePoint(this->Lens[1]);
+    this->Lens[2] = rotatePoint(this->Lens[2]);
+    this->Lens[3] = rotatePoint(this->Lens[3]);
+    this->X = rotatePoint(this->X);
+    this->Y = rotatePoint(this->Y);
+    this->Z = rotatePoint(this->Z);
 }
 
 void CameraModel::Move(const DirectX::XMFLOAT3& TargetPoint) {

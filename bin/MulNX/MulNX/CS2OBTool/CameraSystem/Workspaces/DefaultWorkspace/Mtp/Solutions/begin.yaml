@@ -5,7 +5,7 @@ KCP:
   ctrl: false
   shift: false
   alt: true
-  vkCode: 86
+  vkCode: 67
   comboClick: 2
 size: 3
 elements:

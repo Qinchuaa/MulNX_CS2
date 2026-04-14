@@ -178,67 +178,21 @@ bool MulNX::Math::BuildLocalCoordinateSystem(
     return true;
 }
 
-// TODO：这是错的，只是临时的，后续需要重写
 DirectX::XMFLOAT3 MulNX::Math::RotatePoint(
     const DirectX::XMFLOAT3& inputPoint,
     float pitchDegrees,  // 绕Y轴旋转（俯仰）
     float yawDegrees,    // 绕Z轴旋转（偏航）
     float rollDegrees    // 绕X轴旋转（滚转）
 ) {
-    // === 第1步：将输入点转换为SIMD向量 ===
+    // 直接使用已定义的欧拉角到四元数转换，保持与其它数学假设一致。
+    DirectX::XMVECTOR rotationQuaternion = CSEulerToQuatVec({ pitchDegrees, yawDegrees, rollDegrees });
+    rotationQuaternion = DirectX::XMQuaternionNormalize(rotationQuaternion);
+
     DirectX::XMVECTOR point = DirectX::XMLoadFloat3(&inputPoint);
+    DirectX::XMVECTOR rotatedVector = DirectX::XMVector3Rotate(point, rotationQuaternion);
 
-    // === 第2步：角度转弧度 ===
-    float pitchRadians = DirectX::XMConvertToRadians(pitchDegrees);  // Y轴
-    float yawRadians = DirectX::XMConvertToRadians(yawDegrees);      // Z轴
-    float rollRadians = DirectX::XMConvertToRadians(rollDegrees);     // X轴
-
-    // === 第3步：初始化旋转四元数 ===
-    DirectX::XMVECTOR rotationQuaternion = DirectX::XMQuaternionIdentity();
-
-    // === 第4步：按顺序应用旋转 ===
-    // 应用顺序：先Roll → 再Pitch → 最后Yaw
-
-    // 4.1 应用绕X轴旋转（Roll - 滚转）
-    if (rollDegrees != 0.0f) {
-        // 绕X轴旋转
-        DirectX::XMVECTOR rollQuaternion = DirectX::XMQuaternionRotationAxis(
-            DirectX::XMVectorSet(1.0f, 0.0f, 0.0f, 0.0f), // X轴
-            rollRadians
-        );
-        rotationQuaternion = DirectX::XMQuaternionMultiply(rotationQuaternion, rollQuaternion);
-    }
-
-    // 4.2 应用绕Y轴旋转（Pitch - 俯仰）
-    if (pitchDegrees != 0.0f) {
-        // 绕Y轴旋转
-        DirectX::XMVECTOR pitchQuaternion = DirectX::XMQuaternionRotationAxis(
-            DirectX::XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f), // Y轴
-            pitchRadians
-        );
-        rotationQuaternion = DirectX::XMQuaternionMultiply(rotationQuaternion, pitchQuaternion);
-    }
-
-    // 4.3 应用绕Z轴旋转（Yaw - 偏航）
-    if (yawDegrees != 0.0f) {
-        // 绕Z轴旋转
-        DirectX::XMVECTOR yawQuaternion = DirectX::XMQuaternionRotationAxis(
-            DirectX::XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f), // Z轴
-            yawRadians
-        );
-        rotationQuaternion = DirectX::XMQuaternionMultiply(rotationQuaternion, yawQuaternion);
-    }
-
-    // === 第5步：将四元数转换为旋转矩阵 ===
-    DirectX::XMMATRIX rotationMatrix = DirectX::XMMatrixRotationQuaternion(rotationQuaternion);
-
-    // === 第6步：应用旋转到点 ===
-    DirectX::XMVECTOR rotatedVector = DirectX::XMVector3Transform(point, rotationMatrix);
-
-    // === 第7步：将结果转回常规格式 ===
     DirectX::XMFLOAT3 result;
     DirectX::XMStoreFloat3(&result, rotatedVector);
-
     return result;
 }
 
