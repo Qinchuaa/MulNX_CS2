@@ -117,6 +117,7 @@ DWORD MulNX_CS2_Start(void*) {
             .CreateModule<PlayerFlashController>("PlayerFlashController", 112)// 闪光控制模块
             .CreateModule<NameController>("NameController", 113)
             .CreateModule<GlowController>("GlowController", 114)
+            .CreateModule<SmokeController>("SmokeController", 115)
             .CreateModule<MiniMap>("MiniMap", 153)// 小地图模块
             .CreateModule<VirtualUser>("VirtualUser", 154)// 虚拟用户模块
             .CreateModule<GameCfgManager>("GameCfgManager", 206)// 游戏配置管理模块

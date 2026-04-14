@@ -142,6 +142,7 @@ bool PlayerHub::Window(MulNXUINode* node) {
         ImGui::Separator();
         node->CallUINode("NameController");
         node->CallUINode("GlowController");
+        node->CallUINode("SmokeController");
     }
     catch (const std::exception& e) {
         this->ISys().LogWarning(std::format("在绘制玩家信息时捕获到异常：{}", e.what()));

@@ -13,6 +13,7 @@ add_library(MulNXCS2Ext
     "PlayerHub/PlayerHub.cpp"
     "PlayerHub/GlowController/GlowController.cpp"
     "PlayerHub/NameController/NameController.cpp"
+    "PlayerHub/SmokeController/SmokeController.cpp"
 
     "ConsoleManager/ConsoleManager.cpp"
     "DemoHelper/DemoHelper.cpp"

@@ -37,15 +37,6 @@ public:
     std::atomic<int> WindowHeight = 1080;
 };
 
-class ControlSmoke {
-public:
-    std::atomic<bool> Enbale = false;
-    std::atomic<bool> Show = true;
-    std::atomic<float> R = 127;
-    std::atomic<float> G = 127;
-    std::atomic<float> B = 127;
-};
-
 class Dofs{
 public:
     float* pNearBlurry = nullptr;
@@ -66,7 +57,6 @@ public:
 
 class CSController final :public MulNX::IAbstractLayer3D {
 private:
-    ControlSmoke controlSmoke{};
     ControlView controlView{};
 
     AdvancedViewController* pAdvancedViewController = nullptr;

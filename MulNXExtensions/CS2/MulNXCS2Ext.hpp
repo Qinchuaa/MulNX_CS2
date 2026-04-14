@@ -11,3 +11,4 @@
 #include "PlayerHub/PlayerHub.hpp"
 #include "PlayerHub/NameController/NameController.hpp"
 #include "PlayerHub/GlowController/GlowController.hpp"
+#include "PlayerHub/SmokeController/SmokeController.hpp"

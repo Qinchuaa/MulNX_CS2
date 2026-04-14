@@ -101,13 +101,6 @@ bool CSController::UINodeFunc(MulNXUINode* node) {
         MulNX::UI::Checkbox("自动分析tick", this->autoTick);
         MulNX::UI::SliderInt("GameTick与DemoTick差值", this->deltaTick, 0, 10000);
     }
-    if (ImGui::CollapsingHeader("烟雾弹控制")) {
-        MulNX::UI::Checkbox("启用烟雾弹控制", this->controlSmoke.Enbale);
-        MulNX::UI::Checkbox("烟雾显示", this->controlSmoke.Show);
-        MulNX::UI::SliderFloat("色彩R", this->controlSmoke.R, 0, 255);
-        MulNX::UI::SliderFloat("色彩G", this->controlSmoke.G, 0, 255);
-        MulNX::UI::SliderFloat("色彩B", this->controlSmoke.B, 0, 255);
-    }
     node->CallUINode("PlayerFlashController");
     node->CallUINode("AdvancedViewController");
     // 自由摄像机控制
@@ -230,31 +223,6 @@ int CSController::BasicUpdate() {
         OldRoundStartCount = MulNX::MRead(pGameRules->m_nRoundStartCount());
     }
     
-    for (int i = 0;i <= this->Modules.client.dwGameEntitySystem_highestEntityIndex();i++) {
-        auto entity = this->Modules.client.GetBaseEntity(i);
-        if (!entity)continue;
-
-        auto zname = entity->GetName();
-        if(zname.empty())continue;
-
-        if (zname.find("smokegrenade") != std::string::npos && zname.find("weapon") == std::string::npos) {
-            if (this->controlSmoke.Enbale.load(std::memory_order_acquire)) {
-                if (this->controlSmoke.Show.load(std::memory_order_acquire) == true) {
-                    auto* color = entity->As<CS2::C_SmokeGrenadeProjectile>()->vSmokeColor();
-                    DirectX::XMFLOAT3 pushIn{
-                        this->controlSmoke.R.load(std::memory_order_acquire) ,
-                        this->controlSmoke.G.load(std::memory_order_acquire) ,
-                        this->controlSmoke.B.load(std::memory_order_acquire) };
-                    MulNX::MWrite(color, pushIn);
-                }
-                else {
-                    MulNX::MWrite(entity->As<CS2::C_SmokeGrenadeProjectile>()->bDidSmokeEffect(), false);
-                    MulNX::MWrite(entity->As<CS2::C_SmokeGrenadeProjectile>()->bSmokeEffectSpawned(), false);
-                    MulNX::MWrite(entity->As<CS2::C_SmokeGrenadeProjectile>()->nSmokeEffectTickBegin(), 0);
-                }
-            }
-        }
-    }
     return 0;
 }
 int CSController::EntityListUpdate() {
@@ -294,12 +262,10 @@ int CSController::TryGetMsg() {
     int Result = 0;
     Result = this->BasicUpdate();
     if (Result) {
-        this->GlobalVars->InGamePlaying = false;
         return Result;
     }
     this->EntityListUpdate();
 
-    this->GlobalVars->InGamePlaying = true;
 
     return 0;
 }

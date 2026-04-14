@@ -42,7 +42,7 @@ bool MiniMap::UINodeFunc(MulNXUINode* ThisNode) {
     ImGui::Begin("小地图窗口", &op);
     this->ShowWindow = op;
 
-    if (!this->GlobalVars->InGamePlaying) {
+    if (false) {
         // 恢复样式
         style.Colors[ImGuiCol_WindowBg] = oldWindowBg;
         style.Colors[ImGuiCol_ChildBg] = oldChildBg;
