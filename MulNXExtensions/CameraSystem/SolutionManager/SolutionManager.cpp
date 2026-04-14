@@ -431,11 +431,13 @@ void SolutionManager::Playing_Enable() {
         return;
     }
     this->Playing = true;
+    this->ISys().PublishAsync("CameraSystem/Play/Started"_hash);
     this->ISys().LogInfo("已开启播放");
 }
 void SolutionManager::Playing_Disable() {
     this->Playing = false;
     this->AL3D->ClearViewOverride();
+    this->ISys().PublishAsync("CameraSystem/Play/Ended"_hash);
     this->ISys().LogInfo("已关闭播放");
 }
 void SolutionManager::Playing_SetTimeSchema(const float Time) {

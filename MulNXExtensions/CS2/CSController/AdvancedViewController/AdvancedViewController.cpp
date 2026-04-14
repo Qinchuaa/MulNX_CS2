@@ -181,10 +181,7 @@ std::expected<MulNX::Math::Point3, int> AdvancedViewController::GetPoint3(CS2::C
 
 CS2::C_CSPlayerPawn* AdvancedViewController::GetSelfViewTargetPawn() {
     try {
-        auto* localController = this->CS2()->Modules.client.dwLocalPlayerController();
-        if (!localController) return nullptr;
-        auto hLocalPawn = MulNX::MRead(localController->m_hPawn());
-        auto* localPawn = this->CS2()->Modules.client.GetBaseEntityFromHandle(hLocalPawn)->As<CS2::C_CSPlayerPawn>();
+        auto* localPawn = this->CS2()->Modules.client.GetLocalPlayerPawn();
         if (!localPawn) return nullptr;
         if (this->useLocalPawn.load(std::memory_order_acquire)) {
             return localPawn;

@@ -290,11 +290,13 @@ void ElementManager::Preview_Enable() {
         return;
     }
     this->OnPreview = true;
+    this->ISys().PublishAsync("CameraSystem/Preview/Started"_hash);
     this->ISys().LogInfo("已开启预览");
 }
 void ElementManager::Preview_Disable() {
     this->OnPreview = false;
     this->AL3D->ClearViewOverride();
+    this->ISys().PublishAsync("CameraSystem/Preview/Ended"_hash);
     this->ISys().LogInfo("已关闭预览");
 }
 void ElementManager::Preview_SetElement(const std::string& Name) {

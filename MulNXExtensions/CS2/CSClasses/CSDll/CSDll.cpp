@@ -16,3 +16,11 @@ CS2::C_BaseEntity* CS2::Module::Client::GetBaseEntityFromHandle(CS2::CHandleBase
     if (!handle.Valid())return nullptr;
     return this->GetBaseEntity(handle.GetIndexInEntityList());
 }
+
+CS2::C_CSPlayerPawn* CS2::Module::Client::GetLocalPlayerPawn() {
+    auto* localController = this->dwLocalPlayerController();
+    if (!localController) return nullptr;
+    auto hLocalPawn = MulNX::MRead(localController->m_hPawn());
+    auto* localPawn = this->GetBaseEntityFromHandle(hLocalPawn)->As<CS2::C_CSPlayerPawn>();
+    return localPawn;
+}

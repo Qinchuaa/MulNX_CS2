@@ -101,6 +101,11 @@ void SmokeController::MySetSmokeProps(CS2::C_SmokeGrenadeProjectile* pSmoke) {
     auto hController = *pThrower->m_hController();
     auto pController = this->CS2()->Modules.client.GetBaseEntityFromHandle(hController)->As<CS2::CBasePlayerController>();
 
+    if(!pController) {
+        this->ISys().LogWarning("未找到投掷者的控制器，无法应用烟雾颜色");
+        return;
+    }
+
     Steam64UID uid = *pController->m_steamID();
 
     // 获取颜色向量指针

@@ -22,6 +22,7 @@ namespace CS2 {
 
             CS2::C_BaseEntity* GetBaseEntity(int index);
             CS2::C_BaseEntity* GetBaseEntityFromHandle(CS2::CHandleBase handle);
+            CS2::C_CSPlayerPawn* GetLocalPlayerPawn();
         };
 
         class engine2 : public MulNX::Memory::DllModule {

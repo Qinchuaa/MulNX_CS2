@@ -129,9 +129,7 @@ bool CSController::Init() {
     this->ShowWindow = true;
     this->ISys()
         .SubscribeAsync("Core/ReHook")
-        .SubscribeAsync("Game/Command")
-        .SubscribeAsync("CameraSystem/Play/Started")
-        .SubscribeAsync("CameraSystem/Play/Ended");
+        .SubscribeAsync("Game/Command");
 
     this->SendUINode(this->GetName(), [this](MulNXUINode* node) {return this->UINodeFunc(node);});
 
@@ -183,7 +181,7 @@ bool CSController::Init() {
             this->ISys().LogWarning("在更新数据时捕获到异常：" + std::string(e.what()));
         }
 
-        std::this_thread::sleep_for(std::chrono::milliseconds(this->MyThreadDelta));
+        std::this_thread::sleep_for(std::chrono::milliseconds(2));
         return true;
         });
 
@@ -199,8 +197,7 @@ void CSController::Update() {
 
     static int OldRoundStartCount = MulNX::MRead(pGameRules->m_nRoundStartCount());
     if (OldRoundStartCount != MulNX::MRead(pGameRules->m_nRoundStartCount())) {
-        MulNX::Message Msg("Game/NewRound"_hash);
-        this->ISys().PublishAsync(std::move(Msg));
+        this->ISys().PublishAsync("Game/NewRound"_hash);
         OldRoundStartCount = MulNX::MRead(pGameRules->m_nRoundStartCount());
     }
 
