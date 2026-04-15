@@ -57,21 +57,23 @@ void HookManager::CreateHook() {
     }
 
     // Hook Present函数
-    this->hkPresent = MulNX::Memory::HookEx::Create((uint8_t*)IVClass::Assume(pTempSwapChain)->GetVFuncPtr(8), 0, false, [this](RegContext* ctx, MulNX::Memory::HookEx* hk)->bool {
-        if (this->GlobalVars->SystemReady.load(std::memory_order_acquire)) {
-            // 这里是Hook Present
-            // 我们从这里，偷到了游戏的真正的交换链指针
-            this->pSwapChain = (IDXGISwapChain*)ctx->rcx;
-            this->pUISystem->Render();
-        }
-        return true;
+    this->hkPresent = MulNX::Hook::Create((uint8_t*)IVClass::Assume(pTempSwapChain)->GetVFuncPtr(8),
+        0, false, [this](RegContext* ctx, MulNX::Hook* hk)->bool {
+            if (this->GlobalVars->SystemReady.load(std::memory_order_acquire)) {
+                // 这里是Hook Present
+                // 我们从这里，偷到了游戏的真正的交换链指针
+                this->pSwapChain = (IDXGISwapChain*)ctx->rcx;
+                this->pUISystem->Render();
+            }
+            return true;
         }).value();
     this->hkPresent->Attach();
 
     // Hook ResizeBuffers函数
-    this->hkResizeBuffers = MulNX::Memory::HookEx::Create((uint8_t*)IVClass::Assume(pTempSwapChain)->GetVFuncPtr(13), 0, false, [this](RegContext* ctx, MulNX::Memory::HookEx* hk)->bool {
-        this->ReleaseOld();
-        return true;
+    this->hkResizeBuffers = MulNX::Hook::Create((uint8_t*)IVClass::Assume(pTempSwapChain)->GetVFuncPtr(13),
+        0, false, [this](RegContext* ctx, MulNX::Hook* hk)->bool {
+            this->ReleaseOld();
+            return true;
         }).value();
     this->hkResizeBuffers->Attach();
 
@@ -112,9 +114,10 @@ void HookManager::d3dInit() {
     this->pSwapChain->GetDesc(&sd);
     this->CS2hWnd = sd.OutputWindow;
     // 以此为基础，Hook窗口过程，以便处理输入等消息
-    this->hkWndProc = MulNX::Memory::HookEx::Create((uint8_t*)GetWindowLongPtrW(this->CS2hWnd, GWLP_WNDPROC), 0, false, [this](RegContext* ctx, MulNX::Memory::HookEx* hk)->bool {
-        bool CallRawFunc = this->MyWndProc((HWND)ctx->rcx, ctx->rdx, ctx->r8, ctx->r9);
-        return CallRawFunc;
+    this->hkWndProc = MulNX::Hook::Create((uint8_t*)GetWindowLongPtrW(this->CS2hWnd, GWLP_WNDPROC),
+        0, false, [this](RegContext* ctx, MulNX::Hook* hk)->bool {
+            bool CallRawFunc = this->MyWndProc((HWND)ctx->rcx, ctx->rdx, ctx->r8, ctx->r9);
+            return CallRawFunc;
         }).value();
     this->hkWndProc->Attach();
 
@@ -168,18 +171,18 @@ void HookManager::BuildNew() {
 // ImGui窗口处理函数导入
 extern LRESULT ImGui_ImplWin32_WndProcHandler(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 bool HookManager::MyWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
-	std::unique_lock lock(this->pUISystem->UIMtx);
-	if (ImGui_ImplWin32_WndProcHandler(hwnd, uMsg, wParam, lParam)) {
-		return false;
-	}
-	ImGuiIO& io = ImGui::GetIO();
-	// 鼠标：当ImGui想要捕获时总是拦截
-	if (io.WantCaptureMouse && MulNX::Base::WIN32Msg::IsMouseMessage(uMsg)) {
-		return false;
-	}
-	// 键盘：只在WantTextInput为true时拦截（表示输入框激活）
-	else if (io.WantTextInput && MulNX::Base::WIN32Msg::IsKeyboardMessage(uMsg)) {
-		return false;
-	}
-	return true;
+    std::unique_lock lock(this->pUISystem->UIMtx);
+    if (ImGui_ImplWin32_WndProcHandler(hwnd, uMsg, wParam, lParam)) {
+        return false;
+    }
+    ImGuiIO& io = ImGui::GetIO();
+    // 鼠标：当ImGui想要捕获时总是拦截
+    if (io.WantCaptureMouse && MulNX::Base::WIN32Msg::IsMouseMessage(uMsg)) {
+        return false;
+    }
+    // 键盘：只在WantTextInput为true时拦截（表示输入框激活）
+    else if (io.WantTextInput && MulNX::Base::WIN32Msg::IsKeyboardMessage(uMsg)) {
+        return false;
+    }
+    return true;
 }

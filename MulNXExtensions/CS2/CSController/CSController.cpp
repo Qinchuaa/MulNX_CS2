@@ -6,6 +6,9 @@
 #include <MulNXExtensions/CameraSystem/CameraSystemIO/CameraSystemIO.hpp>
 #include <MulNXThirdParty/All_cs2_dumper.hpp>
 
+using OnAddEntity_t = void* (__fastcall*)(void* This, CS2::C_BaseEntity* pInstance, CS2::CHandleBase handle);
+using OnRemoveEntity_t = void* (__fastcall*)(void* This, CS2::C_BaseEntity* inst, CS2::CHandleBase handle);
+
 void CSController::HandleCameraSystemPlay(CS2::CViewSetup* viewSetup) {
     // 加载来自摄像机系统的View
     auto view = this->controlView.ViewToGame.load(std::memory_order_acquire);
@@ -149,6 +152,18 @@ bool CSController::Init() {
         (uintptr_t)this->Modules.tier0.GetProcAddressT<void* (const char*, int*)>("CreateInterface")
         ("VEngineCvar007", nullptr);
 
+    static auto vtable = (uint8_t**)IVClass::Assume(this->Modules.client.dwGameEntitySystem())->GetVTablePtr();
+    auto pCreateEntity = vtable[15];
+
+    static auto hkCreateEntity = MulNX::Hook::Create(pCreateEntity, 0, false, [this](RegContext* ctx, MulNX::Hook* hk)->bool {
+        auto pEntity = *ctx->P2<CS2::C_BaseEntity*>();
+        void* result = reinterpret_cast<OnAddEntity_t>(hk->pMaybeRawFunc)(*ctx->P1<void*>(), pEntity, ctx->r8);
+        this->ISys().LogInfo(std::format("检测到实体创建，类名：{}", pEntity->GetName()));
+        ctx->rax = reinterpret_cast<uint64_t>(result);
+        return false;
+        }).value();
+    hkCreateEntity->Attach();
+
     if (this->Modules.client.Valid) {
         // 搜索 .text 段
         auto textRegion = this->Modules.client.GetTextRegion();
@@ -158,7 +173,7 @@ bool CSController::Init() {
             auto target = textRegion.FindRegion(pattern);
 
             if (target.IsValid()) {
-                this->hkPosCallIsPlayingDemo = MulNX::Memory::HookEx::Create(target.Data(), 0, true, [this](RegContext* ctx, MulNX::Memory::HookEx* hookEx)->bool {
+                this->hkPosCallIsPlayingDemo = MulNX::Hook::Create(target.Data(), 0, true, [this](RegContext* ctx, MulNX::Hook* Hook)->bool {
                     this->HandleOverrideView((CS2::CViewSetup*)ctx->rsi);
                     return true;
                     }).value();

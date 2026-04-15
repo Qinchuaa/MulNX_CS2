@@ -13,3 +13,4 @@
 #include "PlayerHub/GlowController/GlowController.hpp"
 #include "PlayerHub/SmokeController/SmokeController.hpp"
 #include "PlayerHub/ObserverController/ObserverController.hpp"
+#include "PlayerHub/ProjectileTracker/ProjectileTracker.hpp"

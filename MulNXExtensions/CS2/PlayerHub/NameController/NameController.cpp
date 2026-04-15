@@ -35,8 +35,8 @@ void NameController::Menu(MulNXUINode* node) {
 
 bool NameController::Init() {
     auto FnGetDecoratedPlayerName = this->CS2()->Modules.client.GetTextRegion().FindRegion(MulNX::CS2::Signatures::GetDecoratedPlayerName);
-    this->hkGetDecoratedPlayerName = MulNX::Memory::HookEx::Create(FnGetDecoratedPlayerName.Data(), 0, false,
-        [this](RegContext* ctx, MulNX::Memory::HookEx* hk)->bool {
+    this->hkGetDecoratedPlayerName = MulNX::Hook::Create(FnGetDecoratedPlayerName.Data(), 0, false,
+        [this](RegContext* ctx, MulNX::Hook* hk)->bool {
             // 这里注意，这里的名称获取，是需要进一步调用GetPlayerName的
             // 我们借助这一个比较稳定的特征，创建延迟Hook
             // 所以，这里同时不需要加锁，因为它已经满足上下文无关于我们的数据结构的访问了
@@ -78,8 +78,8 @@ void NameController::ProcessMsg(MulNX::Message& Msg) {
 
 void NameController::HandleVHook(CS2::CCSPlayerController* pPlayerController) {
     if (this->bGetPlayerNameHooked)return;
-    this->hkGetPlayerName = MulNX::Memory::HookEx::Create(reinterpret_cast<uint8_t*>(pPlayerController->GetVFuncPtr(223)), 0, false,
-        [this](RegContext* ctx, MulNX::Memory::HookEx* hk)->bool {
+    this->hkGetPlayerName = MulNX::Hook::Create(reinterpret_cast<uint8_t*>(pPlayerController->GetVFuncPtr(223)), 0, false,
+        [this](RegContext* ctx, MulNX::Hook* hk)->bool {
             // 而在这里，我们则需要加锁，因为我们要访问替换表了
             std::shared_lock lock(this->Hub()->smutex);
 

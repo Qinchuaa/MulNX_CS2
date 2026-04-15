@@ -46,6 +46,7 @@ static void MainDraw(MulNXUINode* node) {
     node->CallUINode("ProjectManager");
     node->CallUINode("DemoHelper");
     node->CallUINode("PlayerHub");
+    node->CallUINode("ProjectileTracker");
 }
 
 BOOL APIENTRY DllMain(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserved) {
@@ -120,6 +121,7 @@ DWORD MulNX_CS2_Start(void*) {
             .CreateModule<GlowController>("GlowController", 214)
             .CreateModule<SmokeController>("SmokeController", 215)
             .CreateModule<ObserverController>("ObserverController", 216)
+            .CreateModule<ProjectileTracker>("ProjectileTracker", 217)
             .CreateModule<MiniMap>("MiniMap", 303)// 小地图模块
             .CreateModule<VirtualUser>("VirtualUser", 304)// 虚拟用户模块
             .CreateModule<GameCfgManager>("GameCfgManager", 406)// 游戏配置管理模块

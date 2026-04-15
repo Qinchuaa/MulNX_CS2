@@ -32,6 +32,14 @@ namespace CS2 {
         int GetIndexInEntityList() { return this->handle & 0x7FFF; }
         bool Valid() { return this->handle != 0xFFFFFFFF; }
 
+        bool operator<(const CHandleBase& rhs) const noexcept {
+            return this->handle < rhs.handle;
+        }
+
+        bool operator==(const CHandleBase& rhs) const noexcept {
+            return this->handle == rhs.handle;
+        }
+
         CHandleBase() :handle(0xFFFFFFFF) {}
     };
 
@@ -82,6 +90,7 @@ namespace CS2 {
         ui8TeamNum* iTeamNum() { return Schema<ui8TeamNum>(this, cs2_dumper::schemas::client_dll::C_BaseEntity::m_iTeamNum); }
         CHandle<C_BaseEntity>* m_hEffectEntity() { return Schema<CHandle<C_BaseEntity>>(this, cs2_dumper::schemas::client_dll::C_BaseEntity::m_hEffectEntity); }
         CHandle<C_BaseEntity>* m_hOwnerEntity() { return Schema<CHandle<C_BaseEntity>>(this, cs2_dumper::schemas::client_dll::C_BaseEntity::m_hOwnerEntity); }
+        GameTime_t* m_flCreateTime() { return Schema<GameTime_t>(this, cs2_dumper::schemas::client_dll::C_BaseEntity::m_flCreateTime); }
 
         DirectX::XMFLOAT3 GetBonePos(int index);
         std::string GetName();
@@ -229,7 +238,22 @@ namespace CS2 {
 
     class C_BaseCSGrenadeProjectile :public C_BaseGrenade {
     public:
-
+        DirectX::XMFLOAT3* m_vInitialPosition() { return Schema<DirectX::XMFLOAT3>(this, cs2_dumper::schemas::client_dll::C_BaseCSGrenadeProjectile::m_vInitialPosition); }
+        DirectX::XMFLOAT3* m_vInitialVelocity() { return Schema<DirectX::XMFLOAT3>(this, cs2_dumper::schemas::client_dll::C_BaseCSGrenadeProjectile::m_vInitialVelocity); }
+        int32_t* m_nBounces() { return Schema<int32_t>(this, cs2_dumper::schemas::client_dll::C_BaseCSGrenadeProjectile::m_nBounces); }
+        //constexpr std::ptrdiff_t m_nExplodeEffectIndex = 0x13C0; // CStrongHandle<InfoForResourceTypeIParticleSystemDefinition>
+        int32_t* m_nExplodeEffectTickBegin() { return Schema<int32_t>(this, cs2_dumper::schemas::client_dll::C_BaseCSGrenadeProjectile::m_nExplodeEffectTickBegin); }
+        DirectX::XMFLOAT3* m_vecExplodeEffectOrigin() { return Schema<DirectX::XMFLOAT3>(this, cs2_dumper::schemas::client_dll::C_BaseCSGrenadeProjectile::m_vecExplodeEffectOrigin); }
+        GameTime_t* m_flSpawnTime() { return Schema<GameTime_t>(this, cs2_dumper::schemas::client_dll::C_BaseCSGrenadeProjectile::m_flSpawnTime); }
+        DirectX::XMFLOAT3* vecLastTrailLinePos() { return Schema<DirectX::XMFLOAT3>(this, cs2_dumper::schemas::client_dll::C_BaseCSGrenadeProjectile::vecLastTrailLinePos); }
+        GameTime_t* flNextTrailLineTime() { return Schema<GameTime_t>(this, cs2_dumper::schemas::client_dll::C_BaseCSGrenadeProjectile::flNextTrailLineTime); }
+        bool* m_bExplodeEffectBegan() { return Schema<bool>(this, cs2_dumper::schemas::client_dll::C_BaseCSGrenadeProjectile::m_bExplodeEffectBegan); }
+        bool* m_bCanCreateGrenadeTrail() { return Schema<bool>(this, cs2_dumper::schemas::client_dll::C_BaseCSGrenadeProjectile::m_bCanCreateGrenadeTrail); }
+        //constexpr std::ptrdiff_t m_nSnapshotTrajectoryEffectIndex = 0x13F0; // ParticleIndex_t
+        //constexpr std::ptrdiff_t m_hSnapshotTrajectoryParticleSnapshot = 0x13F8; // CStrongHandle<InfoForResourceTypeIParticleSnapshot>
+        //constexpr std::ptrdiff_t m_arrTrajectoryTrailPoints = 0x1400; // CUtlVector<Vector>
+        //constexpr std::ptrdiff_t m_arrTrajectoryTrailPointCreationTimes = 0x1418; // CUtlVector<float32>
+        float* m_flTrajectoryTrailEffectCreationTime() { return Schema<float>(this, cs2_dumper::schemas::client_dll::C_BaseCSGrenadeProjectile::m_flTrajectoryTrailEffectCreationTime); }
     };
 
     class C_SmokeGrenadeProjectile :public C_BaseCSGrenadeProjectile {

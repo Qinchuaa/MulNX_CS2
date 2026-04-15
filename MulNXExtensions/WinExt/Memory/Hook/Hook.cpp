@@ -5,13 +5,13 @@
 #include <algorithm>
 #include <format>
 
-uintptr_t MulNX::Memory::HookEx::Dispatch(HookEx* pHookExInstance, RegContext* ctx) {
+uintptr_t MulNX::Hook::Dispatch(Hook* pHookInstance, RegContext* ctx) {
     // 返回true继续执行剩余指令，返回false则在恢复寄存器后直接ret
-    if (pHookExInstance->callback(ctx, pHookExInstance)) {
-        return pHookExInstance->jmpTarget1;
+    if (pHookInstance->callback(ctx, pHookInstance)) {
+        return pHookInstance->jmpTarget1;
     }
     else {
-        return pHookExInstance->jmpTarget0;
+        return pHookInstance->jmpTarget0;
     }
 }
 
@@ -71,25 +71,25 @@ void* TryAlloc(uintptr_t target, size_t size) {
     return nullptr;
 }
 
-std::expected<std::unique_ptr<MulNX::Memory::HookEx>, std::string> MulNX::Memory::HookEx::Create(uint8_t* Target, int Len, bool extraStackAdjust, std::function<bool(RegContext*, HookEx*)>&& callback) {
+std::expected<std::unique_ptr<MulNX::Hook>, std::string> MulNX::Hook::Create(uint8_t* Target, int Len, bool extraStackAdjust, std::function<bool(RegContext*, Hook*)>&& callback) {
     if (0 < Len && Len < 5) {
         return std::unexpected(std::format("参数指定的长度是：{}  ，这个长度怎么可能放得下一个jmp rel32？？", Len));
     }
     if (Len == 0) {
         // 自动分析法，info至少提供20个空间
-        auto info = MulNX::Memory::HookEx::AnalyseTarget(Target);
+        auto info = MulNX::Hook::AnalyseTarget(Target);
         for (int i = 0;Len < 5;++i) {
             Len += info.Cmds.at(i).size;
         }
     }
 
-    // 创建HookEx实例
-    auto HookExInstance = std::make_unique<HookEx>();
-    HookExInstance->hookTarget = Target;
-    HookExInstance->callback = std::move(callback);
-    HookExInstance->overrideSize = Len;
+    // 创建Hook实例
+    auto HookInstance = std::make_unique<Hook>();
+    HookInstance->hookTarget = Target;
+    HookInstance->callback = std::move(callback);
+    HookInstance->overrideSize = Len;
     // 复制覆盖处指令
-    HookExInstance->hookTargetRawCode = MulNX::Memory::Asm::Code(Target, Target + HookExInstance->overrideSize);
+    HookInstance->hookTargetRawCode = MulNX::Memory::Asm::Code(Target, Target + HookInstance->overrideSize);
 
     // 为调度器汇编部分分配空间    
     auto* alloced = TryAlloc((uintptr_t)Target, 4096);
@@ -97,7 +97,7 @@ std::expected<std::unique_ptr<MulNX::Memory::HookEx>, std::string> MulNX::Memory
         return std::unexpected("windows内存分配失败！无法找到空间");
     }
     // 进行raii绑定，防止内存泄露
-    HookExInstance->pAsmDispatcher = alloced;
+    HookInstance->pAsmDispatcher = alloced;
     if (std::abs(static_cast<long long>(reinterpret_cast<uintptr_t>(alloced) -
         reinterpret_cast<uintptr_t>(Target))) > 1024ULL * 1024 * 1024) {
         return std::unexpected("windows内存分配失败！分配空间不合适");
@@ -111,11 +111,11 @@ std::expected<std::unique_ptr<MulNX::Memory::HookEx>, std::string> MulNX::Memory
 
         // 计算结构体大小（保证16字节对齐）
         constexpr size_t ctxSize = (sizeof(RegContext) + 15) & ~15;
-        HookExInstance->frameSize = ctxSize;
-        if (!extraStackAdjust)HookExInstance->frameSize += 8;
+        HookInstance->frameSize = ctxSize;
+        if (!extraStackAdjust)HookInstance->frameSize += 8;
 
         Asm
-            .sub(RSP, HookExInstance->frameSize) // 分配栈空间
+            .sub(RSP, HookInstance->frameSize) // 分配栈空间
             // 保存所有寄存器到 [rsp + offset]
             .mov(Mem(RSP, offsetof(RegContext, rax)), RAX)
             .mov(Mem(RSP, offsetof(RegContext, rcx)), RCX)
@@ -137,17 +137,17 @@ std::expected<std::unique_ptr<MulNX::Memory::HookEx>, std::string> MulNX::Memory
 
         // 指令执行区
         Asm
-            .mov(RCX, (uintptr_t)HookExInstance.get())// 此参数对应 HookEx，是第一个参数
+            .mov(RCX, (uintptr_t)HookInstance.get())// 此参数对应 Hook，是第一个参数
             .mov(RDX, RSP)// 此参数对应 RegContext，是第二个参数
-            .mov(RAX, (uintptr_t)&MulNX::Memory::HookEx::Dispatch)// 绑定分发函数
+            .mov(RAX, (uintptr_t)&MulNX::Hook::Dispatch)// 绑定分发函数
             .sub(RSP, 32)// 分配影子空间
             .call(RAX)// 调用函数，进入CPP语言空间
             .add(RSP, 32)// 回收影子空间
             .jmp(RAX);// 某种意义上，这里是一个分支操作，但是这个分支实际上是由CPP语言层面决定的，因此我们在汇编层面上并不需要区分真假分支，直接让它无条件跳转到jmpTarget即可
-        HookExInstance->dispatcherAsmCode = Asm.Release();
+        HookInstance->dispatcherAsmCode = Asm.Release();
 
         // 分支0
-        HookExInstance->jmpTarget0 = (uintptr_t)HookExInstance->pAsmDispatcher + HookExInstance->dispatcherAsmCode.size();
+        HookInstance->jmpTarget0 = (uintptr_t)HookInstance->pAsmDispatcher + HookInstance->dispatcherAsmCode.size();
         // 恢复区
         Asm
             .mov(RAX, Mem(RSP, offsetof(RegContext, rax)))
@@ -167,19 +167,13 @@ std::expected<std::unique_ptr<MulNX::Memory::HookEx>, std::string> MulNX::Memory
             .mov(R14, Mem(RSP, offsetof(RegContext, r14)))
             .mov(R15, Mem(RSP, offsetof(RegContext, r15)))
             // 释放上下文空间
-            .add(RSP, HookExInstance->frameSize)
+            .add(RSP, HookInstance->frameSize)
             .ret();// 从分发函数返回
 
-        HookExInstance->dispatcherAsmCode.append_range(std::move(Asm.Release()));
-
-
-
-
-
-
+        HookInstance->dispatcherAsmCode.append_range(std::move(Asm.Release()));
 
         // 分支1
-        HookExInstance->jmpTarget1 = (uintptr_t)HookExInstance->pAsmDispatcher + HookExInstance->dispatcherAsmCode.size();
+        HookInstance->jmpTarget1 = (uintptr_t)HookInstance->pAsmDispatcher + HookInstance->dispatcherAsmCode.size();
         // 恢复区
         Asm
             .mov(RAX, Mem(RSP, offsetof(RegContext, rax)))
@@ -199,82 +193,56 @@ std::expected<std::unique_ptr<MulNX::Memory::HookEx>, std::string> MulNX::Memory
             .mov(R14, Mem(RSP, offsetof(RegContext, r14)))
             .mov(R15, Mem(RSP, offsetof(RegContext, r15)))
             // 释放上下文空间
-            .add(RSP, HookExInstance->frameSize);
+            .add(RSP, HookInstance->frameSize);
 
-        HookExInstance->dispatcherAsmCode.append_range(std::move(Asm.Release()));
+        HookInstance->dispatcherAsmCode.append_range(std::move(Asm.Release()));
 
         // 这里恰好可以记录一个可能是原函数地址的位置（如果覆盖的指令是一个完整函数的开头），供回调函数使用
-        HookExInstance->pMaybeRawFunc = (uintptr_t)HookExInstance->pAsmDispatcher + HookExInstance->dispatcherAsmCode.size();
+        HookInstance->pMaybeRawFunc = (uintptr_t)HookInstance->pAsmDispatcher + HookInstance->dispatcherAsmCode.size();
 
         // 修复原始指令（包括jmp call rip相对寻址）
-        auto result = FixRelativeInstructions(HookExInstance->hookTargetRawCode,
-            (uintptr_t)HookExInstance->hookTarget,
-            (uintptr_t)HookExInstance->pAsmDispatcher + HookExInstance->dispatcherAsmCode.size());
+        auto result = FixRelativeInstructions(HookInstance->hookTargetRawCode,
+            (uintptr_t)HookInstance->hookTarget,
+            (uintptr_t)HookInstance->pAsmDispatcher + HookInstance->dispatcherAsmCode.size());
         if (!result.has_value())return std::unexpected(result.error());
 
         MulNX::Memory::Asm::Code fixed = result.value();
             
 
         // 追加原始指令
-        HookExInstance->dispatcherAsmCode.append_range(std::move(fixed));
+        HookInstance->dispatcherAsmCode.append_range(std::move(fixed));
 
         // 跳转到原处
-        Asm.jmp64((uintptr_t)Target + HookExInstance->overrideSize);
+        Asm.jmp64((uintptr_t)Target + HookInstance->overrideSize);
         
-        HookExInstance->dispatcherAsmCode.append_range(std::move(Asm.Release()));
-
-
-
-
-
-
-
-
-
-
-
-
+        HookInstance->dispatcherAsmCode.append_range(std::move(Asm.Release()));
 
         // 复制机器码到VirtualAlloc分配的内存
-        memcpy(HookExInstance->pAsmDispatcher,
-            HookExInstance->dispatcherAsmCode.data(),
-            HookExInstance->dispatcherAsmCode.size());
-
-
-
-        
-
-
-        
-
-
-
-
-
-
-
+        memcpy(HookInstance->pAsmDispatcher,
+            HookInstance->dispatcherAsmCode.data(),
+            HookInstance->dispatcherAsmCode.size());
         
         // 生成用于覆盖原位置的代码
-        Asm.jmp((uintptr_t)HookExInstance->pAsmDispatcher - (uintptr_t)Target - 5);
-        //Asm.jmp64((uintptr_t)HookExInstance->pAsmDispatcher);
-        for (int i = 5;i < HookExInstance->overrideSize;++i) {
+        Asm.jmp((uintptr_t)HookInstance->pAsmDispatcher - (uintptr_t)Target - 5);
+        //Asm.jmp64((uintptr_t)HookInstance->pAsmDispatcher);
+        for (int i = 5;i < HookInstance->overrideSize;++i) {
             Asm.nop();
         }
-        HookExInstance->jumperAsmCode = Asm.Release();
+        HookInstance->jumperAsmCode = Asm.Release();
     }
 
-    return HookExInstance;
+    return HookInstance;
 }
 
-void* MulNX::Memory::HookEx::GetRawStackAddr(RegContext* ctx) {
+void* MulNX::Hook::GetRawStackAddr(RegContext* ctx) {
     auto currentRsp = ctx->rsp;
     auto rawStackAddr = currentRsp + (this->frameSize - sizeof(RegContext));
     return reinterpret_cast<void*>(rawStackAddr);
 }
 
-MulNX::Memory::HookEx::Result MulNX::Memory::HookEx::Attach() {
+MulNX::Hook::Result MulNX::Hook::Attach() {
     __try {
-        if (this->attached)return MulNX::Memory::HookEx::Result::Attached;
+        if (this->attached)return MulNX::Hook::Result::Attached;
         // 覆盖原位置
         DWORD old;
         VirtualProtect(this->hookTarget, this->overrideSize, PAGE_EXECUTE_READWRITE, &old);
@@ -283,16 +251,16 @@ MulNX::Memory::HookEx::Result MulNX::Memory::HookEx::Attach() {
 
         this->attached = true;
 
-        return MulNX::Memory::HookEx::Result::AttachSuccess;
+        return MulNX::Hook::Result::AttachSuccess;
     }
     __except (EXCEPTION_EXECUTE_HANDLER) {
-        return MulNX::Memory::HookEx::Result::AttachError;
+        return MulNX::Hook::Result::AttachError;
     }
 }
 
-MulNX::Memory::HookEx::Result MulNX::Memory::HookEx::Detach() {
+MulNX::Hook::Result MulNX::Hook::Detach() {
     __try {
-        if (!this->attached)return MulNX::Memory::HookEx::Result::Detached;
+        if (!this->attached)return MulNX::Hook::Result::Detached;
         // 覆盖原位置
         DWORD old;
         VirtualProtect(this->hookTarget, this->overrideSize, PAGE_EXECUTE_READWRITE, &old);
@@ -301,14 +269,14 @@ MulNX::Memory::HookEx::Result MulNX::Memory::HookEx::Detach() {
 
         this->attached = false;
 
-        return MulNX::Memory::HookEx::Result::DetachSuccess;
+        return MulNX::Hook::Result::DetachSuccess;
     }
     __except (EXCEPTION_EXECUTE_HANDLER) {
-        return MulNX::Memory::HookEx::Result::DetachError;
+        return MulNX::Hook::Result::DetachError;
     }
 }
 
-MulNX::Memory::HookEx::~HookEx() {
+MulNX::Hook::~Hook() {
     if (this->pAsmDispatcher == nullptr)return;
     this->Detach();
     std::atomic_ref<size_t> threads(this->threadNumInAsm);

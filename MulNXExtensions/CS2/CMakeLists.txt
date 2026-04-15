@@ -10,6 +10,7 @@ add_library(MulNXCS2Ext
     "PlayerHub/NameController/NameController.cpp"
     "PlayerHub/SmokeController/SmokeController.cpp"
     "PlayerHub/ObserverController/ObserverController.cpp"
+    "PlayerHub/ProjectileTracker/ProjectileTracker.cpp"
 
     "ConsoleManager/ConsoleManager.cpp"
     "DemoHelper/DemoHelper.cpp"

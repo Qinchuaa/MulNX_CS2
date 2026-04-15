@@ -7,11 +7,11 @@
 #include <string>
 #include <cstdint>
 
-MulNX::Memory::HookTargetInfo MulNX::Memory::HookEx::AnalyseTarget(uint8_t* target) {
+MulNX::HookTargetInfo MulNX::Hook::AnalyseTarget(uint8_t* target) {
     ZydisDecoder decoder;
     ZydisDecoderInit(&decoder, ZYDIS_MACHINE_MODE_LONG_64, ZYDIS_STACK_WIDTH_64);
 
-    MulNX::Memory::HookTargetInfo targetInfo{};
+    MulNX::HookTargetInfo targetInfo{};
 
     uint8_t* currentBegin = target;
     std::ptrdiff_t currentCmdSize = 1;
@@ -29,7 +29,7 @@ MulNX::Memory::HookTargetInfo MulNX::Memory::HookEx::AnalyseTarget(uint8_t* targ
             continue;
         }
         else {
-            MulNX::Memory::AsmCmdInfo info;
+            MulNX::AsmCmdInfo info;
             info.addr = currentBegin;
             info.size = currentCmdSize;
             info.code = currentCmd;
@@ -45,7 +45,7 @@ MulNX::Memory::HookTargetInfo MulNX::Memory::HookEx::AnalyseTarget(uint8_t* targ
     return targetInfo;
 }
 
-std::expected<MulNX::Memory::Asm::Code, std::string> MulNX::Memory::HookEx::FixRelativeInstructions(
+std::expected<MulNX::Memory::Asm::Code, std::string> MulNX::Hook::FixRelativeInstructions(
     const MulNX::Memory::Asm::Code& raw_code,
     uintptr_t old_base,
     uintptr_t new_base) {

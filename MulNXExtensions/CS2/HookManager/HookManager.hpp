@@ -11,11 +11,11 @@ private:
     MulNX::IUISystem* pUISystem = nullptr;
 
     // Present函数Hook
-    std::unique_ptr<MulNX::Memory::HookEx> hkPresent = nullptr;
+    std::unique_ptr<MulNX::Hook> hkPresent = nullptr;
     // ResizeBuffers函数Hook
-    std::unique_ptr<MulNX::Memory::HookEx> hkResizeBuffers = nullptr;
+    std::unique_ptr<MulNX::Hook> hkResizeBuffers = nullptr;
     // 窗口过程Hook
-    std::unique_ptr<MulNX::Memory::HookEx> hkWndProc = nullptr;
+    std::unique_ptr<MulNX::Hook> hkWndProc = nullptr;
     bool MyWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
     // D3D11指针组

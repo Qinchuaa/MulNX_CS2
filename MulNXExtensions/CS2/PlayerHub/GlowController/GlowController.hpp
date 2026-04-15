@@ -4,7 +4,7 @@
 #include <MulNXExtensions/WinExt/WinExt.hpp>
 
 class GlowController final :public CSModuleBase {
-    std::unique_ptr<MulNX::Memory::HookEx> hkSetGlowColor = nullptr;
+    std::unique_ptr<MulNX::Hook> hkSetGlowColor = nullptr;
     std::unordered_map<Steam64UID, uint32_t>playerColors;
     std::map<CS2::ui8TeamNum, uint32_t>teamColors;
 public:

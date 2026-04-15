@@ -78,7 +78,8 @@ public:
     C_Modules Modules{};
     std::atomic<bool> ESPDraw = false;
     
-    std::unique_ptr<MulNX::Memory::HookEx> hkPosCallIsPlayingDemo = nullptr;
+    std::unique_ptr<MulNX::Hook> hkPosCallIsPlayingDemo = nullptr;
+    
     void HandleOverrideView(CS2::CViewSetup* viewSetup);
     void HandleCameraSystemPlay(CS2::CViewSetup* viewSetup);
 

@@ -11,3 +11,4 @@
 
 *.py linguist-vendored
 *.html linguist-vendored
+*.ps1 linguist-vendored
