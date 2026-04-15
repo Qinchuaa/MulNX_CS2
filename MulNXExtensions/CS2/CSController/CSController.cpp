@@ -4,10 +4,11 @@
 #include <MulNX/Base/UI/UI.hpp>
 #include <MulNX/Base/Math/Translate/Translate.hpp>
 #include <MulNXExtensions/CameraSystem/CameraSystemIO/CameraSystemIO.hpp>
+#include <MulNXExtensions/CS2/PlayerHub/ProjectileTracker/ProjectileTracker.hpp>
 #include <MulNXThirdParty/All_cs2_dumper.hpp>
 
-using OnAddEntity_t = void* (__fastcall*)(void* This, CS2::C_BaseEntity* pInstance, CS2::CHandleBase handle);
-using OnRemoveEntity_t = void* (__fastcall*)(void* This, CS2::C_BaseEntity* inst, CS2::CHandleBase handle);
+using AddEntity_t = void* (__fastcall*)(void* This, CS2::C_BaseEntity* p, CS2::CHandleBase handle);
+using RemoveEntity_t = void* (__fastcall*)(void* This, CS2::C_BaseEntity* p, CS2::CHandleBase handle);
 
 void CSController::HandleCameraSystemPlay(CS2::CViewSetup* viewSetup) {
     // 加载来自摄像机系统的View
@@ -28,6 +29,13 @@ void CSController::HandleCameraSystemPlay(CS2::CViewSetup* viewSetup) {
 }
 
 void CSController::HandleOverrideView(CS2::CViewSetup* viewSetup) {
+    static auto* pProjectileTracker = this->Core->ModuleManager()->FindModule<ProjectileTracker>("ProjectileTracker");
+    auto trckerView = pProjectileTracker->GetView();
+    if (trckerView.has_value()) {
+        *viewSetup->pViewOrigin() = trckerView.value().first;
+        *viewSetup->pViewAngles() = trckerView.value().second;
+    }
+
     // 同步窗口尺寸到ControlView
     this->controlView.currentView.WindowWidth.store(*viewSetup->pWidth(), std::memory_order_relaxed);
     this->controlView.currentView.WindowHeight.store(*viewSetup->pHeight(), std::memory_order_relaxed);
@@ -153,16 +161,28 @@ bool CSController::Init() {
         ("VEngineCvar007", nullptr);
 
     static auto vtable = (uint8_t**)IVClass::Assume(this->Modules.client.dwGameEntitySystem())->GetVTablePtr();
-    auto pCreateEntity = vtable[15];
+    auto pAddEntity = vtable[15];
 
-    static auto hkCreateEntity = MulNX::Hook::Create(pCreateEntity, 0, false, [this](RegContext* ctx, MulNX::Hook* hk)->bool {
-        auto pEntity = *ctx->P2<CS2::C_BaseEntity*>();
-        void* result = reinterpret_cast<OnAddEntity_t>(hk->pMaybeRawFunc)(*ctx->P1<void*>(), pEntity, ctx->r8);
-        this->ISys().LogInfo(std::format("检测到实体创建，类名：{}", pEntity->GetName()));
-        ctx->rax = reinterpret_cast<uint64_t>(result);
-        return false;
+    static auto hkAddEntity = MulNX::Hook::Create(pAddEntity,
+        0, false, [this](RegContext* ctx, MulNX::Hook* hk)->bool {
+            auto pEntity = *ctx->P2<CS2::C_BaseEntity*>();
+            MulNX::Message msg("Game/Entity/Added"_hash);
+            msg.p1.as<CS2::C_BaseEntity*>() = pEntity;
+            this->ISys().PublishAsync(std::move(msg));
+            return true;
         }).value();
-    hkCreateEntity->Attach();
+    hkAddEntity->Attach();
+
+    auto pRemoveEntity = vtable[16];
+    static auto hkRemoveEntity = MulNX::Hook::Create(pRemoveEntity,
+        0, false, [this](RegContext* ctx, MulNX::Hook* hk)->bool {
+            auto pEntity = *ctx->P2<CS2::C_BaseEntity*>();
+            MulNX::Message msg("Game/Entity/Removed"_hash);
+            msg.p1.as<CS2::C_BaseEntity*>() = pEntity;
+            this->ISys().PublishAsync(std::move(msg));
+            return true;
+        }).value();
+    hkRemoveEntity->Attach();
 
     if (this->Modules.client.Valid) {
         // 搜索 .text 段

@@ -91,6 +91,8 @@ namespace CS2 {
         CHandle<C_BaseEntity>* m_hEffectEntity() { return Schema<CHandle<C_BaseEntity>>(this, cs2_dumper::schemas::client_dll::C_BaseEntity::m_hEffectEntity); }
         CHandle<C_BaseEntity>* m_hOwnerEntity() { return Schema<CHandle<C_BaseEntity>>(this, cs2_dumper::schemas::client_dll::C_BaseEntity::m_hOwnerEntity); }
         GameTime_t* m_flCreateTime() { return Schema<GameTime_t>(this, cs2_dumper::schemas::client_dll::C_BaseEntity::m_flCreateTime); }
+        DirectX::XMFLOAT3* m_vecAbsVelocity() { return Schema<DirectX::XMFLOAT3>(this, cs2_dumper::schemas::client_dll::C_BaseEntity::m_vecAbsVelocity); }
+
 
         DirectX::XMFLOAT3 GetBonePos(int index);
         std::string GetName();
@@ -230,12 +232,19 @@ namespace CS2 {
         CHandle<C_CSPlayerPawn>* m_hPlayerPawn() { return Schema<CHandle<C_CSPlayerPawn>>(this, cs2_dumper::schemas::client_dll::CCSPlayerController::m_hPlayerPawn); }
     };
 
+    // 源于武器装备继承树
+    class C_BaseCSGrenade :public C_CSWeaponBase {
+    public:
+
+    };
+
     class C_BaseGrenade :public C_BaseFlex {
     public:
         CHandle<C_CSPlayerPawn>* m_hThrower() { return Schema<CHandle<C_CSPlayerPawn>>(this, cs2_dumper::schemas::client_dll::C_BaseGrenade::m_hThrower); }
 
     };
 
+    // 源于飞行投掷物继承树
     class C_BaseCSGrenadeProjectile :public C_BaseGrenade {
     public:
         DirectX::XMFLOAT3* m_vInitialPosition() { return Schema<DirectX::XMFLOAT3>(this, cs2_dumper::schemas::client_dll::C_BaseCSGrenadeProjectile::m_vInitialPosition); }
