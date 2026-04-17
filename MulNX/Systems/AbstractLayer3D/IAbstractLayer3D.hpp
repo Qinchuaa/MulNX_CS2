@@ -63,7 +63,7 @@ namespace MulNX {
         // 返回时间源，由实现创建独占指针，这里返回原始指针
         TimeBridge* Time();
 
-        virtual MulNX::Math::View GetView()const = 0;
+        virtual MulNX::Math::View GetView() = 0;
 
         virtual float* GetViewMatrix() = 0;
         virtual float GetWinWidth()const = 0;

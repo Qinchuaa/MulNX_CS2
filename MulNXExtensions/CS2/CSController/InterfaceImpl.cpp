@@ -7,15 +7,14 @@ bool CSController::ExecuteCommand(const std::string& cmd) {
 float* CSController::GetViewMatrix() {
     return this->Modules.client.dwViewMatrix();
 }
-MulNX::Math::View CSController::GetView()const {
+MulNX::Math::View CSController::GetView() {
     MulNX::Math::View view;
-    view.position.x = this->controlView.currentView.OriginX.load(std::memory_order_acquire);
-    view.position.y = this->controlView.currentView.OriginY.load(std::memory_order_acquire);
-    view.position.z = this->controlView.currentView.OriginZ.load(std::memory_order_acquire);
-    view.rotation.x = this->controlView.currentView.AnglesX.load(std::memory_order_acquire);
-    view.rotation.y = this->controlView.currentView.AnglesY.load(std::memory_order_acquire);
-    view.rotation.z = this->controlView.currentView.AnglesZ.load(std::memory_order_acquire);
-    view.FOV = this->controlView.currentView.FOV.load(std::memory_order_acquire);
+    {
+        auto read = this->controlView.currentView.Read();
+        view.position = { read->OriginX,read->OriginY,read->OriginZ };
+        view.rotation = { read->AnglesX,read->AnglesY,read->AnglesZ };
+        view.FOV = read->FOV;
+    }
 
     view.dof.NearBlurry = *this->controlView.dofs.pNearBlurry;
     view.dof.NearCrisp = *this->controlView.dofs.pNearCrisp;
@@ -51,10 +50,10 @@ bool CSController::JumpTime(const float time) {
     return true;
 }
 float CSController::GetWinWidth()const {
-    return this->controlView.currentView.WindowWidth.load(std::memory_order_relaxed);
+    return this->controlView.WindowWidth.load(std::memory_order_relaxed);
 }
 float CSController::GetWinHeight()const {
-    return this->controlView.currentView.WindowHeight.load(std::memory_order_relaxed);
+    return this->controlView.WindowHeight.load(std::memory_order_relaxed);
 }
 bool CSController::SpecPlayer(int IndexInMap) {
     this->ExecuteCommand("spec_mode 2;spec_player " + std::to_string(this->AL3DGameData.Players[IndexInMap].IndexInMap));
@@ -69,7 +68,7 @@ void CSController::spec_goto_ex(const DirectX::XMFLOAT3& pos, const DirectX::XMF
     this->controlView.InputRoll.store(rot.z, std::memory_order_release);
 }
 void CSController::ClearViewOverride() {
-    this->controlView.ViewToGame.store(nullptr, std::memory_order_release);
+    this->controlView.hasViewToGame.store(false, std::memory_order_release);
 }
 void CSController::SetDOF(const MulNX::Math::DOFParam& dof) {
     *this->controlView.dofs.pNearBlurry = dof.NearBlurry;

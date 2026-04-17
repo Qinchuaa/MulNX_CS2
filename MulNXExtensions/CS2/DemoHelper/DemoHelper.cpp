@@ -6,26 +6,21 @@
 bool DemoHelper::UINodeFunc(MulNXUINode* node) {
     auto w = MulNX::UI::RAIIWindow("Demo辅助", this->ShowWindow);
     if (!w)return true;
-    auto ReadData = this->Data.load(std::memory_order_acquire);
+    std::shared_lock lock(this->smutex);
     if (ImGui::Button("标记当前时间")) {
         MulNX::Message msg("DemoHelper/MarkTime"_hash);
         node->PublishAsync(std::move(msg));
     }
     ImGui::Text("时间列表:");
-    if (!ReadData->TimeMarks.empty()) {
-        for (auto time : ReadData->TimeMarks) {
-            ImGui::Text("时间点： %.3f 秒", time);
-            ImGui::SameLine();
-            std::string str = "跳转##" + std::to_string(time);
-            if (ImGui::Button(str.c_str())) {
-                MulNX::Message Msg("DemoHelper/JumpTIme"_hash);
-                Msg.p1.low<float>() = time;
-                node->PublishAsync(std::move(Msg));
-            }
+    for (auto time : this->TimeMarks) {
+        ImGui::Text("时间点： %.3f 秒", time);
+        ImGui::SameLine();
+        std::string str = "跳转##" + std::to_string(time);
+        if (ImGui::Button(str.c_str())) {
+            MulNX::Message Msg("DemoHelper/JumpTIme"_hash);
+            Msg.p1.low<float>() = time;
+            node->PublishAsync(std::move(Msg));
         }
-    }
-    else {
-        ImGui::Text("空的");
     }
     ImGui::SeparatorText("快捷时间");
     if (ImGui::Button("五秒前")) {
@@ -85,15 +80,11 @@ void DemoHelper::ProcessMsg(MulNX::Message& Msg) {
 
 void DemoHelper::VirtualMain() {
     this->EntryProcessMsg();
-
-    auto data = std::make_shared<DemoHelperPrivateData>();
-    data->TimeMarks = this->Marks;
-    this->Data.store(std::move(data), std::memory_order_release);
 }
 
 bool DemoHelper::MarkTime() {
+    std::unique_lock lock(this->smutex);
     this->Marks.push_back(this->AL3D->Time()->GetReal());
-
 
     return true;
 }

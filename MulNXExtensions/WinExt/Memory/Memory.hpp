@@ -1,5 +1,7 @@
 #pragma once
 
+#include <MulNX/Common/Common.hpp>
+
 #include "DllModule/DllModule.hpp"
 #include "Pattern/Pattern.hpp"
 #include "Region/Region.hpp"
@@ -35,7 +37,7 @@ namespace MulNX {
                     : bad_memory_access(msg) {}
             };
 
-            template<typename T>
+            template<MulNX::Pod T>
             static bool ReadImpl(uintptr_t address, T& target) {
                 __try {
                     target = *reinterpret_cast<T*>(address);
@@ -46,7 +48,7 @@ namespace MulNX {
                 }
             }
 
-            template<typename T>
+            template<MulNX::Pod T>
             T MRead(uintptr_t address) {
                 T target;
                 if (!ReadImpl(address, target)) {
@@ -56,7 +58,7 @@ namespace MulNX {
                     return target;
                 }
             }
-            template<typename T>
+            template<MulNX::Pod T>
             T MRead(T* address) {
                 T target;
                 if (!ReadImpl(reinterpret_cast<uintptr_t>(address), target)) {
@@ -67,7 +69,7 @@ namespace MulNX {
                 }
             }
 
-            template<typename T>
+            template<MulNX::Pod T>
             static bool WriteImpl(uintptr_t address, const T& value) {
                 __try {
                     *reinterpret_cast<T*>(address) = value;
@@ -78,14 +80,14 @@ namespace MulNX {
                 }
             }
 
-            template<typename T>
+            template<MulNX::Pod T>
             void MWrite(uintptr_t address, const T& value) {
                 if (!WriteImpl(address, value)) {
                     throw bad_memory_write(std::format("write error at: 0x{:X}", address));
                 }
             }
 
-            template<typename T>
+            template<MulNX::Pod T>
             void MWrite(T* address, const T& value) {
                 if (!WriteImpl(reinterpret_cast<uintptr_t>(address), value)) {
                     throw bad_memory_write(std::format("write error at: 0x{:X}", reinterpret_cast<uintptr_t>(address)));

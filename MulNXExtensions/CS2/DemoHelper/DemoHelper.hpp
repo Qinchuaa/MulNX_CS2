@@ -1,16 +1,14 @@
 #pragma once
 
 #include <MulNX/MulNX.hpp>
-struct DemoHelperPrivateData {
-	std::vector<float> TimeMarks{};
-};
+#include <MulNX/Base/NewestBuffer/NewestBuffer.hpp>
 
 class DemoHelper final :public MulNX::ModuleBase {
 private:
     std::vector<float>Marks{};
     std::atomic<MulNX::any_unique_ptr*>* ppUpdateData = nullptr;
     MulNXHandle hUINode{};
-    std::atomic<std::shared_ptr<DemoHelperPrivateData>> Data = nullptr;
+    std::vector<float> TimeMarks{};
 public:
 
     bool Init()override;

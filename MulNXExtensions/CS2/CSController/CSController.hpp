@@ -2,6 +2,7 @@
 
 #include <MulNX/MulNX.hpp>
 #include <MulNX/Base/Math/Math.hpp>
+#include <MulNX/Base/NewestBuffer/NewestBuffer.hpp>
 #include <MulNXExtensions/WinExt/WinExt.hpp>
 #include <MulNXExtensions/CS2/Signatures.hpp>
 
@@ -14,27 +15,15 @@
 #include "FreeCameraController/FreeCameraController.hpp"
 #include "AdvancedViewController/AdvancedViewController.hpp"
 
-#include <expected>
-
-class C_Modules {
-public:
-    CS2::Module::Client client{};
-    CS2::Module::engine2 engine2{};
-    MulNX::Memory::DllModule tier0{};
-};
-
 class Views {
 public:
-    std::atomic<float> OriginX = 0;
-    std::atomic<float> OriginY = 0;
-    std::atomic<float> OriginZ = 0;
-    std::atomic<float> AnglesX = 0;
-    std::atomic<float> AnglesY = 0;
-    std::atomic<float> AnglesZ = 0;
-    std::atomic<float> FOV = 90.0f;
-
-    std::atomic<int> WindowWidth = 1920;
-    std::atomic<int> WindowHeight = 1080;
+    float OriginX = 0;
+    float OriginY = 0;
+    float OriginZ = 0;
+    float AnglesX = 0;
+    float AnglesY = 0;
+    float AnglesZ = 0;
+    float FOV = 90.0f;
 };
 
 class Dofs{
@@ -47,10 +36,13 @@ public:
 
 class ControlView {
 public:
-    std::atomic<std::shared_ptr<Views>> ViewToGame = nullptr;
+    std::atomic<bool> hasViewToGame = false;
+    MulNX::NewestBuffer<Views> ViewToGame{};
     std::atomic<float> InputRoll = 0;
     std::atomic<bool> CameraMode = false;
-    Views currentView{};
+    std::atomic<int> WindowWidth = 1920;
+    std::atomic<int> WindowHeight = 1080;
+    MulNX::NewestBuffer<Views> currentView{};
 
     Dofs dofs{};
 };
@@ -62,11 +54,12 @@ private:
     FreeCameraController* pFreeCameraController{};
     AdvancedViewController* pAdvancedViewController = nullptr;
 
-    // 逆向层关键接口
+    // 控制台指令执行器
     void* Source2EngineToClient001 = nullptr;
     VExecutor<void(int, const char*, int)> executor{};
-    // 逆向层数据备份
+    // 控制台变量系统
     C_ConVarSystem CvarSystem{};
+    // CS2全局变量
     C_GlobalVars* CSGlobalVars{};
 
     std::atomic<bool> autoTick = true;
@@ -75,7 +68,7 @@ private:
     void ESP();
 public:
     std::vector<std::function<bool(CS2::CCSPlayerController*, CS2::C_CSPlayerPawn*)>>handlesControlPlayer{};
-    C_Modules Modules{};
+    CS2::Modules Modules{};
     std::atomic<bool> ESPDraw = false;
     
     std::unique_ptr<MulNX::Hook> hkPosCallIsPlayingDemo = nullptr;
@@ -91,7 +84,7 @@ public:
     // 核心接口
     bool ExecuteCommand(const std::string& cmd)override;
     float* GetViewMatrix()override;
-    MulNX::Math::View GetView()const override;
+    MulNX::Math::View GetView()override;
     float GetTime()override;
     bool JumpTime(const float time)override;
     float GetWinWidth()const override;

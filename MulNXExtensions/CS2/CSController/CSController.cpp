@@ -12,8 +12,8 @@ using RemoveEntity_t = void* (__fastcall*)(void* This, CS2::C_BaseEntity* p, CS2
 
 void CSController::HandleCameraSystemPlay(CS2::CViewSetup* viewSetup) {
     // 加载来自摄像机系统的View
-    auto view = this->controlView.ViewToGame.load(std::memory_order_acquire);
-    if (view) {
+    if (this->controlView.hasViewToGame.load(std::memory_order_acquire)) {
+        auto view = this->controlView.ViewToGame.Read();
         viewSetup->pViewOrigin()->x = view->OriginX;
         viewSetup->pViewOrigin()->y = view->OriginY;
         viewSetup->pViewOrigin()->z = view->OriginZ;
@@ -37,8 +37,8 @@ void CSController::HandleOverrideView(CS2::CViewSetup* viewSetup) {
     }
 
     // 同步窗口尺寸到ControlView
-    this->controlView.currentView.WindowWidth.store(*viewSetup->pWidth(), std::memory_order_relaxed);
-    this->controlView.currentView.WindowHeight.store(*viewSetup->pHeight(), std::memory_order_relaxed);
+    this->controlView.WindowWidth.store(*viewSetup->pWidth(), std::memory_order_relaxed);
+    this->controlView.WindowHeight.store(*viewSetup->pHeight(), std::memory_order_relaxed);
 
     // 执行roll覆盖，这是优先级最低的覆盖，保证运镜至少优先于此，且不影响于此
     viewSetup->pViewAngles()->z = this->controlView.InputRoll.load(std::memory_order_acquire);
@@ -57,15 +57,19 @@ void CSController::HandleOverrideView(CS2::CViewSetup* viewSetup) {
     }
 
     // 记录视角数据
-    this->controlView.currentView.OriginX.store(viewSetup->pViewOrigin()->x, std::memory_order_release);
-    this->controlView.currentView.OriginY.store(viewSetup->pViewOrigin()->y, std::memory_order_release);
-    this->controlView.currentView.OriginZ.store(viewSetup->pViewOrigin()->z, std::memory_order_release);
+    {
+        auto currentView = this->controlView.currentView.Write();
 
-    this->controlView.currentView.AnglesX.store(viewSetup->pViewAngles()->x, std::memory_order_release);
-    this->controlView.currentView.AnglesY.store(viewSetup->pViewAngles()->y, std::memory_order_release);
-    this->controlView.currentView.AnglesZ.store(viewSetup->pViewAngles()->z, std::memory_order_release);
+        currentView->OriginX=viewSetup->pViewOrigin()->x;
+        currentView->OriginY=viewSetup->pViewOrigin()->y;
+        currentView->OriginZ=viewSetup->pViewOrigin()->z;
 
-    this->controlView.currentView.FOV.store(*viewSetup->pFov(), std::memory_order_release);
+        currentView->AnglesX=viewSetup->pViewAngles()->x;
+        currentView->AnglesY=viewSetup->pViewAngles()->y;
+        currentView->AnglesZ=viewSetup->pViewAngles()->z;
+
+        currentView->FOV = *viewSetup->pFov();
+    }
 }
 
 bool CSController::UINodeFunc(MulNXUINode* node) {
@@ -275,20 +279,22 @@ void CSController::HandleFreeCameraPath(const CameraSystemIO* const IO) {
     const auto& rot = IO->Frame.view.rotation;
     const auto& dof = IO->Frame.view.dof;
 
-    auto view = std::make_shared<Views>();
-    view->OriginX = pos.x;
-    view->OriginY = pos.y;
-    view->OriginZ = pos.z;
-    view->FOV = fov;
-    view->AnglesX = rot.x;
-    view->AnglesY = rot.y;
-    view->AnglesZ = rot.z;
-    this->controlView.ViewToGame.store(view);
-
+    {
+        auto view = this->controlView.ViewToGame.Write();
+        view->OriginX = pos.x;
+        view->OriginY = pos.y;
+        view->OriginZ = pos.z;
+        view->FOV = fov;
+        view->AnglesX = rot.x;
+        view->AnglesY = rot.y;
+        view->AnglesZ = rot.z;
+    }
     *this->controlView.dofs.pNearBlurry = dof.NearBlurry;
     *this->controlView.dofs.pNearCrisp = dof.NearCrisp;
     *this->controlView.dofs.pFarCrisp = dof.FarCrisp;
     *this->controlView.dofs.pFarBlurry = dof.FarBlurry;
+
+    this->controlView.hasViewToGame.store(true, std::memory_order_release);
 }
 void CSController::HandleFirstPersonCameraPath(const CameraSystemIO* const IO) {
     static uint8_t LastIndex = 0xFFFF;
