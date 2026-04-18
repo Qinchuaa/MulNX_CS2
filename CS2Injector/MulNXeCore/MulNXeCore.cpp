@@ -79,10 +79,10 @@ void MulNXeCore::VirtualMain() {
     ImGui::Separator();
 
     ImGui::Text("欢迎使用 MulNX_CS2");
-    ImGui::Text("软件全称：%s", MulNXGlobalVarsOnlyRead::FullName);
-    ImGui::Text("开发者ID：%s", MulNXGlobalVarsOnlyRead::DeveloperName);
-    ImGui::Text("当前版本：%s", MulNXGlobalVarsOnlyRead::Version);
-    ImGui::Text("时间戳：%s", MulNXGlobalVarsOnlyRead::TimeStamp);
+    ImGui::Text("软件全称：%s", MulNXInfo::FullName);
+    ImGui::Text("开发者ID：%s", MulNXInfo::DeveloperName);
+    ImGui::Text("当前版本：%s", MulNXInfo::Version);
+    ImGui::Text("时间戳：%s", MulNXInfo::TimeStamp);
 
     ImGui::Separator();
     ImGui::Text("感谢您对MulNX的使用与支持！");

@@ -1,5 +1,6 @@
 #pragma once
 
+#include <MulNX/Base/NewestBuffer/NewestBuffer.hpp>
 #include <MulNX/MulNX.hpp>
 #include <MulNXExtensions/WinExt/WinExt.hpp>
 #include <MulNXExtensions/CS2/CSModuleBase.hpp>
@@ -40,7 +41,8 @@ private:
     DirectX::XMFLOAT3 localRotationOffset = { 0.0f, 0.0f, 0.0f };
 
     // 调试信息
-    std::atomic<std::shared_ptr<AxisInfo>> CurrentBoneInfo;
+    std::atomic<bool> hasAxisInfo = false;
+    MulNX::NewestBuffer<AxisInfo> currentAxisInfo;
     // 是否反转上向（用于修正骨骼上向方向）
     std::atomic<bool> InvertUp{ false };
     // 绘制选项

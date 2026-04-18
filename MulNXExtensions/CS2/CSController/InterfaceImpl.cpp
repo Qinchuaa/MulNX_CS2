@@ -11,8 +11,8 @@ MulNX::Math::View CSController::GetView() {
     MulNX::Math::View view;
     {
         auto read = this->controlView.currentView.Read();
-        view.position = { read->OriginX,read->OriginY,read->OriginZ };
-        view.rotation = { read->AnglesX,read->AnglesY,read->AnglesZ };
+        view.position = read->position;
+        view.rotation = read->rotation;
         view.FOV = read->FOV;
     }
 

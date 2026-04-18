@@ -15,17 +15,6 @@
 #include "FreeCameraController/FreeCameraController.hpp"
 #include "AdvancedViewController/AdvancedViewController.hpp"
 
-class Views {
-public:
-    float OriginX = 0;
-    float OriginY = 0;
-    float OriginZ = 0;
-    float AnglesX = 0;
-    float AnglesY = 0;
-    float AnglesZ = 0;
-    float FOV = 90.0f;
-};
-
 class Dofs{
 public:
     float* pNearBlurry = nullptr;
@@ -37,12 +26,13 @@ public:
 class ControlView {
 public:
     std::atomic<bool> hasViewToGame = false;
-    MulNX::NewestBuffer<Views> ViewToGame{};
+    MulNX::NewestBuffer<MulNX::Math::View> ViewToGame{};
+    MulNX::NewestBuffer<MulNX::Math::View> currentView{};
     std::atomic<float> InputRoll = 0;
     std::atomic<bool> CameraMode = false;
     std::atomic<int> WindowWidth = 1920;
     std::atomic<int> WindowHeight = 1080;
-    MulNX::NewestBuffer<Views> currentView{};
+    
 
     Dofs dofs{};
 };

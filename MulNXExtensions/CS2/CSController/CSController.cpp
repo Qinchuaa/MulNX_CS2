@@ -14,13 +14,8 @@ void CSController::HandleCameraSystemPlay(CS2::CViewSetup* viewSetup) {
     // 加载来自摄像机系统的View
     if (this->controlView.hasViewToGame.load(std::memory_order_acquire)) {
         auto view = this->controlView.ViewToGame.Read();
-        viewSetup->pViewOrigin()->x = view->OriginX;
-        viewSetup->pViewOrigin()->y = view->OriginY;
-        viewSetup->pViewOrigin()->z = view->OriginZ;
-
-        viewSetup->pViewAngles()->x = view->AnglesX;
-        viewSetup->pViewAngles()->y = view->AnglesY;
-        viewSetup->pViewAngles()->z = view->AnglesZ;
+        *viewSetup->pViewOrigin() = view->position;
+        *viewSetup->pViewAngles() = view->rotation;
 
         if (view->FOV > 0.01f) {
             *viewSetup->pFov() = view->FOV;
@@ -60,13 +55,8 @@ void CSController::HandleOverrideView(CS2::CViewSetup* viewSetup) {
     {
         auto currentView = this->controlView.currentView.Write();
 
-        currentView->OriginX=viewSetup->pViewOrigin()->x;
-        currentView->OriginY=viewSetup->pViewOrigin()->y;
-        currentView->OriginZ=viewSetup->pViewOrigin()->z;
-
-        currentView->AnglesX=viewSetup->pViewAngles()->x;
-        currentView->AnglesY=viewSetup->pViewAngles()->y;
-        currentView->AnglesZ=viewSetup->pViewAngles()->z;
+        currentView->position = *viewSetup->pViewOrigin();
+        currentView->rotation = *viewSetup->pViewAngles();
 
         currentView->FOV = *viewSetup->pFov();
     }
@@ -281,13 +271,9 @@ void CSController::HandleFreeCameraPath(const CameraSystemIO* const IO) {
 
     {
         auto view = this->controlView.ViewToGame.Write();
-        view->OriginX = pos.x;
-        view->OriginY = pos.y;
-        view->OriginZ = pos.z;
+        view->position = pos;
         view->FOV = fov;
-        view->AnglesX = rot.x;
-        view->AnglesY = rot.y;
-        view->AnglesZ = rot.z;
+        view->rotation = rot;
     }
     *this->controlView.dofs.pNearBlurry = dof.NearBlurry;
     *this->controlView.dofs.pNearCrisp = dof.NearCrisp;

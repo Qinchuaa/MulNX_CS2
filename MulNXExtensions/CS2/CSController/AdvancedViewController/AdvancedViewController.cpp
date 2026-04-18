@@ -48,8 +48,8 @@ bool AdvancedViewController::Menu(MulNXUINode* node) {
         MulNX::UI::SliderFloat("坐标轴长度", this->AxisLength, 1.0f, 200.0f);
 
         // 绘制当前骨骼位置（调试用）
-        auto boneInfo = this->CurrentBoneInfo.load(std::memory_order_acquire);
-        if (boneInfo) {
+        if (this->hasAxisInfo.load(std::memory_order_acquire)) {
+            auto read = this->currentAxisInfo.Read();
             MulNX::TransInfo info;
             info.pMatrix = this->CS2()->GetViewMatrix();
             info.windowHeight = this->CS2()->GetWinHeight();
@@ -57,17 +57,17 @@ bool AdvancedViewController::Menu(MulNXUINode* node) {
 
             // 分两部分绘制：原始骨骼点 与 坐标轴
             if (this->ShowOriginalBones.load(std::memory_order_acquire)) {
-                MulNX::UI::DrawWorldPoint(boneInfo->PosOrigin, info, "Origin");
-                MulNX::UI::DrawWorldPoint(boneInfo->PosForward, info, "Forward");
-                MulNX::UI::DrawWorldPoint(boneInfo->PosUp, info, "Up");
+                MulNX::UI::DrawWorldPoint(read->PosOrigin, info, "Origin");
+                MulNX::UI::DrawWorldPoint(read->PosForward, info, "Forward");
+                MulNX::UI::DrawWorldPoint(read->PosUp, info, "Up");
             }
 
             if (this->ShowCoordinateAxes.load(std::memory_order_acquire)) {
                 float axisLen = this->AxisLength.load(std::memory_order_acquire);
-                DirectX::XMFLOAT3 org = boneInfo->PosOrigin;
-                DirectX::XMFLOAT3 f_end = (boneInfo->AxisForward * axisLen) + org;
-                DirectX::XMFLOAT3 u_end = (boneInfo->AxisUp * axisLen) + org;
-                DirectX::XMFLOAT3 r_end = (boneInfo->AxisLeft * axisLen) + org;
+                DirectX::XMFLOAT3 org = read->PosOrigin;
+                DirectX::XMFLOAT3 f_end = (read->AxisForward * axisLen) + org;
+                DirectX::XMFLOAT3 u_end = (read->AxisUp * axisLen) + org;
+                DirectX::XMFLOAT3 r_end = (read->AxisLeft * axisLen) + org;
 
                 MulNX::UI::DrawWorldLine(org, f_end, info, ImColor(255, 0, 0), 2.0f);
                 MulNX::UI::DrawWorldLine(org, u_end, info, ImColor(0, 255, 0), 2.0f);
@@ -97,6 +97,7 @@ void AdvancedViewController::HandleUpdate(CS2::CViewSetup* viewSetup) {
                 this->viewBuffer.Push(newView);
             }
             else {
+                this->hasAxisInfo.store(false, std::memory_order_release);
                 this->ISys().LogWarning(std::format("HandleSelfViewUpdate failed with code: 0x{:X}", result.error()));
             }
             lastTime = currentTime;
@@ -213,17 +214,17 @@ std::expected<MulNX::Math::View, int> AdvancedViewController::HandleSelfViewUpda
         }
 
         // 存储调试信息
-        auto boneInfo = std::make_shared<AxisInfo>();
-        boneInfo->PosOrigin = point3.origin;
-        boneInfo->PosForward = point3.forward;
-        boneInfo->PosUp = point3.up;
-        boneInfo->AxisForward = forward;
-        boneInfo->AxisLeft = left;
-        boneInfo->AxisUp = up;
-        float axisLen = this->AxisLength.load(std::memory_order_acquire);
+        {
+            auto write = this->currentAxisInfo.Write();
+            write->PosOrigin = point3.origin;
+            write->PosForward = point3.forward;
+            write->PosUp = point3.up;
+            write->AxisForward = forward;
+            write->AxisLeft = left;
+            write->AxisUp = up;
 
-        this->CurrentBoneInfo.store(boneInfo, std::memory_order_release);
-
+            this->hasAxisInfo.store(true, std::memory_order_release);
+        }
         // ========== 构建局部坐标系到世界坐标系的旋转矩阵 ==========
         // 注意：DirectX 使用行主序矩阵，矩阵的行（而非列）应表示局部轴在世界坐标系中的分量
         // 所以每一行分别是 X 轴(forward)、Y 轴(left)、Z 轴(up)
