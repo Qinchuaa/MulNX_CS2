@@ -17,7 +17,7 @@ bool SmokeController::Init() {
     this->hkSetSmokeProps->Attach();
 
     // 2. 注册 UI
-    this->SendUINode(this->GetName(), [this](MulNXUINode* node) {
+    this->SendUINode(this->GetName(), [this](MulNX::UINode* node) {
         this->Menu(node);
         return true;
         });
@@ -134,7 +134,7 @@ void SmokeController::MySetSmokeProps(CS2::C_SmokeGrenadeProjectile* pSmoke) {
     }
 }
 
-void SmokeController::Menu(MulNXUINode* node) {
+void SmokeController::Menu(MulNX::UINode* node) {
     auto view = this->Hub()->showView.load(std::memory_order_acquire);
     if (view == PlayerHub::View::Player) {
         this->MenuPlayer(node);
@@ -144,7 +144,7 @@ void SmokeController::Menu(MulNXUINode* node) {
     }
 }
 
-void SmokeController::MenuPlayer(MulNXUINode* node) {
+void SmokeController::MenuPlayer(MulNX::UINode* node) {
     auto uid = this->Hub()->currentSteamId.load(std::memory_order_acquire);
 
     uint32_t currentColorU32 = IM_COL32(255, 255, 255, 255);
@@ -174,7 +174,7 @@ void SmokeController::MenuPlayer(MulNXUINode* node) {
     }
 }
 
-void SmokeController::MenuTeam(MulNXUINode* node) {
+void SmokeController::MenuTeam(MulNX::UINode* node) {
     auto team = this->Hub()->currentTeam.load(std::memory_order_acquire);
 
     uint32_t currentColorU32 = IM_COL32(255, 255, 255, 255);

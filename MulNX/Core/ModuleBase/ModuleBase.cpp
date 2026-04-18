@@ -41,14 +41,14 @@ bool MulNX::ModuleBase::BaseInit() {
     return true;
 }
 
-bool MulNX::ModuleBase::SendUINode(std::string&& name, std::function<void(MulNXUINode*)>&& func) {
+bool MulNX::ModuleBase::SendUINode(std::string&& name, std::function<void(MulNX::UINode*)>&& func) {
     // 创建UI节点
-    MulNXUINode UINode = MulNXUINode::Create(this);
+    MulNX::UINode UINode = MulNX::UINode::Create(this);
     // 设置UI节点属性
     UINode.name = std::move(name);
     UINode.MyFunc = std::move(func);
     // 创建UI消息
-    auto [msg, rp] = MulNX::Message::Create<MulNXUINode>("UISystem/ModulePush"_hash, std::move(UINode));
+    auto [msg, rp] = MulNX::Message::Create<MulNX::UINode>("UISystem/ModulePush"_hash, std::move(UINode));
     // 发送UI消息
     this->ISys().PublishAsync(std::move(msg));
     this->ISys().LogInfo("发送了一个UI节点进入消息系统");

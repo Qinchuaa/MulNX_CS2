@@ -76,7 +76,7 @@ namespace MulNX {
 		// 消息处理入口
 		void EntryProcessMsg();
         // 通过任意函数，发送一个UI节点
-        bool SendUINode(std::string&& name, std::function<void(MulNXUINode*)>&& func);
+        bool SendUINode(std::string&& name, std::function<void(MulNX::UINode*)>&& func);
         void SendTask(std::string&& workerName, std::function<bool()>&& task);
     public:
         // 设置模块名称

@@ -15,7 +15,7 @@ public:
 
     void VirtualMain()override;
     void ProcessMsg(MulNX::Message& Msg)override;
-    bool UINodeFunc(MulNXUINode* node);
+    bool UINodeFunc(MulNX::UINode* node);
     //void HandleUICommand(MulNXMessage* Msg);
 
     bool MarkTime();

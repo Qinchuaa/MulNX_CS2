@@ -5,19 +5,19 @@
 #include <MulNX/Systems/UISystem/UIContext/UIContext.hpp>
 #include <MulNX/Systems/MessageManager/IMessageManager.hpp>
 
-void MulNXUINode::Draw() {
+void MulNX::UINode::Draw() {
 	this->MyFunc(this);
 }
-bool MulNXUINode::CallUINode(std::string&& Name) {
+bool MulNX::UINode::CallUINode(std::string&& Name) {
     return this->MainContext->CallUINode(Name);
 }
-bool MulNXUINode::SetNextUINode(std::string&& Name) {
+bool MulNX::UINode::SetNextUINode(std::string&& Name) {
 	this->MainContext->Next = std::move(Name);
 	return true;
 }
 
-MulNXUINode MulNXUINode::Create(MulNX::ModuleBase* MB) {
-    MulNXUINode node;
+MulNX::UINode MulNX::UINode::Create(MulNX::ModuleBase* MB) {
+    MulNX::UINode node;
     node.hSelf = MulNXHandle::CreateHandle();
     node.HModule = MB->HModule;
     node.pMsgManager = MB->GetCore()->ModuleManager()->FindModule<MulNX::IMessageManager>("MessageManager");
@@ -25,7 +25,7 @@ MulNXUINode MulNXUINode::Create(MulNX::ModuleBase* MB) {
     return std::move(node);
 }
 
-bool MulNXUINode::PublishAsync(MulNX::Message&& Msg) {
+bool MulNX::UINode::PublishAsync(MulNX::Message&& Msg) {
     if (this->buzy->load(std::memory_order_acquire)) {
         this->MainContext->EnableErrorHandle = true;
         return false;

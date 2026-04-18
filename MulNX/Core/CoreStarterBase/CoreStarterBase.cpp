@@ -11,15 +11,13 @@ bool MulNX::Core::CoreStarterBase::SystemInit(MulNX::Core::Core* pCore) {
     return true;
 }
 
-void MulNX::Core::CoreStarterBase::RegisterMainDrawWith(std::function<void(MulNXUINode*)>&& MainDrawFunc) {
-    // 注册主窗口UI上下文
-    auto [UINode, pUINode] = MulNX::make_any_shared<MulNXUINode>();
+void MulNX::Core::CoreStarterBase::RegisterMainDrawWith(std::function<void(MulNX::UINode*)>&& MainDrawFunc) {
+    // 注册主窗口UI上下文 
+    auto [msg1, pUINode] = MulNX::Message::Create<MulNX::UINode>("UISystem/ModulePush"_hash);
     pUINode->name = "MainDraw";
     pUINode->MyFunc = MainDrawFunc;
-    MulNX::Message Msg("UISystem/ModulePush"_hash);
-    Msg.asp = std::move(UINode);
-    this->ISys().PublishAsync(std::move(Msg));
+    this->ISys().PublishAsync(std::move(msg1));
     // UI系统主界面初始化
-    auto [msg, rp] = MulNX::Message::Create<std::string>("UISystem/Start"_hash, "MainDraw");
-    this->ISys().PublishAsync(std::move(msg));
+    auto [msg2, rp] = MulNX::Message::Create<std::string>("UISystem/Start"_hash, "MainDraw");
+    this->ISys().PublishAsync(std::move(msg2));
 }

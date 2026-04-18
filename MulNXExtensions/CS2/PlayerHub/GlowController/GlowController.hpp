@@ -11,7 +11,7 @@ public:
     bool Init()override;
     void ProcessMsg(MulNX::Message& Msg)override;
     void MySetGlowColor(CS2::CGlowProperty* pGlowProperty, uint32_t* color);
-    void Menu(MulNXUINode* node);
-    void MenuPlayer(MulNXUINode* node);
-    void MenuTeam(MulNXUINode* node);
+    void Menu(MulNX::UINode* node);
+    void MenuPlayer(MulNX::UINode* node);
+    void MenuTeam(MulNX::UINode* node);
 };

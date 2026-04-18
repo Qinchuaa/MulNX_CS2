@@ -14,7 +14,7 @@ public:
     std::chrono::steady_clock::time_point LastUpdateTime = std::chrono::steady_clock::now();
 
     bool Init()override;
-    void Menu(MulNXUINode* node);
+    void Menu(MulNX::UINode* node);
 
     bool HandleUpdate(CS2::CViewSetup* viewSetup);
     void HandleOverrideView(CS2::CViewSetup* viewSetup);

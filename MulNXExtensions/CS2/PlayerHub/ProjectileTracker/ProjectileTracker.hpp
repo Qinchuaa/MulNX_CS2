@@ -21,7 +21,7 @@ class ProjectileTracker final : public CSModuleBase {
     void HandleProjectileRemove(CS2::C_BaseCSGrenadeProjectile* pProjectile);
 
     void ProcessMsg(MulNX::Message& msg)override;
-    void Menu(MulNXUINode* node);
+    void Menu(MulNX::UINode* node);
     void Update();
     std::atomic<std::shared_ptr<std::pair<DirectX::XMFLOAT3, DirectX::XMFLOAT3>>> currentView = nullptr;
 public:

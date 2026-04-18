@@ -4,7 +4,7 @@
 #include <MulNX/Base/UI/UI.hpp>
 #include <MulNXExtensions/CS2/CSController/CSController.hpp>
 
-bool GameSettingsManager::UINodeFunc(MulNXUINode* ThisNode) {
+bool GameSettingsManager::UINodeFunc(MulNX::UINode* ThisNode) {
     if (ImGui::Button("一键修复数字切人bug")) {
         this->AL3D->ExecuteCommand("unbind 1");
         this->AL3D->ExecuteCommand("unbind 2");
@@ -145,7 +145,7 @@ bool GameSettingsManager::Init() {
     this->GameSettings.SoundSettings.snd_deathcamera_volume = CVarSystem.GetCvar("snd_deathcamera_volume")->GetPtr<float>();
     this->GameSettings.SoundSettings.snd_mute_mvp_music_live_players = CVarSystem.GetCvar("snd_mute_mvp_music_live_players")->GetPtr<bool>();
 
-    this->SendUINode(this->GetName(), [this](MulNXUINode* node) {return this->UINodeFunc(node);});
+    this->SendUINode(this->GetName(), [this](MulNX::UINode* node) {return this->UINodeFunc(node);});
     return true;
 }
 

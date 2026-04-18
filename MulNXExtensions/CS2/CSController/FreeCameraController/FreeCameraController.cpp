@@ -3,11 +3,11 @@
 #include <MulNX/Base/UI/UI.hpp>
 
 bool FreeCameraController::Init() {
-    this->SendUINode(this->GetName(), [this](MulNXUINode* node) {return this->Menu(node);});
+    this->SendUINode(this->GetName(), [this](MulNX::UINode* node) {return this->Menu(node);});
     return true;
 }
 
-void FreeCameraController::Menu(MulNXUINode* node) {
+void FreeCameraController::Menu(MulNX::UINode* node) {
     // 自由摄像机控制
     if (ImGui::CollapsingHeader("自由摄像机控制")) {
 

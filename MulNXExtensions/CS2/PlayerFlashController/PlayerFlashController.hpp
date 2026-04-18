@@ -9,6 +9,6 @@ private:
     std::atomic<bool>bForceNoFlash = false;
 public:
     bool Init()override;
-    bool Menu(MulNXUINode* node);
+    bool Menu(MulNX::UINode* node);
     bool HandleForceFlash(CS2::CCSPlayerController* controller, CS2::C_CSPlayerPawn* pawn);
 };

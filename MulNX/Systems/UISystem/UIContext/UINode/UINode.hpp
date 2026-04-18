@@ -4,38 +4,41 @@
 #include <MulNX/Systems/MessageManager/IMessageManager.hpp>
 #include <functional>
 
-class MulNXUIContext;
 
-class MulNXUINode {
-public:
-	std::string name{};
-    std::function<void(MulNXUINode*)>MyFunc = nullptr;
-    MulNX::IMessageManager* pMsgManager = nullptr;
 
-	// 按照线程管理进行成员分类
+namespace MulNX {
+    class UIContext;
+    class UINode {
+    public:
+        std::string name{};
+        std::function<void(UINode*)>MyFunc = nullptr;
+        MulNX::IMessageManager* pMsgManager = nullptr;
 
-    // 初始化即可
-    MulNXHandle hSelf{};
-    MulNXHandle HModule{};
+        // 按照线程管理进行成员分类
 
-	// 跨线程数据
+        // 初始化即可
+        MulNXHandle hSelf{};
+        MulNXHandle HModule{};
 
-	bool Active = true;
-    std::atomic<bool>* buzy = nullptr;
+        // 跨线程数据
 
-	MulNXUIContext* MainContext = nullptr;
+        bool Active = true;
+        std::atomic<bool>* buzy = nullptr;
 
-    MulNXUINode() = default;
-    MulNXUINode(const MulNXUINode&) = default;
-    MulNXUINode(MulNXUINode&&) = default;
-    MulNXUINode& operator=(const MulNXUINode&) = default;
-    MulNXUINode& operator=(MulNXUINode&&) = default;
+        MulNX::UIContext* MainContext = nullptr;
 
-	void Draw();
+        MulNX::UINode() = default;
+        MulNX::UINode(const MulNX::UINode&) = default;
+        MulNX::UINode(MulNX::UINode&&) = default;
+        MulNX::UINode& operator=(const MulNX::UINode&) = default;
+        MulNX::UINode& operator=(MulNX::UINode&&) = default;
 
-    bool CallUINode(std::string&& Name);
-    bool SetNextUINode(std::string&& Name);
-    bool PublishAsync(MulNX::Message&& Msg);
+        void Draw();
 
-    static MulNXUINode Create(MulNX::ModuleBase* MB);
-};
+        bool CallUINode(std::string&& Name);
+        bool SetNextUINode(std::string&& Name);
+        bool PublishAsync(MulNX::Message&& Msg);
+
+        static MulNX::UINode Create(MulNX::ModuleBase* MB);
+    };
+}

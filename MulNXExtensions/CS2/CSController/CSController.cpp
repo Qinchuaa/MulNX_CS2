@@ -62,7 +62,7 @@ void CSController::HandleOverrideView(CS2::CViewSetup* viewSetup) {
     }
 }
 
-bool CSController::UINodeFunc(MulNXUINode* node) {
+bool CSController::UINodeFunc(MulNX::UINode* node) {
     if (this->ESPDraw.load(std::memory_order_acquire)) {
         this->ESP();
     }
@@ -136,7 +136,7 @@ bool CSController::Init() {
         .SubscribeAsync("Core/ReHook")
         .SubscribeAsync("Game/Command");
 
-    this->SendUINode(this->GetName(), [this](MulNXUINode* node) {return this->UINodeFunc(node);});
+    this->SendUINode(this->GetName(), [this](MulNX::UINode* node) {return this->UINodeFunc(node);});
 
     this->pAdvancedViewController = this->Core->ModuleManager()->FindModule<AdvancedViewController>("AdvancedViewController");
     this->pFreeCameraController = this->Core->ModuleManager()->FindModule<FreeCameraController>("FreeCameraController");

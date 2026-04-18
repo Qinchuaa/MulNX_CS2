@@ -70,6 +70,6 @@ public:
     //基类接口实现
 
     bool Init()override;
-    bool UINodeFunc(MulNXUINode* node);
+    bool UINodeFunc(MulNX::UINode* node);
     void VirtualMain()override;
 };

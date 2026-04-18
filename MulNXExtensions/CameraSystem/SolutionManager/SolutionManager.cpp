@@ -12,7 +12,7 @@ bool SolutionManager::Init() {
     this->CamDrawer = &this->Core->ModuleManager()->FindModule<CameraSystem>("CameraSystem")->CamDrawer;
     this->EManager = this->Core->ModuleManager()->FindModule<ElementManager>("ElementManager");
     this->PManager = this->Core->ModuleManager()->FindModule<ProjectManager>("ProjectManager");
-    this->SendUINode(this->GetName(), [this](MulNXUINode* node) {return this->UINodeFunc(node);});
+    this->SendUINode(this->GetName(), [this](MulNX::UINode* node) {return this->UINodeFunc(node);});
     auto* PathManager = this->ISys().PathManager();
     if (PathManager->CreateKey("Solutions", "Solutions",
         [this](MulNX::PathManager* PathManager)->bool {
@@ -280,7 +280,7 @@ void SolutionManager::Solution_ShowAllInLines() {
 
 //调试窗口及菜单
 
-bool SolutionManager::UINodeFunc(MulNXUINode* node) {
+bool SolutionManager::UINodeFunc(MulNX::UINode* node) {
     if (this->ShowWindow.load(std::memory_order_acquire)) {
         this->Solution_DebugWindow();
 

@@ -3,7 +3,7 @@
 #include <MulNX/Base/UI/UI.hpp>
 #include <MulNXExtensions/CS2/CSController/CSController.hpp>
 
-bool PlayerHub::Window(MulNXUINode* node) {
+bool PlayerHub::Window(MulNX::UINode* node) {
     auto w = MulNX::UI::RAIIWindow("玩家信息管理", this->ShowWindow);
     if (!w) return false;
     try {
@@ -151,6 +151,6 @@ bool PlayerHub::Window(MulNXUINode* node) {
 }
 
 bool PlayerHub::Init() {
-    this->SendUINode(this->GetName(), [this](MulNXUINode* node) {return this->Window(node);});
+    this->SendUINode(this->GetName(), [this](MulNX::UINode* node) {return this->Window(node);});
     return true;
 }

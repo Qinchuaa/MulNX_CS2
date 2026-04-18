@@ -11,7 +11,7 @@
 #include <Windows.h>
 
 bool MiniMap::Init() {
-    this->SendUINode(this->GetName(), [this](MulNXUINode* node) {return this->UINodeFunc(node);});
+    this->SendUINode(this->GetName(), [this](MulNX::UINode* node) {return this->UINodeFunc(node);});
     return true;
 }
 
@@ -23,7 +23,7 @@ void MiniMap::VirtualMain() {
     return;
 }
 
-bool MiniMap::UINodeFunc(MulNXUINode* ThisNode) {
+bool MiniMap::UINodeFunc(MulNX::UINode* ThisNode) {
     if (!this->ShowWindow) return true;
 
     // 保存当前样式

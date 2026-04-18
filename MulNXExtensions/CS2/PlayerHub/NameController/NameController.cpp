@@ -9,7 +9,7 @@ using GetDecoratedPlayerName_t = const char* (*)(CS2::CCSPlayerController* This_
 
 using GetPlayerName_t = const char* (*)(CS2::CCSPlayerController*);
 
-void NameController::Menu(MulNXUINode* node) {
+void NameController::Menu(MulNX::UINode* node) {
     if(this->Hub()->showView.load(std::memory_order_acquire) != PlayerHub::View::Player){
         ImGui::TextUnformatted("请切换到玩家视图以设置名称替换");
         return;
@@ -47,7 +47,7 @@ bool NameController::Init() {
         }).value();
     this->hkGetDecoratedPlayerName->Attach();
 
-    this->SendUINode(this->GetName(), [this](MulNXUINode* node) {
+    this->SendUINode(this->GetName(), [this](MulNX::UINode* node) {
         this->Menu(node);
         return true;
         });

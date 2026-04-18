@@ -53,7 +53,7 @@ private:
     MulNX::Math::ViewBuffer viewBuffer{};
 public:
     bool Init()override;
-    bool Menu(MulNXUINode* node);
+    bool Menu(MulNX::UINode* node);
 
     void HandleUpdate(CS2::CViewSetup* viewSetup);
     CS2::C_CSPlayerPawn* GetSelfViewTargetPawn();

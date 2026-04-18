@@ -4,7 +4,7 @@
 #include <MulNX/Systems/Debugger/Debugger.hpp>
 #include <MulNX/Base/UI/UI.hpp>
 
-bool MulNXController::UINodeFunc(MulNXUINode* ThisNode) {
+bool MulNXController::UINodeFunc(MulNX::UINode* ThisNode) {
     static bool debugMode = this->GlobalVars->DebugMode;
     if (ImGui::Checkbox("调试模式（Debug Mode），提供更多功能，但可能影响性能和稳定性", &debugMode)) {
         this->GlobalVars->DebugMode = debugMode;
@@ -48,7 +48,7 @@ bool MulNXController::UINodeFunc(MulNXUINode* ThisNode) {
 bool MulNXController::Init() {
     this->ISys()
         .SubscribeAsync("ModuleManager/ModuleInfo/Response");
-    this->SendUINode(this->GetName(), [this](MulNXUINode* node) {return this->UINodeFunc(node);});
+    this->SendUINode(this->GetName(), [this](MulNX::UINode* node) {return this->UINodeFunc(node);});
 
     return true;
 }

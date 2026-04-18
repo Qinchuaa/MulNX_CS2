@@ -5,7 +5,7 @@
 #include <MulNXExtensions/CameraSystem/SolutionManager/SolutionManager.hpp>
 #include <MulNXExtensions/CameraSystem/ProjectManager/ProjectManager.hpp>
 
-bool ElementManager::UINodeFunc(MulNXUINode* node) {
+bool ElementManager::UINodeFunc(MulNX::UINode* node) {
     auto w = MulNX::UI::RAIIWindow("元素调试", this->ShowWindow);
     if (!w)return true;
     // 检查当前是否有操作元素
@@ -24,7 +24,7 @@ bool ElementManager::Init() {
     this->CamDrawer = &this->Core->ModuleManager()->FindModule<CameraSystem>("CameraSystem")->CamDrawer;
     this->SManager = this->Core->ModuleManager()->FindModule<SolutionManager>("SolutionManager");
     this->PManager = this->Core->ModuleManager()->FindModule<ProjectManager>("ProjectManager");
-    this->SendUINode(this->GetName(), [this](MulNXUINode* node) {return this->UINodeFunc(node);});
+    this->SendUINode(this->GetName(), [this](MulNX::UINode* node) {return this->UINodeFunc(node);});
 
     auto* PathManager = this->ISys().PathManager();
     if (PathManager->CreateKey("Elements", "Elements",

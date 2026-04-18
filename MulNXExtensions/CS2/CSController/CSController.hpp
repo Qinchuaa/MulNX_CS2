@@ -67,7 +67,7 @@ public:
     void HandleCameraSystemPlay(CS2::CViewSetup* viewSetup);
 
     bool Init()override;
-    bool UINodeFunc(MulNXUINode* node);
+    bool UINodeFunc(MulNX::UINode* node);
     void ProcessMsg(MulNX::Message& Msg)override;
     void Update();
 

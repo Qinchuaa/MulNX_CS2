@@ -4,7 +4,7 @@
 #include <MulNXExtensions/CS2/CSController/CSController.hpp>
 #include <MulNXExtensions/CS2/PlayerHub/PlayerHub.hpp>
 
-void GlowController::Menu(MulNXUINode* node) {
+void GlowController::Menu(MulNX::UINode* node) {
     auto view = this->Hub()->showView.load(std::memory_order_acquire);
     if (view == PlayerHub::View::Player) {
         this->MenuPlayer(node);
@@ -13,7 +13,7 @@ void GlowController::Menu(MulNXUINode* node) {
         this->MenuTeam(node);
     }
 }
-void GlowController::MenuPlayer(MulNXUINode* node) {
+void GlowController::MenuPlayer(MulNX::UINode* node) {
     auto uid = this->Hub()->currentSteamId.load(std::memory_order_acquire);
 
     // 1. 获取当前为该玩家设置的颜色（若存在），否则使用默认白色
@@ -49,7 +49,7 @@ void GlowController::MenuPlayer(MulNXUINode* node) {
         this->ISys().PublishAsync(std::move(msg));
     }
 }
-void GlowController::MenuTeam(MulNXUINode* node) {
+void GlowController::MenuTeam(MulNX::UINode* node) {
     auto team = this->Hub()->currentTeam.load(std::memory_order_acquire);
 
     uint32_t currentColorU32 = IM_COL32(255, 255, 255, 255); // 默认白色
@@ -89,7 +89,7 @@ bool GlowController::Init() {
         }).value();
     this->hkSetGlowColor->Attach();
 
-    this->SendUINode(this->GetName(), [this](MulNXUINode* node) {
+    this->SendUINode(this->GetName(), [this](MulNX::UINode* node) {
         this->Menu(node);
         return true;
         });

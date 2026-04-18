@@ -11,7 +11,7 @@ bool GameCfgManager::Init() {
 	this->GamePath = this->IPCer->PathGet_CS_cfg();
 	//初始化Cfg文件列表
     this->UpdateCfgList();
-    this->SendUINode(this->GetName(), [this](MulNXUINode* node) {return this->UINodeFunc(node);});
+    this->SendUINode(this->GetName(), [this](MulNX::UINode* node) {return this->UINodeFunc(node);});
     return true;
 }
 
@@ -75,7 +75,7 @@ bool GameCfgManager::DeleteCfg(const std::string& CfgName) {
 }
 
 
-bool GameCfgManager::UINodeFunc(MulNXUINode* ThisNode) {
+bool GameCfgManager::UINodeFunc(MulNX::UINode* ThisNode) {
     if (!this->ShowWindow) return true;
     static bool op;
     op = this->ShowWindow;

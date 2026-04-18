@@ -21,7 +21,7 @@ bool MulNX::Debugger::Init() {
     this->ISys()
         .SubscribeAsync("Debugger/SetMaxInfoCount")
         .SubscribeAsync("Debugger/SaveToFile");
-    this->SendUINode(this->GetName(), [this](MulNXUINode* node) {return this->UINodeFunc(node);});
+    this->SendUINode(this->GetName(), [this](MulNX::UINode* node) {return this->UINodeFunc(node);});
     return true;
 }
 void MulNX::Debugger::ProcessMsg(MulNX::Message& Msg) {
@@ -144,7 +144,7 @@ void MulNX::Debugger::AddError(const std::string& NewMsg) {
     }
 }
 
-bool MulNX::Debugger::UINodeFunc(MulNXUINode* ThisNode) {
+bool MulNX::Debugger::UINodeFunc(MulNX::UINode* ThisNode) {
     auto w = MulNX::UI::RAIIWindow("调试器", this->ShowWindow);
     if (!w)return true;
     std::shared_lock lock(this->smutex);

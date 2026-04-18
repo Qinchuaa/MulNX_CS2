@@ -36,5 +36,5 @@ public:
     //从工具目录删除Cfg文件
     bool DeleteCfg(const std::string& CfgName);
 
-    bool UINodeFunc(MulNXUINode* node);
+    bool UINodeFunc(MulNX::UINode* node);
 };

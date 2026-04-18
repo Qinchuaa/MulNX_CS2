@@ -5,11 +5,11 @@
 #include <MulNXExtensions/CS2/CSController/CSController.hpp>
 
 bool ConsoleManager::Init() {
-    this->SendUINode(this->GetName(), [this](MulNXUINode* node) {return this->UINodeFunc(node);});
+    this->SendUINode(this->GetName(), [this](MulNX::UINode* node) {return this->UINodeFunc(node);});
     return true;
 }
 
-bool ConsoleManager::UINodeFunc(MulNXUINode* ThisNode) {
+bool ConsoleManager::UINodeFunc(MulNX::UINode* ThisNode) {
     MulNX::UI::Checkbox("小地图窗口", this->Core->ModuleManager()->FindModule("MiniMap")->ShowWindow);
     MulNX::UI::Checkbox("游戏配置管理器窗口", this->Core->ModuleManager()->FindModule("GameCfgManager")->ShowWindow);
     MulNX::UI::Checkbox("快捷操作窗口", this->Core->ModuleManager()->FindModule("CSController")->ShowWindow);

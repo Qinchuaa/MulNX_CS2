@@ -14,7 +14,7 @@
 // 这是MulNX_CS2项目的入口文件，也是MulNX项目的示例模块
 // 本文件展示了如何使用MulNX核心系统创建一个功能完整的注入式DLL工具。
 
-static void MainDraw(MulNXUINode* node) {
+static void MainDraw(MulNX::UINode* node) {
     ImGui::Begin("主窗口");
     if (ImGui::BeginTabBar("主标签页集")) {
         if (ImGui::BeginTabItem("摄像机系统")) {
@@ -56,7 +56,7 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserv
         // 这里不需要等待线程结束，因为它会在完成初始化后自动退出，然后等待进程结束时被操作系统清理
         break;
     }
-                           // 本系统不考虑卸载，计划生命周期与游戏进程相同！
+    // 本系统不考虑卸载，计划生命周期与游戏进程相同！
     case DLL_THREAD_ATTACH: {
         break;
     }

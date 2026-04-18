@@ -3,7 +3,7 @@
 #include <MulNX/MulNX.hpp>
 #include <MulNX/Base/UI/UI.hpp>
 
-bool CameraSystem::UINodeFunc(MulNXUINode* ThisNode) {
+bool CameraSystem::UINodeFunc(MulNX::UINode* ThisNode) {
     // 顶部：工作区信息（始终显示）
     ImGui::BeginChild("工作区面板", ImVec2(0, 150), true); {
         // 工作区状态
@@ -296,7 +296,7 @@ bool CameraSystem::Init() {
         auto Workspaces = this->ISys().PathGet("Workspaces");
         PathManager->KeyBindStatic("CurrentWorkspace", Workspaces);
     }
-    this->SendUINode(this->GetName(), [this](MulNXUINode* node) {return this->UINodeFunc(node);});
+    this->SendUINode(this->GetName(), [this](MulNX::UINode* node) {return this->UINodeFunc(node);});
     this->ISys()
         .SubscribeAsync("Global/Save")
         .SubscribeAsync("Global/Save/Strong")

@@ -31,7 +31,7 @@ namespace MulNX {
 		bool Init()override;
 		void VirtualMain()override;
 		void ProcessMsg(MulNX::Message& Msg)override;
-		bool UINodeFunc(MulNXUINode* ThisNode);
+		bool UINodeFunc(MulNX::UINode* ThisNode);
 
 		//调试器接口实现
 

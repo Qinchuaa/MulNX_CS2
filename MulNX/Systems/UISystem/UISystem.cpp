@@ -25,7 +25,7 @@ void MulNX::UISystem::ProcessMsg(MulNX::Message& Msg) {
         break;
     }
     case "UISystem/ModulePush"_hash: {
-        MulNXUINode* node = Msg.asp.get<MulNXUINode>();
+        MulNX::UINode* node = Msg.asp.get<MulNX::UINode>();
         this->UIContext.AddUINode(node->hSelf, std::move(*node));
         this->ISys().LogSucc("接收到一个UI节点");
         break;

@@ -12,7 +12,7 @@ namespace MulNX {
 
         virtual int Render() = 0;
 
-        virtual MulNXUIContext* GetUIContext() = 0;
+        virtual MulNX::UIContext* GetUIContext() = 0;
 
         virtual void SetFrameBefore(std::function<void(void)>Before) = 0;
         virtual void SetFrameBehind(std::function<void(void)>Behind) = 0;

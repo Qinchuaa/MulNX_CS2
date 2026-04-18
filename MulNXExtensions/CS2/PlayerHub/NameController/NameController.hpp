@@ -14,7 +14,7 @@ class NameController final :public CSModuleBase {
 public:
     bool Init()override;
     void ProcessMsg(MulNX::Message& Msg)override;
-    void Menu(MulNXUINode* node);
+    void Menu(MulNX::UINode* node);
 
     bool SetReplace(Steam64UID uid, const std::string& newName);
 };

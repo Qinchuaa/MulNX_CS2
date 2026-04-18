@@ -11,7 +11,7 @@ static std::string GetControllerPlayerName(CS2::CCSPlayerController* pController
     return name.empty() ? "未知玩家" : name;
 }
 
-void ProjectileTracker::Menu(MulNXUINode* node) {
+void ProjectileTracker::Menu(MulNX::UINode* node) {
     auto w = MulNX::UI::RAIIWindow("投掷物追踪器", this->ShowWindow);
     if (!w) return;
 
@@ -54,7 +54,7 @@ bool ProjectileTracker::Init() {
         return true;
         });
 
-    this->SendUINode(this->GetName(), [this](MulNXUINode* node) {
+    this->SendUINode(this->GetName(), [this](MulNX::UINode* node) {
         this->Menu(node);
         });
 

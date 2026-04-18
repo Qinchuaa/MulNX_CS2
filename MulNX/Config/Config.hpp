@@ -47,13 +47,14 @@ namespace MulNX {
     class IMessageChannel;
     // 路径管理器
     class PathManager;
+    // UI节点
+    class UINode;
 
     [[noreturn]] void ErrorTerminate(const std::string& Msg,
         const std::source_location& loc = std::source_location::current());
 
     void SetUIStyle();
 }
-class MulNXUINode;
 
 // 辅助模板：将函数签名 R(Args...) 转换为对应的函数指针类型 R(*)(Args...)
 template<typename T>

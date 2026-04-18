@@ -6,7 +6,7 @@ namespace MulNX {
     class UISystem final :public IUISystem {
     private:
         std::shared_mutex UIMutex{};
-        MulNXUIContext UIContext{};
+        MulNX::UIContext UIContext{};
         bool UISystemRunning = false;
         std::function<void(void)>FrameBefore = nullptr;
         std::function<void(void)>FrameBehind = nullptr;
@@ -19,7 +19,7 @@ namespace MulNX {
 
         int Render()override;
 
-        MulNXUIContext* GetUIContext() { return &this->UIContext; }
+        MulNX::UIContext* GetUIContext() { return &this->UIContext; }
 
         void SetFrameBefore(std::function<void(void)>Before)override;
         void SetFrameBehind(std::function<void(void)>Behind)override;
