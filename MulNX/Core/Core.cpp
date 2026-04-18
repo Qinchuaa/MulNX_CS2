@@ -9,14 +9,6 @@ MulNX::Core::Core::Core(std::string&& Name) :
     this->pModuleManager = std::make_unique<MulNX::Core::ModuleManager>();
 }
 
-bool MulNX::Core::Core::SetCoreStarter(std::unique_ptr<CoreStarterBase> starter) {
-	if (!starter) {
-		return false;
-	}
-	this->pCoreStarter = std::move(starter);
-	return true;
-}
-
 MulNX::Core::Core* MulNX::Core::Core::Create(std::string&& coreName) {
     auto core = std::make_unique<MulNX::Core::Core>(std::move(coreName));
     auto& Myself = core->pMyself;

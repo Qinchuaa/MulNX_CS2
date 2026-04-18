@@ -1,11 +1,13 @@
 #include "HookManager.hpp"
 
-#include <MulNX/MulNX.hpp>
 #include <MulNX/Base/CharUtility/CharUtility.hpp>
 #include <MulNX/Base/UI/UI.hpp>
+#include <MulNX/MulNX.hpp>
 #include <MulNXThirdParty/imgui_d11/imgui_impl_dx11.h>
 #include <MulNXThirdParty/imgui_d11/imgui_impl_win32.h>
 #include <chrono>
+
+// 链接d3d11库
 #pragma comment(lib,"d3d11.lib")
 
 using ResizeBuffers_t = HRESULT(__stdcall*)(IDXGISwapChain* This, UINT BufferCount, UINT Width, UINT Height, DXGI_FORMAT NewFormat, UINT SwapChainFlags);

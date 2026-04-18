@@ -24,6 +24,11 @@ void CSController::HandleCameraSystemPlay(CS2::CViewSetup* viewSetup) {
 }
 
 void CSController::HandleOverrideView(CS2::CViewSetup* viewSetup) {
+    if (this->GlobalVars->SystemReady.load(std::memory_order_acquire)) {
+        this->Core->VirtualMain();
+    }
+    
+
     static auto* pProjectileTracker = this->Core->ModuleManager()->FindModule<ProjectileTracker>("ProjectileTracker");
     auto trckerView = pProjectileTracker->GetView();
     if (trckerView.has_value()) {

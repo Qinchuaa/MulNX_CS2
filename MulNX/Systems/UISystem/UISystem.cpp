@@ -48,7 +48,6 @@ int MulNX::UISystem::Render() {
     if (this->UIContext.Active) {
         this->UIContext.Draw();
     }
-    this->Core->VirtualMain();
     this->FrameBehind();
 
     return 0;

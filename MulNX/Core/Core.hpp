@@ -42,11 +42,12 @@ namespace MulNX {
             // 获取模块的接口
             ModuleManager* ModuleManager();
 
-            // 获取启动器
-            MulNX::Core::CoreStarterBase* GetStarter() { return this->pCoreStarter.get(); }
-
             // 设置启动器
-			bool SetCoreStarter(std::unique_ptr<CoreStarterBase> Starter);
+            template<typename T>
+            CoreStarterBase* CreateCoreStarter() {
+                this->pCoreStarter = std::make_unique<T>();
+                return this->pCoreStarter.get();
+            }
 
             // 获取核心名
             std::string GetName();
