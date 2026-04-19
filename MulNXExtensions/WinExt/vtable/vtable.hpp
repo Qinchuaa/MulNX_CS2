@@ -2,6 +2,7 @@
 
 #include <cstdint>
 #include <utility>  // for std::forward
+#include <type_traits>
 
 // 辅助 trait：将函数类型 F = R(Args...) 转换为对应的带显式 this 指针的函数指针类型 R(*)(void*, Args...)
 template<typename F>
@@ -75,7 +76,7 @@ public:
 
     template<typename T>
     static IVClass* Assume(T* pClass) {
-        return reinterpret_cast<IVClass*>(pClass);
+        return reinterpret_cast<IVClass*>(const_cast<std::remove_cv_t<T>*>(pClass));
     }
 
     static IVClass* Assume(uintptr_t pClass) {

@@ -7,8 +7,8 @@
 #include <MulNXExtensions/CS2/PlayerHub/ProjectileTracker/ProjectileTracker.hpp>
 #include <MulNXThirdParty/All_cs2_dumper.hpp>
 
-using AddEntity_t = void* (__fastcall*)(void* This, CS2::C_BaseEntity* p, CS2::CHandleBase handle);
-using RemoveEntity_t = void* (__fastcall*)(void* This, CS2::C_BaseEntity* p, CS2::CHandleBase handle);
+using AddEntity_t = void* (*)(void* This, CS2::C_BaseEntity* p, CS2::CHandleBase handle);
+using RemoveEntity_t = void* (*)(void* This, CS2::C_BaseEntity* p, CS2::CHandleBase handle);
 
 void CSController::HandleCameraSystemPlay(CS2::CViewSetup* viewSetup) {
     // 加载来自摄像机系统的View
@@ -25,7 +25,7 @@ void CSController::HandleCameraSystemPlay(CS2::CViewSetup* viewSetup) {
 
 void CSController::HandleOverrideView(CS2::CViewSetup* viewSetup) {
     if (this->GlobalVars->SystemReady.load(std::memory_order_acquire)) {
-        this->Core->VirtualMain();
+        this->Core->ModuleManager()->VirtualMain();
     }
     
 
@@ -121,14 +121,6 @@ void CSController::ProcessMsg(MulNX::Message& Msg) {
     case "Game/Command"_hash: {
         auto cmd = Msg.asp.get<MulNX::NetExt>()->str1;
         this->ExecuteCommand(cmd);
-        break;
-    }
-    case "CameraSystem/Play/Started"_hash: {
-        this->ExecuteCommand("spec_mode 4");
-        break;
-    }
-    case "CameraSystem/Play/Ended"_hash: {
-        this->ExecuteCommand("spec_mode 2");
         break;
     }
 

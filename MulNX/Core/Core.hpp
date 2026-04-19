@@ -9,8 +9,6 @@ namespace MulNX {
         class Core {
             friend class MulNX::ModuleBase;
         private:
-            // 数据存储：
-
             // 自身指针
             std::unique_ptr<Core> pMyself = nullptr;
             // 核心名称（文件系统路径管理需要用）
@@ -21,9 +19,7 @@ namespace MulNX {
             std::unique_ptr<MulNX::Core::CoreStarterBase> pCoreStarter = nullptr;
 
             Core() = delete;
-            // 删除拷贝构造
             Core(const Core&) = delete;
-            // 删除拷贝赋值
             Core& operator=(const Core&) = delete;
         public:
             // 构造函数
@@ -36,8 +32,6 @@ namespace MulNX {
 
             // 初始化
             void Init();
-            // 主循环
-            void VirtualMain();
 
             // 获取模块的接口
             ModuleManager* ModuleManager();
