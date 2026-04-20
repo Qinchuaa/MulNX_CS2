@@ -51,6 +51,7 @@ private:
     C_ConVarSystem CvarSystem{};
     // CS2全局变量
     C_GlobalVars* CSGlobalVars{};
+    std::unique_ptr<MulNX::Hook> hkPosCallIsPlayingDemo = nullptr;
 
     std::atomic<bool> autoTick = true;
     std::atomic<int> deltaTick = 0;
@@ -61,15 +62,16 @@ public:
     CS2::Modules Modules{};
     std::atomic<bool> ESPDraw = false;
     
-    std::unique_ptr<MulNX::Hook> hkPosCallIsPlayingDemo = nullptr;
-    
-    void HandleOverrideView(CS2::CViewSetup* viewSetup);
-    void HandleCameraSystemPlay(CS2::CViewSetup* viewSetup);
-
     bool Init()override;
     bool UINodeFunc(MulNX::UINode* node);
     void ProcessMsg(MulNX::Message& Msg)override;
     void Update();
+
+    void HandleOverrideView(CS2::CViewSetup* viewSetup);
+    void HandleCameraSystemPlay(CS2::CViewSetup* viewSetup);
+    // 获取控制台变量系统
+    C_ConVarSystem& GetCvarSystem() { return this->CvarSystem; }
+    bool SpecHandle(CS2::CHandleBase handle);
 
     // 核心接口
     bool ExecuteCommand(const std::string& cmd)override;
@@ -88,9 +90,5 @@ public:
     // CameraSystemIO的处理
 
     void HandleFreeCameraPath(const CameraSystemIO* const IO);
-    void HandleFirstPersonCameraPath(const CameraSystemIO* const IO);
     bool CameraSystemIOOverride(const CameraSystemIO* const IO)override;
-
-    // 获取控制台变量系统
-    C_ConVarSystem& GetCvarSystem() { return this->CvarSystem; }
 };

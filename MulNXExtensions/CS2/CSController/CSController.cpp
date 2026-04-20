@@ -1,6 +1,5 @@
 #include "CSController.hpp"
 
-#include <MulNX/MulNX.hpp>
 #include <MulNX/Base/UI/UI.hpp>
 #include <MulNX/Base/Math/Translate/Translate.hpp>
 #include <MulNXExtensions/CameraSystem/CameraSystemIO/CameraSystemIO.hpp>
@@ -279,13 +278,6 @@ void CSController::HandleFreeCameraPath(const CameraSystemIO* const IO) {
 
     this->controlView.hasViewToGame.store(true, std::memory_order_release);
 }
-void CSController::HandleFirstPersonCameraPath(const CameraSystemIO* const IO) {
-    static uint8_t LastIndex = 0xFFFF;
-    if (LastIndex != IO->Frame.TargetPlayerIndexInMap) {
-        this->ExecuteCommand("spec_mode 2;spec_player " + std::to_string(IO->Frame.TargetPlayerIndexInMap));
-        LastIndex = IO->Frame.TargetPlayerIndexInMap;
-    }
-}
 bool CSController::CameraSystemIOOverride(const CameraSystemIO* const IO) {
     static float LastCallTime = IO->FrameGameTime;
     if (LastCallTime == IO->FrameGameTime) {
@@ -293,12 +285,32 @@ bool CSController::CameraSystemIOOverride(const CameraSystemIO* const IO) {
     }
     LastCallTime = IO->FrameGameTime;
 
-    switch (IO->Frame.TargetOBMode) {
-    case 4:this->HandleFreeCameraPath(IO); break;
-    case 2:this->HandleFirstPersonCameraPath(IO); break;
-    }
+    this->HandleFreeCameraPath(IO);
 
     return true;
+}
+
+bool CSController::SpecHandle(CS2::CHandleBase handle) {
+    try {
+        auto* localPawn = this->Modules.client.GetLocalPlayerPawn();
+        if (!localPawn) {
+            this->ISys().LogWarning("尝试在无本地实体情况下设置观战？");
+            return false;
+        }
+        auto pObserverServices = MulNX::MRead(localPawn->pObserverServices());
+        auto* pTarget = pObserverServices->hObserverTarget();
+        MulNX::MWrite(&pTarget->handle, handle.handle);
+        MulNX::MWrite(pObserverServices->iObserverMode(), (uint8_t)2);
+        return true;
+    }
+    catch (const std::runtime_error& e) {
+        this->ISys().LogError(std::format("在设置观战目标时发生错误：{}", e.what()));
+        return false;
+    }
+    catch (...) {
+        this->ISys().LogError("在设置观战目标时发生未知错误");
+        return false;
+    }
 }
 
 // C_ConVar* m_yawPtr = nullptr;
