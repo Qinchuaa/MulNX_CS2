@@ -69,6 +69,7 @@ void ProjectileTracker::ProcessMsg(MulNX::Message& msg) {
     switch (msg.type) {
     case "Game/Entity/Added"_hash: {
         auto pEntity = msg.p1.as<CS2::C_BaseEntity*>();
+        auto hEntity = msg.p2.low<CS2::CHandleBase>();
         std::string name;
         try {
             name = pEntity->GetName();
@@ -184,8 +185,8 @@ void ProjectileTracker::Update() {
         auto pGameSceneNode = MulNX::MRead(pProjectile->pGameSceneNode());
         if (!pGameSceneNode) return;
 
-        auto pos = MulNX::MRead(pGameSceneNode->vecAbsOrigin());
-        auto vel = MulNX::MRead(pProjectile->m_vecAbsVelocity());
+        auto pos = MulNX::MRead(pGameSceneNode->vecOrigin());
+        auto vel = MulNX::MRead(pProjectile->m_vecVelocity());
 
         // 相机后移距离（可根据投掷物尺寸调整）
         constexpr float kCameraOffsetDistance = 80.0f;

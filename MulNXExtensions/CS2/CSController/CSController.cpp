@@ -6,9 +6,6 @@
 #include <MulNXExtensions/CS2/PlayerHub/ProjectileTracker/ProjectileTracker.hpp>
 #include <MulNXThirdParty/All_cs2_dumper.hpp>
 
-using AddEntity_t = void* (*)(void* This, CS2::C_BaseEntity* p, CS2::CHandleBase handle);
-using RemoveEntity_t = void* (*)(void* This, CS2::C_BaseEntity* p, CS2::CHandleBase handle);
-
 void CSController::HandleCameraSystemPlay(CS2::CViewSetup* viewSetup) {
     // 加载来自摄像机系统的View
     if (this->controlView.hasViewToGame.load(std::memory_order_acquire)) {

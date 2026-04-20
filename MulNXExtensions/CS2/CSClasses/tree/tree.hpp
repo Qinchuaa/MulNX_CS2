@@ -92,6 +92,8 @@ namespace CS2 {
         CHandle<C_BaseEntity>* m_hOwnerEntity() { return Schema<CHandle<C_BaseEntity>>(this, cs2_dumper::schemas::client_dll::C_BaseEntity::m_hOwnerEntity); }
         GameTime_t* m_flCreateTime() { return Schema<GameTime_t>(this, cs2_dumper::schemas::client_dll::C_BaseEntity::m_flCreateTime); }
         DirectX::XMFLOAT3* m_vecAbsVelocity() { return Schema<DirectX::XMFLOAT3>(this, cs2_dumper::schemas::client_dll::C_BaseEntity::m_vecAbsVelocity); }
+        DirectX::XMFLOAT3* m_vecVelocity() { return Schema<DirectX::XMFLOAT3>(this, cs2_dumper::schemas::client_dll::C_BaseEntity::m_vecVelocity); }
+
 
 
         DirectX::XMFLOAT3 GetBonePos(int index);
