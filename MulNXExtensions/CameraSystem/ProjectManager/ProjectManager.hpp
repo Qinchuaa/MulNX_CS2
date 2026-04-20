@@ -34,7 +34,7 @@ public:
     bool MenuProject(MulNX::UINode* node);
     bool UINodeFunc(MulNX::UINode* node);
     // 逻辑主函数
-    void VirtualMain()override;
+    void HandleUpdate();
     // 遍历
     void Traversal();
 

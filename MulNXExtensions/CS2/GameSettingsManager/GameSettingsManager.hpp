@@ -71,5 +71,4 @@ public:
 
     bool Init()override;
     bool UINodeFunc(MulNX::UINode* node);
-    void VirtualMain()override;
 };

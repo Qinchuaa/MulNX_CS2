@@ -29,7 +29,7 @@ namespace MulNX {
 		//模块基类接口实现
 
 		bool Init()override;
-		void VirtualMain()override;
+		void Main();
 		void ProcessMsg(MulNX::Message& Msg)override;
 		bool UINodeFunc(MulNX::UINode* ThisNode);
 

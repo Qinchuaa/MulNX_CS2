@@ -5,8 +5,12 @@
 using namespace MulNX::Core;
 
 bool ModuleManager::Init() {
-	// 后置消息订阅，参见 PackedInit
-	return true;
+    // 后置消息订阅，参见 PackedInit
+    this->SendTask("MulNXMain", [this]()->bool {
+        this->EntryProcessMsg();
+        return true;
+        });
+    return true;
 }
 void ModuleManager::ProcessMsg(MulNX::Message& Msg) {
 	std::unique_lock lock(this->smutex);
@@ -21,10 +25,6 @@ void ModuleManager::ProcessMsg(MulNX::Message& Msg) {
         this->ISys().PublishAsync(std::move(msg));
 	}
 	}
-}
-void ModuleManager::VirtualMain() {
-	this->EntryProcessMsg();
-	this->PackedVirtualMain();
 }
 
 bool ModuleManager::RegisteModule(std::unique_ptr<MulNX::ModuleBase>&& Module, int Priority) {
@@ -94,14 +94,4 @@ bool ModuleManager::PackedInit() {
         .SubscribeAsync("ModuleManager/ModuleInfo/Request");
     // 完成初始化
 	return true;
-}
-
-void ModuleManager::PackedVirtualMain() {
-	std::shared_lock lock(this->smutex);
-    for (const auto& [Priority, hModule] : this->PriorityToHandleMap) {
-        auto* pModule = this->Modules[hModule].get();
-        if (!pModule->HasParent()) {
-            pModule->VirtualMain();
-        }
-    }
 }

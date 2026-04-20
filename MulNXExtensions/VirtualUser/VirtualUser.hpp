@@ -7,6 +7,6 @@ public:
     std::atomic<bool> Enabled = true;
     bool Init()override;
 
-    void VirtualMain()override;
+    void Main();
     void ProcessMsg(MulNX::Message& Msg)override;
 };

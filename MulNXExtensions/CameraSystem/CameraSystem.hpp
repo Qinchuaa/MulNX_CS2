@@ -48,8 +48,8 @@ public:
     bool Init()override;
     // 菜单
     bool Menu(MulNX::UINode* node);
-    // 逻辑主函数
-    void VirtualMain()override;
+    
+    void HandleUpdate();
 
     void ProcessMsg(MulNX::Message& msg)override;
 public:

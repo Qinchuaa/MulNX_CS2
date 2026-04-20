@@ -3,6 +3,7 @@
 #include <MulNX/Base/UI/UI.hpp>
 #include <MulNX/Base/Math/Translate/Translate.hpp>
 #include <MulNXExtensions/CameraSystem/CameraSystemIO/CameraSystemIO.hpp>
+#include <MulNXExtensions/CameraSystem/CameraSystem.hpp>
 #include <MulNXExtensions/CS2/PlayerHub/ProjectileTracker/ProjectileTracker.hpp>
 #include <MulNXThirdParty/All_cs2_dumper.hpp>
 
@@ -21,7 +22,7 @@ void CSController::HandleCameraSystemPlay(CS2::CViewSetup* viewSetup) {
 
 void CSController::HandleOverrideView(CS2::CViewSetup* viewSetup) {
     if (this->GlobalVars->SystemReady.load(std::memory_order_acquire)) {
-        this->Core->ModuleManager()->VirtualMain();
+        this->Core->ModuleManager()->FindModule<CameraSystem>("CameraSystem")->HandleUpdate();
     }
     
 

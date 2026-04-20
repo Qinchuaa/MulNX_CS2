@@ -148,7 +148,3 @@ bool GameSettingsManager::Init() {
     this->SendUINode(this->GetName(), [this](MulNX::UINode* node) {return this->UINodeFunc(node);});
     return true;
 }
-
-void GameSettingsManager::VirtualMain() {
-
-}

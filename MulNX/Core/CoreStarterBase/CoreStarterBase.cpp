@@ -13,11 +13,10 @@ bool MulNX::Core::CoreStarterBase::SystemInit(MulNX::Core::Core* pCore) {
 
 void MulNX::Core::CoreStarterBase::RegisterMainDrawWith(std::function<void(MulNX::UINode*)>&& MainDrawFunc) {
     // 注册主窗口UI上下文 
-    auto [msg1, pUINode] = MulNX::Message::Create<MulNX::UINode>("UISystem/ModulePush"_hash);
-    pUINode->name = "MainDraw";
-    pUINode->MyFunc = MainDrawFunc;
-    this->ISys().PublishAsync(std::move(msg1));
+    this->SendUINode("MainDraw", std::move(MainDrawFunc));
+    this->ISys().LogInfo("发送了主窗口注册指令");
     // UI系统主界面初始化
     auto [msg2, rp] = MulNX::Message::Create<std::string>("UISystem/Start"_hash, "MainDraw");
     this->ISys().PublishAsync(std::move(msg2));
+    this->ISys().LogWarning("发送了UI启动指令！渲染即将开始！");
 }

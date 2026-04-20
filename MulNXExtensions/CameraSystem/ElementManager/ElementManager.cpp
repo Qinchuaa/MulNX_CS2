@@ -14,42 +14,31 @@ bool ElementManager::MenuElement(MulNX::UINode* node) {
         this->OnPreview ? "开启" : "关闭",
         this->Preview_CurrentElement ? this->Preview_CurrentElement->GetName() : "无")
         .c_str());
+    
     ImGui::Separator();
+
     // 元素总设置
     if (ImGui::CollapsingHeader("元素设置")) {
         ImGui::Checkbox("预览插值摄像机绘制", &this->Config.PreviewDraw);
         ImGui::Checkbox("预览插值摄像机覆盖", &this->Config.PreviewOverride);
     }
+
     // 创建元素
     if (ImGui::CollapsingHeader("元素创建")) {
         ImGui::Text("新元素名：");
         ImGui::SameLine();
-        static std::string CreateElementName = "";
-        ImGui::InputText("##新元素名", &CreateElementName);
-        // 创建成功则清空输入框
+        static std::string newElementName = "";
+        ImGui::InputText("##新元素名", &newElementName);
         // 创建自由摄像机轨道
         if (ImGui::Button("新的自由摄像机轨道")) {
-            if (CreateElementName.empty()) {
+            if (newElementName.empty()) {
                 this->ISys().LogError("请输入元素名！");
-                return true;
             }
-            if (this->Element_Create<FreeCameraPath>(CreateElementName)) {
-                CreateElementName.clear();
+            else {
+                auto [msg, rp] = MulNX::Message::Create<MulNX::NetExt>("Element/Create"_hash);
+                rp->str1 = std::move(newElementName);
             }
-        }
-    }
-    // 载入元素
-    if (ImGui::CollapsingHeader("元素载入")) {
-        ImGui::Text("载入元素名：");
-        ImGui::SameLine();
-        static std::string LoadElementName = "";
-        ImGui::InputText("##载入元素名", &LoadElementName);
-        ImGui::SameLine();
-        // 载入成功则清空输入框
-        if (ImGui::Button("载入##元素")) {
-            if (this->Element_Load(this->ISys().PathManager()->PathGetFromKey("Elements") / (LoadElementName + ".yaml"))) {
-                LoadElementName.clear();
-            }
+            newElementName.clear();
         }
     }
     // 展示修改元素
@@ -100,9 +89,26 @@ bool ElementManager::Init() {
         })) {
         PathManager->KeyBindDynamic("Elements", "CurrentProject");
     }
+
+    this->ISys()
+        .SubscribeAsync("Element/Create");
+
     return true;
 }
-void ElementManager::VirtualMain() {
+
+void ElementManager::ProcessMsg(MulNX::Message& msg) {
+    switch (msg.type) {
+    case "Element/Create"_hash: {
+        auto& name = msg.asp.get<MulNX::NetExt>()->str1;
+        if (!this->Element_Create<FreeCameraPath>(name)) {
+            this->ISys().LogError(std::format("元素创建失败：{}", name));
+        }
+    }
+    }
+}
+
+void ElementManager::HandleUpdate() {
+    this->EntryProcessMsg();
     if (this->OnPreview) {
         CameraSystemIO IO;
         IO.ElementTime = this->AL3D->Time()->GetReal();

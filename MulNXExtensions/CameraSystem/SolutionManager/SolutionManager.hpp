@@ -51,7 +51,7 @@ public:
     bool MenuSolution(MulNX::UINode* node);
     bool UINodeFunc(MulNX::UINode* node);
     // 逻辑主函数
-    void VirtualMain();
+    void HandleUpdate();
     // 遍历，用于迭代处理每个解决方案
     void Traversal();
     // 刷新，更深层次的遍历，主要用于清理失效元素

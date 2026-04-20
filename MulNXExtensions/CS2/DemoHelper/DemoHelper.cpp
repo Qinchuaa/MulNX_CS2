@@ -59,6 +59,10 @@ bool DemoHelper::Init() {
         ;
 
     this->SendUINode(this->GetName(), [this](MulNX::UINode* node) {return this->UINodeFunc(node);});
+    this->SendTask("MulNXMain", [this]()->bool {
+        this->Main();
+        return true;
+        });
     return true;
 }
 
@@ -78,7 +82,7 @@ void DemoHelper::ProcessMsg(MulNX::Message& Msg) {
     }
 }
 
-void DemoHelper::VirtualMain() {
+void DemoHelper::Main() {
     this->EntryProcessMsg();
 }
 

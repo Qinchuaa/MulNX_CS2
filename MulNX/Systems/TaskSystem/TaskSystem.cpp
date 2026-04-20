@@ -20,6 +20,20 @@ void MulNX::Task::Worker::Start() {
 bool MulNX::TaskSystem::Init() {
     this->ISys()
         .SubscribeAsync("Task/Create");
+
+    static auto t = std::thread([this]() {
+        for (;;) {
+            this->Main();
+        }
+        });
+    // auto [msg, rp] = MulNX::Message::Create<MulNX::Task::RegistrationPacket>("Task/Create"_hash);
+    // rp->targetWorker = "MulNXMain";
+    // rp->task = std::move([this]()->bool {
+    //     this->Main();
+    //     return true;
+    //     });
+    // this->HandleAddTask(msg);
+    
     return true;
 }
 
@@ -36,9 +50,8 @@ void MulNX::TaskSystem::ProcessMsg(MulNX::Message& msg) {
     }
 }
 
-void MulNX::TaskSystem::VirtualMain() {
+void MulNX::TaskSystem::Main() {
     this->EntryProcessMsg();
-    
 }
 
 void MulNX::TaskSystem::HandleAddTask(MulNX::Message& msg) {

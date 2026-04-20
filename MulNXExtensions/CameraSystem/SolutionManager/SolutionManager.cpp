@@ -203,7 +203,7 @@ bool SolutionManager::Init() {
     
     return true;
 }
-void SolutionManager::VirtualMain() {
+void SolutionManager::HandleUpdate() {
     //判断需不需要刷新所有
     if (this->NeedRefresh) {
         this->Refresh();//全部刷新用于清理失效元素

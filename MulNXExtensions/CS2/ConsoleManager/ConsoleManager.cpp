@@ -49,7 +49,3 @@ bool ConsoleManager::UINodeFunc(MulNX::UINode* ThisNode) {
     }
     return true;
 }
-
-void ConsoleManager::VirtualMain() {
-
-}

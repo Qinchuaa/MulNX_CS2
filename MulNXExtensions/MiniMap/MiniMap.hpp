@@ -15,6 +15,6 @@ private:
     bool FollowWindow = true;
 public:
     bool Init()override;
-    void VirtualMain()override;
+    void Main();
     bool UINodeFunc(MulNX::UINode* node);
 };

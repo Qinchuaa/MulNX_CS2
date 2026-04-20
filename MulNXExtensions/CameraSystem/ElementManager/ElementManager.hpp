@@ -38,16 +38,11 @@ public:
     bool OnPreview = false;
 
 
-
-    // 元素管理器基本函数
-
-    // 初始化
     bool Init()override;
-    // UI
     bool MenuElement(MulNX::UINode* node);
     bool UINodeFunc(MulNX::UINode* node);
-    // 逻辑主函数
-    void VirtualMain()override;
+    void ProcessMsg(MulNX::Message& msg)override;
+    void HandleUpdate();
 
 
     // 通用基础函数：

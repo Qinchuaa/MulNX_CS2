@@ -138,12 +138,15 @@ void CameraSystem::ProcessMsg(MulNX::Message& msg) {
     }
 }
 
-void CameraSystem::VirtualMain() {
+void CameraSystem::HandleUpdate() {
     this->EntryProcessMsg();
     if (this->pInputSystem->CheckWithPack(MulNX::KeyCheckPack{ true,false,false,true,'P',1 })) {
         this->ISys().PublishAsync("CameraSystem/Play/Shutdown"_hash);
     }
     this->CamDrawer.Update(this->AL3D->GetViewMatrix(), this->AL3D->GetWinWidth(), this->AL3D->GetWinHeight());
+    this->EManager->HandleUpdate();
+    this->SManager->HandleUpdate();
+    this->PManager->HandleUpdate();
     return;
 }
 void CameraSystem::MemoryClear() {

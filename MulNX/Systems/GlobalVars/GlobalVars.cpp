@@ -6,10 +6,14 @@
 #include <chrono>
 
 bool MulNX::GlobalVars::Init() {
-	return true;
+    this->SendTask("MulNXMain", [this]()->bool {
+        this->Main();
+        return true;
+        });
+    return true;
 }
 
-void MulNX::GlobalVars::VirtualMain() {
+void MulNX::GlobalVars::Main() {
 	static std::chrono::steady_clock::time_point StartTime = std::chrono::steady_clock::now();
     std::chrono::steady_clock::time_point CurrentTime = std::chrono::steady_clock::now();
     static long long LastDelta = 0;

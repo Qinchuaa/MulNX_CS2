@@ -15,5 +15,5 @@ class WebSocketManager final :public MulNX::ModuleBase {
 public:
     bool Init()override;
     void ProcessMsg(MulNX::Message& Msg)override;
-    void VirtualMain()override;
+    void Main();
 };

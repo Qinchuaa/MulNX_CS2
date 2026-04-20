@@ -68,8 +68,6 @@ namespace MulNX {
         bool BaseInit();  
         // 入口点
     public:
-        // 虚拟主循环，执行组件逻辑
-        virtual void VirtualMain() {};
         // 初始化入口
 		bool EntryInit(MulNX::Core::Core* Core);
 	protected:

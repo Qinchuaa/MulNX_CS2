@@ -89,7 +89,7 @@ bool ProjectManager::Init() {
 
     return true;
 }
-void ProjectManager::VirtualMain() {
+void ProjectManager::HandleUpdate() {
     this->Traversal();
     return;
 }

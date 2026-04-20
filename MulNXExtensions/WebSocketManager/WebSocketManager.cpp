@@ -134,10 +134,14 @@ bool WebSocketManager::Init() {
         }
         return true;
         });
+    this->SendTask("MulNXMain", [this]()->bool {
+        this->Main();
+        return true;
+        });
     return true;
 }
 
-void WebSocketManager::VirtualMain() {
+void WebSocketManager::Main() {
     this->EntryProcessMsg();
 }
 

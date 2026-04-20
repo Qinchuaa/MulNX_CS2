@@ -12,10 +12,14 @@
 
 bool MiniMap::Init() {
     this->SendUINode(this->GetName(), [this](MulNX::UINode* node) {return this->UINodeFunc(node);});
+    this->SendTask("MulNXMain", [this]()->bool {
+        this->Main();
+        return true;
+        });
     return true;
 }
 
-void MiniMap::VirtualMain() {
+void MiniMap::Main() {
     if (this->pInputSystem->CheckWithPack(MulNX::KeyCheckPack{ true,false,false,true,'M',1 })) {
         this->ShowWindow = !this->ShowWindow;
     }

@@ -20,6 +20,6 @@ namespace MulNX {
         std::atomic<bool>DangerousErrorShouldTerminate = false;
 
 		bool Init()override;
-		void VirtualMain()override;
+		void Main();
 	};
 }

@@ -24,6 +24,6 @@ namespace MulNX {
     public:
         bool Init()override;
         void ProcessMsg(MulNX::Message& msg)override;
-        void VirtualMain()override;
+        void Main();
     };
 }

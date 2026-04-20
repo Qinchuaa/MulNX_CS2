@@ -22,6 +22,10 @@ bool MulNX::Debugger::Init() {
         .SubscribeAsync("Debugger/SetMaxInfoCount")
         .SubscribeAsync("Debugger/SaveToFile");
     this->SendUINode(this->GetName(), [this](MulNX::UINode* node) {return this->UINodeFunc(node);});
+    this->SendTask("MulNXMain", [this]()->bool {
+        this->Main();
+        return true;
+        });
     return true;
 }
 void MulNX::Debugger::ProcessMsg(MulNX::Message& Msg) {
@@ -34,7 +38,7 @@ void MulNX::Debugger::ProcessMsg(MulNX::Message& Msg) {
     }
     }
 }
-void MulNX::Debugger::VirtualMain() {
+void MulNX::Debugger::Main() {
     this->EntryProcessMsg();
 }
 
