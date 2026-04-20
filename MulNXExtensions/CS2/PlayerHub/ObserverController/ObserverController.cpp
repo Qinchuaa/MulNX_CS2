@@ -46,9 +46,9 @@ void ObserverController::Main() {
 void ObserverController::UpdateObserverState() {
     try {
         auto localPlayerPawn = this->CS2()->Modules.client.GetLocalPlayerPawn();
-        if (!localPlayerPawn) return;
+        if (!localPlayerPawn)return;
         auto pObserverServices = MulNX::MRead(localPlayerPawn->pObserverServices());
-        if (!pObserverServices) return;
+        if (!pObserverServices)return;
         uint8_t detectedMode = MulNX::MRead(pObserverServices->iObserverMode());
         static uint8_t lastObservedSpecMode = detectedMode;
         if (lastObservedSpecMode != detectedMode) {

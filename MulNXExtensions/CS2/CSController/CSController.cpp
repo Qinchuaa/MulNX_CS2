@@ -28,8 +28,8 @@ void CSController::HandleOverrideView(CS2::CViewSetup* viewSetup) {
     static auto* pProjectileTracker = this->Core->ModuleManager()->FindModule<ProjectileTracker>("ProjectileTracker");
     auto trckerView = pProjectileTracker->GetView();
     if (trckerView.has_value()) {
-        *viewSetup->pViewOrigin() = trckerView.value().first;
-        *viewSetup->pViewAngles() = trckerView.value().second;
+        *viewSetup->pViewOrigin() = trckerView.value().position;
+        *viewSetup->pViewAngles() = trckerView.value().rotation;
     }
 
     // 同步窗口尺寸到ControlView

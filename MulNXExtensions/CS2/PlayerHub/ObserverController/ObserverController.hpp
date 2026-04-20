@@ -1,7 +1,6 @@
 #pragma once
 
 #include <MulNXExtensions/CS2/CSModuleBase.hpp>
-#include <atomic>
 
 class ObserverController final : public CSModuleBase {
 private:

@@ -14,33 +14,11 @@ static std::string GetControllerPlayerName(CS2::CCSPlayerController* pController
 void ProjectileTracker::Menu(MulNX::UINode* node) {
     auto w = MulNX::UI::RAIIWindow("投掷物追踪器", this->ShowWindow);
     if (!w) return;
-
+    MulNX::UI::Checkbox("启用功能", this->Enable);
     try {
-        std::shared_lock lock(this->grenadeMutex);
+        std::shared_lock lock(this->smutex);
 
-        ImGui::TextUnformatted("已追踪的 grenade：");
-        if (this->trackedGrenades.empty()) {
-            ImGui::TextDisabled("当前暂无 grenade 记录");
-            return;
-        }
-
-        int index = 0;
-        for (const auto& [pGrenade, pController] : this->trackedGrenades) {
-            if (!pGrenade || !pController) continue;
-
-            auto grenadeName = pGrenade->GetName();
-            auto playerName = GetControllerPlayerName(pController);
-            auto steamId = *pController->m_steamID();
-            auto label = std::format("[{}] {} - 玩家：{} (SteamID={})", index++, grenadeName, playerName, steamId);
-
-            if (ImGui::Selectable(label.c_str(), this->SelectedGrenade == pGrenade)) {
-                this->SelectedGrenade = pGrenade;
-            }
-            if (this->SelectedGrenade == pGrenade) {
-                ImGui::TextUnformatted("已选中");
-            }
-            ImGui::Separator();
-        }
+        
     }
     catch (const std::exception& e) {
         this->ISys().LogWarning(std::format("在绘制投掷物追踪窗口时发生异常：{}", e.what()));
@@ -80,62 +58,18 @@ void ProjectileTracker::ProcessMsg(MulNX::Message& msg) {
         if (name.find("projectile") != std::string::npos) {
             this->HandleProjectileAdd(pEntity->As<CS2::C_BaseCSGrenadeProjectile>(), std::move(name));
         }
-        else if (name.find("grenade") != std::string::npos) {
-            this->HandleGrenadeAdd(pEntity->As<CS2::C_BaseCSGrenade>(), std::move(name));
-        }
+        // else if (name.find("grenade") != std::string::npos) {
+        //     this->HandleGrenadeAdd(pEntity->As<CS2::C_BaseCSGrenade>(), std::move(name));
+        // }
         break;
     }
     case "Game/Entity/Removed"_hash: {
         auto pEntity = msg.p1.as<CS2::C_BaseEntity*>();
-        if (this->trackedProjectiles.find(pEntity->As<CS2::C_BaseCSGrenadeProjectile>()) != this->trackedProjectiles.end()) {
-            this->HandleProjectileRemove(pEntity->As<CS2::C_BaseCSGrenadeProjectile>());
-        }
-        else if (this->trackedGrenades.find(pEntity->As<CS2::C_BaseCSGrenade>()) != this->trackedGrenades.end()) {
-            this->HandleGrenadeRemove(pEntity->As<CS2::C_BaseCSGrenade>());
-        }
         break;
     }
     }
 }
 
-void ProjectileTracker::HandleGrenadeAdd(CS2::C_BaseCSGrenade* pGrenade, std::string&& name) {
-    try {
-        auto hPawn = MulNX::MRead(pGrenade->m_hOwnerEntity());
-        auto pPawn = this->CS2()->Modules.client.GetBaseEntityFromHandle(hPawn)->As<CS2::C_CSPlayerPawn>();
-        auto hController = MulNX::MRead(pPawn->m_hController());
-        auto pController = this->CS2()->Modules.client.GetBaseEntityFromHandle(hController)->As<CS2::CCSPlayerController>();
-
-        if (pController) {
-            std::unique_lock lock(this->grenadeMutex);
-            this->trackedGrenades[pGrenade] = pController;
-            this->ISys().LogInfo(std::format("记录 grenade({}) -> 控制器 SteamID={} ", name, *pController->m_steamID()));
-        }
-        else {
-            this->ISys().LogWarning(std::format("检测到 grenade({}) 但无法解析所属控制器", name));
-        }
-        return;
-    }
-    catch (const std::exception& e) {
-        this->ISys().LogWarning(std::format("在分析新增实体时发生异常：{}", e.what()));
-    }
-}
-void ProjectileTracker::HandleGrenadeRemove(CS2::C_BaseCSGrenade* pGrenade) {
-    try {
-        std::unique_lock lock(this->grenadeMutex);
-        auto it = this->trackedGrenades.find(pGrenade);
-        if (it != this->trackedGrenades.end()) {
-            this->ISys().LogInfo(std::format("移除 grenade 实体，释放追踪记录 SteamID={} ", *it->second->m_steamID()));
-            if (this->SelectedGrenade == pGrenade) {
-                this->SelectedGrenade = nullptr;
-            }
-            this->trackedGrenades.erase(it);
-        }
-        return;
-    }
-    catch (const std::exception& e) {
-        this->ISys().LogWarning(std::format("在处理实体移除时发生异常：{}", e.what()));
-    }
-}
 void ProjectileTracker::HandleProjectileAdd(CS2::C_BaseCSGrenadeProjectile* pProjectile, std::string&& name) {
     try {
         auto hThrower = MulNX::MRead(pProjectile->m_hThrower());
@@ -143,14 +77,20 @@ void ProjectileTracker::HandleProjectileAdd(CS2::C_BaseCSGrenadeProjectile* pPro
         auto hController = MulNX::MRead(pPawn->m_hController());
         auto* pController = this->CS2()->Modules.client.GetBaseEntityFromHandle(hController)->As<CS2::CCSPlayerController>();
         if (!pController)return;
-        std::unique_lock lock(this->grenadeMutex);
-        this->trackedProjectiles[pProjectile] = pController;
+        std::unique_lock lock(this->smutex);
         this->ISys().LogInfo(std::format("记录 projectile({}) -> 控制器 SteamID={} ", name, MulNX::MRead(pController->m_steamID())));
 
-        auto it = this->trackedGrenades.find(this->SelectedGrenade.load(std::memory_order_acquire));
-        if (it == this->trackedGrenades.end())return;
+        auto* pLocalPlayerPawn = this->CS2()->Modules.client.GetLocalPlayerPawn();
+        if (!pLocalPlayerPawn)return;
+        auto* pObserverServices = MulNX::MRead(pLocalPlayerPawn->pObserverServices());
+        if (!pObserverServices)return;
+        auto hTargetObserverPawn = MulNX::MRead(pObserverServices->hObserverTarget());
+        auto* pTargetPawn = this->CS2()->Modules.client.GetBaseEntityFromHandle(hTargetObserverPawn)->As<CS2::C_CSPlayerPawn>();
+        if (!pTargetPawn)return;
+        auto hTargetController = MulNX::MRead(pTargetPawn->m_hController());
+        auto* pTargetController = this->CS2()->Modules.client.GetBaseEntityFromHandle(hTargetController);
 
-        if (pController == it->second) {
+        if (pController == pTargetController) {
             this->pTargetWatchProjectile.store(pProjectile, std::memory_order_release);
         }
 
@@ -160,30 +100,17 @@ void ProjectileTracker::HandleProjectileAdd(CS2::C_BaseCSGrenadeProjectile* pPro
         this->ISys().LogWarning(std::format("在分析新增实体时发生异常：{}", e.what()));
     }
 }
-void ProjectileTracker::HandleProjectileRemove(CS2::C_BaseCSGrenadeProjectile* pProjectile) {
-    try {
-        auto it = this->trackedProjectiles.find(pProjectile);
-        if (it != this->trackedProjectiles.end()) {
-            this->ISys().LogInfo(std::format("移除 projectile 实体，释放追踪记录 SteamID={} ", *it->second->m_steamID()));
-            this->trackedProjectiles.erase(it);
-        }
-        if (pProjectile == this->pTargetWatchProjectile.load(std::memory_order_acquire)) {
-            this->pTargetWatchProjectile.store(nullptr, std::memory_order_release);
-        }
-        return;
-    }
-    catch (const std::exception& e) {
-        this->ISys().LogWarning(std::format("在处理实体移除时发生异常：{}", e.what()));
-    }
-}
 
 void ProjectileTracker::Update() {
+    if (!this->Enable.load(std::memory_order_acquire))return;
     try {
-        auto pProjectile = this->pTargetWatchProjectile.load(std::memory_order_acquire);
+        CS2::C_BaseCSGrenadeProjectile* pProjectile = this->pTargetWatchProjectile.load(std::memory_order_acquire);
         if (!pProjectile) return;
 
         auto pGameSceneNode = MulNX::MRead(pProjectile->pGameSceneNode());
         if (!pGameSceneNode) return;
+
+        int32_t nBounces = MulNX::MRead(pProjectile->m_nBounces());
 
         auto pos = MulNX::MRead(pGameSceneNode->vecOrigin());
         auto vel = MulNX::MRead(pProjectile->m_vecVelocity());
@@ -211,22 +138,19 @@ void ProjectileTracker::Update() {
             cameraPos.z = pos.z - dir.z * kCameraOffsetDistance;
         }
         // 若速度为零，保持相机位置与投掷物重合，角度保持不变（可扩展为平滑过渡）
-
-        auto newView = std::make_shared<std::pair<DirectX::XMFLOAT3, DirectX::XMFLOAT3>>(
-            cameraPos, viewRot
-        );
-        this->currentView.store(newView, std::memory_order_release);
+        {
+            auto write = this->currentView.Write();
+            write->position = cameraPos;
+            write->rotation = viewRot;
+        }
     }
     catch (const std::exception& e) {
         this->ISys().LogWarning(std::format("在追踪投掷物时发生异常：{}", e.what()));
     }
 }
 
-std::optional<std::pair<DirectX::XMFLOAT3, DirectX::XMFLOAT3>> ProjectileTracker::GetView() {
+std::optional<MulNX::Math::View> ProjectileTracker::GetView() {
+    if (!this->Enable.load(std::memory_order_acquire))return std::nullopt;
     if (!this->pTargetWatchProjectile.load(std::memory_order_acquire)) return std::nullopt;
-    auto currentViewPtr = this->currentView.load(std::memory_order_acquire);
-    if (!currentViewPtr) return std::nullopt;
-
-    return *currentViewPtr;
-
+    return *this->currentView.Read();
 }
