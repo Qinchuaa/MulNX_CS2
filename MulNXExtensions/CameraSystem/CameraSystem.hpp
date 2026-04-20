@@ -21,46 +21,37 @@
 
 #include <MulNX/MulNX.hpp>
 
-#include "CameraDrawer/CameraDrawer.hpp"
-#include "ElementManager/ElementManager.hpp"
-#include "SolutionManager/SolutionManager.hpp"
-#include "ProjectManager/ProjectManager.hpp"
-#include "WorkspaceManager/WorkspaceManager.hpp"
-
 #include <vector>
 #include <DirectXMath.h>
 #include <string>
 #include <unordered_map>
 #include <filesystem>
 
+#include "CameraDrawer/CameraDrawer.hpp"
+#include "ElementManager/ElementManager.hpp"
+#include "SolutionManager/SolutionManager.hpp"
+#include "ProjectManager/ProjectManager.hpp"
+#include "WorkspaceManager/WorkspaceManager.hpp"
+
 // 摄像机系统
 class CameraSystem final :public MulNX::ModuleBase {
 private:
     // 四大管理器
-    ElementManager* EManager{};
-    SolutionManager* SManager{};
-    ProjectManager* PManager{};
-    WorkspaceManager* WManager{};
+    ElementManager* EManager = nullptr;
+    SolutionManager* SManager = nullptr;
+    ProjectManager* PManager = nullptr;
+    WorkspaceManager* WManager = nullptr;
 public:
     // 渲染器
     CameraDrawer CamDrawer{};
     // 初始化
     bool Init()override;
     // 菜单
-    bool UINodeFunc(MulNX::UINode* node);
+    bool Menu(MulNX::UINode* node);
     // 逻辑主函数
     void VirtualMain()override;
 
     void ProcessMsg(MulNX::Message& msg)override;
-private:
-    // 摄像机系统大菜单元素菜单
-    void MenuElement();
-    // 摄像机系统大菜单解决方案菜单
-    void MenuSolution();
-    // 摄像机系统大菜单项目菜单
-    void MenuProject();
-    // 摄像机系统大菜单工作区菜单
-    void MenuWorkspace();
 public:
     // 清空内存，准备加载新工作区
     void MemoryClear();

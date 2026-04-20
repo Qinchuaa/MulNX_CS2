@@ -6,13 +6,189 @@
 #include <MulNXExtensions/CameraSystem/ElementManager/ElementManager.hpp>
 #include <MulNXExtensions/CameraSystem/ProjectManager/ProjectManager.hpp>
 
+bool SolutionManager::MenuSolution(MulNX::UINode* node) {
+    ImGui::Text(("播放状态：" + std::string(this->Playing ? "播放中" : "关闭") +
+        "  活跃解决方案名：" + (this->Playing_pSolution ? this->Playing_pSolution->GetName() : "无")).c_str());
+    ImGui::Separator();
+    // 解决方案总设置
+    if (ImGui::CollapsingHeader("解决方案设置")) {
+        ImGui::Checkbox("解决方案快捷键检测系统", &this->Config.SolutionShortcutEnable);
+        ImGui::Checkbox("解决方案插值摄像机绘制", &this->Config.PlayingDraw);
+        ImGui::Checkbox("解决方案插值覆盖", &this->Config.PlayingOverride);
+    }
+    // 创建解决方案
+    if (ImGui::CollapsingHeader("解决方案创建")) {
+        ImGui::Text("新解决方案名：");
+        ImGui::SameLine();
+        static std::string CreateSolutionName = "";
+        ImGui::InputText("##新解决方案名", &CreateSolutionName);
+        ImGui::SameLine();
+        // 创建成功则清空输入框
+        if (ImGui::Button("创建解决方案")) {
+            if (CreateSolutionName.empty()) {
+                this->ISys().LogError("请输入解决方案名！");
+                return true;
+            }
+            if (this->Solution_Create(CreateSolutionName)) {
+                CreateSolutionName.clear();
+            }
+        }
+    }
+    // 载入解决方案
+    if (ImGui::CollapsingHeader("解决方案载入")) {
+        static std::string LoadSolutionName = "";
+        ImGui::Text("载入解决方案名：");
+        ImGui::SameLine();
+        ImGui::InputText("##载入解决方案名", &LoadSolutionName);
+        ImGui::SameLine();
+        // 载入成功则清空输入框
+        if (ImGui::Button("载入解决方案")) {
+            if (this->Solution_Load(this->ISys().PathManager()->PathGetFromKey("Solutions") / (LoadSolutionName + ".yaml"))) {
+                this->ISys().LogSucc(("加载解决方案成功：" + LoadSolutionName).c_str());
+                LoadSolutionName.clear();
+            }
+            else {
+                this->ISys().LogError(("加载解决方案失败：" + LoadSolutionName).c_str());
+            }
+        }
+    }
+    // 展示修改解决方案
+    if (ImGui::CollapsingHeader("解决方案列表")) {
+        // 输出是否打开了解决方案调试窗口
+        ImGui::Text(("解决方案调试窗口状态：" + std::string(this->ShowWindow.load(std::memory_order_acquire) ? "打开" : "关闭")).c_str());
+        this->Solution_ShowAllInLines();
+    }
+
+    return true;
+}
+
+//调试窗口及菜单
+
+bool SolutionManager::UINodeFunc(MulNX::UINode* node) {
+    if (this->ShowWindow.load(std::memory_order_acquire)) {
+        this->Solution_DebugWindow();
+
+        if (!this->CurrentSolution) {
+            this->OpenSolutionKCPackDebugWindow = false;
+        }
+
+        if (this->OpenSolutionKCPackDebugWindow) {
+            if (this->Buffer_KCPack.DebugWindow(this->OpenSolutionKCPackDebugWindow)) {
+                this->OpenSolutionKCPackDebugWindow.store(false, std::memory_order_release);
+                if (!this->Buffer_KCPack.Usable) {
+                    this->ISys().LogError("当前按键绑定不可用，无法使用这个绑键播放解决方案！");
+                }
+                else {
+                    this->CurrentSolution->KCPack = this->Buffer_KCPack;//更新绑键
+                }
+            }
+        }
+    }
+    return true;
+}
+void SolutionManager::Solution_DebugWindow() {
+    auto w = MulNX::UI::RAIIWindow("解决方案调试", this->ShowWindow);
+    // 检查当前是否操作解决方案
+    if (this->CurrentSolution) {
+        ImGui::Text(std::format("当前操作解决方案名称：{}   元素数量：{}   总时长：{}   播放模式：{}",
+            this->CurrentSolution->Name,
+            this->CurrentSolution->Elements.size(),
+            this->CurrentSolution->TotalDurationTime,
+            PlaybackModeToString(this->CurrentSolution->Playmode)).c_str());
+
+        if (ImGui::Button("切换到激活模式")) {
+            this->CurrentSolution->Playmode = PlaybackMode::Activation;
+        }
+        ImGui::SameLine();
+        if (ImGui::Button("切换到编排模式")) {
+            this->CurrentSolution->Playmode = PlaybackMode::Orchestration;
+        }
+
+        if (ImGui::Button("使能当前解决方案")) {
+            this->Playing_SetSolution(this->CurrentSolution);
+            this->Playing_Enable();
+        }
+        ImGui::SameLine();
+        if (ImGui::Button("按激活模式生成编排模式偏移")) {
+            this->CurrentSolution->TimeLineGenerate();
+        }
+
+        if (ImGui::Button("修改按键绑定")) {
+            this->Buffer_KCPack = this->CurrentSolution->KCPack;//缓存
+            this->OpenSolutionKCPackDebugWindow = true;//打开窗口
+        }
+
+        ImGui::Separator();
+
+        static std::string NewElementName = "";
+        ImGui::InputText("新元素名称", &NewElementName);
+        if (ImGui::Button("添加元素")) {
+            std::shared_ptr<ElementBase> element = this->EManager->Element_Get<ElementBase>(NewElementName);
+            if (!element) {
+                this->ISys().LogError("找不到目标元素   元素名：" + NewElementName);
+            }
+            else {
+                if (!this->CurrentSolution->AddElement(element, 0)) {
+                    this->ISys().LogError("无法添加元素到解决方案，可能是元素已存在于解决方案中   元素名：" + NewElementName);
+                }
+                else {
+                    this->ISys().LogSucc("成功添加元素到解决方案   元素名：" + NewElementName);
+                    NewElementName.clear();
+                }
+            }
+        }
+        ImGui::SameLine();
+        if (ImGui::Button("清空所有元素")) {
+            this->CurrentSolution->Clear();
+            this->ISys().LogSucc("成功清空解决方案所有元素");
+        }
+
+        ImGui::Separator();
+
+        static int IndexForReset = 0;
+        static int PreIndex = -1;
+        ImGui::InputInt("要调整的本解决方案的元素", &IndexForReset);
+        if (0 <= IndexForReset && IndexForReset < this->CurrentSolution->Elements.size()) {
+            std::shared_ptr<ElementBase> element = this->CurrentSolution->Elements.at(IndexForReset).Element;
+            if (element) {
+                const float& Offset = this->CurrentSolution->Elements.at(IndexForReset).Offset;
+                ImGui::Text(("元素信息： 编号： " + std::to_string(IndexForReset) + "  元素名称：" + element->Name + "  元素持续时间：" + std::to_string(element->DurationTime) + "  元素偏移时间：" + std::to_string(Offset)).data());
+                ImGui::Separator();
+                static float tempOffset{};
+                if (IndexForReset != PreIndex) {
+                    tempOffset = Offset;
+                }
+                ImGui::SliderFloat("偏移时间", &tempOffset, 0, 100000);
+                if (ImGui::Button("确认修改")) {
+                    this->CurrentSolution->RemoveElementAt(IndexForReset);
+                    this->CurrentSolution->AddElement(element, tempOffset);
+                }
+                if (ImGui::Button("从解决方案移除该元素")) {
+                    this->CurrentSolution->RemoveElementAt(IndexForReset);
+                }
+            }
+
+        }
+        else {
+            ImGui::Text("索引无效！请输入 0 到 %d 之间的值", this->CurrentSolution->Elements.size() - 1);
+        }
+        PreIndex = IndexForReset;
+    }
+    else {
+        ImGui::Text("当前未选择任何解决方案");
+    }
+}
+
 //解决方案管理器
 
 bool SolutionManager::Init() {
     this->CamDrawer = &this->Core->ModuleManager()->FindModule<CameraSystem>("CameraSystem")->CamDrawer;
     this->EManager = this->Core->ModuleManager()->FindModule<ElementManager>("ElementManager");
     this->PManager = this->Core->ModuleManager()->FindModule<ProjectManager>("ProjectManager");
+
     this->SendUINode(this->GetName(), [this](MulNX::UINode* node) {return this->UINodeFunc(node);});
+    this->SendUINode("MenuSolution", [this](MulNX::UINode* node) {return this->MenuSolution(node);});
+
     auto* PathManager = this->ISys().PathManager();
     if (PathManager->CreateKey("Solutions", "Solutions",
         [this](MulNX::PathManager* PathManager)->bool {
@@ -276,123 +452,6 @@ void SolutionManager::Solution_ShowAllInLines() {
         this->Solution_ShowInLine(Solution.get());
     }
     return;
-}
-
-//调试窗口及菜单
-
-bool SolutionManager::UINodeFunc(MulNX::UINode* node) {
-    if (this->ShowWindow.load(std::memory_order_acquire)) {
-        this->Solution_DebugWindow();
-
-        if (!this->CurrentSolution) {
-            this->OpenSolutionKCPackDebugWindow = false;
-        }
-
-        if (this->OpenSolutionKCPackDebugWindow) {
-            if (this->Buffer_KCPack.DebugWindow(this->OpenSolutionKCPackDebugWindow)) {
-                this->OpenSolutionKCPackDebugWindow.store(false, std::memory_order_release);
-                if (!this->Buffer_KCPack.Usable) {
-                    this->ISys().LogError("当前按键绑定不可用，无法使用这个绑键播放解决方案！");
-                }
-                else {
-                    this->CurrentSolution->KCPack = this->Buffer_KCPack;//更新绑键
-                }
-            }
-        }
-    }
-    return true;
-}
-void SolutionManager::Solution_DebugWindow() {
-    auto w = MulNX::UI::RAIIWindow("解决方案调试", this->ShowWindow);
-    // 检查当前是否操作解决方案
-    if (this->CurrentSolution) {
-        ImGui::Text(std::format("当前操作解决方案名称：{}   元素数量：{}   总时长：{}   播放模式：{}",
-            this->CurrentSolution->Name,
-            this->CurrentSolution->Elements.size(),
-            this->CurrentSolution->TotalDurationTime,
-            PlaybackModeToString(this->CurrentSolution->Playmode)).c_str());
-
-        if (ImGui::Button("切换到激活模式")) {
-            this->CurrentSolution->Playmode = PlaybackMode::Activation;
-        }
-        ImGui::SameLine();
-        if (ImGui::Button("切换到编排模式")) {
-            this->CurrentSolution->Playmode = PlaybackMode::Orchestration;
-        }
-
-        if (ImGui::Button("使能当前解决方案")) {
-            this->Playing_SetSolution(this->CurrentSolution);
-            this->Playing_Enable();
-        }
-        ImGui::SameLine();
-        if (ImGui::Button("按激活模式生成编排模式偏移")) {
-            this->CurrentSolution->TimeLineGenerate();
-        }
-
-        if (ImGui::Button("修改按键绑定")) {
-            this->Buffer_KCPack = this->CurrentSolution->KCPack;//缓存
-            this->OpenSolutionKCPackDebugWindow = true;//打开窗口
-        }
-
-        ImGui::Separator();
-
-        static std::string NewElementName = "";
-        ImGui::InputText("新元素名称", &NewElementName);
-        if (ImGui::Button("添加元素")) {
-            std::shared_ptr<ElementBase> element = this->EManager->Element_Get<ElementBase>(NewElementName);
-            if (!element) {
-                this->ISys().LogError("找不到目标元素   元素名：" + NewElementName);
-            }
-            else {
-                if (!this->CurrentSolution->AddElement(element, 0)) {
-                    this->ISys().LogError("无法添加元素到解决方案，可能是元素已存在于解决方案中   元素名：" + NewElementName);
-                }
-                else {
-                    this->ISys().LogSucc("成功添加元素到解决方案   元素名：" + NewElementName);
-                    NewElementName.clear();
-                }
-            }
-        }
-        ImGui::SameLine();
-        if (ImGui::Button("清空所有元素")) {
-            this->CurrentSolution->Clear();
-            this->ISys().LogSucc("成功清空解决方案所有元素");
-        }
-
-        ImGui::Separator();
-
-        static int IndexForReset = 0;
-        static int PreIndex = -1;
-        ImGui::InputInt("要调整的本解决方案的元素", &IndexForReset);
-        if (0 <= IndexForReset && IndexForReset < this->CurrentSolution->Elements.size()) {
-            std::shared_ptr<ElementBase> element = this->CurrentSolution->Elements.at(IndexForReset).Element;
-            if (element) {
-                const float& Offset = this->CurrentSolution->Elements.at(IndexForReset).Offset;
-                ImGui::Text(("元素信息： 编号： " + std::to_string(IndexForReset) + "  元素名称：" + element->Name + "  元素持续时间：" + std::to_string(element->DurationTime) + "  元素偏移时间：" + std::to_string(Offset)).data());
-                ImGui::Separator();
-                static float tempOffset{};
-                if (IndexForReset != PreIndex) {
-                    tempOffset = Offset;
-                }
-                ImGui::SliderFloat("偏移时间", &tempOffset, 0, 100000);
-                if (ImGui::Button("确认修改")) {
-                    this->CurrentSolution->RemoveElementAt(IndexForReset);
-                    this->CurrentSolution->AddElement(element, tempOffset);
-                }
-                if (ImGui::Button("从解决方案移除该元素")) {
-                    this->CurrentSolution->RemoveElementAt(IndexForReset);
-                }
-            }
-
-        }
-        else {
-            ImGui::Text("索引无效！请输入 0 到 %d 之间的值", this->CurrentSolution->Elements.size() - 1);
-        }
-        PreIndex = IndexForReset;
-    }
-    else {
-        ImGui::Text("当前未选择任何解决方案");
-    }
 }
 
 bool SolutionManager::Playing_SetSolution(Solution* const solution) {

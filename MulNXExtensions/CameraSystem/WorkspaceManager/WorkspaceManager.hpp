@@ -1,8 +1,7 @@
 #pragma once
 
-#include "../Workspace/Workspace.hpp"
-
 #include <MulNX/MulNX.hpp>
+#include <MulNXExtensions/CameraSystem/Workspace/Workspace.hpp>
 
 class ElementManager;
 class SolutionManager;
@@ -14,8 +13,10 @@ private:
     SolutionManager* SManager = nullptr;
     ProjectManager* PManager = nullptr;
     MulNX::IPCer* pIPCer = nullptr;
+
+    bool MenuWorkspace(MulNX::UINode* node);
 public:
-    bool InWorkspace = false;
+    std::atomic<bool> InWorkspace = false;
     //数据存储
     std::unique_ptr<Workspace> CurrentWorkspace = nullptr;
 

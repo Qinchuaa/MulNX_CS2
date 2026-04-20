@@ -1,16 +1,71 @@
 #include "WorkspaceManager.hpp"
 
+#include <MulNX/Base/UI/UI.hpp>
 #include <MulNXExtensions/CameraSystem/ElementManager/ElementManager.hpp>
 #include <MulNXExtensions/CameraSystem/SolutionManager/SolutionManager.hpp>
 #include <MulNXExtensions/CameraSystem/ProjectManager/ProjectManager.hpp>
 
 #include <MulNXThirdParty/All_pugixml.hpp>
 
+bool WorkspaceManager::MenuWorkspace(MulNX::UINode* node) {
+    // 顶部：工作区信息（始终显示）
+    ImGui::BeginChild("工作区面板", ImVec2(0, 150), true); {
+        // 工作区状态
+        ImGui::Text("工作区状态: %s", this->InWorkspace ? "已进入" : "未进入");
+        // 未进入工作区允许打开默认工作区
+        if (!this->InWorkspace) {
+            ImGui::SameLine();
+            if (ImGui::Button("打开默认工作区")) {
+                this->Workspace_Set("DefaultWorkspace");
+            }
+        }
+        // 打开工作区后允许保存工作区
+        if (this->InWorkspace) {
+            ImGui::Text("当前工作区: %s", this->CurrentWorkspace->Name.c_str());
+            ImGui::SameLine();
+            if (ImGui::Button("保存工作区")) {
+                this->Workspace_Save();
+            }
+        }
+        // 详情信息
+        ImGui::Separator();
+        ImGui::BeginChild("工作区详情菜单");
+        if (ImGui::CollapsingHeader("详情信息")) {
+            static std::string TargetWorkspaceName{};
+            ImGui::Text("工作区名：");
+            ImGui::SameLine();
+            ImGui::InputText("##TargetWorkspaceName", &TargetWorkspaceName);
+            ImGui::SameLine();
+            if (ImGui::Button("切换")) {
+                if (TargetWorkspaceName.empty()) {
+                    this->ISys().LogError("请输入工作区名！");
+                    return true;
+                }
+                if (!this->Workspace_Set(TargetWorkspaceName))return true;
+
+            }
+
+            if (!this->CurrentWorkspace) {// 无工作区
+                ImGui::Text("当前未打开任何工作区");
+                return true;
+            }
+            this->InWorkspace = true;
+        }
+        ImGui::EndChild();
+    }
+    ImGui::EndChild();
+
+    return true;
+}
+
 bool WorkspaceManager::Init() {
     this->EManager = this->Core->ModuleManager()->FindModule<ElementManager>("ElementManager");
     this->SManager = this->Core->ModuleManager()->FindModule<SolutionManager>("SolutionManager");
     this->PManager = this->Core->ModuleManager()->FindModule<ProjectManager>("ProjectManager");
     this->pIPCer = this->Core->ModuleManager()->FindModule<MulNX::IPCer>("IPCer");
+
+    this->SendUINode("MenuWorkspace", [this](MulNX::UINode* node) {return this->MenuWorkspace(node);});
+
     return true;
 }
 

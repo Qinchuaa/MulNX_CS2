@@ -48,6 +48,7 @@ public:
     // 初始化函数
     bool Init()override;
     // UI绘制
+    bool MenuSolution(MulNX::UINode* node);
     bool UINodeFunc(MulNX::UINode* node);
     // 逻辑主函数
     void VirtualMain();

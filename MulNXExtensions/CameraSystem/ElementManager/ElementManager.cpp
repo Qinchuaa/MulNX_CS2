@@ -5,7 +5,70 @@
 #include <MulNXExtensions/CameraSystem/SolutionManager/SolutionManager.hpp>
 #include <MulNXExtensions/CameraSystem/ProjectManager/ProjectManager.hpp>
 
+bool ElementManager::MenuElement(MulNX::UINode* node) {
+    std::shared_lock lock(this->smutex);
+    // 展示预览功能相关状态
+    ImGui::TextUnformatted(std::format(
+        "预览状态： {}   预览元素名：{}   预览时间偏移：{}   ",
+        this->Preview_TimeSchema,
+        this->OnPreview ? "开启" : "关闭",
+        this->Preview_CurrentElement ? this->Preview_CurrentElement->GetName() : "无")
+        .c_str());
+    ImGui::Separator();
+    // 元素总设置
+    if (ImGui::CollapsingHeader("元素设置")) {
+        ImGui::Checkbox("预览插值摄像机绘制", &this->Config.PreviewDraw);
+        ImGui::Checkbox("预览插值摄像机覆盖", &this->Config.PreviewOverride);
+    }
+    // 创建元素
+    if (ImGui::CollapsingHeader("元素创建")) {
+        ImGui::Text("新元素名：");
+        ImGui::SameLine();
+        static std::string CreateElementName = "";
+        ImGui::InputText("##新元素名", &CreateElementName);
+        // 创建成功则清空输入框
+        // 创建自由摄像机轨道
+        if (ImGui::Button("新的自由摄像机轨道")) {
+            if (CreateElementName.empty()) {
+                this->ISys().LogError("请输入元素名！");
+                return true;
+            }
+            if (this->Element_Create<FreeCameraPath>(CreateElementName)) {
+                CreateElementName.clear();
+            }
+        }
+    }
+    // 载入元素
+    if (ImGui::CollapsingHeader("元素载入")) {
+        ImGui::Text("载入元素名：");
+        ImGui::SameLine();
+        static std::string LoadElementName = "";
+        ImGui::InputText("##载入元素名", &LoadElementName);
+        ImGui::SameLine();
+        // 载入成功则清空输入框
+        if (ImGui::Button("载入##元素")) {
+            if (this->Element_Load(this->ISys().PathManager()->PathGetFromKey("Elements") / (LoadElementName + ".yaml"))) {
+                LoadElementName.clear();
+            }
+        }
+    }
+    // 展示修改元素
+    if (ImGui::CollapsingHeader("元素列表")) {
+        // 输出是否打开了元素调试窗口
+        ImGui::Text(("元素调试窗口状态：" + std::string(this->ShowWindow.load(std::memory_order_acquire) ? "打开" : "关闭")).c_str());
+        // 使用迭代器遍历所有元素
+        for (const auto& element : this->Elements) {
+            this->Element_ShowInLine(element);
+        }
+    }
+
+    return true;
+}
+
 bool ElementManager::UINodeFunc(MulNX::UINode* node) {
+    for (auto& elem : this->Elements) {
+        elem->DrawBase(this->CamDrawer, this->AL3D->GetViewMatrix(), this->AL3D->GetWinWidth(), this->AL3D->GetWinHeight());
+    }
     auto w = MulNX::UI::RAIIWindow("元素调试", this->ShowWindow);
     if (!w)return true;
     // 检查当前是否有操作元素
@@ -24,7 +87,9 @@ bool ElementManager::Init() {
     this->CamDrawer = &this->Core->ModuleManager()->FindModule<CameraSystem>("CameraSystem")->CamDrawer;
     this->SManager = this->Core->ModuleManager()->FindModule<SolutionManager>("SolutionManager");
     this->PManager = this->Core->ModuleManager()->FindModule<ProjectManager>("ProjectManager");
+
     this->SendUINode(this->GetName(), [this](MulNX::UINode* node) {return this->UINodeFunc(node);});
+    this->SendUINode("MenuElement", [this](MulNX::UINode* node) {return this->MenuElement(node);});
 
     auto* PathManager = this->ISys().PathManager();
     if (PathManager->CreateKey("Elements", "Elements",
@@ -38,10 +103,6 @@ bool ElementManager::Init() {
     return true;
 }
 void ElementManager::VirtualMain() {
-    for (auto& elem : this->Elements) {
-        elem->DrawBase(this->CamDrawer, this->AL3D->GetViewMatrix(), this->AL3D->GetWinWidth(), this->AL3D->GetWinHeight());
-    }
-
     if (this->OnPreview) {
         CameraSystemIO IO;
         IO.ElementTime = this->AL3D->Time()->GetReal();

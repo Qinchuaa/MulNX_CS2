@@ -5,6 +5,39 @@
 #include <MulNXExtensions/CameraSystem/ElementManager/ElementManager.hpp>
 #include <MulNXExtensions/CameraSystem/SolutionManager/SolutionManager.hpp>
 
+bool ProjectManager::MenuProject(MulNX::UINode* node) {
+    // 项目总设置
+    if (ImGui::CollapsingHeader("项目设置")) {
+        ImGui::Checkbox("项目快捷键检测系统", &this->Config.ProjectShortcutEnable);
+    }
+    // 创建项目
+    if (ImGui::CollapsingHeader("项目创建")) {
+        static std::string CreateProjectName = "";
+        ImGui::Text("新项目名：");
+        ImGui::SameLine();
+        ImGui::InputText("##CreateProject", &CreateProjectName);
+        ImGui::SameLine();
+        if (ImGui::Button("创建")) {
+            if (CreateProjectName.empty()) {
+                this->ISys().LogError("请输入项目名！");
+                return true;
+            }
+            if (this->Project_Create(CreateProjectName)) {
+                CreateProjectName.clear();
+            }
+        }
+
+    }
+    // 展示修改项目
+    if (ImGui::CollapsingHeader("项目列表")) {
+        // 输出是否打开了项目调试窗口
+        ImGui::Text(("项目调试窗口状态：" + std::string(this->ShowWindow.load(std::memory_order_acquire) ? "打开" : "关闭")).c_str());
+        this->Project_ShowAllInLines();
+    }
+
+    return true;
+}
+
 bool ProjectManager::UINodeFunc(MulNX::UINode* node) {
     if (this->ShowWindow.load(std::memory_order_acquire)) {
         //项目调试窗口
@@ -23,7 +56,10 @@ bool ProjectManager::Init() {
     this->EManager = this->Core->ModuleManager()->FindModule<ElementManager>("ElementManager");
     this->SManager = this->Core->ModuleManager()->FindModule<SolutionManager>("SolutionManager");
     this->pIPCer = this->Core->ModuleManager()->FindModule<MulNX::IPCer>("IPCer");
+
     this->SendUINode(this->GetName(), [this](MulNX::UINode* node) {return this->UINodeFunc(node);});
+    this->SendUINode("MenuProject", [this](MulNX::UINode* node) {return this->MenuProject(node);});
+
     auto* PathManager = this->ISys().PathManager();
     if (PathManager->CreateKey("CurrentProject", {},
         [this](MulNX::PathManager* PathManager)->bool {
