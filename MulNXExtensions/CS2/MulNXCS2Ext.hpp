@@ -1,6 +1,7 @@
 #pragma once
 
 #include "CSController/CSController.hpp"
+#include "CSController/HookEntitySystem/HookEntitySystem.hpp"
 #include "ConsoleManager/ConsoleManager.hpp"
 #include "DemoHelper/DemoHelper.hpp"
 #include "GameCfgManager/GameCfgManager.hpp"

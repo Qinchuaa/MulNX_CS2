@@ -150,30 +150,6 @@ bool CSController::Init() {
         (uintptr_t)this->Modules.tier0.GetProcAddressT<void* (const char*, int*)>("CreateInterface")
         ("VEngineCvar007", nullptr);
 
-    static auto vtable = (uint8_t**)IVClass::Assume(this->Modules.client.dwGameEntitySystem())->GetVTablePtr();
-    auto pAddEntity = vtable[15];
-
-    static auto hkAddEntity = MulNX::Hook::Create(pAddEntity,
-        0, false, [this](RegContext* ctx, MulNX::Hook* hk)->bool {
-            auto pEntity = *ctx->P2<CS2::C_BaseEntity*>();
-            MulNX::Message msg("Game/Entity/Added"_hash);
-            msg.p1.as<CS2::C_BaseEntity*>() = pEntity;
-            this->ISys().PublishAsync(std::move(msg));
-            return true;
-        }).value();
-    hkAddEntity->Attach();
-
-    auto pRemoveEntity = vtable[16];
-    static auto hkRemoveEntity = MulNX::Hook::Create(pRemoveEntity,
-        0, false, [this](RegContext* ctx, MulNX::Hook* hk)->bool {
-            auto pEntity = *ctx->P2<CS2::C_BaseEntity*>();
-            MulNX::Message msg("Game/Entity/Removed"_hash);
-            msg.p1.as<CS2::C_BaseEntity*>() = pEntity;
-            this->ISys().PublishAsync(std::move(msg));
-            return true;
-        }).value();
-    hkRemoveEntity->Attach();
-
     if (this->Modules.client.Valid) {
         // 搜索 .text 段
         auto textRegion = this->Modules.client.GetTextRegion();
@@ -188,6 +164,7 @@ bool CSController::Init() {
                     return true;
                     }).value();
                 this->hkPosCallIsPlayingDemo->Attach();
+                this->ISys().LogSucc("视角调用演示钩子已部署");
             }
         }
     }

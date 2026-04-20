@@ -102,30 +102,31 @@ DWORD MulNX_CS2_Start(void*) {
         (*core->ModuleManager())
             .CreateSystemModules()// 创建所有系统模块，这是框架运行的基础
             .BindAbstractLayer3D<CSController>("CSController")// 创建CS控制器模块为AbstractLayer3D模块，ID固定自动分配为系统模块最大ID 100
-            .CreateModule<WebSocketManager>("WebSocketManager", 101)// 网络管理模块
+            .CreateModule<WebSocketManager>("WebSocketManager", 101)
             // 摄像机系统
             .CreateModule<CameraSystem>("CameraSystem", 102)
-            .CreateModule<WorkspaceManager>("WorkspaceManager", 103)// 工作区管理模块
-            .CreateModule<ProjectManager>("ProjectManager", 104)// 项目管理模块
-            .CreateModule<SolutionManager>("SolutionManager", 105)// 解决方案管理模块
-            .CreateModule<ElementManager>("ElementManager", 106)// 元素管理模块
+            .CreateModule<WorkspaceManager>("WorkspaceManager", 103)
+            .CreateModule<ProjectManager>("ProjectManager", 104)
+            .CreateModule<SolutionManager>("SolutionManager", 105)
+            .CreateModule<ElementManager>("ElementManager", 106)
             // CS2
-            .CreateModule<AdvancedViewController>("AdvancedViewController", 111)// 高级视角控制模块
-            .CreateModule<FreeCameraController>("FreeCameraController", 112)// 自由摄像机控制模块
-            .CreateModule<PlayerHub>("PlayerHub", 210)// 玩家信息管理模块
-            .CreateModule<PlayerFlashController>("PlayerFlashController", 212)// 闪光控制模块
+            .CreateModule<HookEntitySystem>("HookEntitySystem", 110)
+            .CreateModule<AdvancedViewController>("AdvancedViewController", 111)
+            .CreateModule<FreeCameraController>("FreeCameraController", 112)
+            .CreateModule<PlayerHub>("PlayerHub", 210)
+            .CreateModule<PlayerFlashController>("PlayerFlashController", 212)
             .CreateModule<NameController>("NameController", 213)
             .CreateModule<GlowController>("GlowController", 214)
             .CreateModule<SmokeController>("SmokeController", 215)
             .CreateModule<ObserverController>("ObserverController", 216)
             .CreateModule<ProjectileTracker>("ProjectileTracker", 217)
-            .CreateModule<MiniMap>("MiniMap", 303)// 小地图模块
-            .CreateModule<VirtualUser>("VirtualUser", 304)// 虚拟用户模块
-            .CreateModule<GameCfgManager>("GameCfgManager", 406)// 游戏配置管理模块
-            .CreateModule<DemoHelper>("DemoHelper", 407)// Demo辅助模块
-            .CreateModule<GameSettingsManager>("GameSettingsManager", 408)// 游戏设置管理模块
-            .CreateModule<ConsoleManager>("ConsoleManager", 409)// 控制台管理模块
-            .CreateModule<MulNXController>("MulNXController", 410)// MulNX控制器模块
+            .CreateModule<MiniMap>("MiniMap", 303)
+            .CreateModule<VirtualUser>("VirtualUser", 304)
+            .CreateModule<GameCfgManager>("GameCfgManager", 406)
+            .CreateModule<DemoHelper>("DemoHelper", 407)
+            .CreateModule<GameSettingsManager>("GameSettingsManager", 408)
+            .CreateModule<ConsoleManager>("ConsoleManager", 409)
+            .CreateModule<MulNXController>("MulNXController", 410)
             ;
 
         // 启动核心

@@ -70,6 +70,7 @@ void HookManager::CreateHook() {
             return true;
         }).value();
     this->hkPresent->Attach();
+    this->ISys().LogSucc("Present钩子已部署");
 
     // Hook ResizeBuffers函数
     this->hkResizeBuffers = MulNX::Hook::Create((uint8_t*)IVClass::Assume(pTempSwapChain)->GetVFuncPtr(13),
@@ -78,6 +79,7 @@ void HookManager::CreateHook() {
             return true;
         }).value();
     this->hkResizeBuffers->Attach();
+    this->ISys().LogSucc("ResizeBuffers钩子已部署");
 
     // 释放临时设备和交换链
     pTempD3DDevice->Release();
@@ -122,6 +124,7 @@ void HookManager::d3dInit() {
             return CallRawFunc;
         }).value();
     this->hkWndProc->Attach();
+    this->ISys().LogSucc("窗口过程钩子已部署");
 
     // 创建渲染目标视图
     ID3D11Texture2D* buf = nullptr;
