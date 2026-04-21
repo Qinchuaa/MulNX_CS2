@@ -274,15 +274,15 @@ std::pair<bool, std::string> Solution::Load(YAML::Node& root, ElementManager* el
         // 获取元素名称
         std::string NewElementName = nodeElement["name"].as<std::string>();
         // 得到元素指针
-        std::shared_ptr<ElementBase> element = elementManager->Element_Get<ElementBase>(NewElementName);
+        auto it = elementManager->elements.find(NewElementName);
         // 检验是否找到元素
-        if (!element) {
+        if (it==elementManager->elements.end()) {
             return { false,"找不到目标元素   元素名：" + NewElementName };
         }
         // 获取元素偏移
         float ElementOffset = nodeElement["offset"].as<float>();
         // 尝试创建带有时间偏移的弱引用指针并添加进新解决方案并判断是否成功
-        if (!this->AddElement(element, ElementOffset)) {
+        if (!this->AddElement(it->second, ElementOffset)) {
             return { false,"无法添加元素到解决方案   元素名：" + NewElementName + "  解决方案名：" + this->Name };
         }
     }

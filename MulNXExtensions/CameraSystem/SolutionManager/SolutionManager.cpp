@@ -123,12 +123,12 @@ void SolutionManager::Solution_DebugWindow() {
         static std::string NewElementName = "";
         ImGui::InputText("新元素名称", &NewElementName);
         if (ImGui::Button("添加元素")) {
-            std::shared_ptr<ElementBase> element = this->EManager->Element_Get<ElementBase>(NewElementName);
-            if (!element) {
+            auto it = this->EManager->elements.find(NewElementName);
+            if (it==this->EManager->elements.end()) {
                 this->ISys().LogError("找不到目标元素   元素名：" + NewElementName);
             }
             else {
-                if (!this->CurrentSolution->AddElement(element, 0)) {
+                if (!this->CurrentSolution->AddElement(it->second, 0)) {
                     this->ISys().LogError("无法添加元素到解决方案，可能是元素已存在于解决方案中   元素名：" + NewElementName);
                 }
                 else {

@@ -20,11 +20,11 @@ private:
     ProjectManager* PManager = nullptr;
 
     // 当前操作的元素指针
-    std::shared_ptr<ElementBase> CurrentElement = nullptr;
+    std::atomic<std::shared_ptr<ElementBase>> CurrentElement = nullptr;
 public:
     ElementConfig Config{};
     // 使用智能指针存储多态对象，以存储不同类型的元素
-    std::vector<std::shared_ptr<ElementBase>> Elements;
+    std::unordered_map<std::string, std::shared_ptr<ElementBase>> elements;
 
     // 预览相关
 
@@ -44,56 +44,8 @@ public:
     void ProcessMsg(MulNX::Message& msg)override;
     void HandleUpdate();
 
-
-    // 通用基础函数：
-
-    //获取元素对应的迭代器（Element基类）
-    std::vector<std::shared_ptr<ElementBase>>::iterator Element_GetIterator(const std::string_view Name);
-
-    //获取元素指针
-    template<Elements::Element T>
-    std::shared_ptr<T> Element_Get(const std::string_view Name) {
-        //编译期获取目标类型
-        constexpr ElementType TargetElementType = T::TemplateType;
-        //获取迭代器
-        std::vector<std::shared_ptr<ElementBase>>::iterator it = this->Element_GetIterator(Name);
-        //验证是否找到
-        if (it == this->Elements.end()) {
-            return nullptr;
-        }
-        //得到指针
-        std::shared_ptr<ElementBase> Ptr = *it;
-        //ElementBase直接返回有效指针
-        if constexpr (TargetElementType == ElementType::ElementBase) {
-            return std::static_pointer_cast<T>(Ptr);
-        }
-        //检验类型匹配
-        if (Ptr->Type == TargetElementType) {
-            //静态转换类型（高性能）
-            return std::static_pointer_cast<T>(Ptr);
-        }
-        //失败则返回空指针
-        return nullptr;
-    }
-
-
     //创建元素函数，支持传递任意参数给元素构造函数
-    template<Elements::Element T>
-    bool Element_Create(const std::string& Name) {
-        // 检查是否已存在同名元素
-        if (this->Element_Get<ElementBase>(Name)) {
-            this->ISys().LogError("元素名已占用！ 元素名：" + Name);
-            return false;
-        }
-        //输出成功信息
-        this->ISys().LogSucc("成功创建元素！  元素名：" + Name);
-        //创建指针
-        std::shared_ptr<T> Elem = std::make_shared<T>(std::move(Name));
-        //添加进Elements
-        this->Elements.push_back(std::move(Elem));
-        return true;
-    }
-
+    ElementBase* Element_Create(const ElementType type, const std::string& name);
     // 保存所有元素到磁盘文件
     bool Element_SaveAll();
     // 从磁盘文件加载元素的预处理函数，内部会创建对应类型的元素，并调用具体加载函数加载信息
@@ -106,10 +58,6 @@ public:
     void Element_ShowInLine(const std::shared_ptr<ElementBase> element);
     // 展示某个元素的详细信息到调试窗口
     void Element_ShowMsgToDebugMenu(const std::shared_ptr<ElementBase> element);
-    // 获取元素名称容器
-    std::vector<std::string> Element_GetNames()const;
-
-
 
     //预览功能相关：
     //启用预览

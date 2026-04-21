@@ -51,7 +51,7 @@ protected:
     //能否绘制（默认不能）
     bool Drawable = false;
     //是否绘制（默认不绘制）
-    bool IfDraw = false;
+    std::atomic<bool> draw = false;
 public:
     //构造函数
     ElementBase() = default;
@@ -96,10 +96,6 @@ public:
     // 通用Call，用于时间变换，基类型绑定等
     // bool BaseCall(float& OutputTime, CameraSystemIO* IO)const;
 
-    // 关闭绘制
-    void CloseDraw();
-    // 尝试打开绘制接口
-    bool OpenDraw();
     // 绘制函数入口
     bool DrawBase(CameraDrawer* CamDrawer, const float* Matrix, const float WinWidth, const float WinHeight)const;
     // 绘制函数（虚），各个元素按需实现

@@ -44,20 +44,8 @@ bool ElementBase::CalculateFrame(CameraSystemIO* IO)const {
     return this->Call(IO);
 }
 
-void ElementBase::CloseDraw() {
-    this->IfDraw = false;
-    return;
-}
-bool ElementBase::OpenDraw() {
-    if (!this->Drawable) {
-        return false;
-    }
-    this->IfDraw = true;
-    return true;
-}
-
 bool ElementBase::DrawBase(CameraDrawer* CamDrawer, const float* Matrix, const float WinWidth, const float WinHeight)const {
-    if (!this->IfDraw) {
+    if (!this->draw) {
         return false;
     }
     return this->Draw(CamDrawer, Matrix, WinWidth, WinHeight);

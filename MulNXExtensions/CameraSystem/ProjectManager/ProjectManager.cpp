@@ -210,7 +210,7 @@ bool ProjectManager::Project_Apply(const std::shared_ptr<Project> Project) {
     this->ISys().LogSucc("已切换至项目" + Project->Name);
     this->ISys().LogSucc("尝试加载元素总数：" + std::to_string(Elements.size()));
     this->ISys().LogSucc("尝试加载解决方案总数：" + std::to_string(Solutions.size()));
-    this->ISys().LogSucc("成功加载元素总数：" + std::to_string(this->EManager->Elements.size()));
+    this->ISys().LogSucc("成功加载元素总数：" + std::to_string(this->EManager->elements.size()));
     this->ISys().LogSucc("成功加载解决方案总数：" + std::to_string(this->SManager->Solutions.size()));
     return true;
 }
