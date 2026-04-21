@@ -142,7 +142,7 @@ bool CSController::Init() {
     this->Source2EngineToClient001 =
         this->Modules.engine2.GetProcAddressT<void* (const char*, int*)>("CreateInterface")
         ("Source2EngineToClient001", nullptr);
-    this->executor = IVClass::Assume(this->Source2EngineToClient001)->GetVFunc<void(int, const char*, int)>(49);
+    this->executor = IVClass::Assume(this->Source2EngineToClient001)->GetVFunc<void(int, const char*, int)>(50);
 
     this->CvarSystem.Address =
         (uintptr_t)this->Modules.tier0.GetProcAddressT<void* (const char*, int*)>("CreateInterface")

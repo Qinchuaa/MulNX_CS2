@@ -105,7 +105,7 @@ void SolutionManager::Solution_DebugWindow() {
         }
 
         if (ImGui::Button("使能当前解决方案")) {
-            this->Playing_SetSolution(this->CurrentSolution);
+            this->Playing_SetSolution(this->CurrentSolution->Name);
             this->Playing_Enable();
         }
         ImGui::SameLine();
@@ -221,10 +221,10 @@ void SolutionManager::HandleUpdate() {
 void SolutionManager::Traversal() {
     if (!this->Config.SolutionShortcutEnable)return;
     //遍历
-    for (const auto& pSolution : this->Solutions) {
+    for (const auto& [name,pSolution] : this->solutions) {
         //快捷键播放处理
         if (this->pInputSystem->CheckWithPack(pSolution->KCPack)) {
-            this->Playing_SetSolution(pSolution.get());//设置播放，偏移时间轴播放
+            this->Playing_SetSolution(pSolution.get()->Name);//设置播放，偏移时间轴播放
             this->Playing_Enable();//启动播放
         }
         //后续其它任务待补充
@@ -233,35 +233,35 @@ void SolutionManager::Traversal() {
 }
 void SolutionManager::Refresh() {
     //遍历
-    for (auto& pSolution : this->Solutions) {
+    for (auto& [name,pSolution] : this->solutions) {
         pSolution->Refresh();
     }
 }
 
 //创建，得到，删除
 
-bool SolutionManager::Solution_Create(const std::string& Name) {
+bool SolutionManager::Solution_Create(const std::string& name) {
     // 检查是否已存在同名解决方案
-    if (this->Solution_Get(Name)) {
-        this->ISys().LogError("解决方案名已占用！ 解决方案名：" + Name);
+    if (this->solutions.find(name)!=this->solutions.end()) {
+        this->ISys().LogError("解决方案名已占用！ 解决方案名：" + name);
         return false;
     }
     //输出成功信息
-    this->ISys().LogSucc("成功创建解决方案！  解决方案名：" + Name);
+    this->ISys().LogSucc("成功创建解决方案！  解决方案名：" + name);
     //创建新解决方案
-    std::unique_ptr<Solution> newSolution = std::make_unique<Solution>(Name);
-    Solutions.push_back(std::move(newSolution));
+    std::unique_ptr<Solution> newSolution = std::make_unique<Solution>(name);
+    this->solutions[name] = std::move(newSolution);
 
     return true;
 }
 bool SolutionManager::Solution_SaveAll() {
-    if (this->Solutions.empty()) {
+    if (this->solutions.empty()) {
         this->ISys().LogWarning("尝试在没有任何解决方案的情况下保存");
         return true;
     }
     std::filesystem::path SolutionFolderPath = this->ISys().PathManager()->PathGetFromKey("Solutions");
     //遍历所有解决方案保存
-    for (const auto& solution : this->Solutions) {
+    for (const auto& [name,solution] : this->solutions) {
         if (!solution->Dirty) {
             continue;//不脏不需保存
         }
@@ -294,7 +294,7 @@ bool SolutionManager::Solution_Load(const std::filesystem::path& FullPath) {
         }
 
         // 检查是否存在同名解决方案
-        if (this->Solution_Get(NewSolutionName)) {
+        if (this->solutions.find(NewSolutionName)!=this->solutions.end()) {
             this->ISys().LogError("解决方案名已占用，无法从yaml文件加载解决方案！ 解决方案名：" + std::move(NewSolutionName));
             return false;
         }
@@ -315,7 +315,7 @@ bool SolutionManager::Solution_Load(const std::filesystem::path& FullPath) {
         }
 
         // 添加进解决方案组
-        this->Solutions.push_back(std::move(newSolution));
+        this->solutions[NewSolutionName]=std::move(newSolution);
         this->ISys().LogSucc(std::move(msg));
         this->ISys().LogLine();
         return true;
@@ -325,23 +325,23 @@ bool SolutionManager::Solution_Load(const std::filesystem::path& FullPath) {
         return false;
     }
 }
-std::vector<std::unique_ptr<Solution>>::iterator SolutionManager::Solution_GetIterator(const std::string& Name) {
-    return std::find_if(this->Solutions.begin(), this->Solutions.end(),
-        [&Name](const std::unique_ptr<Solution>& solution) {
-            return solution->Name == Name;
-        });
-}
-Solution* SolutionManager::Solution_Get(const std::string& Name) {
-    auto it = this->Solution_GetIterator(Name);
-    if (it == this->Solutions.end()) {
-        return nullptr;
+
+bool SolutionManager::Solution_Delete(const std::string& name) {
+    //安全检查
+    if (name.empty()) {
+        this->ISys().LogError("尝试删除空名称的解决方案！");
+        return false;
     }
-    return it->get();
-}
-bool SolutionManager::Solution_Delete(Solution* Solution) {
+
+    auto it = this->solutions.find(name);
+    if (it == this->solutions.end()) {
+        this->ISys().LogError("未找到指定名称的解决方案：" + name);
+        return false;
+    }
+
     //检查是否正在播放此解决方案
     if (this->Playing) {
-        if (this->Playing_pSolution == Solution) {
+        if (this->Playing_pSolution == it->second.get()) {
             this->Playing_Disable(); //禁用播放
             this->Playing_pSolution = nullptr;
         }
@@ -349,34 +349,14 @@ bool SolutionManager::Solution_Delete(Solution* Solution) {
 
     //检查是否当前正在操作此解决方案
     if (this->CurrentSolution) {
-        if (this->CurrentSolution == Solution)
+        if (this->CurrentSolution == it->second.get())
             this->CurrentSolution = nullptr;
     }
 
-    //通过迭代器删除元素
-    std::string Name = Solution->Name;
-    auto it = this->Solution_GetIterator(Name);
-    this->Solutions.erase(it);
+    this->solutions.erase(it);
 
-    this->ISys().LogSucc("成功删除解决方案：" + Name);
+    this->ISys().LogSucc("成功删除解决方案：" + name);
     return true;
-}
-bool SolutionManager::Solution_Delete(const std::string& Name) {
-    //安全检查
-    if (Name.empty()) {
-        this->ISys().LogError("尝试删除空名称的解决方案！");
-        return false;
-    }
-
-    //获取迭代器
-    auto it = this->Solution_GetIterator(Name);
-    //判空
-    if (it == this->Solutions.end()) {
-        this->ISys().LogError("未找到指定名称的解决方案：" + Name);
-        return false;
-    }
-
-    return this->Solution_Delete(it->get());
 }
 bool SolutionManager::Solution_ClearAll() {
     //禁用播放
@@ -385,26 +365,17 @@ bool SolutionManager::Solution_ClearAll() {
     //清空当前操作解决方案
     this->CurrentSolution = nullptr;
 
-    if (this->Solutions.empty()) {
+    if (this->solutions.empty()) {
         this->ISys().LogWarning("当前没有任何解决方案，跳过清空操作！");
         return true;
     }
     //清空所有解决方案
-    this->Solutions.clear();
+    this->solutions.clear();
     this->ISys().LogSucc("成功删除所有解决方案！");
     return true;
 }
 
 //功能
-const std::vector<std::string> SolutionManager::Solution_GetNames()const {
-    std::vector<std::string> SolutionsNames;
-    if (this->Solutions.empty())return SolutionsNames;
-    SolutionsNames.reserve(this->Solutions.size());
-    for (size_t i = 0; i < this->Solutions.size(); ++i) {
-        SolutionsNames.push_back(this->Solutions[i]->Name);
-    }
-    return SolutionsNames;
-}
 void SolutionManager::Solution_ShowInLine(Solution* solution) {
     if (!solution) {
         this->ISys().LogError("解决方案指针为空，无法展示信息！");
@@ -448,20 +419,21 @@ void SolutionManager::Solution_ShowInLine(Solution* solution) {
 }
 void SolutionManager::Solution_ShowAllInLines() {
     //使用迭代器遍历所有项目
-    for (const auto& Solution : this->Solutions) {
-        this->Solution_ShowInLine(Solution.get());
+    for (const auto& [name,solution] : this->solutions) {
+        this->Solution_ShowInLine(solution.get());
     }
     return;
 }
 
-bool SolutionManager::Playing_SetSolution(Solution* const solution) {
-    //这里只需要设置，播放结束解决方案本身自动归位
-    if (!solution) {
-        this->ISys().LogError("找不到目标解决方案，可能是空指针");
+bool SolutionManager::Playing_SetSolution(const std::string& name) {
+    auto it = this->solutions.find(name);
+    if (it == this->solutions.end()) {
+        this->ISys().LogError(std::format("目标解决方案不存在：{}", name));
         return false;
     }
-    this->Playing_pSolution = solution;
-    switch (solution->Playmode) {
+
+    this->Playing_pSolution = it->second.get();
+    switch (this->Playing_pSolution->Playmode) {
     case PlaybackMode::Orchestration:
         this->Playing_SetTimeSchema(this->AL3D->Time()->GetReal());//偏移时间轴播放
         this->ISys().LogInfo("偏移时间轴播放，偏移时间设置为：" + std::to_string(this->AL3D->Time()->GetReal()));
@@ -470,15 +442,8 @@ bool SolutionManager::Playing_SetSolution(Solution* const solution) {
         this->Playing_SetTimeSchema(0);
         break;
     }
-    this->ISys().LogInfo("已经切换至解决方案：" + solution->Name);
+    this->ISys().LogInfo(std::format("已经切换至解决方案{}", name));
     return true;
-}
-bool SolutionManager::Playing_SetSolution(const std::string& SolutionName) {
-    Solution* pSolution = this->Solution_Get(SolutionName);
-    if (!pSolution) {
-        return false;
-    }
-    return this->Playing_SetSolution(pSolution);
 }
 
 

@@ -31,7 +31,7 @@ private:
 public:
 
     //数据存储
-    std::vector<std::unique_ptr<Solution>> Solutions{};
+    std::unordered_map<std::string, std::unique_ptr<Solution>> solutions{};
 
     ////////////////////////////////////////
     //播放
@@ -65,17 +65,10 @@ public:
     bool Solution_SaveAll();
     //从文件加载解决方案（反序列化，序列化在Solution）
     bool Solution_Load(const std::filesystem::path& FullPath);
-    //获取解决方案对应的迭代器
-    std::vector<std::unique_ptr<Solution>>::iterator Solution_GetIterator(const std::string& Name);
-    //获取解决方案指针
-    Solution* Solution_Get(const std::string& Name);
     //删除解决方案
-    bool Solution_Delete(Solution* Solution);
     bool Solution_Delete(const std::string& Name);
     //删除所有解决方案
     bool Solution_ClearAll();
-    //获取所有解决方案名称容器（危险函数，只有摄像机系统内部可用）
-    const std::vector<std::string> Solution_GetNames()const;
     //展示单个解决方案信息在一行上
     void Solution_ShowInLine(Solution* solution);
     //按行展示所有解决方案
@@ -96,12 +89,8 @@ public:
     void Playing_Enable();
     //关闭播放
     void Playing_Disable();
-    //通过指针设置当前播放的解决方案
-    bool Playing_SetSolution(Solution* const solution);
     //通过名称设置当前播放的解决方案
     bool Playing_SetSolution(const std::string& SolutionName);
-
-
     //设置播放时间偏移
     void Playing_SetTimeSchema(const float Time);
     //调用播放
