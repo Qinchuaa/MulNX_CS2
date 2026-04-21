@@ -99,7 +99,7 @@ public:
     // 绘制函数入口
     bool DrawBase(CameraDrawer* CamDrawer, const float* Matrix, const float WinWidth, const float WinHeight)const;
     // 绘制函数（虚），各个元素按需实现
-    virtual bool Draw(CameraDrawer* CamDrawer, const float* Matrix, const float WinWidth, const float WinHeight)const;
+    virtual bool Draw(CameraDrawer* CamDrawer, const float* Matrix, const float WinWidth, const float WinHeight)const = 0;
     // 刷新状态（虚）
     virtual void Refresh() = 0;
     // 信息获取函数（虚）

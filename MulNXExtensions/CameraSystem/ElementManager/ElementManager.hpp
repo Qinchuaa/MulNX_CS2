@@ -9,8 +9,6 @@
 class SolutionManager;
 class ProjectManager;
 
-class ElementDebugger;
-
 //元素管理器，用于管理元素
 class ElementManager final : public MulNX::ModuleBase {
     //对于元素，我们只给出三个通用接口：创建、获取、删除，具体的各个元素的功能由各个元素类自己实现
@@ -21,11 +19,6 @@ private:
 
     // 当前操作的元素指针
     std::atomic<std::shared_ptr<ElementBase>> CurrentElement = nullptr;
-public:
-    ElementConfig Config{};
-    // 使用智能指针存储多态对象，以存储不同类型的元素
-    std::unordered_map<std::string, std::shared_ptr<ElementBase>> elements;
-
     // 预览相关
 
     // 预览时间偏移
@@ -37,14 +30,20 @@ public:
     // 是否处于预览状态
     bool OnPreview = false;
 
+    // 展示单个元素信息在一行上
+    void Element_ShowInLine(const std::shared_ptr<ElementBase> element);
+public:
+    ElementConfig Config{};
+    // 使用智能指针存储多态对象，以存储不同类型的元素
+    std::unordered_map<std::string, std::shared_ptr<ElementBase>> elements;
 
-    bool Init()override;
     bool MenuElement(MulNX::UINode* node);
     bool UINodeFunc(MulNX::UINode* node);
+
+    bool Init()override;
     void ProcessMsg(MulNX::Message& msg)override;
     void HandleUpdate();
 
-    //创建元素函数，支持传递任意参数给元素构造函数
     ElementBase* Element_Create(const ElementType type, const std::string& name);
     // 保存所有元素到磁盘文件
     bool Element_SaveAll();
@@ -54,10 +53,7 @@ public:
     bool Element_Delete(const std::string Name);
     // 清空所有元素
     bool Element_ClearAll();
-    // 展示单个元素信息在一行上
-    void Element_ShowInLine(const std::shared_ptr<ElementBase> element);
-    // 展示某个元素的详细信息到调试窗口
-    void Element_ShowMsgToDebugMenu(const std::shared_ptr<ElementBase> element);
+    
 
     //预览功能相关：
     //启用预览

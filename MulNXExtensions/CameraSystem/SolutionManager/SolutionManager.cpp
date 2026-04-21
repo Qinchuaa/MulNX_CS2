@@ -7,8 +7,10 @@
 #include <MulNXExtensions/CameraSystem/ProjectManager/ProjectManager.hpp>
 
 bool SolutionManager::MenuSolution(MulNX::UINode* node) {
-    ImGui::Text(("播放状态：" + std::string(this->Playing ? "播放中" : "关闭") +
-        "  活跃解决方案名：" + (this->Playing_pSolution ? this->Playing_pSolution->GetName() : "无")).c_str());
+    ImGui::Text(std::format("播放状态：{}  活跃解决方案名：{}",
+        this->Playing ? "播放中" : "关闭",
+        this->Playing_pSolution ? this->Playing_pSolution->GetName() : "无"
+    ).c_str());
     ImGui::Separator();
     // 解决方案总设置
     if (ImGui::CollapsingHeader("解决方案设置")) {
@@ -29,41 +31,66 @@ bool SolutionManager::MenuSolution(MulNX::UINode* node) {
                 this->ISys().LogError("请输入解决方案名！");
                 return true;
             }
-            if (this->Solution_Create(CreateSolutionName)) {
-                CreateSolutionName.clear();
-            }
-        }
-    }
-    // 载入解决方案
-    if (ImGui::CollapsingHeader("解决方案载入")) {
-        static std::string LoadSolutionName = "";
-        ImGui::Text("载入解决方案名：");
-        ImGui::SameLine();
-        ImGui::InputText("##载入解决方案名", &LoadSolutionName);
-        ImGui::SameLine();
-        // 载入成功则清空输入框
-        if (ImGui::Button("载入解决方案")) {
-            if (this->Solution_Load(this->ISys().PathManager()->PathGetFromKey("Solutions") / (LoadSolutionName + ".yaml"))) {
-                this->ISys().LogSucc(("加载解决方案成功：" + LoadSolutionName).c_str());
-                LoadSolutionName.clear();
-            }
-            else {
-                this->ISys().LogError(("加载解决方案失败：" + LoadSolutionName).c_str());
-            }
+            auto [msg, rp] = MulNX::Message::Create<MulNX::NetExt>("CameraSystem/Solution/Create"_hash);
+            rp->str1 = std::move(CreateSolutionName);
+            this->ISys().PublishAsync(std::move(msg));
+            CreateSolutionName.clear();
         }
     }
     // 展示修改解决方案
     if (ImGui::CollapsingHeader("解决方案列表")) {
         // 输出是否打开了解决方案调试窗口
         ImGui::Text(("解决方案调试窗口状态：" + std::string(this->ShowWindow.load(std::memory_order_acquire) ? "打开" : "关闭")).c_str());
-        this->Solution_ShowAllInLines();
+        for (const auto& [name, solution] : this->solutions) {
+            this->Solution_ShowInLine(solution.get());
+        }
     }
 
     return true;
 }
-
-//调试窗口及菜单
-
+void SolutionManager::Solution_ShowInLine(Solution* solution) {
+    if (!solution) {
+        this->ISys().LogError("解决方案指针为空，无法展示信息！");
+        return;
+    }
+    ImGui::Text("|解决方案名称：");
+    ImGui::SameLine();
+    if (ImGui::Selectable(solution->name.c_str(), false, ImGuiSelectableFlags_AllowDoubleClick)) {
+        if (ImGui::IsMouseDoubleClicked(0)) {
+            this->CurrentSolution = solution;
+            this->ShowWindow.store(true, std::memory_order_release);
+        }
+    }
+    if (ImGui::BeginPopupContextItem(("右键菜单" + solution->name).c_str())) {
+        if (ImGui::MenuItem("复制名称")) {
+            ImGui::SetClipboardText(solution->name.c_str());
+        }
+        if (ImGui::MenuItem("保存到磁盘")) {
+            auto path = this->ISys().PathManager()->PathGetFromKey("Solutions");
+            auto [ok, msg] = solution->Save(path);
+            if (ok) {
+                this->ISys().LogSucc(std::move(msg));
+            }
+            else {
+                this->ISys().LogError(std::move(msg));
+            }
+        }
+        if (ImGui::MenuItem("打印信息调试窗口")) {
+            this->ISys().LogLine();
+            this->ISys().LogInfo(solution->GetMsg());
+            this->ISys().LogLine();
+        }
+        if (ImGui::MenuItem("删除")) {
+            auto [msg,rp] = MulNX::Message::Create<MulNX::NetExt>("CameraSystem/Solution/Delete"_hash);
+            rp->str1 = solution->name;
+            this->ISys().PublishAsync(std::move(msg));
+        }
+        ImGui::EndPopup();
+    }
+    ImGui::SameLine();
+    ImGui::Text(std::format(" 元素数量：{},   总时长：{}",
+        solution->elements.size(), solution->totalDurationTime).c_str());
+}
 bool SolutionManager::UINodeFunc(MulNX::UINode* node) {
     if (this->ShowWindow.load(std::memory_order_acquire)) {
         this->Solution_DebugWindow();
@@ -91,21 +118,21 @@ void SolutionManager::Solution_DebugWindow() {
     // 检查当前是否操作解决方案
     if (this->CurrentSolution) {
         ImGui::Text(std::format("当前操作解决方案名称：{}   元素数量：{}   总时长：{}   播放模式：{}",
-            this->CurrentSolution->Name,
-            this->CurrentSolution->Elements.size(),
-            this->CurrentSolution->TotalDurationTime,
-            PlaybackModeToString(this->CurrentSolution->Playmode)).c_str());
+            this->CurrentSolution->name,
+            this->CurrentSolution->elements.size(),
+            this->CurrentSolution->totalDurationTime,
+            PlaybackModeToString(this->CurrentSolution->playmode)).c_str());
 
         if (ImGui::Button("切换到激活模式")) {
-            this->CurrentSolution->Playmode = PlaybackMode::Activation;
+            this->CurrentSolution->playmode = PlaybackMode::Activation;
         }
         ImGui::SameLine();
         if (ImGui::Button("切换到编排模式")) {
-            this->CurrentSolution->Playmode = PlaybackMode::Orchestration;
+            this->CurrentSolution->playmode = PlaybackMode::Orchestration;
         }
 
         if (ImGui::Button("使能当前解决方案")) {
-            this->Playing_SetSolution(this->CurrentSolution->Name);
+            this->Playing_SetSolution(this->CurrentSolution->name);
             this->Playing_Enable();
         }
         ImGui::SameLine();
@@ -148,11 +175,12 @@ void SolutionManager::Solution_DebugWindow() {
         static int IndexForReset = 0;
         static int PreIndex = -1;
         ImGui::InputInt("要调整的本解决方案的元素", &IndexForReset);
-        if (0 <= IndexForReset && IndexForReset < this->CurrentSolution->Elements.size()) {
-            std::shared_ptr<ElementBase> element = this->CurrentSolution->Elements.at(IndexForReset).Element;
+        if (0 <= IndexForReset && IndexForReset < this->CurrentSolution->elements.size()) {
+            std::shared_ptr<ElementBase> element = this->CurrentSolution->elements.at(IndexForReset).Element;
             if (element) {
-                const float& Offset = this->CurrentSolution->Elements.at(IndexForReset).Offset;
-                ImGui::Text(("元素信息： 编号： " + std::to_string(IndexForReset) + "  元素名称：" + element->Name + "  元素持续时间：" + std::to_string(element->DurationTime) + "  元素偏移时间：" + std::to_string(Offset)).data());
+                const float& Offset = this->CurrentSolution->elements.at(IndexForReset).Offset;
+                ImGui::Text(std::format("元素信息： 编号：{}  元素名称：{}  元素持续时间：{}  元素偏移时间：{}",
+                    IndexForReset, element->Name, element->DurationTime, Offset).c_str());
                 ImGui::Separator();
                 static float tempOffset{};
                 if (IndexForReset != PreIndex) {
@@ -170,7 +198,7 @@ void SolutionManager::Solution_DebugWindow() {
 
         }
         else {
-            ImGui::Text("索引无效！请输入 0 到 %d 之间的值", this->CurrentSolution->Elements.size() - 1);
+            ImGui::Text(std::format("索引无效！请输入 0 到 {} 之间的值", this->CurrentSolution->elements.size() - 1).c_str());
         }
         PreIndex = IndexForReset;
     }
@@ -199,14 +227,40 @@ bool SolutionManager::Init() {
         PathManager->KeyBindDynamic("Solutions", "CurrentProject");
     }
     this->ISys()
+        .SubscribeAsync("CameraSystem/Solution/Create")
+        .SubscribeAsync("CameraSystem/Solution/Delete")
         .SubscribeAsync("CameraSystem/Solution/Play");
     
     return true;
 }
+
+void SolutionManager::ProcessMsg(MulNX::Message& msg) {
+    switch (msg.type) {
+    case "CameraSystem/Solution/Create"_hash: {
+        auto name = msg.asp.get<MulNX::NetExt>()->str1;
+        std::unique_lock lock(this->smutex);
+        if (!this->Solution_Create(name)) {
+            this->ISys().LogError(std::format("创建解决方案失败：{}", name));
+        }
+    }
+    case "CameraSystem/Solution/Delete"_hash: {
+        auto name = msg.asp.get<MulNX::NetExt>()->str1;
+        std::unique_lock lock(this->smutex);
+        if (!this->Solution_Delete(name)) {
+            this->ISys().LogError(std::format("删除解决方案失败：{}", name));
+        }
+    }
+    }
+}
+
 void SolutionManager::HandleUpdate() {
+    this->EntryProcessMsg();
     //判断需不需要刷新所有
     if (this->NeedRefresh) {
-        this->Refresh();//全部刷新用于清理失效元素
+        //全部刷新用于清理失效元素
+        for (auto& [name, pSolution] : this->solutions) {
+            pSolution->Refresh();
+        }
         this->NeedRefresh = false;
     }
     else if (this->CurrentSolution) {
@@ -224,20 +278,12 @@ void SolutionManager::Traversal() {
     for (const auto& [name,pSolution] : this->solutions) {
         //快捷键播放处理
         if (this->pInputSystem->CheckWithPack(pSolution->KCPack)) {
-            this->Playing_SetSolution(pSolution.get()->Name);//设置播放，偏移时间轴播放
+            this->Playing_SetSolution(pSolution.get()->name);//设置播放，偏移时间轴播放
             this->Playing_Enable();//启动播放
         }
         //后续其它任务待补充
-
     }
 }
-void SolutionManager::Refresh() {
-    //遍历
-    for (auto& [name,pSolution] : this->solutions) {
-        pSolution->Refresh();
-    }
-}
-
 //创建，得到，删除
 
 bool SolutionManager::Solution_Create(const std::string& name) {
@@ -262,7 +308,7 @@ bool SolutionManager::Solution_SaveAll() {
     std::filesystem::path SolutionFolderPath = this->ISys().PathManager()->PathGetFromKey("Solutions");
     //遍历所有解决方案保存
     for (const auto& [name,solution] : this->solutions) {
-        if (!solution->Dirty) {
+        if (!solution->dirty) {
             continue;//不脏不需保存
         }
         auto [ok, msg] = solution->Save(SolutionFolderPath);
@@ -310,7 +356,7 @@ bool SolutionManager::Solution_Load(const std::filesystem::path& FullPath) {
         }
 
         // 检验时间关系
-        if (newSolution->TotalDurationTime != TargetDurationTime) {
+        if (newSolution->totalDurationTime != TargetDurationTime) {
             this->ISys().LogWarning("该解决方案实际持续时长与预估持续时长不同，可能出现问题");
         }
 
@@ -375,56 +421,6 @@ bool SolutionManager::Solution_ClearAll() {
     return true;
 }
 
-//功能
-void SolutionManager::Solution_ShowInLine(Solution* solution) {
-    if (!solution) {
-        this->ISys().LogError("解决方案指针为空，无法展示信息！");
-        return;
-    }
-    ImGui::Text("|解决方案名称：");
-    ImGui::SameLine();
-    if (ImGui::Selectable(solution->Name.data(), false, ImGuiSelectableFlags_AllowDoubleClick)) {
-        if (ImGui::IsMouseDoubleClicked(0)) {
-            this->CurrentSolution = solution;
-            this->ShowWindow.store(true, std::memory_order_release);
-        }
-    }
-    if (ImGui::BeginPopupContextItem(("右键菜单" + solution->Name).c_str())) {
-        if (ImGui::MenuItem("复制名称")) {
-            ImGui::SetClipboardText(solution->Name.c_str());
-        }
-        if (ImGui::MenuItem("保存到磁盘")) {
-            auto path = this->ISys().PathManager()->PathGetFromKey("Solutions");
-            auto [ok, msg] = solution->Save(path);
-            if (ok) {
-                this->ISys().LogSucc(std::move(msg));
-            }
-            else {
-                this->ISys().LogError(std::move(msg));
-            }
-        }
-        if (ImGui::MenuItem("打印信息调试窗口")) {
-            this->ISys().LogLine();
-            this->ISys().LogInfo(solution->GetMsg());
-            this->ISys().LogLine();
-        }
-        if (ImGui::MenuItem("删除")) {
-            this->Solution_Delete(solution->Name);
-        }
-        ImGui::EndPopup();
-    }
-    ImGui::SameLine();
-    ImGui::Text(("   元素数量：" + std::to_string(solution->Elements.size()) + "   总时长：" + std::to_string(solution->TotalDurationTime)).data());
-
-}
-void SolutionManager::Solution_ShowAllInLines() {
-    //使用迭代器遍历所有项目
-    for (const auto& [name,solution] : this->solutions) {
-        this->Solution_ShowInLine(solution.get());
-    }
-    return;
-}
-
 bool SolutionManager::Playing_SetSolution(const std::string& name) {
     auto it = this->solutions.find(name);
     if (it == this->solutions.end()) {
@@ -433,21 +429,18 @@ bool SolutionManager::Playing_SetSolution(const std::string& name) {
     }
 
     this->Playing_pSolution = it->second.get();
-    switch (this->Playing_pSolution->Playmode) {
+    switch (this->Playing_pSolution->playmode) {
     case PlaybackMode::Orchestration:
         this->Playing_SetTimeSchema(this->AL3D->Time()->GetReal());//偏移时间轴播放
-        this->ISys().LogInfo("偏移时间轴播放，偏移时间设置为：" + std::to_string(this->AL3D->Time()->GetReal()));
+        this->ISys().LogInfo(std::format("偏移时间轴播放，偏移时间设置为：{}", this->AL3D->Time()->GetReal()));
         break;
     case PlaybackMode::Activation:
         this->Playing_SetTimeSchema(0);
         break;
     }
-    this->ISys().LogInfo(std::format("已经切换至解决方案{}", name));
+    this->ISys().LogInfo(std::format("已经切换至解决方案：{}", name));
     return true;
 }
-
-
-//启动相关
 
 void SolutionManager::Playing_Enable() {
     if (!this->Playing_pSolution) {

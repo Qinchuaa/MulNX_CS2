@@ -20,38 +20,37 @@ private:
     //数据存储
 
     //解决方案名称
-    std::string Name{};
+    std::string name{};
 
     //存储元素的指针，允许调用不同元素的同一个Call函数（多态，内部实现不同）
-    std::vector<ElementWithOffset> Elements;
+    std::vector<ElementWithOffset> elements;
 
     //开始时间
-    float StartTime{};
+    float startTime{};
     //结束时间
-    float EndTime{};
+    float endTime{};
     //总持续时间
-    float TotalDurationTime{};
+    float totalDurationTime{};
     //解决方案时间偏移
-    float SolutionOffset = 0;
+    float solutionOffset = 0;
     //播放模式
-    PlaybackMode Playmode = PlaybackMode::Orchestration;
+    PlaybackMode playmode = PlaybackMode::Orchestration;
 
     //按键检测包
     MulNX::KeyCheckPack KCPack{};
 
     //脏标记，需要重新保存
-    bool Dirty = false;
+    bool dirty = false;
 public:
-    //构造函数
-    Solution(const std::string& Name) :
-        Name(Name) {
+    Solution(const std::string& name) :
+        name(name) {
         this->Refresh();
     }
+    ~Solution() = default;
 
     //解决方案能否安全使用
-    bool SafeUse = false;
-    //析构函数
-    ~Solution() = default;
+    bool safeUse = false;
+    
 
     //添加元素
     //常量指针常量说明没有修改权，时间偏移默认是0.0f

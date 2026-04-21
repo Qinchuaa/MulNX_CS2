@@ -50,9 +50,6 @@ bool ElementBase::DrawBase(CameraDrawer* CamDrawer, const float* Matrix, const f
     }
     return this->Draw(CamDrawer, Matrix, WinWidth, WinHeight);
 }
-bool ElementBase::Draw(CameraDrawer* CamDrawer, const float* Matrix, const float WinWidth, const float WinHeight)const {
-    return true;
-}
 
 float ElementBase::GetStartTime()const {
     return this->StartTime;

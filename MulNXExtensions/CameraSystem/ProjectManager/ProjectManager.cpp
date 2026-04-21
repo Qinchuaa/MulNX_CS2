@@ -32,7 +32,10 @@ bool ProjectManager::MenuProject(MulNX::UINode* node) {
     if (ImGui::CollapsingHeader("项目列表")) {
         // 输出是否打开了项目调试窗口
         ImGui::Text(("项目调试窗口状态：" + std::string(this->ShowWindow.load(std::memory_order_acquire) ? "打开" : "关闭")).c_str());
-        this->Project_ShowAllInLines();
+        //使用迭代器遍历所有项目
+        for (const auto& [name, project] : this->projects) {
+            this->Project_ShowInLine(project);
+        }
     }
 
     return true;
@@ -90,60 +93,42 @@ bool ProjectManager::Init() {
     return true;
 }
 void ProjectManager::HandleUpdate() {
-    this->Traversal();
-    return;
-}
-void ProjectManager::Traversal() {
     if (!this->Config.ProjectShortcutEnable)return;
-    for (const auto& Project : this->Projects) {
-        if (this->pInputSystem->CheckWithPack(Project->KCPack)) {
-            this->Project_Apply(Project);
+    for (const auto& [name, project] : this->projects) {
+        if (this->pInputSystem->CheckWithPack(project->KCPack)) {
+            this->Project_Apply(project);
         }
     }
 }
 
-
-std::vector<std::shared_ptr<Project>>::iterator ProjectManager::Project_GetIterator(const std::string& Name) {
-    return std::find_if(this->Projects.begin(), this->Projects.end(),
-        [&Name](const std::shared_ptr<Project>& project) {
-            return project->Name == Name;
-        });
-}
-std::shared_ptr<Project> ProjectManager::Project_Get(const std::string& Name) {
-    auto it = this->Project_GetIterator(Name);
-    if (it == this->Projects.end()) {
-        return nullptr;
-    }
-    return (*it);
-}
-bool ProjectManager::Project_Delete(const std::string& Name) {
-    std::vector<std::shared_ptr<Project>>::iterator it = this->Project_GetIterator(Name);
-    if (it == this->Projects.end()) {
+bool ProjectManager::Project_Delete(const std::string& name) {
+    auto it = this->projects.find(name);
+    if (it == this->projects.end()) {
         return true;
     }
-    this->Projects.erase(it);
+    this->projects.erase(it);
     return true;
 }
 bool ProjectManager::Project_ClearAll() {
-    this->Projects.clear();
+    this->projects.clear();
     this->ActiveProject = nullptr;
     return true;
 }
 
 
 
-bool ProjectManager::Project_Create(const std::string& Name) {
+bool ProjectManager::Project_Create(const std::string& name) {
     //检查是否已存在同名项目
-    if (this->Project_Get(Name)) {
-        this->ISys().LogError("项目名已占用！ 项目名：" + Name);
+    if (this->projects.find(name)!=this->projects.end()) {
+        this->ISys().LogError("项目名已占用！ 项目名：" + name);
         return false;
     }
     //创建项目指针
-    std::shared_ptr<Project> CreateProject = std::make_shared<Project>(Name);
+    std::shared_ptr<Project> CreateProject = std::make_shared<Project>(name);
     CreateProject->Refresh();
     //添加进项目组
-    this->Projects.push_back(std::move(CreateProject));
-    this->ISys().LogSucc("成功创建项目：" + Name);
+    this->projects[name] = std::move(CreateProject);
+    this->ISys().LogSucc("成功创建项目：" + name);
     return true;
 }
 bool ProjectManager::Project_Refresh() {
@@ -237,7 +222,7 @@ bool ProjectManager::Project_Load(const std::filesystem::path& ProjectPath, cons
         YAML::Node root = YAML::LoadFile(FullPath.string());
         std::string loadProjectName = root["name"].as<std::string>();
         //检查是否存在同名项目
-        if (this->Project_Get(loadProjectName)) {
+        if (this->projects.find(loadProjectName)!=this->projects.end()) {
             this->ISys().LogError("项目名已占用，无法从文件加载项目！ 项目名：" + std::move(loadProjectName));
             return false;
         }
@@ -249,7 +234,7 @@ bool ProjectManager::Project_Load(const std::filesystem::path& ProjectPath, cons
         this->ISys().LogSucc("成功从文件加载项目：" + loadProjectName);
 
         //添加进项目组
-        this->Projects.push_back(std::move(loadProject));
+        this->projects[loadProjectName] = std::move(loadProject);
         return true;
     }
     catch (const YAML::Exception& e) {
@@ -258,42 +243,6 @@ bool ProjectManager::Project_Load(const std::filesystem::path& ProjectPath, cons
     }
 }
 
-
-
-void ProjectManager::Project_ShowMsg(const std::string& Name) {
-    std::shared_ptr<Project> Project = this->Project_Get(Name);
-    if (!Project) {
-        return;
-    }
-    //判断是否需要更新
-    if (Project == this->ActiveProject) {
-        //如果操作项目和活跃项目是同一个项目，则需要刷新
-        this->Project_Refresh();
-    }
-    this->ISys().LogLine();
-    this->ISys().LogInfo(this->ControllingProject->GetMsg());
-    this->ISys().LogLine();
-    return;
-}
-void ProjectManager::Project_ShowAll() {
-    // 判断是否有项目存在
-    if (!this->Projects.empty())return;
-    // 先尝试更新活跃项目
-    this->Project_Refresh();
-    // 隔离线
-    this->ISys().LogLine();
-    this->ISys().LogLine();
-    // 依次展示所有项目信息
-    for (const auto& Project : this->Projects) {
-        this->ISys().LogInfo(Project->GetMsg());
-        this->ISys().LogLine();
-    }
-    // 隔离线
-    this->ISys().LogLine();
-    this->ISys().LogLine();
-
-    return;
-}
 void ProjectManager::Project_ShowInLine(std::shared_ptr<Project> Project) {
     if (!Project) {
         this->ISys().LogError("项目指针为空，无法展示信息！");
@@ -308,12 +257,6 @@ void ProjectManager::Project_ShowInLine(std::shared_ptr<Project> Project) {
 
     return;
 }
-void ProjectManager::Project_ShowAllInLines() {
-    //使用迭代器遍历所有项目
-    for (const auto& Project : this->Projects) {
-        this->Project_ShowInLine(Project);
-    }
-}
 
 void ProjectManager::Project_DebugWindow() {
     auto w = MulNX::UI::RAIIWindow("项目调试", this->ShowWindow);
@@ -325,9 +268,6 @@ void ProjectManager::Project_DebugWindow() {
         ImGui::Text(this->ControllingProject->Name.c_str());
         if (ImGui::Button("切换到当前项目")) {
             this->Project_Apply(this->ControllingProject);
-        }
-        if (ImGui::Button("打印项目信息到调试窗口")) {
-            this->Project_ShowMsg(this->ControllingProject->Name);
         }
         if (ImGui::Button("卸载当前项目")) {
             this->Project_Delete(this->ControllingProject->Name);
@@ -382,21 +322,6 @@ void ProjectManager::Project_DebugWindow() {
     if (ImGui::Button("关闭项目调试页面")) {
         this->ShowWindow.store(false, std::memory_order_release);
     }
-}
-
-//信息接口
-
-const std::vector<std::string>* ProjectManager::Active_GetRoundStart() {
-    if (!this->ActiveProject) {
-        return nullptr;
-    }
-    return &this->ActiveProject->OnRoundStart;
-}
-const std::vector<std::string>* ProjectManager::Active_GetRoundEnd() {
-    if (!this->ActiveProject) {
-        return nullptr;
-    }
-    return &this->ActiveProject->OnRoundEnd;
 }
 
 bool ProjectManager::Playing_AutoCall(const MulNX::Message& Msg) {

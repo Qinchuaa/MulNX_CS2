@@ -72,9 +72,6 @@ void ElementManager::Element_ShowInLine(const std::shared_ptr<ElementBase> eleme
         if (element->Drawable) {
             MulNX::UI::Checkbox("绘制", element->draw);
         }
-        if (ImGui::MenuItem("打印元素信息到调试窗口")) {
-            this->Element_ShowMsgToDebugMenu(element);
-        }
         if (ImGui::MenuItem("删除元素")) {
             auto [msg, rp] = MulNX::Message::Create<MulNX::NetExt>("Element/Delete"_hash);
             rp->str1 = std::move(element->Name);
@@ -87,7 +84,8 @@ void ElementManager::Element_ShowInLine(const std::shared_ptr<ElementBase> eleme
 }
 
 bool ElementManager::UINodeFunc(MulNX::UINode* node) {
-    for (auto& [name,elem] : this->elements) {
+    for (auto& [name, elem] : this->elements) {
+        std::shared_lock lock(this->smutex);
         elem->DrawBase(this->CamDrawer, this->AL3D->GetViewMatrix(), this->AL3D->GetWinWidth(), this->AL3D->GetWinHeight());
     }
     auto w = MulNX::UI::RAIIWindow("元素调试", this->ShowWindow);
@@ -96,6 +94,7 @@ bool ElementManager::UINodeFunc(MulNX::UINode* node) {
     auto current = this->CurrentElement.load(std::memory_order_acquire);
     if (current) {
         // 根据元素类型调用不同的调试菜单
+        std::unique_lock lock(this->smutex);
         current->DebugUI(this->CamDrawer, this);
     }
     // 如果没有操作元素
@@ -336,12 +335,6 @@ bool ElementManager::Element_ClearAll() {
     return true;
 }
 
-void ElementManager::Element_ShowMsgToDebugMenu(const std::shared_ptr<ElementBase> element) {
-    this->ISys().LogLine();
-    this->ISys().LogInfo(element->GetMsg());
-    this->ISys().LogLine();
-}
-
 //预览相关
 void ElementManager::Preview_Enable() {
     if (!this->Preview_CurrentElement) {
@@ -374,16 +367,14 @@ void ElementManager::Preview_SetPreviewSchema(const float Time) {
 }
 bool ElementManager::Preview_Call(CameraSystemIO* IO) {
     if (!this->OnPreview)return false;
-    if (this->Preview_CurrentElement) {
-        IO->ElementTime += this->Preview_CurrentElement->GetStartTime() - this->Preview_TimeSchema;
-        if (!this->Preview_CurrentElement->CalculateFrame(IO)) {
-            this->Preview_Disable();
-            return false;
-        }
-        return true;
-    }
-    else {
+    if (!this->Preview_CurrentElement) {
         this->Preview_Disable();
         return false;
     }
+    IO->ElementTime += this->Preview_CurrentElement->GetStartTime() - this->Preview_TimeSchema;
+    if (!this->Preview_CurrentElement->CalculateFrame(IO)) {
+        this->Preview_Disable();
+        return false;
+    }
+    return true;
 }

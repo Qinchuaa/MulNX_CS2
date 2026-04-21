@@ -15,8 +15,10 @@ private:
     MulNX::IPCer* pIPCer = nullptr;
 
     std::atomic<bool> OpenProjectKCPackDebugWindow = false;
+    std::unordered_map<std::string, std::shared_ptr<Project>> projects{};
 
-    std::vector<std::shared_ptr<Project>> Projects{};
+    //快捷键修改缓存
+    MulNX::KeyCheckPack Buffer_KCPack{};
 public:
     //当前操作项目指针（操作对象）
     std::shared_ptr<Project> ControllingProject = nullptr;
@@ -25,33 +27,22 @@ public:
 
     ProjectConfig Config{};
 
-    //项目管理器基本函数
-    //初始化函数
-
-    // 初始化
-    bool Init()override;
-    // UI
+    void Project_DebugWindow();
     bool MenuProject(MulNX::UINode* node);
     bool UINodeFunc(MulNX::UINode* node);
-    // 逻辑主函数
+    void Project_ShowInLine(std::shared_ptr<Project> project);
+
+    bool Init()override;
     void HandleUpdate();
-    // 遍历
-    void Traversal();
 
-
-
-    //获取项目对应的迭代器
-    std::vector<std::shared_ptr<Project>>::iterator Project_GetIterator(const std::string& Name);
-    //获取项目指针
-    std::shared_ptr<Project> Project_Get(const std::string& Name);
     //卸载项目（从内存中移除）
-    bool Project_Delete(const std::string& Name);
+    bool Project_Delete(const std::string& name);
     //清空项目（从内存中移除）
     bool Project_ClearAll();
 
 
     //创建项目
-    bool Project_Create(const std::string& Name);
+    bool Project_Create(const std::string& name);
     //保存活跃项目
     bool Project_Save();
     //刷新活跃项目
@@ -59,29 +50,10 @@ public:
     //保存所有项目
     //bool Project_SaveAll();
     //切换项目，重载解决方案和元素（删除先删解决方案再删元素，加载先加载元素再加载解决方案）
-    bool Project_Apply(const std::shared_ptr<Project> Project);
+    bool Project_Apply(const std::shared_ptr<Project> project);
     //从文件加载项目
-    bool Project_Load(const std::filesystem::path& ProjectPath, const std::string& Name);
-
-
-
-    //展示某项目信息
-    void Project_ShowMsg(const std::string& Name);
-    //展示所有项目信息
-    void Project_ShowAll();
-    //展示单个项目信息在一行上
-    void Project_ShowInLine(std::shared_ptr<Project> Project);
-    //一次展示所有项目信息到每一行
-    void Project_ShowAllInLines();
-private:
-    //项目调试窗口及菜单
-    void Project_DebugWindow();
-    //快捷键修改缓存
-    MulNX::KeyCheckPack Buffer_KCPack{};
-public:
-    const std::vector<std::string>* Active_GetRoundStart();
-    const std::vector<std::string>* Active_GetRoundEnd();
+    bool Project_Load(const std::filesystem::path& projectPath, const std::string& name);
 
     //通过信息设置当前播放的解决方案（0：默认游戏时间轴播放，1：偏移时间轴播放）
-    bool Playing_AutoCall(const MulNX::Message& Msg);
+    bool Playing_AutoCall(const MulNX::Message& msg);
 };

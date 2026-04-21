@@ -15,51 +15,35 @@ private:
     CameraDrawer* CamDrawer = nullptr;
     ElementManager* EManager = nullptr;
     ProjectManager* PManager = nullptr;
-public:
-    bool NeedRefresh = false;
-    SolutionConfig Config{};
-private:
-    ////////////////////////////////////////
+
     //当前操作的解决方案指针
     Solution* CurrentSolution = nullptr;
-    ////////////////////////////////////////
-    //操作调试窗口
-private:
+    //按键调试缓存
+    MulNX::KeyCheckPack Buffer_KCPack{};
     //是否打开解决方案按键绑定调试窗口
     std::atomic<bool> OpenSolutionKCPackDebugWindow = false;
-    ////////////////////////////////////////
-public:
-
-    //数据存储
-    std::unordered_map<std::string, std::unique_ptr<Solution>> solutions{};
-
-    ////////////////////////////////////////
-    //播放
-
     // 当前播放的解决方案
     Solution* Playing_pSolution = nullptr;
     // 是否处于播放状态
     // 播放完成之后需要变为false，切换解决方案要变成true
     bool Playing = false;
-
-    ////////////////////////////////////////
-
-    // 解决方案管理器基本函数
-    // 初始化函数
-    bool Init()override;
-    // UI绘制
+public:
+    bool NeedRefresh = false;
+    SolutionConfig Config{};
+    
+    //数据存储
+    std::unordered_map<std::string, std::unique_ptr<Solution>> solutions{};
     bool MenuSolution(MulNX::UINode* node);
     bool UINodeFunc(MulNX::UINode* node);
-    // 逻辑主函数
+    void Solution_ShowInLine(Solution* solution);
+    void Solution_DebugWindow();
+
+    bool Init()override;
+    void ProcessMsg(MulNX::Message& msg)override;
+
     void HandleUpdate();
-    // 遍历，用于迭代处理每个解决方案
     void Traversal();
-    // 刷新，更深层次的遍历，主要用于清理失效元素
-    void Refresh();
 
-
-
-    //创建解决方案
     bool Solution_Create(const std::string& Name);
     //保存所有解决方案到文件
     bool Solution_SaveAll();
@@ -69,22 +53,9 @@ public:
     bool Solution_Delete(const std::string& Name);
     //删除所有解决方案
     bool Solution_ClearAll();
-    //展示单个解决方案信息在一行上
-    void Solution_ShowInLine(Solution* solution);
-    //按行展示所有解决方案
-    void Solution_ShowAllInLines();
-private:
-    //解决方案调试窗口及菜单
-    void Solution_DebugWindow();
-    //按键调试缓存
-    MulNX::KeyCheckPack Buffer_KCPack{};
-    //名称修改缓存
-    std::string Buffer_Name{};
-    //名称修改窗口
-    void Solution_Name_DebugWindow();
 
     //预览功能相关
-public:
+
     //开启播放
     void Playing_Enable();
     //关闭播放
