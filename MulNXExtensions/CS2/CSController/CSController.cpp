@@ -148,24 +148,15 @@ bool CSController::Init() {
         (uintptr_t)this->Modules.tier0.GetProcAddressT<void* (const char*, int*)>("CreateInterface")
         ("VEngineCvar007", nullptr);
 
-    if (this->Modules.client.Valid) {
-        // 搜索 .text 段
-        auto textRegion = this->Modules.client.GetTextRegion();
-        if (textRegion.IsValid()) {
-            // 搜索特征码
-            const auto& pattern = MulNX::CS2::Signatures::CallIsPlayingDemo;
-            auto target = textRegion.FindRegion(pattern);
+    const auto& pattern = MulNX::CS2::Signatures::CallIsPlayingDemo;
+    auto target = this->Modules.client.GetTextRegion().FindRegion(pattern);
 
-            if (target.IsValid()) {
-                this->hkPosCallIsPlayingDemo = MulNX::Hook::Create(target.Data(), 0, true, [this](RegContext* ctx, MulNX::Hook* Hook)->bool {
-                    this->HandleOverrideView((CS2::CViewSetup*)ctx->rsi);
-                    return true;
-                    }).value();
-                this->hkPosCallIsPlayingDemo->Attach();
-                this->ISys().LogSucc("视角调用演示钩子已部署");
-            }
-        }
-    }
+    this->hkPosCallIsPlayingDemo = MulNX::Hook::Create(target.Data(), 0, true, [this](RegContext* ctx, MulNX::Hook* Hook)->bool {
+        this->HandleOverrideView((CS2::CViewSetup*)ctx->rsi);
+        return true;
+        }).value();
+    this->hkPosCallIsPlayingDemo->Attach();
+    this->ISys().LogSucc("视角调用演示钩子已部署");
 
     this->controlView.dofs.pNearBlurry = this->CvarSystem.GetCvar("r_dof_override_near_blurry")->GetPtr<float>();
     this->controlView.dofs.pNearCrisp = this->CvarSystem.GetCvar("r_dof_override_near_crisp")->GetPtr<float>();

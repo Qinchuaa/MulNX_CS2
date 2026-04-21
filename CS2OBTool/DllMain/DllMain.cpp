@@ -110,7 +110,7 @@ DWORD MulNX_CS2_Start(void*) {
             .CreateModule<SolutionManager>("SolutionManager", 105)
             .CreateModule<ElementManager>("ElementManager", 106)
             // CS2
-            .CreateModule<HookEntitySystem>("HookEntitySystem", 110)
+            //.CreateModule<HookEntitySystem>("HookEntitySystem", 110)
             .CreateModule<AdvancedViewController>("AdvancedViewController", 111)
             .CreateModule<FreeCameraController>("FreeCameraController", 112)
             .CreateModule<PlayerHub>("PlayerHub", 210)

@@ -15,7 +15,7 @@ namespace cs2_dumper {
             constexpr std::ptrdiff_t dwGameEntitySystem = 0x24B3268;
             constexpr std::ptrdiff_t dwGameEntitySystem_highestEntityIndex = 0x20A0;
             constexpr std::ptrdiff_t dwGameRules = 0x2311ED0;
-            constexpr std::ptrdiff_t dwGlobalVars = 0x2062540;
+            constexpr std::ptrdiff_t dwGlobalVars = 33834216;
             constexpr std::ptrdiff_t dwGlowManager = 0x230ECD8;
             constexpr std::ptrdiff_t dwLocalPlayerController = 0x22F8028;
             constexpr std::ptrdiff_t dwLocalPlayerPawn = 0x206D9E0;
