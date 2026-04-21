@@ -44,7 +44,7 @@ bool ElementManager::MenuElement(MulNX::UINode* node) {
     // 展示修改元素
     if (ImGui::CollapsingHeader("元素列表")) {
         // 输出是否打开了元素调试窗口
-        ImGui::Text(("元素调试窗口状态：" + std::string(this->ShowWindow.load(std::memory_order_acquire) ? "打开" : "关闭")).c_str());
+        ImGui::Text(std::format("元素调试窗口状态：{}",this->ShowWindow.load(std::memory_order_acquire) ? "打开" : "关闭").c_str());
         // 使用迭代器遍历所有元素
         for (const auto& [name,element] : this->elements) {
             this->Element_ShowInLine(element);
@@ -75,18 +75,9 @@ void ElementManager::Element_ShowInLine(const std::shared_ptr<ElementBase> eleme
         if (ImGui::MenuItem("打印元素信息到调试窗口")) {
             this->Element_ShowMsgToDebugMenu(element);
         }
-        if (ImGui::MenuItem("保存到磁盘")) {
-            auto path = this->ISys().PathManager()->PathGetFromKey("Elements");
-            auto [ok, msg] = element->Save(path);
-            if (ok) {
-                this->ISys().LogSucc(std::move(msg));
-            }
-            else {
-                this->ISys().LogError(std::move(msg));
-            }
-        }
         if (ImGui::MenuItem("删除元素")) {
-            this->Element_Delete(element->Name);
+            auto [msg, rp] = MulNX::Message::Create<MulNX::NetExt>("Element/Delete"_hash);
+            rp->str1 = std::move(element->Name);
         }
         ImGui::EndPopup();
     }
@@ -133,7 +124,8 @@ bool ElementManager::Init() {
     }
 
     this->ISys()
-        .SubscribeAsync("Element/Create");
+        .SubscribeAsync("Element/Create")
+        .SubscribeAsync("Element/Delete");
 
     return true;
 }
@@ -142,8 +134,16 @@ void ElementManager::ProcessMsg(MulNX::Message& msg) {
     switch (msg.type) {
     case "Element/Create"_hash: {
         auto& name = msg.asp.get<MulNX::NetExt>()->str1;
+        std::unique_lock lock(this->smutex);
         if (!this->Element_Create(ElementType::FreeCameraPath, name)) {
             this->ISys().LogError(std::format("元素创建失败：{}", name));
+        }
+    }
+    case "Element/Delete"_hash: {
+        auto& name = msg.asp.get<MulNX::NetExt>()->str1;
+        std::unique_lock lock(this->smutex);
+        if (!this->Element_Delete(name)) {
+            this->ISys().LogError(std::format("元素删除失败：{}", name));
         }
     }
     }
