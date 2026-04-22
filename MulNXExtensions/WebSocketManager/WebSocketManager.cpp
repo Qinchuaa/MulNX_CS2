@@ -118,7 +118,7 @@ bool WebSocketManager::Init() {
             }
         });
 
-    this->SendTask("网络线程（阻塞！）", [this]()->bool {
+    this->SendTask("Web", [this]()->bool {
         try {
             while (!this->GlobalVars->SystemReady.load(std::memory_order_acquire)) {
                 std::this_thread::sleep_for(std::chrono::milliseconds(1));

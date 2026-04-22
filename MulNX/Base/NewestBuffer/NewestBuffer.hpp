@@ -15,11 +15,8 @@ namespace MulNX {
     private:
         static int8_t findFree(int8_t r, int8_t n) {
             if (r != n)return 3 - r - n;
-            switch (r) {
-            case 0:return 1;
-            case 1:return 0;
-            case 2:return 0;
-            }
+            if (r)return 0;
+            return 1;
         }
 
         T* WriteBegin() noexcept {

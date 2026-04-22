@@ -53,7 +53,7 @@ bool NameController::Init() {
         return true;
         });
 
-    this->SendTask("CS2控制线程", [this]() {
+    this->SendTask("CSControl", [this]() {
         this->EntryProcessMsg();
         return true;
         });

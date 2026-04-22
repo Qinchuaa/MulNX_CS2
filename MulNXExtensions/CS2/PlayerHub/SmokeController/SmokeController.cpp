@@ -24,7 +24,7 @@ bool SmokeController::Init() {
         });
 
     // 3. 消息处理线程
-    this->SendTask("CS2控制线程", [this]() {
+    this->SendTask("CSControl", [this]() {
         this->EntryProcessMsg();
         return true;
         });

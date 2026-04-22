@@ -10,7 +10,7 @@ bool ObserverController::Init() {
         .SubscribeAsync("CameraSystem/Play/Ended")
         .SubscribeAsync("spec_mode_changed_to");
 
-    this->SendTask("CS2控制线程", [this]() -> bool {
+    this->SendTask("CSControl", [this]() -> bool {
         this->Main();
         return true;
         });

@@ -163,7 +163,7 @@ bool CSController::Init() {
     this->controlView.dofs.pFarCrisp = this->CvarSystem.GetCvar("r_dof_override_far_crisp")->GetPtr<float>();
     this->controlView.dofs.pFarBlurry = this->CvarSystem.GetCvar("r_dof_override_far_blurry")->GetPtr<float>();
 
-    this->SendTask("CS2控制线程", [this]()->bool {
+    this->SendTask("CSControl", [this]()->bool {
         try {
             this->Update();
             this->EntryProcessMsg();
