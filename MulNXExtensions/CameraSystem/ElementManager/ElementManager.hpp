@@ -1,9 +1,8 @@
 #pragma once
-
+#include <MulNX/Base/NewestBuffer/NewestBuffer.hpp>
 #include <MulNX/MulNX.hpp>
 #include <MulNXExtensions/CameraSystem/Elements/Elements.hpp>
 #include "ElementConfig.hpp"
-
 #include <filesystem>
 
 class SolutionManager;
@@ -32,6 +31,8 @@ private:
 
     // 展示单个元素信息在一行上
     void Element_ShowInLine(const std::shared_ptr<ElementBase> element);
+    std::atomic<bool> needDrawCamera = false;
+    MulNX::NewestBuffer<MulNX::Math::Frame> drawCamera;
 public:
     ElementConfig Config{};
     // 使用智能指针存储多态对象，以存储不同类型的元素

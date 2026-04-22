@@ -186,10 +186,11 @@ void CSController::Update() {
     auto pGameRules = this->Modules.client.dwGameRules();
     if (!pGameRules) return;
 
-    static int OldRoundStartCount = MulNX::MRead(pGameRules->m_nRoundStartCount());
-    if (OldRoundStartCount != MulNX::MRead(pGameRules->m_nRoundStartCount())) {
+    static int32_t OldRoundStartCount = 0;
+    auto currentStartCount = MulNX::MRead(pGameRules->m_nRoundStartCount());
+    if (OldRoundStartCount != currentStartCount) {
         this->ISys().PublishAsync("Game/NewRound"_hash);
-        OldRoundStartCount = MulNX::MRead(pGameRules->m_nRoundStartCount());
+        OldRoundStartCount = currentStartCount;
     }
 
     std::unique_lock lock(this->smutex);

@@ -338,16 +338,19 @@ bool ProjectManager::Playing_AutoCall(const MulNX::Message& Msg) {
             return false;
         }
         int temp = rand() % OnNewRound.size();
-        return this->SManager->Playing_SetSolution(OnNewRound[temp]);
+        auto [msg,rp] = MulNX::Message::Create<MulNX::NetExt>("CameraSystem/Solution/Play"_hash);
+        rp->str1 = OnNewRound[temp];
+        this->ISys().PublishAsync(std::move(msg));
+        return true;
     }
     case "Game/RoundEnd"_hash: {
-        const std::vector<std::string>& OnEnd = this->ActiveProject->OnRoundEnd;
-        if (OnEnd.empty()) {
-            this->ISys().LogWarning("无回合结束解决方案可尝试调用");
-            return false;
-        }
-        int temp = rand() % OnEnd.size();
-        return this->SManager->Playing_SetSolution(OnEnd[temp]);
+        // const std::vector<std::string>& OnEnd = this->ActiveProject->OnRoundEnd;
+        // if (OnEnd.empty()) {
+        //     this->ISys().LogWarning("无回合结束解决方案可尝试调用");
+        //     return false;
+        // }
+        // int temp = rand() % OnEnd.size();
+        // return this->SManager->Playing_SetSolution(OnEnd[temp]);
     }
     }
     return false;

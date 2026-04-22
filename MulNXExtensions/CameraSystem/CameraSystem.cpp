@@ -123,9 +123,7 @@ void CameraSystem::ProcessMsg(MulNX::Message& msg) {
         break;
     }
     case "Game/NewRound"_hash: {
-        if (this->PManager->Playing_AutoCall(msg)) {
-            this->SManager->Playing_Enable();
-        }
+        this->PManager->Playing_AutoCall(msg);
         break;
     }
     case "Command/SpecPlayer"_hash: {

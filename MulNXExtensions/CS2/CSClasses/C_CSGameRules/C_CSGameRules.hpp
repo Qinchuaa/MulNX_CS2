@@ -6,6 +6,9 @@
 namespace CS2 {
     class C_CSGameRules {
     public:
+        int32_t* m_iRoundStartRoundNumber() {
+            return Schema<int32_t>(this, cs2_dumper::schemas::client_dll::C_CSGameRules::m_iRoundStartRoundNumber);
+        }
         // 回合计数（uint8_t）
         uint8_t* m_nRoundStartCount() {
             return Schema<uint8_t>(this, cs2_dumper::schemas::client_dll::C_CSGameRules::m_nRoundStartCount);

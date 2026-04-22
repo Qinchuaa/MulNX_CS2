@@ -1,6 +1,7 @@
 #pragma once
 
 #include "SolutionConfig.hpp"
+#include <MulNX/Base/NewestBuffer/NewestBuffer.hpp>
 #include <MulNX/MulNX.hpp>
 #include <MulNXExtensions/CameraSystem/Solution/Solution.hpp>
 
@@ -27,8 +28,9 @@ private:
     // 是否处于播放状态
     // 播放完成之后需要变为false，切换解决方案要变成true
     bool Playing = false;
+    std::atomic<bool> needDrawCamera = false;
+    MulNX::NewestBuffer<MulNX::Math::Frame> drawCamera;
 public:
-    bool NeedRefresh = false;
     SolutionConfig Config{};
     
     //数据存储
@@ -40,9 +42,7 @@ public:
 
     bool Init()override;
     void ProcessMsg(MulNX::Message& msg)override;
-
     void HandleUpdate();
-    void Traversal();
 
     bool Solution_Create(const std::string& Name);
     //保存所有解决方案到文件
@@ -56,14 +56,10 @@ public:
 
     //预览功能相关
 
-    //开启播放
-    void Playing_Enable();
     //关闭播放
     void Playing_Disable();
     //通过名称设置当前播放的解决方案
-    bool Playing_SetSolution(const std::string& SolutionName);
-    //设置播放时间偏移
-    void Playing_SetTimeSchema(const float Time);
+    void Playing_Solution(const std::string& SolutionName);
     //调用播放
     void Playing_Call();
 };

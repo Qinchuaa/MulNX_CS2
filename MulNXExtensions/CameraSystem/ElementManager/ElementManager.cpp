@@ -9,7 +9,7 @@ bool ElementManager::MenuElement(MulNX::UINode* node) {
     std::shared_lock lock(this->smutex);
     // 展示预览功能相关状态
     ImGui::TextUnformatted(std::format(
-        "预览状态： {}   预览元素名：{}   预览时间偏移：{}   ",
+        "预览状态： {}   预览元素名：{}   预览时间偏移：{} ",
         this->Preview_TimeSchema,
         this->OnPreview ? "开启" : "关闭",
         this->Preview_CurrentElement ? this->Preview_CurrentElement->GetName() : "无")
@@ -88,6 +88,10 @@ bool ElementManager::UINodeFunc(MulNX::UINode* node) {
         std::shared_lock lock(this->smutex);
         elem->DrawBase(this->CamDrawer, this->AL3D->GetViewMatrix(), this->AL3D->GetWinWidth(), this->AL3D->GetWinHeight());
     }
+    if (this->needDrawCamera.load(std::memory_order_acquire)) {
+        auto frame = this->drawCamera.Read();
+        this->CamDrawer->DrawFrameCamera(*frame, "元素预览插值摄像机");
+    }
     auto w = MulNX::UI::RAIIWindow("元素调试", this->ShowWindow);
     if (!w)return true;
     // 检查当前是否有操作元素
@@ -160,8 +164,13 @@ void ElementManager::HandleUpdate() {
                 if (this->Config.PreviewOverride) {
                     this->AL3D->CameraSystemIOOverride(&IO);
                 }
-                else if (this->Config.PreviewDraw) {
-                    this->CamDrawer->DrawFrameCamera(IO.Frame, "预览摄像机");
+                if (this->Config.PreviewDraw) {
+                    auto frame = this->drawCamera.Write();
+                    *frame = IO.Frame;
+                    this->needDrawCamera.store(true, std::memory_order_release);
+                }
+                else {
+                    this->needDrawCamera.store(false, std::memory_order_release);
                 }
             }
         }
@@ -308,7 +317,7 @@ bool ElementManager::Element_Delete(const std::string Name) {
     // 通过迭代器删除元素
     this->elements.erase(it);
     // 添加刷新信息
-    this->SManager->NeedRefresh = true;
+    this->ISys().PublishAsync("CameraSystem/Element/Deleted"_hash);
 
     this->ISys().LogSucc("成功删除元素：" + Name);
     return true;
@@ -330,7 +339,7 @@ bool ElementManager::Element_ClearAll() {
     }
     this->elements.clear();
     // 添加刷新信息
-    this->SManager->NeedRefresh = true;
+    this->ISys().PublishAsync("CameraSystem/Element/Deleted"_hash);
     this->ISys().LogSucc("成功清空所有元素！");
     return true;
 }
