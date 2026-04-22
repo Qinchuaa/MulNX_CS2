@@ -28,5 +28,14 @@ namespace MulNX {
             ~RAIIWindow();
             explicit operator bool() const;
         };
+
+        class RAIIChild {
+            bool showed;
+        public:
+            RAIIChild() = delete;
+            RAIIChild(const char* str_id, const ImVec2& size = ImVec2(0, 0), ImGuiChildFlags child_flags = 0, ImGuiWindowFlags window_flags = 0);
+            ~RAIIChild();
+            explicit operator bool() const;
+        };
     }
 }

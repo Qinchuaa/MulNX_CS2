@@ -147,9 +147,3 @@ void CameraSystem::HandleUpdate() {
     this->PManager->HandleUpdate();
     return;
 }
-void CameraSystem::MemoryClear() {
-    this->EManager->Element_ClearAll();
-    this->SManager->Solution_ClearAll();
-    this->PManager->Project_ClearAll();
-    return;
-}

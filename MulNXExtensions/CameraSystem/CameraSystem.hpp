@@ -41,18 +41,10 @@ private:
     SolutionManager* SManager = nullptr;
     ProjectManager* PManager = nullptr;
     WorkspaceManager* WManager = nullptr;
-public:
-    // 渲染器
-    CameraDrawer CamDrawer{};
-    // 初始化
-    bool Init()override;
-    // 菜单
-    bool Menu(MulNX::UINode* node);
-    
-    void HandleUpdate();
-
     void ProcessMsg(MulNX::Message& msg)override;
+    bool Menu(MulNX::UINode* node);
 public:
-    // 清空内存，准备加载新工作区
-    void MemoryClear();
+    CameraDrawer CamDrawer{};
+    bool Init()override;    
+    void HandleUpdate();
 };

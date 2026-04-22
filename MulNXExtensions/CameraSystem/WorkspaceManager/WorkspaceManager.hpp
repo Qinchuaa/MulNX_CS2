@@ -14,15 +14,12 @@ private:
     ProjectManager* PManager = nullptr;
     MulNX::IPCer* pIPCer = nullptr;
 
+    std::unique_ptr<Workspace> CurrentWorkspace = nullptr;
     bool MenuWorkspace(MulNX::UINode* node);
+    void ProcessMsg(MulNX::Message& msg)override;
 public:
     std::atomic<bool> InWorkspace = false;
-    //数据存储
-    std::unique_ptr<Workspace> CurrentWorkspace = nullptr;
-
-    //工作区管理器基本函数
-
-    //初始化
+    
     bool Init()override;
 
     //工作区

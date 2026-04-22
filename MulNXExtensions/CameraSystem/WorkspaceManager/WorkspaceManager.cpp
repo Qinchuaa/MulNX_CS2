@@ -8,53 +8,51 @@
 #include <MulNXThirdParty/All_pugixml.hpp>
 
 bool WorkspaceManager::MenuWorkspace(MulNX::UINode* node) {
+    std::shared_lock lock(this->smutex);
     // 顶部：工作区信息（始终显示）
-    ImGui::BeginChild("工作区面板", ImVec2(0, 150), true); {
-        // 工作区状态
-        ImGui::Text("工作区状态: %s", this->InWorkspace ? "已进入" : "未进入");
-        // 未进入工作区允许打开默认工作区
-        if (!this->InWorkspace) {
-            ImGui::SameLine();
-            if (ImGui::Button("打开默认工作区")) {
-                this->Workspace_Set("DefaultWorkspace");
-            }
+    auto c = MulNX::UI::RAIIChild("工作区面板", ImVec2(0, 150), true);
+    // 工作区状态
+    ImGui::Text(std::format("工作区状态: {}", this->InWorkspace ? "已进入" : "未进入").c_str());
+    // 未进入工作区允许打开默认工作区
+    if (!this->InWorkspace) {
+        ImGui::SameLine();
+        if (ImGui::Button("打开默认工作区")) {
+            auto [msg, rp] = MulNX::Message::Create<MulNX::NetExt>("CamereSystem/Workspace/Set"_hash);
+            rp->str1 = "DefaultWorkspace";
+            this->ISys().PublishAsync(std::move(msg));
         }
-        // 打开工作区后允许保存工作区
-        if (this->InWorkspace) {
-            ImGui::Text("当前工作区: %s", this->CurrentWorkspace->Name.c_str());
-            ImGui::SameLine();
-            if (ImGui::Button("保存工作区")) {
-                this->Workspace_Save();
-            }
+    }
+    // 打开工作区后允许保存工作区
+    if (this->InWorkspace) {
+        ImGui::Text(std::format("当前工作区: {}", this->CurrentWorkspace->Name).c_str());
+        ImGui::SameLine();
+        if (ImGui::Button("保存工作区")) {
+            this->ISys().PublishAsync("CameraSystem/Workspace/Save"_hash);
         }
-        // 详情信息
-        ImGui::Separator();
-        ImGui::BeginChild("工作区详情菜单");
-        if (ImGui::CollapsingHeader("详情信息")) {
-            static std::string TargetWorkspaceName{};
-            ImGui::Text("工作区名：");
-            ImGui::SameLine();
-            ImGui::InputText("##TargetWorkspaceName", &TargetWorkspaceName);
-            ImGui::SameLine();
-            if (ImGui::Button("切换")) {
-                if (TargetWorkspaceName.empty()) {
-                    this->ISys().LogError("请输入工作区名！");
-                    return true;
-                }
-                if (!this->Workspace_Set(TargetWorkspaceName))return true;
-
-            }
-
-            if (!this->CurrentWorkspace) {// 无工作区
-                ImGui::Text("当前未打开任何工作区");
+    }
+    // 详情信息
+    ImGui::Separator();
+    auto c2 = MulNX::UI::RAIIChild("工作区详情菜单");
+    if (ImGui::CollapsingHeader("详情信息")) {
+        static std::string TargetWorkspaceName{};
+        ImGui::Text("工作区名：");
+        ImGui::SameLine();
+        ImGui::InputText("##TargetWorkspaceName", &TargetWorkspaceName);
+        ImGui::SameLine();
+        if (ImGui::Button("切换")) {
+            if (TargetWorkspaceName.empty()) {
+                this->ISys().LogError("请输入工作区名！");
                 return true;
             }
-            this->InWorkspace = true;
+            auto [msg, rp] = MulNX::Message::Create<MulNX::NetExt>("CamereSystem/Workspace/Set"_hash);
+            rp->str1 = std::move(TargetWorkspaceName);
+            this->ISys().PublishAsync(std::move(msg));
         }
-        ImGui::EndChild();
+        if (!this->CurrentWorkspace) {// 无工作区
+            ImGui::Text("当前未打开任何工作区");
+            return true;
+        }
     }
-    ImGui::EndChild();
-
     return true;
 }
 
@@ -66,7 +64,25 @@ bool WorkspaceManager::Init() {
 
     this->SendUINode("MenuWorkspace", [this](MulNX::UINode* node) {return this->MenuWorkspace(node);});
 
+    this->ISys()
+        .SubscribeAsync("CamereSystem/Workspace/Set")
+        .SubscribeAsync("CameraSystem/Workspace/Save");
+
     return true;
+}
+
+void WorkspaceManager::ProcessMsg(MulNX::Message& msg) {
+    switch (msg.type) {
+    case "CamereSystem/Workspace/Set"_hash: {
+        auto name = msg.asp.get<MulNX::NetExt>()->str1;
+        std::unique_lock lock(this->smutex);
+        this->Workspace_Set(name);
+    }
+    case "CameraSystem/Workspace/Save"_hash: {
+        std::unique_lock lock(this->smutex);
+        this->Workspace_Save();
+    }
+    }
 }
 
 bool WorkspaceManager::Workspace_Save() {
@@ -95,8 +111,8 @@ bool WorkspaceManager::Workspace_Set(const std::string& Name) {
     this->CurrentWorkspace = std::make_unique<Workspace>(Name);
     auto* PathManager = this->ISys().PathManager();
 
-    this->ISys().PathManager()->KeySetCurrent("CurrentProject", {});
-    this->ISys().PathManager()->KeySetCurrent("CurrentWorkspace", Name);
+    PathManager->KeySetCurrent("CurrentProject", {});
+    PathManager->KeySetCurrent("CurrentWorkspace", Name);
     // 获取配置信息
     if (this->Workspace_ConfigLoad(PathManager->PathGetFromKey("CurrentWorkspace"))) {
         this->Workspace_ConfigApply();
@@ -114,9 +130,6 @@ bool WorkspaceManager::Workspace_Set(const std::string& Name) {
     }
     return true;
 }
-
-
-
 
 //config相关
 

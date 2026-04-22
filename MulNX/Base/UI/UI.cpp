@@ -38,8 +38,23 @@ MulNX::UI::RAIIWindow::~RAIIWindow() {
         ImGui::End();
     }   
 }
-
 MulNX::UI::RAIIWindow::operator bool()const {
+    return this->showed;
+}
+
+MulNX::UI::RAIIChild::RAIIChild(const char* str_id, const ImVec2& size_arg, ImGuiChildFlags child_flags, ImGuiWindowFlags window_flags) {
+    this->showed = true;
+    if (this->showed) {
+        bool open = this->showed;
+        ImGui::BeginChild(str_id, size_arg, child_flags, window_flags);
+    }
+}
+MulNX::UI::RAIIChild::~RAIIChild() {
+    if (this->showed) {
+        ImGui::EndChild();
+    }
+}
+MulNX::UI::RAIIChild::operator bool()const {
     return this->showed;
 }
 
