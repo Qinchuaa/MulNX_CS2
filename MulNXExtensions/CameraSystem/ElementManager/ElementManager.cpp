@@ -6,7 +6,6 @@
 #include <MulNXExtensions/CameraSystem/ProjectManager/ProjectManager.hpp>
 
 bool ElementManager::MenuElement(MulNX::UINode* node) {
-    std::shared_lock lock(this->smutex);
     // 展示预览功能相关状态
     ImGui::TextUnformatted(std::format(
         "预览状态： {}   预览元素名：{}   预览时间偏移：{} ",
@@ -84,8 +83,8 @@ void ElementManager::Element_ShowInLine(const std::shared_ptr<ElementBase> eleme
 }
 
 bool ElementManager::UINodeFunc(MulNX::UINode* node) {
+    std::unique_lock lock(this->CamSys()->smutex);
     for (auto& [name, elem] : this->elements) {
-        std::shared_lock lock(this->smutex);
         elem->DrawBase(this->CamDrawer, this->AL3D->GetViewMatrix(), this->AL3D->GetWinWidth(), this->AL3D->GetWinHeight());
     }
     if (this->needDrawCamera.load(std::memory_order_acquire)) {
@@ -98,8 +97,7 @@ bool ElementManager::UINodeFunc(MulNX::UINode* node) {
     auto current = this->CurrentElement.load(std::memory_order_acquire);
     if (current) {
         // 根据元素类型调用不同的调试菜单
-        std::unique_lock lock(this->smutex);
-        current->DebugUI(this->CamDrawer, this);
+        current->DebugUI(this);
     }
     // 如果没有操作元素
     else {
@@ -137,14 +135,14 @@ void ElementManager::ProcessMsg(MulNX::Message& msg) {
     switch (msg.type) {
     case "Element/Create"_hash: {
         auto& name = msg.asp.get<MulNX::NetExt>()->str1;
-        std::unique_lock lock(this->smutex);
+        std::unique_lock lock(this->CamSys()->smutex);
         if (!this->Element_Create(ElementType::FreeCameraPath, name)) {
             this->ISys().LogError(std::format("元素创建失败：{}", name));
         }
     }
     case "Element/Delete"_hash: {
         auto& name = msg.asp.get<MulNX::NetExt>()->str1;
-        std::unique_lock lock(this->smutex);
+        std::unique_lock lock(this->CamSys()->smutex);
         if (!this->Element_Delete(name)) {
             this->ISys().LogError(std::format("元素删除失败：{}", name));
         }

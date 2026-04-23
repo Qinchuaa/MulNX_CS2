@@ -3,12 +3,10 @@
 #include "ProjectConfig.hpp"
 #include <MulNX/MulNX.hpp>
 #include <MulNXExtensions/CameraSystem/Project/Project.hpp>
-
-class ElementManager;
-class SolutionManager;
+#include <MulNXExtensions/CameraSystem/CameraSystem.hpp>
 
 //项目管理器，用于管理项目
-class ProjectManager final :public MulNX::ModuleBase {
+class ProjectManager final :public CamSysModule {
 private:
     ElementManager* EManager = nullptr;
     SolutionManager* SManager = nullptr;

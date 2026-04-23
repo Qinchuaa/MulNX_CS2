@@ -21,17 +21,12 @@
 
 #include <MulNX/MulNX.hpp>
 
-#include <vector>
-#include <DirectXMath.h>
-#include <string>
-#include <unordered_map>
-#include <filesystem>
-
 #include "CameraDrawer/CameraDrawer.hpp"
-#include "ElementManager/ElementManager.hpp"
-#include "SolutionManager/SolutionManager.hpp"
-#include "ProjectManager/ProjectManager.hpp"
-#include "WorkspaceManager/WorkspaceManager.hpp"
+
+class ElementManager;
+class SolutionManager;
+class ProjectManager;
+class WorkspaceManager;
 
 // 摄像机系统
 class CameraSystem final :public MulNX::ModuleBase {
@@ -47,4 +42,9 @@ public:
     CameraDrawer CamDrawer{};
     bool Init()override;    
     void HandleUpdate();
+};
+
+class CamSysModule :public MulNX::ModuleBase {
+public:
+    CameraSystem* CamSys();
 };

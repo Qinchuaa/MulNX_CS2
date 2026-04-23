@@ -71,7 +71,7 @@ public:
 
 
     // 获取基本信息
-    std::string GetBaseMsg()const;
+    std::string GetMsg()const;
     // 获取名字
     std::string GetName()const;
     // 重设名字
@@ -103,7 +103,7 @@ public:
     // 刷新状态（虚）
     virtual void Refresh() = 0;
     // 信息获取函数（虚）
-    virtual std::string GetMsg()const = 0;
+    virtual std::string GetPrivateMsg()const = 0;
 
     std::pair<bool, std::string> Save(const std::filesystem::path& folderPath);
 
@@ -111,5 +111,5 @@ public:
 
     virtual std::pair<bool, std::string> Load(YAML::Node& root) = 0;
 
-    virtual void DebugUI(CameraDrawer* CamDrawer, ElementManager* EManager) = 0;
+    virtual void DebugUI(ElementManager* EManager) = 0;
 };

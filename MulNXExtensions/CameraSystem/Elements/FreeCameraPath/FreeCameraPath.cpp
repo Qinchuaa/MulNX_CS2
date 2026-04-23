@@ -145,7 +145,7 @@ bool FreeCameraPath::Draw(CameraDrawer* CamDrawer, const float* Matrix, const fl
         if (!Matrix)return false;
         const auto& keyframe = keyframes.at(i);
         // 绘制关键帧的摄像机
-        std::string label = this->Name + " #" + std::to_string(i);
+        std::string label = std::format("{} # {}", this->Name, i);
         CamDrawer->DrawCamera(keyframe.GetPosition(), keyframe.GetRotationEuler(), label.c_str());
 
         // 获取ImDrawList用于绘制连线
@@ -176,10 +176,8 @@ bool FreeCameraPath::Draw(CameraDrawer* CamDrawer, const float* Matrix, const fl
     return true;
 }
 
-std::string FreeCameraPath::GetMsg()const {
+std::string FreeCameraPath::GetPrivateMsg()const {
     std::ostringstream oss;
-    oss << this->GetBaseMsg()
-        << "\n详细信息：\n";
     const size_t& Size = this->CameraKeyframes.size();
     oss << "  关键帧总数： " << std::to_string(Size) << "\n";
     for (size_t i = 0; i < Size; ++i) {
@@ -325,18 +323,13 @@ std::pair<bool, std::string> FreeCameraPath::Load(YAML::Node& root) {
     }
 }
 
-void FreeCameraPath::DebugUI(CameraDrawer* CamDrawer, ElementManager* EManager) {
-    std::ostringstream oss;
-    oss << this->GetBaseMsg()
-        << "\n详细信息：\n";
-    const size_t& Size = this->CameraKeyframes.size();
-    oss << "  关键帧总数： " << std::to_string(Size) << "\n";
-    ImGui::TextUnformatted(oss.str().c_str());
+void FreeCameraPath::DebugUI(ElementManager* EManager) {
+    ImGui::TextUnformatted(this->GetMsg().c_str());
 
     static int IndexForReset = -1;
     static int PreIndex = -2;
 
-    for (size_t i = 0; i < Size; ++i) {
+    for (size_t i = 0; i < this->CameraKeyframes.size(); ++i) {
         const MulNX::Math::CameraKeyframe& keyframe = this->CameraKeyframes.at(i);
         if (ImGui::Selectable(std::to_string(i).c_str(), false, ImGuiSelectableFlags_AllowDoubleClick)) {
             IndexForReset = i;
@@ -405,7 +398,7 @@ void FreeCameraPath::DebugUI(CameraDrawer* CamDrawer, ElementManager* EManager) 
         ImGui::SliderFloat("滚转角", &tempRotationEuler.z, -179.0, 179.0);
         ImGui::SliderFloat("FOV", &tempPositionAndFOV.w, 10, 170);
 
-        CamDrawer->DrawCamera(DirectX::XMFLOAT3{ tempPositionAndFOV.x,tempPositionAndFOV.y ,tempPositionAndFOV.z }, tempRotationEuler, "目标摄像机关键帧");
+        EManager->CamSys()->CamDrawer.DrawCamera(DirectX::XMFLOAT3{ tempPositionAndFOV.x,tempPositionAndFOV.y ,tempPositionAndFOV.z }, tempRotationEuler, "目标摄像机关键帧");
         if (ImGui::Button("修改")) {
             // 构造临时摄像机关键帧
             MulNX::Math::CameraKeyframe tempKey;

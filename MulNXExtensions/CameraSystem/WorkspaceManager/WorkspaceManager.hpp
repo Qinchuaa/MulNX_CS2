@@ -2,12 +2,9 @@
 
 #include <MulNX/MulNX.hpp>
 #include <MulNXExtensions/CameraSystem/Workspace/Workspace.hpp>
+#include <MulNXExtensions/CameraSystem/CameraSystem.hpp>
 
-class ElementManager;
-class SolutionManager;
-class ProjectManager;
-
-class WorkspaceManager final :public MulNX::ModuleBase {
+class WorkspaceManager final :public CamSysModule {
 private:
     ElementManager* EManager = nullptr;
     SolutionManager* SManager = nullptr;
@@ -19,7 +16,8 @@ private:
     void ProcessMsg(MulNX::Message& msg)override;
 public:
     std::atomic<bool> InWorkspace = false;
-    
+    void HandleUpdate();
+
     bool Init()override;
 
     //工作区

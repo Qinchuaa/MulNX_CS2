@@ -2,14 +2,11 @@
 #include <MulNX/Base/NewestBuffer/NewestBuffer.hpp>
 #include <MulNX/MulNX.hpp>
 #include <MulNXExtensions/CameraSystem/Elements/Elements.hpp>
+#include <MulNXExtensions/CameraSystem/CameraSystem.hpp>
 #include "ElementConfig.hpp"
-#include <filesystem>
-
-class SolutionManager;
-class ProjectManager;
 
 //元素管理器，用于管理元素
-class ElementManager final : public MulNX::ModuleBase {
+class ElementManager final : public CamSysModule {
     //对于元素，我们只给出三个通用接口：创建、获取、删除，具体的各个元素的功能由各个元素类自己实现
 private:
     CameraDrawer* CamDrawer = nullptr;

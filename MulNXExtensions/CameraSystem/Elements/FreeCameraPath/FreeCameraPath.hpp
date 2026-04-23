@@ -3,15 +3,11 @@
 #include <MulNXExtensions/CameraSystem/Elements/ElementBase.hpp>
 
 class ElementManager;
-class ElementDebugger;
-
-class CameraDrawer;
 
 // 自由摄像机轨道，继承自Element
 class FreeCameraPath final :public ElementBase {
     // 友元声明
     friend ElementManager;
-    friend ElementDebugger;
 public:
     // 模板类型
     static constexpr ElementType TemplateType = ElementType::FreeCameraPath;
@@ -32,7 +28,7 @@ public:
     // 绘制函数（虚），各个元素按需实现
     bool Draw(CameraDrawer* CamDrawer, const float* Matrix, const float WinWidth, const float WinHeight)const override;
     // 获取详细信息（虚）
-    std::string GetMsg()const override;
+    std::string GetPrivateMsg()const override;
     
     // 非虚函数类
     // 增加关键帧
@@ -49,5 +45,5 @@ public:
     std::pair<bool, std::string> SaveImpl(YAML::Node& root)override;
     std::pair<bool, std::string> Load(YAML::Node& root)override;
 
-    void DebugUI(CameraDrawer* CamDrawer, ElementManager* EManager)override;
+    void DebugUI(ElementManager* EManager)override;
 };

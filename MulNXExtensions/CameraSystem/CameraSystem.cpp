@@ -1,18 +1,23 @@
 #include "CameraSystem.hpp"
-
+#include "CamSysExt.hpp"
 #include <MulNX/MulNX.hpp>
 #include <MulNX/Base/UI/UI.hpp>
 
+CameraSystem* CamSysModule::CamSys() {
+    static auto pCamSys = this->Core->ModuleManager()->FindModule<CameraSystem>("CameraSystem");
+    return pCamSys;
+}
+
 bool CameraSystem::Menu(MulNX::UINode* node) {
+    std::shared_lock lock(this->smutex);
     node->CallUINode("MenuWorkspace");
 
     if (!this->WManager->InWorkspace) {
         // 如果不在工作区，显示提示信息
-        ImGui::BeginChild("提示", ImVec2(0, 0), true);
+        auto c = MulNX::UI::RAIIChild("提示", ImVec2(0, 0), true);
         ImGui::Text("请先进入工作区");
         ImGui::Text("在上方的工作区面板中加载（或创建并加载）一个工作区");
         ImGui::Text("工作区是管理项目、解决方案和元素的基础");
-        ImGui::EndChild();
         return true;
     }
 
@@ -21,49 +26,49 @@ bool CameraSystem::Menu(MulNX::UINode* node) {
     const char* tabNames[] = { "项目", "解决方案", "元素" };
 
     // 左侧导航栏
-    ImGui::BeginChild("导航", ImVec2(150, 0), true);
-    for (int Index = 0; Index < IM_ARRAYSIZE(tabNames); ++Index) {
-        if (ImGui::Selectable(tabNames[Index], SelectedTab == Index)) {
-            SelectedTab = Index;
+    {
+        auto c = MulNX::UI::RAIIChild("导航", ImVec2(150, 0), true);
+        for (int Index = 0; Index < IM_ARRAYSIZE(tabNames); ++Index) {
+            if (ImGui::Selectable(tabNames[Index], SelectedTab == Index)) {
+                SelectedTab = Index;
+            }
         }
     }
-    ImGui::EndChild();
-
     ImGui::SameLine();
+    {
+        // 右侧三类控制区
+        auto c = MulNX::UI::RAIIChild("内容", ImVec2(0, 0), true);
+        bool InProject = false;
+        if (this->PManager->ActiveProject) {
+            InProject = true;
+            ImGui::Text(("当前项目：" + this->PManager->ActiveProject->Name).c_str());
+        }
+        else {
+            ImGui::Text("当前未进入任何项目");
+        }
 
-    // 右侧三类控制区
-    ImGui::BeginChild("内容", ImVec2(0, 0), true);
-    bool InProject = false;
-    if (this->PManager->ActiveProject) {
-        InProject = true;
-        ImGui::Text(("当前项目：" + this->PManager->ActiveProject->Name).c_str());
-    }
-    else {
-        ImGui::Text("当前未进入任何项目");
-    }
-
-    ImGui::Separator();
-    switch (SelectedTab) {
-    case 0:// 项目菜单
-        node->CallUINode("MenuProject");
-        break;
-    case 1:// 解决方案菜单
-        if (!InProject) {
-            ImGui::Text("请先进入项目");
+        ImGui::Separator();
+        switch (SelectedTab) {
+        case 0:// 项目菜单
+            node->CallUINode("MenuProject");
+            break;
+        case 1:// 解决方案菜单
+            if (!InProject) {
+                ImGui::Text("请先进入项目");
+                break;
+            }
+            node->CallUINode("MenuSolution");
+            break;
+        case 2:// 元素菜单
+            if (!InProject) {
+                ImGui::Text("请先进入项目");
+                break;
+            }
+            node->CallUINode("MenuElement");
             break;
         }
-        node->CallUINode("MenuSolution");
-        break;
-    case 2:// 元素菜单
-        if (!InProject) {
-            ImGui::Text("请先进入项目");
-            break;
-        }
-        node->CallUINode("MenuElement");
-        break;
     }
-
-    ImGui::EndChild();
+    
     return true;
 }
 
@@ -145,5 +150,6 @@ void CameraSystem::HandleUpdate() {
     this->EManager->HandleUpdate();
     this->SManager->HandleUpdate();
     this->PManager->HandleUpdate();
+    this->WManager->HandleUpdate();
     return;
 }

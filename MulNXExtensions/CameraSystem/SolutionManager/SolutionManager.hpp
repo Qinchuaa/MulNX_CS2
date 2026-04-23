@@ -4,14 +4,10 @@
 #include <MulNX/Base/NewestBuffer/NewestBuffer.hpp>
 #include <MulNX/MulNX.hpp>
 #include <MulNXExtensions/CameraSystem/Solution/Solution.hpp>
-
-class CameraDrawer;
-
-class ElementManager;
-class ProjectManager;
+#include <MulNXExtensions/CameraSystem/CameraSystem.hpp>
 
 //解决方案管理器，用于管理解决方案
-class SolutionManager final :public MulNX::ModuleBase {
+class SolutionManager final :public CamSysModule {
 private:
     CameraDrawer* CamDrawer = nullptr;
     ElementManager* EManager = nullptr;

@@ -26,10 +26,9 @@ std::string ElementBase::TypeGet_String()const {
     return ElementType_EnumToString(this->Type);
 }
 
-std::string ElementBase::GetBaseMsg()const {
-    return "元素名称：" + this->Name +
-        "  元素类型：" + this->TypeGet_String() +
-        "  持续时长：" + std::to_string(this->DurationTime);
+std::string ElementBase::GetMsg()const {
+    return std::format("元素名称：{}  元素类型：{}  持续时长：{}\n详细信息：{}",
+        this->Name, this->TypeGet_String(), this->DurationTime, this->GetPrivateMsg());
 }
 std::string ElementBase::GetName()const {
     return this->Name;

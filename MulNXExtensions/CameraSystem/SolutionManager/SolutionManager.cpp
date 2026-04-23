@@ -237,21 +237,21 @@ void SolutionManager::ProcessMsg(MulNX::Message& msg) {
     switch (msg.type) {
     case "CameraSystem/Solution/Create"_hash: {
         auto name = msg.asp.get<MulNX::NetExt>()->str1;
-        std::unique_lock lock(this->smutex);
+        std::unique_lock lock(this->CamSys()->smutex);
         if (!this->Solution_Create(name)) {
             this->ISys().LogError(std::format("创建解决方案失败：{}", name));
         }
     }
     case "CameraSystem/Solution/Delete"_hash: {
         auto name = msg.asp.get<MulNX::NetExt>()->str1;
-        std::unique_lock lock(this->smutex);
+        std::unique_lock lock(this->CamSys()->smutex);
         if (!this->Solution_Delete(name)) {
             this->ISys().LogError(std::format("删除解决方案失败：{}", name));
         }
     }
     case "CameraSystem/Solution/Play"_hash: {
         auto name = msg.asp.get<MulNX::NetExt>()->str1;
-        std::unique_lock lock(this->smutex);
+        std::unique_lock lock(this->CamSys()->smutex);
         this->Playing_Solution(name);
     }
     case "CameraSystem/Element/Deleted"_hash: {
