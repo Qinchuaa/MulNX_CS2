@@ -7,42 +7,33 @@
 #include <functional>
 
 namespace MulNX {
-    // 模块基类
 	class ModuleBase {
         friend MulNX::Core::Core;
         friend C_ISys;
     private:
-        // 消息管理器指针
         MulNX::IMessageManager* IMsgManager = nullptr;
-        // 路径管理器指针
         MulNX::PathManager* pPathManager = nullptr;
+        MulNX::I18nManager* pI18nManager = nullptr;
     protected:
         // 父模块句柄
         MulNXHandle hParent{};
         // 模块名称，唯一标识
         std::string ModuleName{};
-        // 核心管理器指针
         MulNX::Core::Core* Core = nullptr;
-		// 全局变量指针
 		MulNX::GlobalVars* GlobalVars = nullptr;
         // 线程运行状态
         std::atomic<bool>MyThreadRunning = false;
         // 线程执行间隔，默认以100Hz基准执行
         std::atomic<int> MyThreadDelta = 10;
 	public:
-        // 按键追踪器指针
         MulNX::InputSystem* pInputSystem = nullptr;
 		// 组件句柄
 		MulNXHandle HModule;
-		// 3D抽象层指针
         IAbstractLayer3D* AL3D = nullptr;
-        // 调试器指针
         IDebugger* IDebugger = nullptr;
-        // 主要消息管道指针
         MulNX::IMessageChannel* MainMsgChannel = nullptr;
         // 用于指示UI不应该再发送消息
         std::atomic<bool> UIBusy = false;
-        // 线程锁
         std::shared_mutex smutex;
     public:
 		// 删除不需要的构造函数
@@ -61,15 +52,11 @@ namespace MulNX {
 
 		// 消息处理函数，只需处理即可，消息会由入口点释放
         virtual void ProcessMsg(MulNX::Message& Msg) {};
-
-		// 基本函数：
-
-		// 基础初始化
-        bool BaseInit();  
-        // 入口点
     public:
+        // 基础初始化
+        bool BaseInit(MulNX::Core::Core* core);
         // 初始化入口
-		bool EntryInit(MulNX::Core::Core* Core);
+        bool EntryInit();
 	protected:
 		// 消息处理入口
 		void EntryProcessMsg();
@@ -93,5 +80,6 @@ namespace MulNX {
 
         // 系统服务包装器(原则上是protected权限)
         C_ISys ISys();
+        const std::string& I18n(const std::string& key);
     };
 }

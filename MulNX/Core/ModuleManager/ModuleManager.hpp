@@ -60,8 +60,9 @@ namespace MulNX {
 			}
 
 			// 初始化最后部分使用
-			bool PackedInit();
-		};
+            bool ModulesBaseInit();
+            bool ModulesInit();
+        };
 	}
 
 }

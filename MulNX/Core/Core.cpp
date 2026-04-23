@@ -22,18 +22,8 @@ MulNX::Core::ModuleManager* MulNX::Core::Core::ModuleManager() {
 
 // 专用初始化函数
 void MulNX::Core::Core::Init() {
-    // 核心启动器初始化
-	this->pCoreStarter->EntryInit(this);
 	// 通过核心启动器进行系统初始化
 	this->pCoreStarter->SystemInit(this);
-	// 初始化注册模块
-	this->pModuleManager->PackedInit();
-    // 开启系统
-    this->pCoreStarter->ActiveSystem();
-    // 设置系统标志位
-    this->ModuleManager()->FindModule<MulNX::GlobalVars>("GlobalVars")->SystemReady.store(true, std::memory_order_release);
-    // 执行启动器回调
-    this->pCoreStarter->InitEndCall();
 	return;
 }
 

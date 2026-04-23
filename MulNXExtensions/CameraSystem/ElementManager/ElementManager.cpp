@@ -13,7 +13,7 @@ bool ElementManager::MenuElement(MulNX::UINode* node) {
         this->OnPreview ? "开启" : "关闭",
         this->Preview_CurrentElement ? this->Preview_CurrentElement->GetName() : "无")
         .c_str());
-    
+
     ImGui::Separator();
 
     // 元素总设置
@@ -36,6 +36,7 @@ bool ElementManager::MenuElement(MulNX::UINode* node) {
             else {
                 auto [msg, rp] = MulNX::Message::Create<MulNX::NetExt>("Element/Create"_hash);
                 rp->str1 = std::move(newElementName);
+                this->ISys().PublishAsync(std::move(msg));
             }
             newElementName.clear();
         }
@@ -43,9 +44,9 @@ bool ElementManager::MenuElement(MulNX::UINode* node) {
     // 展示修改元素
     if (ImGui::CollapsingHeader("元素列表")) {
         // 输出是否打开了元素调试窗口
-        ImGui::Text(std::format("元素调试窗口状态：{}",this->ShowWindow.load(std::memory_order_acquire) ? "打开" : "关闭").c_str());
+        ImGui::Text(std::format("元素调试窗口状态：{}", this->ShowWindow.load(std::memory_order_acquire) ? "打开" : "关闭").c_str());
         // 使用迭代器遍历所有元素
-        for (const auto& [name,element] : this->elements) {
+        for (const auto& [name, element] : this->elements) {
             this->Element_ShowInLine(element);
         }
     }
@@ -182,7 +183,7 @@ void ElementManager::HandleUpdate() {
 //创建元素函数，支持传递任意参数给元素构造函数
 ElementBase* ElementManager::Element_Create(const ElementType type, const std::string& name) {
     // 检查是否已存在同名元素
-    if (this->elements.find(name)!=this->elements.end()) {
+    if (this->elements.find(name) != this->elements.end()) {
         this->ISys().LogError("元素名已占用！ 元素名：" + name);
         return nullptr;
     }
@@ -214,7 +215,7 @@ bool ElementManager::Element_SaveAll() {
     }
     std::filesystem::path ElementFolderPath = this->ISys().PathManager()->PathGetFromKey("Elements");
     //遍历所有元素并保存
-    for (const auto& [name,elem] : this->elements) {
+    for (const auto& [name, elem] : this->elements) {
         if (!elem->Dirty) {
             //如果不脏则跳过保存
             continue;
@@ -258,13 +259,13 @@ bool ElementManager::Element_Load(const std::filesystem::path& FullPath) {
             return false;
         }
         // 检查是否存在同名元素
-        if (this->elements.find(NewElementName)!=this->elements.end()) {
+        if (this->elements.find(NewElementName) != this->elements.end()) {
             this->ISys().LogError("元素名已占用，无法从磁盘文件加载元素！ 元素名：" + NewElementName);
             return false;
         }
         // 创建基类指针
         this->ISys().LogInfo("尝试进行分发，元素类型为 " + NewElementTypeString + " ，文件路径：" + FullPath.string());
-        
+
         auto pElement = this->Element_Create(NewElementType, NewElementName);
         // 判空
         if (!pElement) {
@@ -334,7 +335,7 @@ bool ElementManager::Element_ClearAll() {
     // 清空当前操作元素
     this->CurrentElement = nullptr;
     // 把所有元素标记为需要清理并从Elements中释放
-    for (auto& [name,elem] : this->elements) {
+    for (auto& [name, elem] : this->elements) {
         elem->NeedBeDelete = true;
     }
     this->elements.clear();

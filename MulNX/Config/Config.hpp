@@ -50,6 +50,8 @@ namespace MulNX {
     // UI节点
     class UINode;
 
+    class I18nManager;
+
     [[noreturn]] void ErrorTerminate(const std::string& Msg,
         const std::source_location& loc = std::source_location::current());
 

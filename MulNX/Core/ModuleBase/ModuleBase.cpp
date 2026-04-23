@@ -18,7 +18,8 @@ void MulNX::ModuleBase::SetMyThreadDelta(int Delta) {
 }
 
 // 初始化
-bool MulNX::ModuleBase::BaseInit() {
+bool MulNX::ModuleBase::BaseInit(MulNX::Core::Core* core) {
+    this->Core = core;
     try {
         auto* moduleManager = this->Core->ModuleManager();
         this->IMsgManager = moduleManager->FindModule<MulNX::IMessageManager>("MessageManager");
@@ -27,6 +28,7 @@ bool MulNX::ModuleBase::BaseInit() {
         this->AL3D = moduleManager->FindAbstractLayer3D();
         this->pInputSystem = moduleManager->FindModule<MulNX::InputSystem>("InputSystem");
         this->pPathManager = moduleManager->FindModule<MulNX::PathManager>("PathManager");
+        this->pI18nManager = moduleManager->FindModule<MulNX::I18nManager>("I18nManager");
 
         if (!this->HModule.IsValid()) {
             this->HModule = MulNXHandle::CreateHandle();
@@ -62,11 +64,7 @@ void MulNX::ModuleBase::SendTask(std::string&& workerName, std::function<bool()>
     this->ISys().LogInfo("发送了一个任务进入消息系统");
 }
 
-bool MulNX::ModuleBase::EntryInit(MulNX::Core::Core* Core) {
-    this->Core = Core;
-    if (!this->BaseInit()) {
-        return false;
-    }
+bool MulNX::ModuleBase::EntryInit() {
     if (!this->Init()) {
         return false;
     }
@@ -88,4 +86,8 @@ void MulNX::ModuleBase::SetParent(MulNXHandle hModule) {
 }
 bool MulNX::ModuleBase::HasParent() {
     return this->hParent.IsValid();
+}
+
+const std::string& MulNX::ModuleBase::I18n(const std::string& key) {
+    return this->pI18nManager->Get(key);
 }

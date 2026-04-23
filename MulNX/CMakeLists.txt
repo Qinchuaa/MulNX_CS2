@@ -33,6 +33,7 @@ add_library(MulNX
     "Systems/PathManager/PathManager.cpp"
     "Systems/PathManager/FilePathNode/FilePathNode.cpp"
     "Systems/TaskSystem/TaskSystem.cpp"
+    "Systems/I18nManager/I18nManager.cpp"
 
     "MulNX.cpp"
 )
