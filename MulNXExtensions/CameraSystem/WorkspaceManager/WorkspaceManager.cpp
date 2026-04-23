@@ -77,10 +77,12 @@ void WorkspaceManager::ProcessMsg(MulNX::Message& msg) {
         auto name = msg.asp.get<MulNX::NetExt>()->str1;
         std::unique_lock lock(this->CamSys()->smutex);
         this->Workspace_Set(name);
+        break;
     }
     case "CameraSystem/Workspace/Save"_hash: {
         std::unique_lock lock(this->CamSys()->smutex);
         this->Workspace_Save();
+        break;
     }
     }
 }

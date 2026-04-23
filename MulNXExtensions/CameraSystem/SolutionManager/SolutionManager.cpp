@@ -241,6 +241,7 @@ void SolutionManager::ProcessMsg(MulNX::Message& msg) {
         if (!this->Solution_Create(name)) {
             this->ISys().LogError(std::format("创建解决方案失败：{}", name));
         }
+        break;
     }
     case "CameraSystem/Solution/Delete"_hash: {
         auto name = msg.asp.get<MulNX::NetExt>()->str1;
@@ -248,17 +249,20 @@ void SolutionManager::ProcessMsg(MulNX::Message& msg) {
         if (!this->Solution_Delete(name)) {
             this->ISys().LogError(std::format("删除解决方案失败：{}", name));
         }
+        break;
     }
     case "CameraSystem/Solution/Play"_hash: {
         auto name = msg.asp.get<MulNX::NetExt>()->str1;
         std::unique_lock lock(this->CamSys()->smutex);
         this->Playing_Solution(name);
+        break;
     }
     case "CameraSystem/Element/Deleted"_hash: {
         //全部刷新用于清理失效元素
         for (auto& [name, pSolution] : this->solutions) {
             pSolution->Refresh();
         }
+        break;
     }
     }
 }

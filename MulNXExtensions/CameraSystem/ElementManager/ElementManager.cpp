@@ -139,6 +139,7 @@ void ElementManager::ProcessMsg(MulNX::Message& msg) {
         if (!this->Element_Create(ElementType::FreeCameraPath, name)) {
             this->ISys().LogError(std::format("元素创建失败：{}", name));
         }
+        break;
     }
     case "Element/Delete"_hash: {
         auto& name = msg.asp.get<MulNX::NetExt>()->str1;
@@ -146,6 +147,7 @@ void ElementManager::ProcessMsg(MulNX::Message& msg) {
         if (!this->Element_Delete(name)) {
             this->ISys().LogError(std::format("元素删除失败：{}", name));
         }
+        break;
     }
     }
 }
