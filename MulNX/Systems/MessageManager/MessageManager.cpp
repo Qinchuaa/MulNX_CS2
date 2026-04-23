@@ -5,23 +5,7 @@
 #include <MulNX/Systems/GlobalVars/GlobalVars.hpp>
 
 bool MulNX::MessageManager::Init() {
-    std::thread t([this]() {
-        while (!this->GlobalVars->SystemReady.load(std::memory_order_acquire)) {
-            std::this_thread::sleep_for(std::chrono::milliseconds(1));
-        }
-        this->ISys().LogInfo("消息派发开始！");
-        while (true) {
-            if (this->NextMsg()) {
-                // 有消息在处理,快速轮询
-                this->SetMyThreadDelta(1);
-            }
-            else {
-                // 没有消息在处理，降低轮询频率
-                this->SetMyThreadDelta(10);
-            }
-        }
-        });
-    t.detach();
+
     return true;
 }
 
@@ -83,4 +67,19 @@ bool MulNX::MessageManager::NextMsg() {
         return true;
     }
     return false;
+}
+
+void MulNX::MessageManager::HandleDispatch() {
+    while (!this->GlobalVars->SystemReady.load(std::memory_order_acquire)) {
+        std::this_thread::sleep_for(std::chrono::milliseconds(1));
+    }
+    // this->ISys().LogInfo("消息派发开始！");
+    if (this->NextMsg()) {
+        // 有消息在处理,快速轮询
+        this->SetMyThreadDelta(1);
+    }
+    else {
+        // 没有消息在处理，降低轮询频率
+        this->SetMyThreadDelta(10);
+    }
 }

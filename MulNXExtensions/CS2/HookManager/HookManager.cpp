@@ -18,9 +18,6 @@ bool HookManager::Init() {
 }
 void HookManager::ActiveSystem() {
     this->CreateHook();
-    // 设置系统标志位
-    this->Core->ModuleManager()->FindModule<MulNX::GlobalVars>("GlobalVars")
-        ->SystemReady.store(true, std::memory_order_release);
 }
 
 void HookManager::CreateHook() {

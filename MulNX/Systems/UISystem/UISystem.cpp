@@ -22,6 +22,7 @@ void MulNX::UISystem::ProcessMsg(MulNX::Message& Msg) {
         std::string* pStr = Msg.asp.get<std::string>();
         this->UIContext.EntryDraw = std::move(*pStr);
         this->UISystemRunning = true;
+        this->ISys().LogWarning("接收到启动消息，UI系统开始启动");
         break;
     }
     case "UISystem/ModulePush"_hash: {
@@ -39,7 +40,6 @@ int MulNX::UISystem::Render() {
     if (!this->UISystemRunning) {
         return 0;
     }
-    
     this->FrameBefore();
     MulNX::SetUIStyle();
     if (this->pInputSystem->CheckComboClick(VK_INSERT, 1)) {

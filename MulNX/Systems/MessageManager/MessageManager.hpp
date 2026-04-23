@@ -38,5 +38,7 @@ namespace MulNX {
         bool Publish(Message&& Msg)override;
 
         bool Subscribe(MessageChannel* const pChannel, const std::string& Type);
+
+        void HandleDispatch();
     };
 }

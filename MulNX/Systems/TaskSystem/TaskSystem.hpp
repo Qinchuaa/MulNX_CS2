@@ -1,6 +1,7 @@
 #pragma once
 
 #include <MulNX/Core/ModuleBase/ModuleBase.hpp>
+#include <MulNXThirdParty/queue/concurrentqueue.h>
 
 namespace MulNX {
     namespace Task {
@@ -8,7 +9,7 @@ namespace MulNX {
         public:
             std::thread t;
             std::vector<std::function<bool()>>tasks;
-            std::atomic<std::function<bool()>*>entry;
+            moodycamel::ConcurrentQueue<std::function<bool()>>queue;
             void Start();
         };
 
@@ -24,6 +25,5 @@ namespace MulNX {
     public:
         bool Init()override;
         void ProcessMsg(MulNX::Message& msg)override;
-        void Main();
     };
 }

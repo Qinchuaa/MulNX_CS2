@@ -1,13 +1,15 @@
 #include "TaskSystem.hpp"
 
-#include <MulNX/Systems/MessageManager/IMessageManager.hpp>
+#include <MulNX/Core/Core.hpp>
+#include <MulNX/Core/ModuleManager/ModuleManager.hpp>
+#include <MulNX/Systems/MessageManager/MessageManager.hpp>
 
 void MulNX::Task::Worker::Start() {
     this->t = std::thread([this]() {
         for (;;) {
-            if (this->entry.load(std::memory_order_acquire)) {
-                this->tasks.push_back(std::move(*this->entry.load(std::memory_order_acquire)));
-                this->entry.store(nullptr, std::memory_order_release);
+            std::function<bool()> task;
+            while (queue.try_dequeue(task)) {
+                tasks.push_back(std::move(task));
             }
             for (const auto& task : this->tasks) {
                 task();
@@ -21,19 +23,23 @@ bool MulNX::TaskSystem::Init() {
     this->ISys()
         .SubscribeAsync("Task/Create");
 
-    static auto t = std::thread([this]() {
-        for (;;) {
-            this->Main();
-        }
+    auto [msg, rp] = MulNX::Message::Create<MulNX::Task::RegistrationPacket>("Task/Create"_hash);
+    rp->targetWorker = "Messaging";
+    rp->task = std::move([this]()->bool {
+        this->EntryProcessMsg();
+        return true;
         });
-    // auto [msg, rp] = MulNX::Message::Create<MulNX::Task::RegistrationPacket>("Task/Create"_hash);
-    // rp->targetWorker = "MulNXMain";
-    // rp->task = std::move([this]()->bool {
-    //     this->Main();
-    //     return true;
-    //     });
-    // this->HandleAddTask(msg);
-    
+    this->HandleAddTask(msg);
+
+    auto [msg2, rp2] = MulNX::Message::Create<MulNX::Task::RegistrationPacket>("Task/Create"_hash);
+    rp2->targetWorker = "Messaging";
+    auto pMessageManager = this->Core->ModuleManager()->FindModule<MessageManager>("MessageManager");
+    rp2->task = std::move([pMessageManager]()->bool {
+        pMessageManager->HandleDispatch();
+        return true;
+        });
+    this->HandleAddTask(msg2);
+
     return true;
 }
 
@@ -50,21 +56,14 @@ void MulNX::TaskSystem::ProcessMsg(MulNX::Message& msg) {
     }
 }
 
-void MulNX::TaskSystem::Main() {
-    this->EntryProcessMsg();
-}
-
 void MulNX::TaskSystem::HandleAddTask(MulNX::Message& msg) {
-    auto pRegistrationPacket = msg.asp.get<MulNX::Task::RegistrationPacket>();
-    auto it = this->workers.find(pRegistrationPacket->targetWorker);
+    auto RegistrationPacket = std::move(*msg.asp.get<MulNX::Task::RegistrationPacket>());
+    auto it = this->workers.find(RegistrationPacket.targetWorker);
     if (it == this->workers.end()) {
-        this->workers[pRegistrationPacket->targetWorker] = std::make_unique<MulNX::Task::Worker>();
-        this->workers[pRegistrationPacket->targetWorker]->Start();
-        this->ISys().LogSucc(std::format("成功创建工作者：{}", pRegistrationPacket->targetWorker));
+        this->workers[RegistrationPacket.targetWorker] = std::make_unique<MulNX::Task::Worker>();
+        this->workers[RegistrationPacket.targetWorker]->Start();
+        this->ISys().LogSucc(std::format("成功创建工作者：{}", RegistrationPacket.targetWorker));
     }
-    this->workers[pRegistrationPacket->targetWorker]->entry.store(&pRegistrationPacket->task, std::memory_order_release);
-    while (this->workers[pRegistrationPacket->targetWorker]->entry.load(std::memory_order_acquire) != nullptr) {
-        std::this_thread::sleep_for(std::chrono::milliseconds(2));
-    }
-    this->ISys().LogSucc(std::format("成功将任务添加进入工作者：{}", pRegistrationPacket->targetWorker));
+    this->workers[RegistrationPacket.targetWorker]->queue.enqueue(std::move(RegistrationPacket.task));
+    this->ISys().LogSucc(std::format("成功将任务添加进入工作者：{}", RegistrationPacket.targetWorker));
 }
