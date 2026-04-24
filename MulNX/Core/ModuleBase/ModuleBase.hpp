@@ -30,7 +30,7 @@ namespace MulNX {
 		// 组件句柄
 		MulNXHandle HModule;
         IAbstractLayer3D* AL3D = nullptr;
-        IDebugger* IDebugger = nullptr;
+        Debugger* IDebugger = nullptr;
         MulNX::IMessageChannel* MainMsgChannel = nullptr;
         // 用于指示UI不应该再发送消息
         std::atomic<bool> UIBusy = false;

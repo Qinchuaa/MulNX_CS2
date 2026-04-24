@@ -23,7 +23,7 @@ bool MulNX::ModuleBase::BaseInit(MulNX::Core::Core* core) {
     try {
         auto* moduleManager = this->Core->ModuleManager();
         this->IMsgManager = moduleManager->FindModule<MulNX::IMessageManager>("MessageManager");
-        this->IDebugger = moduleManager->FindModule<MulNX::IDebugger>("Debugger");
+        this->IDebugger = moduleManager->FindModule<MulNX::Debugger>("Debugger");
         this->GlobalVars = moduleManager->FindModule<MulNX::GlobalVars>("GlobalVars");
         this->AL3D = moduleManager->FindAbstractLayer3D();
         this->pInputSystem = moduleManager->FindModule<MulNX::InputSystem>("InputSystem");

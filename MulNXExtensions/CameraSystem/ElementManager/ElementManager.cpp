@@ -9,9 +9,9 @@ bool ElementManager::MenuElement(MulNX::UINode* node) {
     // 展示预览功能相关状态
     ImGui::TextUnformatted(std::format(
         "预览状态： {}   预览元素名：{}   预览时间偏移：{} ",
-        this->Preview_TimeSchema,
         this->OnPreview ? "开启" : "关闭",
-        this->Preview_CurrentElement ? this->Preview_CurrentElement->GetName() : "无")
+        this->Preview_CurrentElement ? this->Preview_CurrentElement->GetName() : "无",
+        this->Preview_TimeSchema)
         .c_str());
 
     ImGui::Separator();

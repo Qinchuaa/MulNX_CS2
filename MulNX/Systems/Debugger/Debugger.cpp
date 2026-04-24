@@ -6,6 +6,60 @@
 
 #include <bitset>
 
+bool MulNX::Debugger::UINodeFunc(MulNX::UINode* ThisNode) {
+    auto w = MulNX::UI::RAIIWindow("调试器", this->ShowWindow);
+    if (!w)return true;
+    std::shared_lock lock(this->smutex);
+
+    // 在标签页内创建一个子窗口
+    ImVec2 childSize = ImGui::GetContentRegionAvail();
+    childSize.y -= ImGui::GetStyle().ItemSpacing.y; // 留出一点空间
+
+    // 开始子窗口，占据标签页的剩余空间
+    ImGui::BeginChild("信息", childSize, true, ImGuiWindowFlags_HorizontalScrollbar);
+
+    // 使用虚拟列表优化性能
+    ImGuiListClipper clipper;
+    clipper.Begin(static_cast<int>(this->DebugMsg.size()));
+    while (clipper.Step()) {
+        for (int i = clipper.DisplayStart; i < clipper.DisplayEnd; i++) {
+            const auto& msg = this->DebugMsg[i];
+
+            // 根据消息类型着色
+            if (msg.find(this->Info) == 0) {
+                ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(50, 50, 255, 255));
+            }
+            else if (msg.find(this->Succ) == 0) {
+                ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(0, 100, 0, 255));
+            }
+            else if (msg.find(this->Warning) == 0) {
+                ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(255, 100, 0, 255));
+            }
+            else if (msg.find(this->Error) == 0) {
+                ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(255, 50, 50, 255));
+            }
+            else {
+                ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(0, 0, 0, 255));
+            }
+
+            ImGui::TextUnformatted(msg.c_str());
+
+            // 弹出
+            ImGui::PopStyleColor();
+        }
+    }
+
+    // 自动滚动到最新消息
+    if (this->NeedAutoScroll) {
+        ImGui::SetScrollHereY(1.0f);
+        this->NeedAutoScroll = false;
+    }
+
+    // 结束子窗口
+    ImGui::EndChild();
+    return true;
+}
+
 bool MySaveStringToFile(const std::string& data,
     const std::filesystem::path& filePath) {
     // 强制按二进制打开可避免换行转换
@@ -18,23 +72,52 @@ bool MySaveStringToFile(const std::string& data,
     return out.good();
 }
 bool MulNX::Debugger::Init() {
-    this->ISys()
-        .SubscribeAsync("Debugger/SetMaxInfoCount")
-        .SubscribeAsync("Debugger/SaveToFile");
     this->SendUINode(this->GetName(), [this](MulNX::UINode* node) {return this->UINodeFunc(node);});
+
     this->SendTask("MulNXMain", [this]()->bool {
         this->Main();
         return true;
         });
+    
+    this->ISys()
+        .SubscribeAsync("Log/Info")
+        .SubscribeAsync("Log/Succ")
+        .SubscribeAsync("Log/Warning")
+        .SubscribeAsync("Log/Error")
+        .SubscribeAsync("Debugger/SetMaxInfoCount")
+        .SubscribeAsync("Debugger/SaveToFile");
+    
     return true;
 }
-void MulNX::Debugger::ProcessMsg(MulNX::Message& Msg) {
-    switch (Msg.type) {
+void MulNX::Debugger::ProcessMsg(MulNX::Message& msg) {
+    switch (msg.type) {
     case "Debugger/SetMaxInfoCount"_hash: {
-        this->ResetMaxMsgCount(Msg.p1.low<float>());
+        this->ResetMaxMsgCount(msg.p1.low<float>());
+        break;
     }
     case "Debugger/SaveToFile"_hash: {
         this->SaveToFile();
+        break;
+    }
+    case "Log/Info"_hash: {
+        auto log = std::move(msg.asp.get<MulNX::NetExt>()->str1);
+        this->AddInfo(std::move(log));
+        break;
+    }
+    case "Log/Succ"_hash: {
+        auto log = std::move(msg.asp.get<MulNX::NetExt>()->str1);
+        this->AddSucc(std::move(log));
+        break;
+    }
+    case "Log/Warning"_hash: {
+        auto log = std::move(msg.asp.get<MulNX::NetExt>()->str1);
+        this->AddWarning(std::move(log));
+        break;
+    }
+    case "Log/Error"_hash: {
+        auto log = std::move(msg.asp.get<MulNX::NetExt>()->str1);
+        this->AddError(std::move(log));
+        break;
     }
     }
 }
@@ -148,59 +231,6 @@ void MulNX::Debugger::AddError(const std::string& NewMsg) {
     }
 }
 
-bool MulNX::Debugger::UINodeFunc(MulNX::UINode* ThisNode) {
-    auto w = MulNX::UI::RAIIWindow("调试器", this->ShowWindow);
-    if (!w)return true;
-    std::shared_lock lock(this->smutex);
-
-    // 在标签页内创建一个子窗口
-    ImVec2 childSize = ImGui::GetContentRegionAvail();
-    childSize.y -= ImGui::GetStyle().ItemSpacing.y; // 留出一点空间
-
-    // 开始子窗口，占据标签页的剩余空间
-    ImGui::BeginChild("信息", childSize, true, ImGuiWindowFlags_HorizontalScrollbar);
-
-    // 使用虚拟列表优化性能
-    ImGuiListClipper clipper;
-    clipper.Begin(static_cast<int>(this->DebugMsg.size()));
-    while (clipper.Step()) {
-        for (int i = clipper.DisplayStart; i < clipper.DisplayEnd; i++) {
-            const auto& msg = this->DebugMsg[i];
-
-            // 根据消息类型着色
-            if (msg.find(this->Info) == 0) {
-                ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(50, 50, 255, 255));
-            }
-            else if (msg.find(this->Succ) == 0) {
-                ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(0, 100, 0, 255));
-            }
-            else if (msg.find(this->Warning) == 0) {
-                ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(255, 100, 0, 255));
-            }
-            else if (msg.find(this->Error) == 0) {
-                ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(255, 50, 50, 255));
-            }
-            else {
-                ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(0, 0, 0, 255));
-            }
-
-            ImGui::TextUnformatted(msg.c_str());
-
-            // 弹出
-            ImGui::PopStyleColor();
-        }
-    }
-
-    // 自动滚动到最新消息
-    if (this->NeedAutoScroll) {
-        ImGui::SetScrollHereY(1.0f);
-        this->NeedAutoScroll = false;
-    }
-
-    // 结束子窗口
-    ImGui::EndChild();
-    return true;
-}
 void MulNX::Debugger::ShowStream() {
     this->IfShowStream = true;
 }

@@ -2,6 +2,10 @@
 
 #include <MulNX/Core/ModuleBase/ModuleBase.hpp>
 
+namespace YAML {
+    class Node;
+}
+
 namespace MulNX {
     class I18nManager final :public MulNX::ModuleBase {
     private:

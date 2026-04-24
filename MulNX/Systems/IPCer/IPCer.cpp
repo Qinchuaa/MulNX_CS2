@@ -1,7 +1,7 @@
 #include "IPCer.hpp"
 
 #include <MulNX/Core/Core.hpp>
-#include <MulNX/Systems/Debugger/IDebugger.hpp>
+#include <MulNX/Systems/Debugger/Debugger.hpp>
 
 #include <strstream>
 #include <Windows.h>

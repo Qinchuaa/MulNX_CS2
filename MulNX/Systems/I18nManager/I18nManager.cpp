@@ -1,7 +1,18 @@
 #include "I18nManager.hpp"
 
+#include <yaml-cpp/yaml.h>
+
 bool MulNX::I18nManager::Init() {
-    this->strings["log.success"] = "测试成功";
+    auto path = this->ISys().PathGet("Language");
+    auto filePath = path / "lan.yaml";
+
+    this->strings.clear();
+    YAML::Node root = YAML::LoadFile(filePath.string());
+    if (!root.IsMap()) return false;
+    for (auto it = root.begin(); it != root.end(); ++it) {
+        this->strings[it->first.as<std::string>()] = it->second.as<std::string>();
+    }
+    
     return true;
 }
 

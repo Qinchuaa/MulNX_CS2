@@ -23,7 +23,7 @@ namespace MulNX {
     // 模块基类
     class ModuleBase;
     // 调试器接口
-    class IDebugger;
+    class Debugger;
     // MulNX句柄系统
     class IHandleSystem;
     class HandleSystem;

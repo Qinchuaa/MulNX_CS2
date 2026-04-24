@@ -6,16 +6,24 @@ MulNX::C_ISys MulNX::ModuleBase::ISys() {
 }
 
 void MulNX::C_ISys::LogInfo(const std::string& Msg) {
-    this->pModuleBase->IDebugger->AddInfo("[" + this->pModuleBase->GetName() + "]" + Msg);
+    auto [msg, rp] = MulNX::Message::Create<MulNX::NetExt>("Log/Info"_hash);
+    rp->str1 = "[" + this->pModuleBase->GetName() + "]" + Msg;
+    this->PublishAsync(std::move(msg));
 }
 void MulNX::C_ISys::LogSucc(const std::string& Msg) {
-    this->pModuleBase->IDebugger->AddSucc("[" + this->pModuleBase->GetName() + "]" + Msg);
+    auto [msg, rp] = MulNX::Message::Create<MulNX::NetExt>("Log/Succ"_hash);
+    rp->str1 = "[" + this->pModuleBase->GetName() + "]" + Msg;
+    this->PublishAsync(std::move(msg));
 }
 void MulNX::C_ISys::LogWarning(const std::string& Msg) {
-    this->pModuleBase->IDebugger->AddWarning("[" + this->pModuleBase->GetName() + "]" + Msg);
+    auto [msg, rp] = MulNX::Message::Create<MulNX::NetExt>("Log/Warning"_hash);
+    rp->str1 = "[" + this->pModuleBase->GetName() + "]" + Msg;
+    this->PublishAsync(std::move(msg));
 }
 void MulNX::C_ISys::LogError(const std::string& Msg) {
-    this->pModuleBase->IDebugger->AddError("[" + this->pModuleBase->GetName() + "]" + Msg);
+    auto [msg, rp] = MulNX::Message::Create<MulNX::NetExt>("Log/Error"_hash);
+    rp->str1 = "[" + this->pModuleBase->GetName() + "]" + Msg;
+    this->PublishAsync(std::move(msg));
 }
 
 void MulNX::C_ISys::LogLine() {

@@ -1,21 +1,27 @@
-[成功][HookManager]初始化成功!
+[提示][ModuleManager]注意: AbstractLayer3D(3D抽象层)被绑定为CSController
+[成功][ModuleManager]成功订阅消息：ModuleManager/ModuleInfo/Request
 [提示][ModuleManager]发送了一个任务进入消息系统
 [成功][ModuleManager]初始化成功!
-[成功][HookManager]模块管理器初始化完成，即将初始化核心基础模块...
+[成功][HookManager]初始化成功!
 [成功][IPCer]初始化成功!
 [提示][PathManager]检测到共享目录已创建：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\Saves
 [提示][PathManager]检测到共享目录已创建：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\Config
 [提示][PathManager]检测到共享目录已创建：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\Resource
 [提示][PathManager]检测到共享目录已创建：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\Log
 [成功][PathManager]初始化成功!
+[成功][I18nManager]初始化成功!
 [成功][MessageManager]初始化成功!
 [成功][UISystem]成功订阅消息：UISystem/Start
 [成功][UISystem]成功订阅消息：UISystem/ModulePush
 [成功][UISystem]初始化成功!
-[成功][Debugger]成功订阅消息：Debugger/SetMaxInfoCount
-[成功][Debugger]成功订阅消息：Debugger/SaveToFile
 [提示][Debugger]发送了一个UI节点进入消息系统
 [提示][Debugger]发送了一个任务进入消息系统
+[成功][Debugger]成功订阅消息：Log/Info
+[成功][Debugger]成功订阅消息：Log/Succ
+[成功][Debugger]成功订阅消息：Log/Warning
+[成功][Debugger]成功订阅消息：Log/Error
+[成功][Debugger]成功订阅消息：Debugger/SetMaxInfoCount
+[成功][Debugger]成功订阅消息：Debugger/SaveToFile
 [成功][Debugger]初始化成功!
 [成功][HandleSystem]初始化成功!
 [提示][InputSystem]发送了一个任务进入消息系统
@@ -138,7 +144,6 @@
 [提示][MulNXController]发送了一个任务进入消息系统
 [成功][MulNXController]初始化成功!
 [提示][ModuleManager]注意: AbstractLayer3D(3D抽象层)被绑定为CSController
-[成功][ModuleManager]成功订阅消息：ModuleManager/ModuleInfo/Request
 [成功][HookManager]Present钩子已部署
 [成功][HookManager]ResizeBuffers钩子已部署
 [成功][HookManager]注入成功！
@@ -219,16 +224,23 @@
 [提示][ProjectManager]项目管理器正在处理消息！
 [警告][ProjectManager]无活跃项目，无法执行自动操作
 [成功][NameController]玩家名称获取钩子已部署
+[提示][ProjectileTracker]记录 projectile(smokegrenade_projectile) -> 控制器 SteamID=76561199560778677 
+[提示][ProjectileTracker]记录 projectile(flashbang_projectile) -> 控制器 SteamID=76561199560778677 
+[提示][ProjectileTracker]记录 projectile(flashbang_projectile) -> 控制器 SteamID=76561199560778677 
+[提示][VirtualUser]已触发自动保存（频率：每分钟）
+[提示][VirtualUser]已触发自动保存（频率：每分钟）
+[提示][VirtualUser]已触发自动保存（频率：每分钟）
+[提示][VirtualUser]已触发自动保存（频率：每分钟）
+[提示][VirtualUser]已触发自动保存（频率：每分钟）
 [警告][ElementManager]当前没有任何元素，跳过清空操作！
 [提示][SolutionManager]已关闭播放
 [警告][SolutionManager]当前没有任何解决方案，跳过清空操作！
 [成功][CameraSystem]成功设置工作区路径为：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace
 [提示][WorkspaceManager]尝试从文件加载工作区配置，文件路径：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace\WorkspaceConfig.yaml
+[提示][ObserverController]收到运镜结束消息
 [成功][WorkspaceManager]成功从文件加载工作区配置！ 文件路径：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace\WorkspaceConfig.yaml
 [提示][ProjectManager]尝试从文件加载项目，文件路径：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace\Mtp\Mtp.yaml
-[提示][ObserverController]收到运镜结束消息
 [成功][ProjectManager]成功从文件加载项目：Mtp
-[成功][WorkspaceManager]成功保存工作区配置文件到文件！ 文件路径：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace\WorkspaceConfig.yaml
 [提示][SolutionManager]已关闭播放
 [警告][SolutionManager]当前没有任何解决方案，跳过清空操作！
 [警告][ElementManager]当前没有任何元素，跳过清空操作！
@@ -288,6 +300,10 @@
 [提示][ElementManager]尝试进行分发，元素类型为 FreeCameraPath ，文件路径：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace\Mtp\Elements\xyz.yaml
 [成功][ElementManager]成功创建元素！  元素名：xyz
 [成功][ElementManager]成功从YAML文件加载自由摄像机轨道信息！ 自由摄像机轨道 名：xyz
+[提示][ElementManager]尝试从磁盘文件加载元素，文件路径：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace\Mtp\Elements\zuixin.yaml
+[提示][ElementManager]尝试进行分发，元素类型为 FreeCameraPath ，文件路径：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace\Mtp\Elements\zuixin.yaml
+[成功][ElementManager]成功创建元素！  元素名：zuixin
+[成功][ElementManager]成功从YAML文件加载自由摄像机轨道信息！ 自由摄像机轨道 名：zuixin
 [提示][SolutionManager]尝试从yaml文件加载解决方案，文件路径：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\CameraSystem\Workspaces\DefaultWorkspace\Mtp\Solutions\begin.yaml
 [成功][SolutionManager]解决方案加载成功
 [提示][SolutionManager]+------------------------------------------------+
@@ -298,11 +314,11 @@
 [成功][SolutionManager]解决方案加载成功
 [提示][SolutionManager]+------------------------------------------------+
 [成功][ProjectManager]已切换至项目Mtp
-[成功][ProjectManager]尝试加载元素总数：13
+[成功][ProjectManager]尝试加载元素总数：14
 [成功][ProjectManager]尝试加载解决方案总数：3
-[成功][ProjectManager]成功加载元素总数：13
+[成功][ProjectManager]成功加载元素总数：14
 [成功][ProjectManager]成功加载解决方案总数：3
-[提示][SolutionManager]偏移时间轴播放，偏移时间设置为：86.57988
+[提示][SolutionManager]偏移时间轴播放，偏移时间设置为：128.21579
 [提示][SolutionManager]播放解决方案：begin
 [提示][ObserverController]收到运镜开始消息
 [提示][ObserverController]运镜开始时当前模式非 spec_mode 4，尝试切换并等待生效。
