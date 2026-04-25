@@ -7,6 +7,15 @@ ui:
   button:
     save: 保存
     change: 切换
+    delete: 删除
+    add: 添加
+    clear: 清空
+    copy_name: 复制名称
+    print_debug: 打印信息到调试窗口
+    modify_keybind: 修改按键绑定
+    confirm_modify: 确认修改
+    remove: 移除
+    no_selected: 当前未选择
 
 text:
   entered: 已进入
@@ -26,6 +35,7 @@ sys:
   version_is: 当前版本号：{0} 
   build_stamp: 当前版本构建时间：{0} 
   started: 各模块初始化完毕，系统已启动
+  shutdown_warning: 检测到 WM_CLOSE 消息，游戏即将关闭，系统进入终止态，后续日志请忽略
 
 result:
   create_succ: 创建成功：{0}
@@ -48,7 +58,6 @@ log:
   new: |
     +----------新的日志片段----------+
     当游戏关闭时发生异常是可预见的，请忽略
-
 camsys:
   tab_proj: 项目
   tab_sol: 解决方案
@@ -89,23 +98,15 @@ camsys:
     new_name: 新解决方案名：
     create_btn: 创建解决方案
     list: 解决方案列表
-    debug_window_status: 解决方案调试窗口状态：{0}
     name_label: "|解决方案名称："
-    context_menu: 解决方案右键菜单
-    copy_name: 复制名称
-    save_to_disk: 保存到磁盘
-    print_debug: 打印信息调试窗口
-    delete: 删除
     element_count_duration: " 元素数量：{0},   总时长：{1}"
     playing_draw_label: 解决方案插值摄像机
-    keypack_unusable: 当前按键绑定不可用，无法使用这个绑定播放解决方案！
     debug_window: 解决方案调试
     current_info: "当前操作解决方案名称：{0}   元素数量：{1}   总时长：{2}   播放模式：{3}"
     switch_to_activation: 切换到激活模式
     switch_to_orchestration: 切换到编排模式
     enable_current: 使能当前解决方案
     gen_timeline_offset: 按激活模式生成编排模式偏移
-    modify_keybind: 修改按键绑定
     new_element_name: 新元素名称
     add_element: 添加元素
     clear_all_elements: 清空所有元素
@@ -113,10 +114,7 @@ camsys:
     adjust_element_index: 要调整的本解决方案的元素
     element_info: "元素信息： 编号：{0}  元素名称：{1}  元素持续时间：{2}  元素偏移时间：{3}"
     offset_time: 偏移时间
-    confirm_modify: 确认修改
-    remove_element: 从解决方案移除该元素
     invalid_index: "索引无效！请输入 0 到 {0} 之间的值"
-    no_selected: 当前未选择任何解决方案
   
   proj:
     settings: 项目设置

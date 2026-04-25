@@ -1,10 +1,8 @@
 #pragma once
 
-using DWORD = unsigned long;
+#include <MulNX/MulNX.hpp>
 
 DWORD MulNX_CS2_Start(void*);
-
-#include <MulNX/MulNX.hpp>
 
 class MainDraw final:public MulNX::ModuleBase{
 public:

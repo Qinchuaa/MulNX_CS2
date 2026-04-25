@@ -11,8 +11,8 @@ bool ElementManager::MenuElement(MulNX::UINode* node) {
         "camsys.elem.preview_status",
         this->OnPreview ? I18n("text.opened") : I18n("text.closed"),
         this->Preview_CurrentElement ? this->Preview_CurrentElement->GetName() : I18n("text.none"),
-        this->Preview_TimeSchema)
-        .c_str());
+        this->Preview_TimeSchema
+    ).c_str());
 
     ImGui::Separator();
 

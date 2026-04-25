@@ -173,6 +173,9 @@ void HookManager::BuildNew() {
 // ImGui窗口处理函数导入
 extern LRESULT ImGui_ImplWin32_WndProcHandler(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 bool HookManager::MyWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
+    if (uMsg == WM_CLOSE) {
+        this->ISys().LogWarning(I18n("sys.shutdown_warning"));
+    }
     std::unique_lock lock(this->pUISystem->UIMtx);
     if (ImGui_ImplWin32_WndProcHandler(hwnd, uMsg, wParam, lParam)) {
         return false;
