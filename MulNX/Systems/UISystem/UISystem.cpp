@@ -4,6 +4,7 @@
 #include <MulNX/Base/UI/UI.hpp>
 #include <MulNX/Core/Core.hpp>
 #include <MulNX/Systems/PathManager/PathManager.hpp>
+#include <MulNX/Systems/I18nManager/I18nManager.hpp>
 #include <MulNX/Systems/MessageManager/IMessageManager.hpp>
 #include <MulNX/Systems/InputSystem/InputSystem.hpp>
 #include <MulNX/Systems/GlobalVars/GlobalVars.hpp>
@@ -32,12 +33,25 @@ void MulNX::UISystem::ProcessMsg(MulNX::Message& Msg) {
         // 这里需要进行转换，以适配ImGui的接口
         this->strImguiIniPath = MulNX::Base::CharUtility::FilePathToString(IniPath);
         io.IniFilename = this->strImguiIniPath.c_str();
-        // 加载字体
-        auto cfgPath = this->ISys().PathManager()->PathGetForShared("Config") / "ui.yaml";
-        YAML::Node root = YAML::LoadFile(cfgPath.string());
-        auto fontFilePath = root["font"]["path"].as<std::string>();
-        auto fontSize = root["font"]["size"].as<float>();
-        io.Fonts->AddFontFromFileTTF(fontFilePath.c_str(), fontSize);
+        try {
+            // 加载字体
+            auto cfgPath = this->ISys().PathManager()->PathGetForShared("Config") / "ui.yaml";
+            this->ISys().LogInfo(I18n("ui.font.cfg.load", cfgPath.string()));
+            YAML::Node root = YAML::LoadFile(cfgPath.string());
+            auto fontFilePath = root["font"]["path"].as<std::string>();
+            auto fontSize = root["font"]["size"].as<float>();
+            this->ISys().LogSucc(I18n("ui.font.cfg.load_succ", fontFilePath, fontSize));
+            this->ISys().LogInfo(I18n("ui.font.load", fontFilePath));
+            io.Fonts->AddFontFromFileTTF(fontFilePath.c_str(), fontSize);
+            this->ISys().LogSucc(I18n("ui.font.load_succ", fontFilePath));
+        }
+        catch (const std::exception& e) {
+            this->ISys().LogError(e.what());
+        }
+        catch (...) {
+            MulNX::ErrorTerminate("Unknown Error On Load Font!");
+        }
+
         break;
     }
     case "UISystem/ModulePush"_hash: {

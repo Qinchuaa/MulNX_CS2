@@ -4,6 +4,13 @@ ui:
   game_settings: 游戏设置
   game_enhance: 游戏增强
   mulnx_control: MulNX控制
+  font:
+    cfg:
+      load: 尝试解析字体配置：{}
+      load_succ: 字体配置解析成功！字体路径：{0}  字体大小：{1}
+    load: 尝试加载字体：{}
+    load_succ: 字体加载成功：{}
+    
     
 text:
   entered: 已进入
@@ -45,6 +52,7 @@ math:
     fmt: "时间：{0}  坐标（XYZ）：{1}，{2}，{3}  FOV：{4}  角度： 俯仰：{5}  偏航：{6}  滚转：{7}  景深： 近模糊：{8}  近清晰：{9}  远清晰：{10}  远模糊：{11}"
 
 sys:
+  i18n_load_succ: 语言文件加载成功：{0}
   version_is_testing: 当前版本是否为测试版：{0} 
   version_is: 当前版本号：{0} 
   build_stamp: 当前版本构建时间：{0} 
