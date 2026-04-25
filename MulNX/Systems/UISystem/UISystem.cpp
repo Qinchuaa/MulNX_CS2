@@ -23,6 +23,7 @@ void MulNX::UISystem::ProcessMsg(MulNX::Message& Msg) {
         this->UIContext.EntryDraw = std::move(*pStr);
         this->UISystemRunning = true;
         this->ISys().LogWarning("接收到启动消息，UI系统开始启动");
+        MulNX::SetUIStyle();
         break;
     }
     case "UISystem/ModulePush"_hash: {
@@ -41,7 +42,6 @@ int MulNX::UISystem::Render() {
         return 0;
     }
     this->FrameBefore();
-    MulNX::SetUIStyle();
     if (this->pInputSystem->CheckComboClick(VK_INSERT, 1)) {
         this->UIContext.Active = !this->UIContext.Active;
     }

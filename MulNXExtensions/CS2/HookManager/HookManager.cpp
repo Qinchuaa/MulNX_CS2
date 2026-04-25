@@ -62,6 +62,8 @@ void HookManager::CreateHook() {
                 // 这里是Hook Present
                 // 我们从这里，偷到了游戏的真正的交换链指针
                 this->pSwapChain = (IDXGISwapChain*)ctx->rcx;
+                this->d3dInit();
+                this->BuildNew();
                 this->pUISystem->Render();
             }
             return true;
@@ -83,17 +85,12 @@ void HookManager::CreateHook() {
     pTempSwapChain->Release();
 
     this->pUISystem->SetFrameBefore([this]()->void {
-
-        this->d3dInit();
-        this->BuildNew();
         ImGui_ImplDX11_NewFrame();
         ImGui_ImplWin32_NewFrame();
         ImGui::NewFrame();
-
         return;
         });
     this->pUISystem->SetFrameBehind([this]()->void {
-
         ImGui::EndFrame();
         ImGui::Render();
         this->pd3dContext->OMSetRenderTargets(1, &this->view, nullptr);
@@ -139,17 +136,16 @@ void HookManager::d3dInit() {
     this->ImguiIniPathString = MulNX::Base::CharUtility::FilePathToString(IniPath);
     io.IniFilename = this->ImguiIniPathString.c_str();
 
-    // 初始化ImGui平台和渲染器绑定
-    ImGui_ImplWin32_Init(this->CS2hWnd);
-    ImGui_ImplDX11_Init(this->pd3dDevice, this->pd3dContext);
-
     // 加载中文字体
     io.Fonts->AddFontFromFileTTF(
         "C:/Windows/Fonts/msyh.ttc",				// 微软雅黑字体路径
         16.0f,										// 字体大小
-        nullptr,									// 使用默认配置
-        io.Fonts->GetGlyphRangesChineseFull()		// 加载所有中文字符
+        nullptr									// 使用默认配置
     );
+
+    // 初始化ImGui平台和渲染器绑定
+    ImGui_ImplWin32_Init(this->CS2hWnd);
+    ImGui_ImplDX11_Init(this->pd3dDevice, this->pd3dContext);
 }
 
 void HookManager::ReleaseOld() {
