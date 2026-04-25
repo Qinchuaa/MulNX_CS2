@@ -3,6 +3,7 @@
 #include <MulNX/Base/UI/UI.hpp>
 #include <MulNX/Core/Cores.hpp>
 #include <MulNX/Systems/ISystems.hpp>
+#include <MulNX/Systems/Logger/Logger.hpp>
 
 #include <bitset>
 
@@ -60,18 +61,9 @@ bool MulNX::Debugger::UINodeFunc(MulNX::UINode* ThisNode) {
     return true;
 }
 
-bool MySaveStringToFile(const std::string& data,
-    const std::filesystem::path& filePath) {
-    // 强制按二进制打开可避免换行转换
-    std::ofstream out(filePath, std::ios::binary);
-    if (!out) {
-        return false;
-    }
-
-    out.write(data.data(), static_cast<std::streamsize>(data.size()));
-    return out.good();
-}
 bool MulNX::Debugger::Init() {
+    this->pLogger = this->Core->ModuleManager()->FindModule<MulNX::Logger>("Logger");
+
     this->SendUINode(this->GetName(), [this](MulNX::UINode* node) {return this->UINodeFunc(node);});
 
     this->SendTask("MulNXMain", [this]()->bool {
@@ -85,7 +77,7 @@ bool MulNX::Debugger::Init() {
         .SubscribeAsync("Log/Warning")
         .SubscribeAsync("Log/Error")
         .SubscribeAsync("Debugger/SetMaxInfoCount")
-        .SubscribeAsync("Debugger/SaveToFile");
+        ;
 
     this->kInfo = I18n("log.info");
     this->kSucc = I18n("log.succ");
@@ -98,10 +90,6 @@ void MulNX::Debugger::ProcessMsg(MulNX::Message& msg) {
     switch (msg.type) {
     case "Debugger/SetMaxInfoCount"_hash: {
         this->ResetMaxMsgCount(msg.p1.low<float>());
-        break;
-    }
-    case "Debugger/SaveToFile"_hash: {
-        this->SaveToFile();
         break;
     }
     case "Log/Info"_hash: {
@@ -149,34 +137,20 @@ void MulNX::Debugger::ResetMaxMsgCount(const int Max) {
 
     return;
 }
-void MulNX::Debugger::SaveToFile() {
-    std::shared_lock lock(this->smutex);
-    std::string data;
-    for (const auto& msg : this->DebugMsg) {
-        data += msg + "\n";
-    }
-
-    auto path = this->ISys().PathManager()->PathGetForShared("Log") / ("Log_" + this->Core->GetName() + ".txt");
-    if (!MySaveStringToFile(data, path)) {
-        // 处理错误
-        throw std::runtime_error("无法保存调试日志到文件: " + path.string());
-    }
-
-}
 
 void MulNX::Debugger::PushBack(MulNX::NetExt&& pack, const std::string& strLevel) {
     // 调用者已加锁，此处无锁
 
-    // 1. 取出结构化字段
+    // 取出结构化字段
     std::string moduleName = std::move(pack.str1);
     std::string rawMsg = std::move(pack.str2);
     auto eventTime = MulNX::FromUnixUs(pack.timestamp_us);
 
-    // 3. 获取整行格式模板
+    // 获取整行格式模板
     const std::string& lineFmt = I18n("log.fmt");
     // 例："[{}] [{}] [{}] {}"  占位顺序：时间、级别、模块、消息
 
-    // 4. 按换行符拆分消息体
+    // 按换行符拆分消息体
     std::istringstream iss(rawMsg);
     std::string line;
     bool first = true;
@@ -187,7 +161,7 @@ void MulNX::Debugger::PushBack(MulNX::NetExt&& pack, const std::string& strLevel
         }
         if (line.empty()) continue;  // 跳过纯空行
 
-        // 5. 用整行模板拼接出最终日志
+        // 用整行模板拼接出最终日志
         std::string formatted = std::vformat(lineFmt, std::make_format_args(
             eventTime,      // {} 对应时间
             strLevel,     // {} 对应级别
@@ -195,7 +169,8 @@ void MulNX::Debugger::PushBack(MulNX::NetExt&& pack, const std::string& strLevel
             line          // {} 对应本行消息
         ));
 
-        // 6. 存入双端队列（保持容量限制）
+        this->pLogger->logs.enqueue(formatted);
+        // 存入双端队列（保持容量限制）
         std::unique_lock lock(this->smutex);
         if (this->DebugMsg.size() == this->MaxMsgCount) {
             this->DebugMsg.pop_front();
@@ -204,7 +179,7 @@ void MulNX::Debugger::PushBack(MulNX::NetExt&& pack, const std::string& strLevel
         first = false;
     }
 
-    // 7. 自动滚动标记
+    // 自动滚动标记
     if (this->AutoScroll) {
         this->NeedAutoScroll = true;
     }

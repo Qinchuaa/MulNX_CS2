@@ -11,3 +11,4 @@
 #include "PathManager/PathManager.hpp"
 #include "TaskSystem/TaskSystem.hpp"
 #include "I18nManager/I18nManager.hpp"
+#include "Logger/Logger.hpp"

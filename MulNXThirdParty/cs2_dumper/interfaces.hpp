@@ -1,5 +1,5 @@
 // Generated using https://github.com/a2x/cs2-dumper
-// 2026-04-23 05:56:52.908453800 UTC
+// 2026-04-25 07:05:32.055366600 UTC
 
 #pragma once
 
@@ -119,7 +119,7 @@ namespace cs2_dumper {
         }
         // Module: panorama.dll
         namespace panorama_dll {
-            constexpr std::ptrdiff_t PanoramaUIEngine001 = 0x505D30;
+            constexpr std::ptrdiff_t PanoramaUIEngine001 = 0x506D30;
         }
         // Module: panorama_text_pango.dll
         namespace panorama_text_pango_dll {
@@ -177,10 +177,10 @@ namespace cs2_dumper {
         }
         // Module: soundsystem.dll
         namespace soundsystem_dll {
-            constexpr std::ptrdiff_t SoundOpSystem001 = 0x5129B0;
-            constexpr std::ptrdiff_t SoundOpSystemEdit001 = 0x512870;
+            constexpr std::ptrdiff_t SoundOpSystem001 = 0x5129C0;
+            constexpr std::ptrdiff_t SoundOpSystemEdit001 = 0x512880;
             constexpr std::ptrdiff_t SoundSystem001 = 0x512360;
-            constexpr std::ptrdiff_t VMixEditTool001 = 0x594879F;
+            constexpr std::ptrdiff_t VMixEditTool001 = 0x59487BF;
         }
         // Module: steamaudio.dll
         namespace steamaudio_dll {

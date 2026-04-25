@@ -10,11 +10,6 @@ bool MulNXController::UINodeFunc(MulNX::UINode* ThisNode) {
         this->GlobalVars->DebugMode = debugMode;
     }
     MulNX::UI::Checkbox("调试器窗口", this->IDebugger->ShowWindow);
-    
-    if (ImGui::Button("保存调试日志到文件")) {
-        MulNX::Message Msg("Debugger/SaveToFile"_hash);
-        this->ISys().PublishAsync(std::move(Msg));
-    }
     ImGui::Checkbox("当有错误信息时弹出调试器", &this->IDebugger->ShowWhenError);
     ImGui::Checkbox("自动滚动到最新消息", &this->IDebugger->AutoScroll);
     static int MaxDebugMsgs = 1000;

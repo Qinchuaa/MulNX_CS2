@@ -49,6 +49,7 @@ ModuleManager& ModuleManager::CreateSystemModules() {
         .CreateModule<MulNX::I18nManager>("I18nManager", 5)
         .CreateModule<MulNX::MessageManager>("MessageManager", 6)// 消息管理器模块
         .CreateModule<MulNX::UISystem>("UISystem", 7)// UI系统模块
+        .CreateModule<MulNX::Logger>("Logger", 8)
         .CreateModule<MulNX::Debugger>("Debugger", 10)// 调试器模块
         .CreateModule<MulNX::HandleSystem>("HandleSystem", 20)// 句柄系统模块
         .CreateModule<MulNX::InputSystem>("InputSystem", 50)// 输入系统模块
