@@ -1,6 +1,7 @@
 #include "I18nManager.hpp"
 
 #include <yaml-cpp/yaml.h>
+#include <stack>
 
 bool MulNX::I18nManager::Init() {
     auto path = this->ISys().PathGet("Language");
@@ -8,12 +9,22 @@ bool MulNX::I18nManager::Init() {
 
     this->strings.clear();
     YAML::Node root = YAML::LoadFile(filePath.string());
-    if (!root.IsMap()) return false;
-    for (auto it = root.begin(); it != root.end(); ++it) {
-        this->strings[it->first.as<std::string>()] = it->second.as<std::string>();
-    }
+    this->LoadYaml(root, {});
     
     return true;
+}
+
+void MulNX::I18nManager::LoadYaml(const YAML::Node& node, const std::string& key) {
+    if (node.IsScalar()) {
+        this->strings[key] = node.as<std::string>();
+        return;
+    }
+    for (auto it = node.begin();it != node.end();++it) {
+        auto full = key.empty()
+            ? it->first.as<std::string>()
+            : key + "." + it->first.as<std::string>();
+        this->LoadYaml(it->second, full);
+    }
 }
 
 const std::string& MulNX::I18nManager::Get(const std::string& key) {

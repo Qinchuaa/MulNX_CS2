@@ -1,1 +1,145 @@
-ui.button.save: 保存
+ui:
+  main: 主窗口
+  camera_system: 摄像机系统
+  game_settings: 游戏设置
+  game_enhance: 游戏增强
+  mulnx_control: MulNX控制
+  button:
+    save: 保存
+    change: 切换
+
+text:
+  entered: 已进入
+  unentered: 未进入
+  detail_info: 详细信息
+  opened: 打开
+  closed: 关闭
+  none: 无
+  empty: 空
+  playing: 播放中
+
+action:
+  try_load_config: 尝试加载配置文件：{0}
+
+sys:
+  version_is_testing: 当前版本是否为测试版：{0} 
+  version_is: 当前版本号：{0} 
+  build_stamp: 当前版本构建时间：{0} 
+  started: 各模块初始化完毕，系统已启动
+
+result:
+  create_succ: 创建成功：{0}
+  create_error: 创建失败：{0}
+  save_success: 保存成功
+  error_empty_name: 不能使用空名称
+  error_no_file: 不存在的文件：{0}
+  error_no_path: 不存在的文件夹：{0}
+  cfg_load_succ: 配置加载成功：{0}
+  cfg_load_error: 配置加载失败：{0}
+  resource_load_succ: 资源加载成功：{0}
+  resource_load_error: 资源加载失败：{0}
+
+log:
+  info: 提示
+  succ: 成功
+  warning: 警告
+  error: 错误
+  fmt: "[{0}][{1}][{2}]{3}" # 0~3代表：时间、级别、模块、消息
+
+camsys:
+  tab_proj: 项目
+  tab_sol: 解决方案
+  tab_elem: 元素
+
+  please_enter_proj: 当前未加载项目，请先加载项目
+  please_enter_ws: |
+    请先进入工作区
+    在上方的工作区面板中加载（或创建并加载）一个工作区
+    工作区是管理项目、解决方案和元素的基础
+  
+  elem:
+    preview_status: "预览状态：{0}   预览元素名：{1}   预览时间偏移：{2}"
+    settings: 元素设置
+    preview_draw: 预览插值摄像机绘制
+    preview_override: 预览插值摄像机覆盖
+    create: 元素创建
+    new_name: 新元素名：
+    new_free_camera_path: 新的自由摄像机轨道
+    list: 元素列表
+    debug_window_status: 元素调试窗口状态：{0}
+    name_label: "|元素名称："
+    context_menu: 元素右键菜单
+    copy_name: 复制名称
+    draw: 绘制
+    delete: 删除元素
+    type_duration: "   元素类型：{0}   持续时长：{1}"
+    debug_window: 元素调试
+    no_selected: 当前未选择任何元素
+
+  sol:
+    play_status: 播放状态：{0}  活跃解决方案名：{1}
+    settings: 解决方案设置
+    shortcut_enable: 解决方案快捷键检测系统
+    playing_draw: 解决方案插值摄像机绘制
+    playing_override: 解决方案插值覆盖
+    create: 解决方案创建
+    new_name: 新解决方案名：
+    create_btn: 创建解决方案
+    list: 解决方案列表
+    debug_window_status: 解决方案调试窗口状态：{0}
+    name_label: "|解决方案名称："
+    context_menu: 解决方案右键菜单
+    copy_name: 复制名称
+    save_to_disk: 保存到磁盘
+    print_debug: 打印信息调试窗口
+    delete: 删除
+    element_count_duration: " 元素数量：{0},   总时长：{1}"
+    playing_draw_label: 解决方案插值摄像机
+    keypack_unusable: 当前按键绑定不可用，无法使用这个绑定播放解决方案！
+    debug_window: 解决方案调试
+    current_info: "当前操作解决方案名称：{0}   元素数量：{1}   总时长：{2}   播放模式：{3}"
+    switch_to_activation: 切换到激活模式
+    switch_to_orchestration: 切换到编排模式
+    enable_current: 使能当前解决方案
+    gen_timeline_offset: 按激活模式生成编排模式偏移
+    modify_keybind: 修改按键绑定
+    new_element_name: 新元素名称
+    add_element: 添加元素
+    clear_all_elements: 清空所有元素
+    clear_all_elements_success: 成功清空解决方案所有元素
+    adjust_element_index: 要调整的本解决方案的元素
+    element_info: "元素信息： 编号：{0}  元素名称：{1}  元素持续时间：{2}  元素偏移时间：{3}"
+    offset_time: 偏移时间
+    confirm_modify: 确认修改
+    remove_element: 从解决方案移除该元素
+    invalid_index: "索引无效！请输入 0 到 {0} 之间的值"
+    no_selected: 当前未选择任何解决方案
+  
+  proj:
+    settings: 项目设置
+    shortcut_enable: 项目快捷键检测系统
+    create: 项目创建
+    new_name: 新项目名：
+    create_btn: 创建
+    list: 项目列表
+    debug_window_status: 项目调试窗口状态：{0}
+    name_label: "|项目名称："
+    debug_window: 项目调试
+    current: 当前项目：{0}
+    current_label: 当前操作项目：
+    switch_to_current: 切换到当前项目
+    unload_current: 卸载当前项目
+    modify_keybind: 修改按键绑定
+    enter_new_round: 进入新回合
+    delete_on_new_round: 删除##OnNewRound
+    round_end: 回合结束
+    no_selected: 当前未选择任何项目
+    close_debug_page: 关闭项目调试页面
+
+  ws:
+    enter_status: 工作区状态:{0}
+    current_workspace: 当前工作区:{0}
+    current_null: 当前未打开任何工作区
+    open_default: 打开默认工作区
+    save: 保存工作区
+    target_name: 工作区名：

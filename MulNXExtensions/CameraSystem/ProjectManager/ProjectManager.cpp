@@ -248,7 +248,7 @@ void ProjectManager::Project_ShowInLine(std::shared_ptr<Project> Project) {
         this->ISys().LogError("项目指针为空，无法展示信息！");
         return;
     }
-    ImGui::Text("|项目名称：");
+    ImGui::Text(I18n("project.name_label").c_str());
     ImGui::SameLine();
     if (ImGui::Button(Project->Name.c_str())) {
         this->ControllingProject = Project;
@@ -259,67 +259,58 @@ void ProjectManager::Project_ShowInLine(std::shared_ptr<Project> Project) {
 }
 
 void ProjectManager::Project_DebugWindow() {
-    auto w = MulNX::UI::RAIIWindow("项目调试", this->ShowWindow);
+    auto w = MulNX::UI::RAIIWindow(I18n("project.debug_window").c_str(), this->ShowWindow);
     if (!w)return;
     // 检查当前操作项目
     if (this->ControllingProject) {
-        ImGui::Text("当前操作项目：");
+        ImGui::Text(I18n("project.current_label").c_str());
         ImGui::SameLine();
         ImGui::Text(this->ControllingProject->Name.c_str());
-        if (ImGui::Button("切换到当前项目")) {
+        if (ImGui::Button(I18n("project.switch_to_current").c_str())) {
             this->Project_Apply(this->ControllingProject);
         }
-        if (ImGui::Button("卸载当前项目")) {
+        if (ImGui::Button(I18n("project.unload_current").c_str())) {
             this->Project_Delete(this->ControllingProject->Name);
             this->ShowWindow.store(false, std::memory_order_release);
             return;
         }
-        if (ImGui::Button("修改按键绑定")) {
-            this->Buffer_KCPack = this->ControllingProject->KCPack;//缓存
-            this->OpenProjectKCPackDebugWindow = true;//打开窗口
+        if (ImGui::Button(I18n("project.modify_keybind").c_str())) {
+            this->Buffer_KCPack = this->ControllingProject->KCPack;
+            this->OpenProjectKCPackDebugWindow = true;
         }
         ImGui::Separator();
         ImGui::Separator();
-        if (ImGui::TreeNode("进入新回合")) {
+        if (ImGui::TreeNode(I18n("project.enter_new_round").c_str())) {
             if (!this->ControllingProject->OnNewRound.empty()) {
                 for (const std::string SolutionName : this->ControllingProject->OnNewRound) {
                     ImGui::Text(SolutionName.c_str());
                     ImGui::SameLine();
-                    if (ImGui::Button((std::string("删除##OnNewRound") + SolutionName).c_str())) {
+                    if (ImGui::Button((I18n("project.delete_on_new_round") + SolutionName).c_str())) {
                         auto it = std::find(this->ControllingProject->OnNewRound.begin(), this->ControllingProject->OnNewRound.end(), SolutionName);
                         if (it != this->ControllingProject->OnNewRound.end()) {
                             this->ControllingProject->OnNewRound.erase(it);
                         }
                     }
                 }
+            } else {
+                ImGui::Text(I18n("text.empty").c_str());
             }
-            else {
-                ImGui::Text("空");
-            }
-
-
-
             ImGui::TreePop();
         }
-        if (ImGui::TreeNode("回合结束")) {
+        if (ImGui::TreeNode(I18n("project.round_end").c_str())) {
             if (!this->ControllingProject->OnRoundEnd.empty()) {
                 for (const std::string SolutionName : this->ControllingProject->OnRoundEnd) {
                     ImGui::Text(SolutionName.c_str());
                 }
+            } else {
+                ImGui::Text(I18n("text.empty").c_str());
             }
-            else {
-                ImGui::Text("空");
-            }
-
-
             ImGui::TreePop();
         }
-
+    } else {
+        ImGui::Text(I18n("project.no_selected").c_str());
     }
-    else {
-        ImGui::Text("当前未选择任何项目");
-    }
-    if (ImGui::Button("关闭项目调试页面")) {
+    if (ImGui::Button(I18n("project.close_debug_page").c_str())) {
         this->ShowWindow.store(false, std::memory_order_release);
     }
 }

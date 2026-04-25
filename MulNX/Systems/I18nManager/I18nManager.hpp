@@ -9,6 +9,7 @@ namespace YAML {
 namespace MulNX {
     class I18nManager final :public MulNX::ModuleBase {
     private:
+        void LoadYaml(const YAML::Node& node, const std::string& key);
         std::unordered_map<std::string, std::string>strings{};
     public:
         bool Init()override;

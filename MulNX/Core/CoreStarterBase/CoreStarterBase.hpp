@@ -11,7 +11,7 @@ namespace MulNX {
             // 初始化Core的所有系统组件
             bool SystemInit(MulNX::Core::Core* pCore);
             // 注册主绘制函数
-            void RegisterMainDrawWith(std::function<void(MulNX::UINode*)>&& MainDrawFunc);
+            void CreateMainDraw();
             // 核心完全初始化后回调
             std::function<void()>InitEndCall = nullptr;
             // 激活系统，以开始工作

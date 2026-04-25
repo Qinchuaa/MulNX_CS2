@@ -26,16 +26,16 @@ bool MulNX::Debugger::UINodeFunc(MulNX::UINode* ThisNode) {
             const auto& msg = this->DebugMsg[i];
 
             // 根据消息类型着色
-            if (msg.find(this->Info) == 0) {
+            if (msg.find(this->kInfo) != std::string::npos) {
                 ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(50, 50, 255, 255));
             }
-            else if (msg.find(this->Succ) == 0) {
+            else if (msg.find(this->kSucc) != std::string::npos) {
                 ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(0, 100, 0, 255));
             }
-            else if (msg.find(this->Warning) == 0) {
+            else if (msg.find(this->kWarning) != std::string::npos) {
                 ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(255, 100, 0, 255));
             }
-            else if (msg.find(this->Error) == 0) {
+            else if (msg.find(this->kError) != std::string::npos) {
                 ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(255, 50, 50, 255));
             }
             else {
@@ -78,7 +78,7 @@ bool MulNX::Debugger::Init() {
         this->Main();
         return true;
         });
-    
+
     this->ISys()
         .SubscribeAsync("Log/Info")
         .SubscribeAsync("Log/Succ")
@@ -86,7 +86,12 @@ bool MulNX::Debugger::Init() {
         .SubscribeAsync("Log/Error")
         .SubscribeAsync("Debugger/SetMaxInfoCount")
         .SubscribeAsync("Debugger/SaveToFile");
-    
+
+    this->kInfo = I18n("log.info");
+    this->kSucc = I18n("log.succ");
+    this->kWarning = I18n("log.warning");
+    this->kError = I18n("log.error");
+
     return true;
 }
 void MulNX::Debugger::ProcessMsg(MulNX::Message& msg) {
@@ -100,23 +105,27 @@ void MulNX::Debugger::ProcessMsg(MulNX::Message& msg) {
         break;
     }
     case "Log/Info"_hash: {
-        auto log = std::move(msg.asp.get<MulNX::NetExt>()->str1);
-        this->AddInfo(std::move(log));
+        MulNX::NetExt ext = std::move(*msg.asp.get<MulNX::NetExt>());
+        this->PushBack(std::move(ext), this->kInfo);
         break;
     }
     case "Log/Succ"_hash: {
-        auto log = std::move(msg.asp.get<MulNX::NetExt>()->str1);
-        this->AddSucc(std::move(log));
+        MulNX::NetExt ext = std::move(*msg.asp.get<MulNX::NetExt>());
+        this->PushBack(std::move(ext), this->kSucc);
         break;
     }
     case "Log/Warning"_hash: {
-        auto log = std::move(msg.asp.get<MulNX::NetExt>()->str1);
-        this->AddWarning(std::move(log));
+        MulNX::NetExt ext = std::move(*msg.asp.get<MulNX::NetExt>());
+        this->PushBack(std::move(ext), this->kWarning);
         break;
     }
     case "Log/Error"_hash: {
-        auto log = std::move(msg.asp.get<MulNX::NetExt>()->str1);
-        this->AddError(std::move(log));
+        MulNX::NetExt ext = std::move(*msg.asp.get<MulNX::NetExt>());
+        if (this->ShowWhenError) {
+            this->ShowWindow = true;
+            this->IfShowStream = true;
+        }
+        this->PushBack(std::move(ext), this->kError);
         break;
     }
     }
@@ -128,7 +137,7 @@ void MulNX::Debugger::Main() {
 void MulNX::Debugger::ResetMaxMsgCount(const int Max) {
     std::unique_lock lock(this->smutex);
     if (Max < 1) {
-        this->AddError("最大信息条数不能小于一1!");
+        //this->AddError("最大信息条数不能小于一1!");
         return;
     }
     if (DebugMsg.size() > Max) {
@@ -136,7 +145,7 @@ void MulNX::Debugger::ResetMaxMsgCount(const int Max) {
     }
     this->MaxMsgCount = Max;
     lock.unlock();
-    this->AddInfo("已重置最大信息条数为 " + std::to_string(Max) + " 条");
+    //this->AddInfo("已重置最大信息条数为 " + std::to_string(Max) + " 条");
 
     return;
 }
@@ -146,7 +155,7 @@ void MulNX::Debugger::SaveToFile() {
     for (const auto& msg : this->DebugMsg) {
         data += msg + "\n";
     }
-    
+
     auto path = this->ISys().PathManager()->PathGetForShared("Log") / ("Log_" + this->Core->GetName() + ".txt");
     if (!MySaveStringToFile(data, path)) {
         // 处理错误
@@ -155,79 +164,49 @@ void MulNX::Debugger::SaveToFile() {
 
 }
 
-void MulNX::Debugger::PushBack(const std::string& NewMsg, const std::string& prefix) {
-    // 这里不需要锁，因为调用此函数的上层函数已经加锁
-    // 检查字符串是否包含换行符
-    if (NewMsg.find('\n') == std::string::npos && NewMsg.find('\r') == std::string::npos) {
-        // 没有换行符，直接添加（注意：这里需要加上前缀）
+void MulNX::Debugger::PushBack(MulNX::NetExt&& pack, const std::string& strLevel) {
+    // 调用者已加锁，此处无锁
+
+    // 1. 取出结构化字段
+    std::string moduleName = std::move(pack.str1);
+    std::string rawMsg = std::move(pack.str2);
+    auto eventTime = MulNX::FromUnixUs(pack.timestamp_us);
+
+    // 3. 获取整行格式模板
+    const std::string& lineFmt = I18n("log.fmt");
+    // 例："[{}] [{}] [{}] {}"  占位顺序：时间、级别、模块、消息
+
+    // 4. 按换行符拆分消息体
+    std::istringstream iss(rawMsg);
+    std::string line;
+    bool first = true;
+    while (std::getline(iss, line)) {
+        // 清理行尾回车
+        if (!line.empty() && line.back() == '\r') {
+            line.pop_back();
+        }
+        if (line.empty()) continue;  // 跳过纯空行
+
+        // 5. 用整行模板拼接出最终日志
+        std::string formatted = std::vformat(lineFmt, std::make_format_args(
+            eventTime,      // {} 对应时间
+            strLevel,     // {} 对应级别
+            moduleName,   // {} 对应模块
+            line          // {} 对应本行消息
+        ));
+
+        // 6. 存入双端队列（保持容量限制）
+        std::unique_lock lock(this->smutex);
         if (this->DebugMsg.size() == this->MaxMsgCount) {
             this->DebugMsg.pop_front();
         }
-        this->DebugMsg.push_back(prefix + NewMsg);
-    }
-    else {
-        // 有换行符，分割字符串并为每一行添加前缀
-        std::istringstream iss(NewMsg);
-        std::string line;
-        bool firstLine = true;
-        int lineCount = 0;
-
-        while (std::getline(iss, line)) {
-            // 清理回车符
-            if (!line.empty() && line.back() == '\r') {
-                line.pop_back();
-            }
-
-            // 跳过空行
-            if (line.empty()) continue;
-
-            std::string formattedLine;
-            if (firstLine) {
-                // 第一行直接添加前缀
-                formattedLine = prefix + line;
-                firstLine = false;
-            }
-            else {
-                // 后续行添加前缀//和缩进
-                formattedLine = prefix + line;
-            }
-
-            // 添加到消息队列
-            if (this->DebugMsg.size() == this->MaxMsgCount) {
-                this->DebugMsg.pop_front();
-            }
-            this->DebugMsg.push_back(formattedLine);
-            lineCount++;
-        }
+        this->DebugMsg.push_back(std::move(formatted));
+        first = false;
     }
 
+    // 7. 自动滚动标记
     if (this->AutoScroll) {
         this->NeedAutoScroll = true;
-    }
-    return;
-}
-
-void MulNX::Debugger::AddInfo(const std::string& NewMsg) {
-    std::unique_lock lock(this->smutex);
-    this->PushBack(NewMsg, this->Info);
-}
-
-void MulNX::Debugger::AddSucc(const std::string& NewMsg) {
-    std::unique_lock lock(this->smutex);
-    this->PushBack(NewMsg, this->Succ);
-}
-
-void MulNX::Debugger::AddWarning(const std::string& NewMsg) {
-    std::unique_lock lock(this->smutex);
-    this->PushBack(NewMsg, this->Warning);
-}
-
-void MulNX::Debugger::AddError(const std::string& NewMsg) {
-    std::unique_lock lock(this->smutex);
-    this->PushBack(NewMsg, this->Error);
-    if (this->ShowWhenError) {
-        this->ShowWindow = true;
-        this->IfShowStream = true;
     }
 }
 

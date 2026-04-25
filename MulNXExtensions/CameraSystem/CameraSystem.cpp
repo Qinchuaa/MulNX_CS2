@@ -15,24 +15,21 @@ bool CameraSystem::Menu(MulNX::UINode* node) {
     if (!this->WManager->InWorkspace) {
         // 如果不在工作区，显示提示信息
         auto c = MulNX::UI::RAIIChild("提示", ImVec2(0, 0), true);
-        ImGui::Text("请先进入工作区");
-        ImGui::Text("在上方的工作区面板中加载（或创建并加载）一个工作区");
-        ImGui::Text("工作区是管理项目、解决方案和元素的基础");
+        ImGui::Text(I18n("camsys.please_enter_ws").c_str());
         return true;
     }
 
     // 进入工作区，显示工作区内容
     static int SelectedTab = 0;
-    const char* tabNames[] = { "项目", "解决方案", "元素" };
-
     // 左侧导航栏
     {
         auto c = MulNX::UI::RAIIChild("导航", ImVec2(150, 0), true);
-        for (int Index = 0; Index < IM_ARRAYSIZE(tabNames); ++Index) {
-            if (ImGui::Selectable(tabNames[Index], SelectedTab == Index)) {
-                SelectedTab = Index;
-            }
-        }
+        if (ImGui::Selectable(I18n("camsys.tab_proj").c_str(), SelectedTab == 0))
+            SelectedTab = 0;
+        if (ImGui::Selectable(I18n("camsys.tab_sol").c_str(), SelectedTab == 1))
+            SelectedTab = 1;
+        if (ImGui::Selectable(I18n("camsys.tab_elem").c_str(), SelectedTab == 2))
+            SelectedTab = 2;
     }
     ImGui::SameLine();
     {
@@ -41,10 +38,10 @@ bool CameraSystem::Menu(MulNX::UINode* node) {
         bool InProject = false;
         if (this->PManager->ActiveProject) {
             InProject = true;
-            ImGui::Text(("当前项目：" + this->PManager->ActiveProject->Name).c_str());
+            ImGui::Text(I18n("camsys.proj.current", this->PManager->ActiveProject->Name).c_str());
         }
         else {
-            ImGui::Text("当前未进入任何项目");
+            ImGui::Text(I18n("camsys.please_enter_proj").c_str());
         }
 
         ImGui::Separator();
@@ -54,14 +51,14 @@ bool CameraSystem::Menu(MulNX::UINode* node) {
             break;
         case 1:// 解决方案菜单
             if (!InProject) {
-                ImGui::Text("请先进入项目");
+                ImGui::Text(I18n("camsys.please_enter_proj").c_str());
                 break;
             }
             node->CallUINode("MenuSolution");
             break;
         case 2:// 元素菜单
             if (!InProject) {
-                ImGui::Text("请先进入项目");
+                ImGui::Text(I18n("camsys.please_enter_proj").c_str());
                 break;
             }
             node->CallUINode("MenuElement");

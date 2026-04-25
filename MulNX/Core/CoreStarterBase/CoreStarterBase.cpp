@@ -21,15 +21,19 @@ bool MulNX::Core::CoreStarterBase::SystemInit(MulNX::Core::Core* pCore) {
     this->ActiveSystem();
     // 设置系统标志位
     this->Core->ModuleManager()->FindModule<MulNX::GlobalVars>("GlobalVars")->SystemReady.store(true, std::memory_order_release);
+    // 输出启动信息
+    this->ISys().LogSucc(I18n("sys.started"));
+    this->ISys().LogWarning(I18n("sys.version_is_testing", MulNXInfo::IsDebugVersion));
+    this->ISys().LogWarning(I18n("sys.version_is", MulNXInfo::Version));
+    this->ISys().LogWarning(I18n("sys.build_stamp", MulNXInfo::TimeStamp));
     // 执行启动器回调
     this->InitEndCall();
+    // 通过MainDraw字符串发送UI启动命令
+    this->CreateMainDraw();
     return true;
 }
 
-void MulNX::Core::CoreStarterBase::RegisterMainDrawWith(std::function<void(MulNX::UINode*)>&& MainDrawFunc) {
-    // 注册主窗口UI上下文 
-    this->SendUINode("MainDraw", std::move(MainDrawFunc));
-    this->ISys().LogInfo("发送了主窗口注册指令");
+void MulNX::Core::CoreStarterBase::CreateMainDraw() {
     // UI系统主界面初始化
     auto [msg2, rp] = MulNX::Message::Create<std::string>("UISystem/Start"_hash, "MainDraw");
     this->ISys().PublishAsync(std::move(msg2));

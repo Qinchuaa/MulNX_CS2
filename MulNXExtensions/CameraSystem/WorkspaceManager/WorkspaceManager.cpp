@@ -12,11 +12,12 @@ bool WorkspaceManager::MenuWorkspace(MulNX::UINode* node) {
     // 顶部：工作区信息（始终显示）
     auto c = MulNX::UI::RAIIChild("工作区面板", ImVec2(0, 150), true);
     // 工作区状态
-    ImGui::Text(std::format("工作区状态: {}", this->InWorkspace ? "已进入" : "未进入").c_str());
+    ImGui::Text(I18n("camsys.ws.enter_status",
+        this->InWorkspace ? I18n("text.entered") : I18n("text.unentered")).c_str());
     // 未进入工作区允许打开默认工作区
     if (!this->InWorkspace) {
         ImGui::SameLine();
-        if (ImGui::Button("打开默认工作区")) {
+        if (ImGui::Button(I18n("camsys.ws.open_default").c_str())) {
             auto [msg, rp] = MulNX::Message::Create<MulNX::NetExt>("CamereSystem/Workspace/Set"_hash);
             rp->str1 = "DefaultWorkspace";
             this->ISys().PublishAsync(std::move(msg));
@@ -24,24 +25,24 @@ bool WorkspaceManager::MenuWorkspace(MulNX::UINode* node) {
     }
     // 打开工作区后允许保存工作区
     if (this->InWorkspace) {
-        ImGui::Text(std::format("当前工作区: {}", this->CurrentWorkspace->Name).c_str());
+        ImGui::Text(I18n("camsys.ws.current_workspace", this->CurrentWorkspace->Name).c_str());
         ImGui::SameLine();
-        if (ImGui::Button("保存工作区")) {
+        if (ImGui::Button(I18n("camsys.ws.save").c_str())) {
             this->ISys().PublishAsync("CameraSystem/Workspace/Save"_hash);
         }
     }
     // 详情信息
     ImGui::Separator();
     auto c2 = MulNX::UI::RAIIChild("工作区详情菜单");
-    if (ImGui::CollapsingHeader("详情信息")) {
+    if (ImGui::CollapsingHeader(I18n("text.detail_info").c_str())) {
         static std::string TargetWorkspaceName{};
-        ImGui::Text("工作区名：");
+        ImGui::Text(I18n("camsys.ws.target_name").c_str());
         ImGui::SameLine();
         ImGui::InputText("##TargetWorkspaceName", &TargetWorkspaceName);
         ImGui::SameLine();
-        if (ImGui::Button("切换")) {
+        if (ImGui::Button(I18n("ui.button.change").c_str())) {
             if (TargetWorkspaceName.empty()) {
-                this->ISys().LogError("请输入工作区名！");
+                this->ISys().LogError(I18n("result.error_empty_name"));
                 return true;
             }
             auto [msg, rp] = MulNX::Message::Create<MulNX::NetExt>("CamereSystem/Workspace/Set"_hash);
@@ -49,7 +50,7 @@ bool WorkspaceManager::MenuWorkspace(MulNX::UINode* node) {
             this->ISys().PublishAsync(std::move(msg));
         }
         if (!this->CurrentWorkspace) {// 无工作区
-            ImGui::Text("当前未打开任何工作区");
+            ImGui::Text(I18n("camsys.ws.current_null").c_str());
             return true;
         }
     }
@@ -104,7 +105,7 @@ bool WorkspaceManager::Workspace_Save() {
     if (!this->PManager->Project_Save()) {
         return false;
     }
-    this->ISys().LogSucc("工作区保存成功");
+    this->ISys().LogSucc(I18n("result.save_success"));
     return true;
 }
 bool WorkspaceManager::Workspace_Set(const std::string& Name) {
@@ -167,18 +168,18 @@ bool WorkspaceManager::Workspace_ConfigLoad(const std::filesystem::path& Workspa
     }
     // 检查文件路径和名称存在性
     if (WorkspacePath.empty()) {
-        this->ISys().LogError("文件夹路径为空，无法从文件加载工作区配置！");
+        this->ISys().LogError(I18n("result.error_no_path", WorkspacePath.string()));
         return false;
     }
     // 拼接完整路径
     std::filesystem::path FullPath = WorkspacePath / ("WorkspaceConfig.yaml");
     // 检查文件本身存在性
     if (!std::filesystem::exists(FullPath)) {
-        this->ISys().LogWarning("文件不存在！文件路径：" + FullPath.string());
+        this->ISys().LogWarning(I18n("result.error_no_file", FullPath.string()));
         return false;
     }
     // 输出调试信息
-    this->ISys().LogInfo("尝试从文件加载工作区配置，文件路径：" + FullPath.string());
+    this->ISys().LogInfo(I18n("action.try_load_config", FullPath.string()));
 
     try {
         YAML::Node root = YAML::LoadFile(FullPath.string());
@@ -198,11 +199,11 @@ bool WorkspaceManager::Workspace_ConfigLoad(const std::filesystem::path& Workspa
         auto projects = config["projects"];
         Config.ProjectCfg.ProjectShortcutEnable = projects["ProjectShortcutEnable"].as<bool>();
 
-        this->ISys().LogSucc("成功从文件加载工作区配置！ 文件路径：" + FullPath.string());
+        this->ISys().LogSucc(I18n("result.cfg_load_succ", FullPath.string()));
         return true;
     }
     catch (const YAML::Exception& e) {
-        this->ISys().LogError("在加载工作区时发生异常：" + std::string(e.what()));
+        this->ISys().LogError(I18n("result.cfg_load_error", e.what()));
         return false;
     }
 }

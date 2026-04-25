@@ -1,6 +1,5 @@
 #include "DllMain.hpp"
 
-#include <MulNX/MulNX.hpp>
 #include <MulNX/Base/UI/UI.hpp>
 #include <MulNXExtensions/CameraSystem/CamSysExt.hpp>
 #include <MulNXExtensions/MiniMap/MiniMap.hpp>
@@ -14,22 +13,27 @@
 // 这是MulNX_CS2项目的入口文件，也是MulNX项目的示例模块
 // 本文件展示了如何使用MulNX核心系统创建一个功能完整的注入式DLL工具。
 
-static void MainDraw(MulNX::UINode* node) {
-    ImGui::Begin("主窗口");
-    if (ImGui::BeginTabBar("主标签页集")) {
-        if (ImGui::BeginTabItem("摄像机系统")) {
+bool MainDraw::Init() {
+    this->SendUINode("MainDraw", [this](MulNX::UINode* node) {this->Window(node);});
+    return true;
+}
+
+void MainDraw::Window(MulNX::UINode* node) {
+    ImGui::Begin(I18n("ui.main").c_str());
+    if (ImGui::BeginTabBar("TabBar")) {
+        if (ImGui::BeginTabItem(I18n("ui.camera_system").c_str())) {
             node->CallUINode("CameraSystem");
             ImGui::EndTabItem();
         }
-        if (ImGui::BeginTabItem("游戏设置")) {
+        if (ImGui::BeginTabItem(I18n("ui.game_settings").c_str())) {
             node->CallUINode("GameSettingsManager");
             ImGui::EndTabItem();
         }
-        if (ImGui::BeginTabItem("游戏增强")) {
+        if (ImGui::BeginTabItem(I18n("ui.game_enhance").c_str())) {
             node->CallUINode("ConsoleManager");
             ImGui::EndTabItem();
         }
-        if (ImGui::BeginTabItem("MulNX控制")) {
+        if (ImGui::BeginTabItem(I18n("ui.mulnx_control").c_str())) {
             node->CallUINode("VirtualUser");
             node->CallUINode("MulNXController");
             ImGui::EndTabItem();
@@ -78,24 +82,17 @@ DWORD MulNX_CS2_Start(void*) {
         // 创建核心
         auto* core = MulNX::Core::Core::Create("CS2OBTool");
         // 创建核心启动器
-        auto starter = core->CreateCoreStarter<HookManager>();
+        auto* starter = core->CreateCoreStarter<HookManager>();
         // 手动创建的模块需要手动设置名称
         starter->SetName("HookManager");
         // 设置初始化完成回调
         starter->InitEndCall = [starter]() {
-            // 初始化额外任务（对系统无影响）
-            starter->ISys().LogSucc("注入成功！");
-            starter->ISys().LogInfo("各模块初始化完成！");
-            starter->ISys().LogWarning("您正在使用测试版本！！");
 #ifdef _DEBUG
             starter->AL3D->ExecuteCommand("playdemo 111");
             std::thread([]() {
                 MessageBoxW(NULL, L"MulNX 注入成功！", L"MulNX", MB_OK | MB_ICONINFORMATION);
                 }).detach();
 #endif
-            // 注册主窗口UI上下文
-            starter->RegisterMainDrawWith(MainDraw);
-            // UI系统的启动由HookManager在Hook完成后自主启动
             };
 
         // 注册所有模块
@@ -127,6 +124,7 @@ DWORD MulNX_CS2_Start(void*) {
             .CreateModule<GameSettingsManager>("GameSettingsManager", 408)
             .CreateModule<ConsoleManager>("ConsoleManager", 409)
             .CreateModule<MulNXController>("MulNXController", 410)
+            .CreateModule<MainDraw>("MainDraw", 1000)
             ;
 
         // 启动核心

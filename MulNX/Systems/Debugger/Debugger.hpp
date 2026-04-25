@@ -1,6 +1,7 @@
 #pragma once
 
 #include <MulNX/Core/ModuleBase/ModuleBase.hpp>
+#include <MulNX/Systems/MessageManager/Message.hpp>
 
 #include <algorithm>
 #include <deque>
@@ -19,10 +20,10 @@ namespace MulNX {
 		int MaxMsgCount = 1000;
 
 
-		const std::string Info = "[提示]";
-		const std::string Succ = "[成功]";
-		const std::string Warning = "[警告]";
-		const std::string Error = "[错误]";
+        std::string kInfo{};
+        std::string kSucc{};
+        std::string kWarning{};
+        std::string kError{};
 	public:
         bool ShowWhenError = true;
         bool AutoScroll = true;
@@ -35,16 +36,12 @@ namespace MulNX {
 		void ProcessMsg(MulNX::Message& Msg)override;
 		bool UINodeFunc(MulNX::UINode* ThisNode);		
 	private:
-        void AddInfo(const std::string& NewMsg);
-        void AddSucc(const std::string& NewMsg);
-        void AddWarning(const std::string& NewMsg);
-        void AddError(const std::string& NewMsg);
         void ResetMaxMsgCount(const int Max);
         void SaveToFile();
     public:
 		//其它函数
 
-		void PushBack(const std::string& NewMsg, const std::string& prefix);
+		void PushBack(MulNX::NetExt&& pack,const std::string& strLevel);
 
 		void ShowStream();
 		void HideStream();

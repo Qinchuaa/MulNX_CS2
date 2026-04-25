@@ -7,31 +7,31 @@
 
 bool ElementManager::MenuElement(MulNX::UINode* node) {
     // 展示预览功能相关状态
-    ImGui::TextUnformatted(std::format(
-        "预览状态： {}   预览元素名：{}   预览时间偏移：{} ",
-        this->OnPreview ? "开启" : "关闭",
-        this->Preview_CurrentElement ? this->Preview_CurrentElement->GetName() : "无",
+    ImGui::TextUnformatted(I18n(
+        "camsys.elem.preview_status",
+        this->OnPreview ? I18n("text.opened") : I18n("text.closed"),
+        this->Preview_CurrentElement ? this->Preview_CurrentElement->GetName() : I18n("text.none"),
         this->Preview_TimeSchema)
         .c_str());
 
     ImGui::Separator();
 
     // 元素总设置
-    if (ImGui::CollapsingHeader("元素设置")) {
-        ImGui::Checkbox("预览插值摄像机绘制", &this->Config.PreviewDraw);
-        ImGui::Checkbox("预览插值摄像机覆盖", &this->Config.PreviewOverride);
+    if (ImGui::CollapsingHeader(I18n("camsys.elem.settings").c_str())) {
+        ImGui::Checkbox(I18n("camsys.elem.preview_draw").c_str(), &this->Config.PreviewDraw);
+        ImGui::Checkbox(I18n("camsys.elem.preview_override").c_str(), &this->Config.PreviewOverride);
     }
 
     // 创建元素
-    if (ImGui::CollapsingHeader("元素创建")) {
-        ImGui::Text("新元素名：");
+    if (ImGui::CollapsingHeader(I18n("camsys.elem.create").c_str())) {
+        ImGui::Text(I18n("camsys.elem.new_name").c_str());
         ImGui::SameLine();
         static std::string newElementName = "";
         ImGui::InputText("##新元素名", &newElementName);
         // 创建自由摄像机轨道
-        if (ImGui::Button("新的自由摄像机轨道")) {
+        if (ImGui::Button(I18n("camsys.elem.new_free_camera_path").c_str())) {
             if (newElementName.empty()) {
-                this->ISys().LogError("请输入元素名！");
+                this->ISys().LogError(I18n("result.error_empty_name").c_str());
             }
             else {
                 auto [msg, rp] = MulNX::Message::Create<MulNX::NetExt>("Element/Create"_hash);
@@ -42,10 +42,7 @@ bool ElementManager::MenuElement(MulNX::UINode* node) {
         }
     }
     // 展示修改元素
-    if (ImGui::CollapsingHeader("元素列表")) {
-        // 输出是否打开了元素调试窗口
-        ImGui::Text(std::format("元素调试窗口状态：{}", this->ShowWindow.load(std::memory_order_acquire) ? "打开" : "关闭").c_str());
-        // 使用迭代器遍历所有元素
+    if (ImGui::CollapsingHeader(I18n("camsys.elem.list").c_str())) {
         for (const auto& [name, element] : this->elements) {
             this->Element_ShowInLine(element);
         }
@@ -55,7 +52,7 @@ bool ElementManager::MenuElement(MulNX::UINode* node) {
 }
 
 void ElementManager::Element_ShowInLine(const std::shared_ptr<ElementBase> element) {
-    ImGui::Text("|元素名称：");
+    ImGui::Text(I18n("camsys.elem.name_label").c_str());
     ImGui::SameLine();
 
     if (ImGui::Selectable(element->Name.data(), false, ImGuiSelectableFlags_AllowDoubleClick)) {
@@ -65,14 +62,14 @@ void ElementManager::Element_ShowInLine(const std::shared_ptr<ElementBase> eleme
         }
     }
 
-    if (ImGui::BeginPopupContextItem(("右键菜单" + element->Name).c_str())) {
-        if (ImGui::MenuItem("复制名称")) {
+    if (ImGui::BeginPopupContextItem((I18n("camsys.elem.context_menu") + element->Name).c_str())) {
+        if (ImGui::MenuItem(I18n("camsys.elem.copy_name").c_str())) {
             ImGui::SetClipboardText(element->Name.c_str());
         }
         if (element->Drawable) {
-            MulNX::UI::Checkbox("绘制", element->draw);
+            MulNX::UI::Checkbox(I18n("camsys.elem.draw").c_str(), element->draw);
         }
-        if (ImGui::MenuItem("删除元素")) {
+        if (ImGui::MenuItem(I18n("camsys.elem.delete").c_str())) {
             auto [msg, rp] = MulNX::Message::Create<MulNX::NetExt>("Element/Delete"_hash);
             rp->str1 = std::move(element->Name);
         }
@@ -80,7 +77,7 @@ void ElementManager::Element_ShowInLine(const std::shared_ptr<ElementBase> eleme
     }
 
     ImGui::SameLine();
-    ImGui::Text(("   元素类型：" + element->TypeGet_String() + "   持续时长：" + std::to_string(element->DurationTime)).c_str());
+    ImGui::Text(I18n("camsys.elem.type_duration", element->TypeGet_String(), std::to_string(element->DurationTime)).c_str());
 }
 
 bool ElementManager::UINodeFunc(MulNX::UINode* node) {

@@ -7,22 +7,30 @@ MulNX::C_ISys MulNX::ModuleBase::ISys() {
 
 void MulNX::C_ISys::LogInfo(const std::string& Msg) {
     auto [msg, rp] = MulNX::Message::Create<MulNX::NetExt>("Log/Info"_hash);
-    rp->str1 = "[" + this->pModuleBase->GetName() + "]" + Msg;
+    rp->str1 = this->pModuleBase->GetName();
+    rp->str2 = Msg;
+    rp->timestamp_us = MulNX::ToUnixUs(std::chrono::system_clock::now());
     this->PublishAsync(std::move(msg));
 }
 void MulNX::C_ISys::LogSucc(const std::string& Msg) {
     auto [msg, rp] = MulNX::Message::Create<MulNX::NetExt>("Log/Succ"_hash);
-    rp->str1 = "[" + this->pModuleBase->GetName() + "]" + Msg;
+    rp->str1 = this->pModuleBase->GetName();
+    rp->str2 = Msg;
+    rp->timestamp_us = MulNX::ToUnixUs(std::chrono::system_clock::now());
     this->PublishAsync(std::move(msg));
 }
 void MulNX::C_ISys::LogWarning(const std::string& Msg) {
     auto [msg, rp] = MulNX::Message::Create<MulNX::NetExt>("Log/Warning"_hash);
-    rp->str1 = "[" + this->pModuleBase->GetName() + "]" + Msg;
+    rp->str1 = this->pModuleBase->GetName();
+    rp->str2 = Msg;
+    rp->timestamp_us = MulNX::ToUnixUs(std::chrono::system_clock::now());
     this->PublishAsync(std::move(msg));
 }
 void MulNX::C_ISys::LogError(const std::string& Msg) {
     auto [msg, rp] = MulNX::Message::Create<MulNX::NetExt>("Log/Error"_hash);
-    rp->str1 = "[" + this->pModuleBase->GetName() + "]" + Msg;
+    rp->str1 = this->pModuleBase->GetName();
+    rp->str2 = Msg;
+    rp->timestamp_us = MulNX::ToUnixUs(std::chrono::system_clock::now());
     this->PublishAsync(std::move(msg));
 }
 

@@ -11,6 +11,7 @@ namespace MulNX {
     public:
         std::string str1;
         std::string str2;
+        int64_t timestamp_us = 0; // 微秒，Unix epoch
     };
 
     // MulNX消息，8+8+8+8（asp8字节实现），32对齐，半个Cache Line

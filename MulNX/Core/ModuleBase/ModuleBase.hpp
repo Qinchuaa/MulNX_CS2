@@ -80,6 +80,12 @@ namespace MulNX {
 
         // 系统服务包装器(原则上是protected权限)
         C_ISys ISys();
+
         const std::string& I18n(const std::string& key);
+
+        template<typename... Args>
+        std::string I18n(const std::string& key, Args&&... args) {
+            return std::vformat(this->I18n(key), std::make_format_args((args)...));
+        }
     };
 }
