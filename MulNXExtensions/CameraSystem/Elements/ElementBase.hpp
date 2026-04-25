@@ -71,13 +71,12 @@ public:
 
 
     // 获取基本信息
+    std::string GetBaseInfo()const;
     std::string GetMsg()const;
     // 获取名字
     std::string GetName()const;
     // 重设名字
     void ResetName(const std::string& NewName);
-
-
 
     float GetStartTime()const;
     float GetEndTime()const;

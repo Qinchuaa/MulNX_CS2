@@ -40,7 +40,7 @@ bool WorkspaceManager::MenuWorkspace(MulNX::UINode* node) {
         ImGui::SameLine();
         ImGui::InputText("##TargetWorkspaceName", &TargetWorkspaceName);
         ImGui::SameLine();
-        if (ImGui::Button(I18n("ui.button.change").c_str())) {
+        if (ImGui::Button(I18n("text.change").c_str())) {
             if (TargetWorkspaceName.empty()) {
                 this->ISys().LogError(I18n("result.error_empty_name"));
                 return true;

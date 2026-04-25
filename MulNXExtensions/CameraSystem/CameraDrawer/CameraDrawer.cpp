@@ -93,10 +93,6 @@ void CameraModel::DrawCamera(const DirectX::XMFLOAT3& Position, const DirectX::X
     Model.Draw(label);
 }
 
-
-
-
-
 void CameraDrawer::Init(float CameraHigh, float CameraX, float CameraY, float AxisLenth, ImU32 Colour) {
     this->CameraModel.Init(CameraHigh, CameraX, CameraY, AxisLenth, Colour);
 }

@@ -7,19 +7,19 @@
 
 bool ProjectManager::MenuProject(MulNX::UINode* node) {
     // 项目总设置
-    if (ImGui::CollapsingHeader("项目设置")) {
-        ImGui::Checkbox("项目快捷键检测系统", &this->Config.ProjectShortcutEnable);
+    if (ImGui::CollapsingHeader(I18n("camsys.proj.settings").c_str())) {
+        ImGui::Checkbox(I18n("camsys.proj.shortcut_enable").c_str(), &this->Config.ProjectShortcutEnable);
     }
     // 创建项目
-    if (ImGui::CollapsingHeader("项目创建")) {
+    if (ImGui::CollapsingHeader(I18n("camsys.proj.create").c_str())) {
         static std::string CreateProjectName = "";
-        ImGui::Text("新项目名：");
+        ImGui::Text(I18n("camsys.proj.new_name").c_str());
         ImGui::SameLine();
         ImGui::InputText("##CreateProject", &CreateProjectName);
         ImGui::SameLine();
-        if (ImGui::Button("创建")) {
+        if (ImGui::Button(I18n("text.create").c_str())) {
             if (CreateProjectName.empty()) {
-                this->ISys().LogError("请输入项目名！");
+                this->ISys().LogError(I18n("result.error_empty_name"));
                 return true;
             }
             if (this->Project_Create(CreateProjectName)) {
@@ -29,18 +29,18 @@ bool ProjectManager::MenuProject(MulNX::UINode* node) {
 
     }
     // 展示修改项目
-    if (ImGui::CollapsingHeader("项目列表")) {
-        // 输出是否打开了项目调试窗口
-        ImGui::Text(("项目调试窗口状态：" + std::string(this->ShowWindow.load(std::memory_order_acquire) ? "打开" : "关闭")).c_str());
-        //使用迭代器遍历所有项目
+    if (ImGui::CollapsingHeader(I18n("camsys.proj.list").c_str())) {
         for (const auto& [name, project] : this->projects) {
-            this->Project_ShowInLine(project);
+            ImGui::Text(I18n("camsys.proj.name_label").c_str());
+            ImGui::SameLine();
+            if (ImGui::Button(project->Name.c_str())) {
+                this->ControllingProject = project;
+                this->ShowWindow.store(true, std::memory_order_release);
+            }
         }
     }
-
     return true;
 }
-
 bool ProjectManager::UINodeFunc(MulNX::UINode* node) {
     if (this->ShowWindow.load(std::memory_order_acquire)) {
         //项目调试窗口
@@ -53,6 +53,65 @@ bool ProjectManager::UINodeFunc(MulNX::UINode* node) {
         }
     }
     return true;
+}
+void ProjectManager::Project_DebugWindow() {
+    auto w = MulNX::UI::RAIIWindow(I18n("camsys.proj.debug_window").c_str(), this->ShowWindow);
+    if (!w)return;
+    // 检查当前操作项目
+    if (this->ControllingProject) {
+        ImGui::Text(I18n("camsys.proj.current_label").c_str());
+        ImGui::SameLine();
+        ImGui::Text(this->ControllingProject->Name.c_str());
+        if (ImGui::Button(I18n("camsys.proj.switch_to_current").c_str())) {
+            this->Project_Apply(this->ControllingProject);
+        }
+        if (ImGui::Button(I18n("camsys.proj.unload_current").c_str())) {
+            this->Project_Delete(this->ControllingProject->Name);
+            this->ShowWindow.store(false, std::memory_order_release);
+            return;
+        }
+        if (ImGui::Button(I18n("camsys.proj.modify_keybind").c_str())) {
+            this->Buffer_KCPack = this->ControllingProject->KCPack;
+            this->OpenProjectKCPackDebugWindow = true;
+        }
+        ImGui::Separator();
+        ImGui::Separator();
+        if (ImGui::TreeNode(I18n("camsys.proj.enter_new_round").c_str())) {
+            if (!this->ControllingProject->OnNewRound.empty()) {
+                for (const std::string SolutionName : this->ControllingProject->OnNewRound) {
+                    ImGui::Text(SolutionName.c_str());
+                    ImGui::SameLine();
+                    if (ImGui::Button((I18n("camsys.proj.delete_on_new_round") + SolutionName).c_str())) {
+                        auto it = std::find(this->ControllingProject->OnNewRound.begin(), this->ControllingProject->OnNewRound.end(), SolutionName);
+                        if (it != this->ControllingProject->OnNewRound.end()) {
+                            this->ControllingProject->OnNewRound.erase(it);
+                        }
+                    }
+                }
+            }
+            else {
+                ImGui::Text(I18n("text.empty").c_str());
+            }
+            ImGui::TreePop();
+        }
+        if (ImGui::TreeNode(I18n("camsys.proj.round_end").c_str())) {
+            if (!this->ControllingProject->OnRoundEnd.empty()) {
+                for (const std::string SolutionName : this->ControllingProject->OnRoundEnd) {
+                    ImGui::Text(SolutionName.c_str());
+                }
+            }
+            else {
+                ImGui::Text(I18n("text.empty").c_str());
+            }
+            ImGui::TreePop();
+        }
+    }
+    else {
+        ImGui::Text(I18n("camsys.proj.no_selected").c_str());
+    }
+    if (ImGui::Button(I18n("camsys.proj.close_debug_page").c_str())) {
+        this->ShowWindow.store(false, std::memory_order_release);
+    }
 }
 
 bool ProjectManager::Init() {
@@ -242,79 +301,6 @@ bool ProjectManager::Project_Load(const std::filesystem::path& ProjectPath, cons
         return false;
     }
 }
-
-void ProjectManager::Project_ShowInLine(std::shared_ptr<Project> Project) {
-    if (!Project) {
-        this->ISys().LogError("项目指针为空，无法展示信息！");
-        return;
-    }
-    ImGui::Text(I18n("project.name_label").c_str());
-    ImGui::SameLine();
-    if (ImGui::Button(Project->Name.c_str())) {
-        this->ControllingProject = Project;
-        this->ShowWindow.store(true, std::memory_order_release);
-    }
-
-    return;
-}
-
-void ProjectManager::Project_DebugWindow() {
-    auto w = MulNX::UI::RAIIWindow(I18n("project.debug_window").c_str(), this->ShowWindow);
-    if (!w)return;
-    // 检查当前操作项目
-    if (this->ControllingProject) {
-        ImGui::Text(I18n("project.current_label").c_str());
-        ImGui::SameLine();
-        ImGui::Text(this->ControllingProject->Name.c_str());
-        if (ImGui::Button(I18n("project.switch_to_current").c_str())) {
-            this->Project_Apply(this->ControllingProject);
-        }
-        if (ImGui::Button(I18n("project.unload_current").c_str())) {
-            this->Project_Delete(this->ControllingProject->Name);
-            this->ShowWindow.store(false, std::memory_order_release);
-            return;
-        }
-        if (ImGui::Button(I18n("project.modify_keybind").c_str())) {
-            this->Buffer_KCPack = this->ControllingProject->KCPack;
-            this->OpenProjectKCPackDebugWindow = true;
-        }
-        ImGui::Separator();
-        ImGui::Separator();
-        if (ImGui::TreeNode(I18n("project.enter_new_round").c_str())) {
-            if (!this->ControllingProject->OnNewRound.empty()) {
-                for (const std::string SolutionName : this->ControllingProject->OnNewRound) {
-                    ImGui::Text(SolutionName.c_str());
-                    ImGui::SameLine();
-                    if (ImGui::Button((I18n("project.delete_on_new_round") + SolutionName).c_str())) {
-                        auto it = std::find(this->ControllingProject->OnNewRound.begin(), this->ControllingProject->OnNewRound.end(), SolutionName);
-                        if (it != this->ControllingProject->OnNewRound.end()) {
-                            this->ControllingProject->OnNewRound.erase(it);
-                        }
-                    }
-                }
-            } else {
-                ImGui::Text(I18n("text.empty").c_str());
-            }
-            ImGui::TreePop();
-        }
-        if (ImGui::TreeNode(I18n("project.round_end").c_str())) {
-            if (!this->ControllingProject->OnRoundEnd.empty()) {
-                for (const std::string SolutionName : this->ControllingProject->OnRoundEnd) {
-                    ImGui::Text(SolutionName.c_str());
-                }
-            } else {
-                ImGui::Text(I18n("text.empty").c_str());
-            }
-            ImGui::TreePop();
-        }
-    } else {
-        ImGui::Text(I18n("project.no_selected").c_str());
-    }
-    if (ImGui::Button(I18n("project.close_debug_page").c_str())) {
-        this->ShowWindow.store(false, std::memory_order_release);
-    }
-}
-
 bool ProjectManager::Playing_AutoCall(const MulNX::Message& Msg) {
     this->ISys().LogInfo("项目管理器正在处理消息！");
     if (!this->ActiveProject) {

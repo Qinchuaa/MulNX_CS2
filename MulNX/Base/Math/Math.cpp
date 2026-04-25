@@ -1,5 +1,6 @@
 #include "Math.hpp"
 
+#include <MulNX/Systems/I18nManager/I18nManager.hpp>
 #include <sstream>
 #include <iomanip>
 #include <format>
@@ -112,7 +113,7 @@ std::string MulNX::Math::CameraKeyframe::GetMsg()const {
     DirectX::XMFLOAT4 PositionAndFOV = this->GetPositionAndFOV();
     DirectX::XMFLOAT3 Euler = this->GetRotationEuler();
     auto dof = this->GetDOF();
-    auto msg = std::format("时间：{}  坐标（XYZ）：{}，{}，{}  FOV：{}  角度： 俯仰：{}  偏航：{}  滚转：{}  景深： 近模糊：{}  近清晰：{}  远清晰：{}  远模糊：{}",
+    auto msg = I18n("math.camera_keyframe.fmt",
         this->time,
         PositionAndFOV.x, PositionAndFOV.y, PositionAndFOV.z, PositionAndFOV.w,
         Euler.x, Euler.y, Euler.z,

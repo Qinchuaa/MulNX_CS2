@@ -57,10 +57,10 @@ void SolutionManager::Solution_ShowInLine(Solution* solution) {
         }
     }
     if (ImGui::BeginPopupContextItem(("右键菜单" + solution->name).c_str())) {
-        if (ImGui::MenuItem(I18n("ui.button.copy_name").c_str())) {
+        if (ImGui::MenuItem(I18n("text.copy_name").c_str())) {
             ImGui::SetClipboardText(solution->name.c_str());
         }
-        if (ImGui::MenuItem(I18n("ui.button.save").c_str())) {
+        if (ImGui::MenuItem(I18n("text.save").c_str())) {
             auto path = this->ISys().PathManager()->PathGetFromKey("Solutions");
             auto [ok, msg] = solution->Save(path);
             if (ok) {
@@ -70,12 +70,12 @@ void SolutionManager::Solution_ShowInLine(Solution* solution) {
                 this->ISys().LogError(std::move(msg));
             }
         }
-        if (ImGui::MenuItem(I18n("ui.button.print_debug").c_str())) {
+        if (ImGui::MenuItem(I18n("text.print_debug").c_str())) {
             this->ISys().LogLine();
             this->ISys().LogInfo(solution->GetMsg());
             this->ISys().LogLine();
         }
-        if (ImGui::MenuItem(I18n("ui.button.delete").c_str())) {
+        if (ImGui::MenuItem(I18n("text.delete").c_str())) {
             auto [msg, rp] = MulNX::Message::Create<MulNX::NetExt>("CameraSystem/Solution/Delete"_hash);
             rp->str1 = solution->name;
             this->ISys().PublishAsync(std::move(msg));
@@ -142,7 +142,7 @@ void SolutionManager::Solution_DebugWindow() {
     // if (ImGui::Button("按激活模式生成编排模式偏移")) {
     //     this->CurrentSolution->TimeLineGenerate();
     // }
-    if (ImGui::Button(I18n("ui.button.modify_keybind").c_str())) {
+    if (ImGui::Button(I18n("text.modify_keybind").c_str())) {
         this->Buffer_KCPack = this->CurrentSolution->KCPack;//缓存
         this->OpenSolutionKCPackDebugWindow = true;//打开窗口
     }
@@ -150,7 +150,7 @@ void SolutionManager::Solution_DebugWindow() {
 
     static std::string NewElementName = "";
     ImGui::InputText(I18n("camsys.sol.new_element_name").c_str(), &NewElementName);
-    if (ImGui::Button(I18n("ui.button.add").c_str())) {
+    if (ImGui::Button(I18n("text.add").c_str())) {
         auto it = this->EManager->elements.find(NewElementName);
         if (it == this->EManager->elements.end()) {
             this->ISys().LogError("找不到目标元素   元素名：" + NewElementName);
@@ -166,7 +166,7 @@ void SolutionManager::Solution_DebugWindow() {
         }
     }
     ImGui::SameLine();
-    if (ImGui::Button(I18n("ui.button.clear").c_str())) {
+    if (ImGui::Button(I18n("text.clear").c_str())) {
         this->CurrentSolution->Clear();
         this->ISys().LogSucc("成功清空解决方案所有元素");
     }
@@ -187,11 +187,11 @@ void SolutionManager::Solution_DebugWindow() {
             tempOffset = Offset;
         }
         ImGui::SliderFloat(I18n("camsys.sol.offset_time").c_str(), &tempOffset, 0, 100000);
-        if (ImGui::Button(I18n("ui.button.confirm_modify").c_str())) {
+        if (ImGui::Button(I18n("text.confirm_modify").c_str())) {
             this->CurrentSolution->RemoveElementAt(IndexForReset);
             this->CurrentSolution->AddElement(element, tempOffset);
         }
-        if (ImGui::Button(I18n("ui.button.remove").c_str())) {
+        if (ImGui::Button(I18n("text.remove").c_str())) {
             this->CurrentSolution->RemoveElementAt(IndexForReset);
         }
     }

@@ -63,13 +63,13 @@ void ElementManager::Element_ShowInLine(const std::shared_ptr<ElementBase> eleme
     }
 
     if (ImGui::BeginPopupContextItem((I18n("camsys.elem.context_menu") + element->Name).c_str())) {
-        if (ImGui::MenuItem(I18n("camsys.elem.copy_name").c_str())) {
+        if (ImGui::MenuItem(I18n("text.copy_name").c_str())) {
             ImGui::SetClipboardText(element->Name.c_str());
         }
         if (element->Drawable) {
             MulNX::UI::Checkbox(I18n("camsys.elem.draw").c_str(), element->draw);
         }
-        if (ImGui::MenuItem(I18n("camsys.elem.delete").c_str())) {
+        if (ImGui::MenuItem(I18n("text.delete").c_str())) {
             auto [msg, rp] = MulNX::Message::Create<MulNX::NetExt>("Element/Delete"_hash);
             rp->str1 = std::move(element->Name);
         }
@@ -87,7 +87,7 @@ bool ElementManager::UINodeFunc(MulNX::UINode* node) {
     }
     if (this->needDrawCamera.load(std::memory_order_acquire)) {
         auto frame = this->drawCamera.Read();
-        this->CamDrawer->DrawFrameCamera(*frame, "元素预览插值摄像机");
+        this->CamDrawer->DrawFrameCamera(*frame, I18n("camsys.elem.preview_draw_label").c_str());
     }
     auto w = MulNX::UI::RAIIWindow("元素调试", this->ShowWindow);
     if (!w)return true;
@@ -99,7 +99,7 @@ bool ElementManager::UINodeFunc(MulNX::UINode* node) {
     }
     // 如果没有操作元素
     else {
-        ImGui::Text("当前未选择任何元素");
+        ImGui::Text(I18n("text.no_selected").c_str());
     }
     return true;
 }

@@ -4,19 +4,7 @@ ui:
   game_settings: 游戏设置
   game_enhance: 游戏增强
   mulnx_control: MulNX控制
-  button:
-    save: 保存
-    change: 切换
-    delete: 删除
-    add: 添加
-    clear: 清空
-    copy_name: 复制名称
-    print_debug: 打印信息到调试窗口
-    modify_keybind: 修改按键绑定
-    confirm_modify: 确认修改
-    remove: 移除
-    no_selected: 当前未选择
-
+    
 text:
   entered: 已进入
   unentered: 未进入
@@ -26,9 +14,35 @@ text:
   none: 无
   empty: 空
   playing: 播放中
+  save: 保存
+  change: 切换
+  delete: 删除
+  add: 添加
+  clear: 清空
+  copy: 复制
+  copy_name: 复制名称
+  print_debug: 打印信息到调试窗口
+  modify_keybind: 修改按键绑定
+  confirm: 确认
+  confirm_modify: 确认修改
+  remove: 移除
+  no_selected: 当前未选择
+  create: 创建
+  preview: 预览
+  normalize: 标准化
 
 action:
   try_load_config: 尝试加载配置文件：{0}
+
+math:
+  time: 时间
+  pos: 位置
+  yaw: 偏航角
+  pitch: 俯仰角
+  roll: 滚转角
+  fov: FOV
+  camera_keyframe:
+    fmt: "时间：{0}  坐标（XYZ）：{1}，{2}，{3}  FOV：{4}  角度： 俯仰：{5}  偏航：{6}  滚转：{7}  景深： 近模糊：{8}  近清晰：{9}  远清晰：{10}  远模糊：{11}"
 
 sys:
   version_is_testing: 当前版本是否为测试版：{0} 
@@ -58,6 +72,7 @@ log:
   new: |
     +----------新的日志片段----------+
     当游戏关闭时发生异常是可预见的，请忽略
+# 摄像机系统
 camsys:
   tab_proj: 项目
   tab_sol: 解决方案
@@ -70,20 +85,21 @@ camsys:
     工作区是管理项目、解决方案和元素的基础
   
   elem:
+    info_base_fmt: 元素名称：{0}  元素类型：{1}  持续时长：{2}
+    info_fmt: "基本信息：{0}\n详细信息：{1}"
     preview_status: "预览状态：{0}   预览元素名：{1}   预览时间偏移：{2}"
     settings: 元素设置
     preview_draw: 预览插值摄像机绘制
+    preview_draw_label: 元素预览插值摄像机
     preview_override: 预览插值摄像机覆盖
     create: 元素创建
     new_name: 新元素名：
     new_free_camera_path: 新的自由摄像机轨道
     list: 元素列表
-    debug_window_status: 元素调试窗口状态：{0}
     name_label: "|元素名称："
     context_menu: 元素右键菜单
     copy_name: 复制名称
     draw: 绘制
-    delete: 删除元素
     type_duration: "   元素类型：{0}   持续时长：{1}"
     debug_window: 元素调试
     no_selected: 当前未选择任何元素
@@ -121,9 +137,7 @@ camsys:
     shortcut_enable: 项目快捷键检测系统
     create: 项目创建
     new_name: 新项目名：
-    create_btn: 创建
     list: 项目列表
-    debug_window_status: 项目调试窗口状态：{0}
     name_label: "|项目名称："
     debug_window: 项目调试
     current: 当前项目：{0}
@@ -144,3 +158,8 @@ camsys:
     open_default: 打开默认工作区
     save: 保存工作区
     target_name: 工作区名：
+
+free_campath:
+  fmt: "编号： {0}  {1}\n" # {1}为关键帧参数
+  fmt_edit: "正在调整的关键帧编号： {0}  {1}\n" # {1}为关键帧参数
+  add: 添加关键帧

@@ -5,6 +5,122 @@
 #include <fstream>
 #include <format>
 
+std::string FreeCameraPath::GetPrivateMsg()const {
+    std::ostringstream oss;
+    for (size_t i = 0; i < this->CameraKeyframes.size(); ++i) {
+        const MulNX::Math::CameraKeyframe& keyframe = this->CameraKeyframes.at(i);
+        oss << I18n("free_campath.fmt", i, keyframe.GetMsg());
+    }
+    return oss.str();
+}
+
+void FreeCameraPath::DebugUI(ElementManager* EManager) {
+    ImGui::TextUnformatted(this->GetBaseInfo().c_str());
+
+    static int IndexForReset = -1;
+    static int PreIndex = -2;
+
+    for (size_t i = 0; i < this->CameraKeyframes.size(); ++i) {
+        const MulNX::Math::CameraKeyframe& keyframe = this->CameraKeyframes.at(i);
+        if (ImGui::Selectable(std::to_string(i).c_str(), false, ImGuiSelectableFlags_AllowDoubleClick)) {
+            IndexForReset = i;
+            if (ImGui::IsMouseDoubleClicked(0)) {
+                auto pos = keyframe.GetPosition();
+                auto rot = keyframe.GetRotationEuler();
+                auto dof = keyframe.GetDOF();
+                auto* al3d = EManager->AL3D;
+                al3d->spec_goto_ex(pos, rot);
+                al3d->SetDOF(dof);
+                if (al3d->pInputSystem->IsKeyPressed(VK_MENU)) {
+                    al3d->Time()->JumpReal(keyframe.time);
+                }
+            }
+        }
+        ImGui::SameLine();
+        ImGui::Text(I18n("free_campath.fmt", i, keyframe.GetMsg()).c_str());
+    }
+
+    if (ImGui::Button(I18n("free_campath.add").c_str()) || EManager->pInputSystem->CheckComboClick('F', 1)) {
+        MulNX::Math::CameraKeyframe keyframe;
+        keyframe.time = EManager->AL3D->Time()->GetReal();
+        auto view = EManager->AL3D->GetView();
+        keyframe.PositionAndFOV = view.ToPositionAndFOV();
+        keyframe.RotationQuat = view.ToRotationQuat();
+        keyframe.dof = view.ToDOFPack();
+        this->AddKeyframe(keyframe);
+    }
+
+    if (ImGui::Button(I18n("text.clear").c_str()) || EManager->pInputSystem->CheckComboClick(VK_DELETE, 2)) {
+        this->Clear();
+    }
+
+    if (ImGui::Button(I18n("text.normalize").c_str())) {
+        this->TimeNormalize();
+    }
+
+    if (ImGui::Button(I18n("text.preview").c_str())) {
+        EManager->Preview_SetElement(this->Name);
+        EManager->Preview_SetPreviewSchema(EManager->AL3D->Time()->GetReal());
+        EManager->Preview_Enable();
+    }
+
+    ImGui::Separator();
+
+    if (0 <= IndexForReset && IndexForReset < this->CameraKeyframes.size()) {
+        const MulNX::Math::CameraKeyframe& keyframe = this->GetKeyFrame(IndexForReset);
+        ImGui::Text(I18n("free_campath.fmt_edit", IndexForReset, keyframe.GetMsg()).c_str());
+        ImGui::Separator();
+
+        static float temptime{};
+        static DirectX::XMFLOAT4 tempPositionAndFOV{};
+        static DirectX::XMFLOAT3 tempRotationEuler{};
+        if (IndexForReset != PreIndex) {
+            temptime = keyframe.time;
+            tempPositionAndFOV = keyframe.GetPositionAndFOV();
+            tempRotationEuler = keyframe.GetRotationEuler();
+        }
+
+        ImGui::SliderFloat(I18n("math.time").c_str(), &temptime, 0, 20000);
+
+        ImGui::SliderFloat3(I18n("math.pos").c_str(), &tempPositionAndFOV.x, -2000.0, 2000, 0);
+        ImGui::SliderFloat(I18n("math.yaw").c_str(), &tempRotationEuler.x, -89.0, 89.0);
+        ImGui::SliderFloat(I18n("math.pitch").c_str(), &tempRotationEuler.y, -179.0, 179.0);
+        ImGui::SliderFloat(I18n("math.roll").c_str(), &tempRotationEuler.z, -179.0, 179.0);
+        ImGui::SliderFloat(I18n("math.fov").c_str(), &tempPositionAndFOV.w, 10, 170);
+
+        EManager->CamSys()->CamDrawer.DrawCamera(DirectX::XMFLOAT3{ tempPositionAndFOV.x,tempPositionAndFOV.y ,tempPositionAndFOV.z }, tempRotationEuler, "目标摄像机关键帧");
+        if (ImGui::Button(I18n("text.confirm_modify").c_str())) {
+            // 构造临时摄像机关键帧
+            MulNX::Math::CameraKeyframe tempKey;
+            // 注入时间
+            tempKey.time = temptime;
+            // 注入位置和FOV
+            tempKey.PositionAndFOV = DirectX::XMLoadFloat4(&tempPositionAndFOV);
+            // 转换角度并注入
+            DirectX::XMFLOAT4 tempRotationQuat;
+            MulNX::Math::CSEulerToQuat(tempRotationEuler, tempRotationQuat);
+            tempKey.RotationQuat = DirectX::XMLoadFloat4(&tempRotationQuat);
+            // 擦除旧关键帧
+            this->CameraKeyframes.erase(this->CameraKeyframes.begin() + IndexForReset);
+            // 添加新关键帧
+            this->AddKeyframe(std::move(tempKey));
+            PreIndex = -1;
+        }
+        if (ImGui::Button(I18n("text.delete").c_str())) {
+            //删除并刷新
+            this->CameraKeyframes.erase(this->CameraKeyframes.begin() + IndexForReset);
+            this->Refresh();
+            PreIndex = -1;
+        }
+        if (ImGui::Button(I18n("text.copy").c_str())) {
+            //拷贝复制
+            this->AddKeyframe(this->GetKeyFrame(IndexForReset));
+            PreIndex = -1;
+        }
+    }
+    PreIndex = IndexForReset;
+}
+
 void FreeCameraPath::AddKeyframe(const MulNX::Math::CameraKeyframe& keyframe) {
 	//按照时间排序插入
     auto it = std::lower_bound(this->CameraKeyframes.begin(), this->CameraKeyframes.end(), keyframe,
@@ -176,17 +292,6 @@ bool FreeCameraPath::Draw(CameraDrawer* CamDrawer, const float* Matrix, const fl
     return true;
 }
 
-std::string FreeCameraPath::GetPrivateMsg()const {
-    std::ostringstream oss;
-    const size_t& Size = this->CameraKeyframes.size();
-    oss << "  关键帧总数： " << std::to_string(Size) << "\n";
-    for (size_t i = 0; i < Size; ++i) {
-        const MulNX::Math::CameraKeyframe& keyframe = this->CameraKeyframes.at(i);
-        oss << "编号： " << std::to_string(i) << keyframe.GetMsg() << "\n";
-    }
-	return oss.str();
-}
-
 size_t FreeCameraPath::GetKeyFrameCount() const {
     return this->CameraKeyframes.size();
 }
@@ -321,112 +426,4 @@ std::pair<bool, std::string> FreeCameraPath::Load(YAML::Node& root) {
     catch (const std::exception& e) {
         return { false, "读取YAML文件时发生错误：" + std::string(e.what()) };
     }
-}
-
-void FreeCameraPath::DebugUI(ElementManager* EManager) {
-    ImGui::TextUnformatted(this->GetMsg().c_str());
-
-    static int IndexForReset = -1;
-    static int PreIndex = -2;
-
-    for (size_t i = 0; i < this->CameraKeyframes.size(); ++i) {
-        const MulNX::Math::CameraKeyframe& keyframe = this->CameraKeyframes.at(i);
-        if (ImGui::Selectable(std::to_string(i).c_str(), false, ImGuiSelectableFlags_AllowDoubleClick)) {
-            IndexForReset = i;
-            if (ImGui::IsMouseDoubleClicked(0)) {
-                auto pos = keyframe.GetPosition();
-                auto rot = keyframe.GetRotationEuler();
-                auto dof = keyframe.GetDOF();
-                auto* al3d = EManager->AL3D;
-                al3d->spec_goto_ex(pos, rot);
-                al3d->SetDOF(dof);
-                if (al3d->pInputSystem->IsKeyPressed(VK_MENU)) {
-                    al3d->Time()->JumpReal(keyframe.time);
-                }
-            }
-        }
-        ImGui::SameLine();
-        ImGui::Text(keyframe.GetMsg().c_str());
-    }
-    
-    if (ImGui::Button("添加关键帧") || EManager->pInputSystem->CheckComboClick('F', 1)) {
-        MulNX::Math::CameraKeyframe keyframe;
-        keyframe.time = EManager->AL3D->Time()->GetReal();
-        auto view = EManager->AL3D->GetView();
-        keyframe.PositionAndFOV = view.ToPositionAndFOV();
-        keyframe.RotationQuat = view.ToRotationQuat();
-        keyframe.dof = view.ToDOFPack();
-        this->AddKeyframe(keyframe);
-    }
-
-    if (ImGui::Button("清空关键帧") || EManager->pInputSystem->CheckComboClick(VK_DELETE, 2)) {
-        this->Clear();
-    }
-
-    if (ImGui::Button("标准化轨道")) {
-        this->TimeNormalize();
-    }
-
-    if (ImGui::Button("预览轨道")) {
-        EManager->Preview_SetElement(this->Name);
-        EManager->Preview_SetPreviewSchema(EManager->AL3D->Time()->GetReal());
-        EManager->Preview_Enable();
-    }
-
-    ImGui::Separator();
-
-    if (0 <= IndexForReset && IndexForReset < this->CameraKeyframes.size()) {
-        const MulNX::Math::CameraKeyframe& keyframe = this->GetKeyFrame(IndexForReset);
-        ImGui::Text(("关键帧信息： 编号： " + std::to_string(IndexForReset) + keyframe.GetMsg()).c_str());
-
-        ImGui::Separator();
-
-        static float temptime{};
-        static DirectX::XMFLOAT4 tempPositionAndFOV{};
-        static DirectX::XMFLOAT3 tempRotationEuler{};
-        if (IndexForReset != PreIndex) {
-            temptime = keyframe.time;
-            tempPositionAndFOV = keyframe.GetPositionAndFOV();
-            tempRotationEuler = keyframe.GetRotationEuler();
-        }
-
-        ImGui::SliderFloat("时间", &temptime, 0, 20000);
-
-        ImGui::SliderFloat3("位置", &tempPositionAndFOV.x, -2000.0, 2000, 0);
-        ImGui::SliderFloat("俯仰角", &tempRotationEuler.x, -89.0, 89.0);
-        ImGui::SliderFloat("偏航角", &tempRotationEuler.y, -179.0, 179.0);
-        ImGui::SliderFloat("滚转角", &tempRotationEuler.z, -179.0, 179.0);
-        ImGui::SliderFloat("FOV", &tempPositionAndFOV.w, 10, 170);
-
-        EManager->CamSys()->CamDrawer.DrawCamera(DirectX::XMFLOAT3{ tempPositionAndFOV.x,tempPositionAndFOV.y ,tempPositionAndFOV.z }, tempRotationEuler, "目标摄像机关键帧");
-        if (ImGui::Button("修改")) {
-            // 构造临时摄像机关键帧
-            MulNX::Math::CameraKeyframe tempKey;
-            // 注入时间
-            tempKey.time = temptime;
-            // 注入位置和FOV
-            tempKey.PositionAndFOV = DirectX::XMLoadFloat4(&tempPositionAndFOV);
-            // 转换角度并注入
-            DirectX::XMFLOAT4 tempRotationQuat;
-            MulNX::Math::CSEulerToQuat(tempRotationEuler, tempRotationQuat);
-            tempKey.RotationQuat = DirectX::XMLoadFloat4(&tempRotationQuat);
-            // 擦除旧关键帧
-            this->CameraKeyframes.erase(this->CameraKeyframes.begin() + IndexForReset);
-            // 添加新关键帧
-            this->AddKeyframe(std::move(tempKey));
-            PreIndex = -1;
-        }
-        if (ImGui::Button("删除")) {
-            //删除并刷新
-            this->CameraKeyframes.erase(this->CameraKeyframes.begin() + IndexForReset);
-            this->Refresh();
-            PreIndex = -1;
-        }
-        if (ImGui::Button("复制")) {
-            //拷贝复制
-            this->AddKeyframe(this->GetKeyFrame(IndexForReset));
-            PreIndex = -1;
-        }
-    }
-    PreIndex = IndexForReset;
 }

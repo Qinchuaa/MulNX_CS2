@@ -26,9 +26,12 @@ std::string ElementBase::TypeGet_String()const {
     return ElementType_EnumToString(this->Type);
 }
 
+std::string ElementBase::GetBaseInfo()const {
+    return I18n("camsys.elem.info_base_fmt", this->Name, this->TypeGet_String(), this->DurationTime);
+}
+
 std::string ElementBase::GetMsg()const {
-    return std::format("元素名称：{}  元素类型：{}  持续时长：{}\n详细信息：{}",
-        this->Name, this->TypeGet_String(), this->DurationTime, this->GetPrivateMsg());
+    return I18n("camsys.elem.info_fmt", this->GetBaseInfo(), this->GetPrivateMsg());
 }
 std::string ElementBase::GetName()const {
     return this->Name;

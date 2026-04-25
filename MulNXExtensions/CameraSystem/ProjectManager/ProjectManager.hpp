@@ -28,7 +28,6 @@ public:
     void Project_DebugWindow();
     bool MenuProject(MulNX::UINode* node);
     bool UINodeFunc(MulNX::UINode* node);
-    void Project_ShowInLine(std::shared_ptr<Project> project);
 
     bool Init()override;
     void HandleUpdate();
@@ -37,7 +36,6 @@ public:
     bool Project_Delete(const std::string& name);
     //清空项目（从内存中移除）
     bool Project_ClearAll();
-
 
     //创建项目
     bool Project_Create(const std::string& name);
