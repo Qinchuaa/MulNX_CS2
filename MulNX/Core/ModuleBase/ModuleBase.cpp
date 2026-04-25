@@ -28,7 +28,6 @@ bool MulNX::ModuleBase::BaseInit(MulNX::Core::Core* core) {
         this->AL3D = moduleManager->FindAbstractLayer3D();
         this->pInputSystem = moduleManager->FindModule<MulNX::InputSystem>("InputSystem");
         this->pPathManager = moduleManager->FindModule<MulNX::PathManager>("PathManager");
-        this->pI18nManager = moduleManager->FindModule<MulNX::I18nManager>("I18nManager");
 
         if (!this->HModule.IsValid()) {
             this->HModule = MulNXHandle::CreateHandle();
@@ -86,8 +85,4 @@ void MulNX::ModuleBase::SetParent(MulNXHandle hModule) {
 }
 bool MulNX::ModuleBase::HasParent() {
     return this->hParent.IsValid();
-}
-
-const std::string& MulNX::ModuleBase::I18n(const std::string& key) {
-    return this->pI18nManager->Get(key);
 }

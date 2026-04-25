@@ -10,8 +10,13 @@ bool MulNX::I18nManager::Init() {
     this->strings.clear();
     YAML::Node root = YAML::LoadFile(filePath.string());
     this->LoadYaml(root, {});
-    
+
+    this->pThis = this;
     return true;
+}
+
+const std::string& I18n(const std::string& key) {
+    return MulNX::I18nManager::pThis->Get(key);
 }
 
 void MulNX::I18nManager::LoadYaml(const YAML::Node& node, const std::string& key) {

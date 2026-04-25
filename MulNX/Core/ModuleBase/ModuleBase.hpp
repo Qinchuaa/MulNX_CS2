@@ -13,7 +13,6 @@ namespace MulNX {
     private:
         MulNX::IMessageManager* IMsgManager = nullptr;
         MulNX::PathManager* pPathManager = nullptr;
-        MulNX::I18nManager* pI18nManager = nullptr;
     protected:
         // 父模块句柄
         MulNXHandle hParent{};
@@ -80,12 +79,5 @@ namespace MulNX {
 
         // 系统服务包装器(原则上是protected权限)
         C_ISys ISys();
-
-        const std::string& I18n(const std::string& key);
-
-        template<typename... Args>
-        std::string I18n(const std::string& key, Args&&... args) {
-            return std::vformat(this->I18n(key), std::make_format_args((args)...));
-        }
     };
 }

@@ -2,6 +2,7 @@
 
 #include <MulNX/Core/Core.hpp>
 #include <MulNX/Systems/PathManager/PathManager.hpp>
+#include <MulNX/Systems/I18nManager/I18nManager.hpp>
 
 bool MulNX::Logger::Init() {
     this->logPath = this->ISys().PathManager()->PathGetForShared("Log") / ("Log_" + this->Core->GetName() + ".txt");
@@ -9,7 +10,7 @@ bool MulNX::Logger::Init() {
     if (!this->target) {
         MulNX::ErrorTerminate("Cannot Wirte Log!");
     }
-    target << I18n("log.new") << std::endl;
+    this->target << I18n("log.new") << std::endl;
     this->SendTask("Loging", [this]()->bool {
         this->Log();
         return true;
