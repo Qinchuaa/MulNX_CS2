@@ -10,6 +10,7 @@ namespace MulNX {
         bool UISystemRunning = false;
         std::function<void(void)>FrameBefore = nullptr;
         std::function<void(void)>FrameBehind = nullptr;
+        std::string strImguiIniPath;
     public:
         bool Init()override;
 

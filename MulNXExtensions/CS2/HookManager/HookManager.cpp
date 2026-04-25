@@ -1,6 +1,5 @@
 #include "HookManager.hpp"
 
-#include <MulNX/Base/CharUtility/CharUtility.hpp>
 #include <MulNX/Base/UI/UI.hpp>
 #include <MulNX/MulNX.hpp>
 #include <MulNXThirdParty/imgui_d11/imgui_impl_dx11.h>
@@ -102,11 +101,9 @@ void HookManager::CreateHook() {
 void HookManager::d3dInit() {
     if (this->d3dInited)return;
     this->d3dInited = true;
-
     // 定位到真正的交换链指针后，获取设备和上下文
     this->pSwapChain->GetDevice(__uuidof(ID3D11Device), (void**)&this->pd3dDevice);
     this->pd3dDevice->GetImmediateContext(&this->pd3dContext);
-
     // 通过设备描述获取窗口句柄
     DXGI_SWAP_CHAIN_DESC sd;
     this->pSwapChain->GetDesc(&sd);
@@ -119,30 +116,13 @@ void HookManager::d3dInit() {
         }).value();
     this->hkWndProc->Attach();
     this->ISys().LogSucc("窗口过程钩子已部署");
-
     // 创建渲染目标视图
     ID3D11Texture2D* buf = nullptr;
     this->pSwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (void**)&buf);
     this->pd3dDevice->CreateRenderTargetView(buf, nullptr, &this->view);
     buf->Release();
-
     // 初始化ImGui上下文
     ImGui::CreateContext();
-
-    // 设置ini文件路径
-    ImGuiIO& io = ImGui::GetIO();
-    auto IniPath = this->ISys().PathGet("Config") / "MulNXUIConfig.ini";
-    // 这里需要进行转换，以适配ImGui的接口
-    this->ImguiIniPathString = MulNX::Base::CharUtility::FilePathToString(IniPath);
-    io.IniFilename = this->ImguiIniPathString.c_str();
-
-    // 加载中文字体
-    io.Fonts->AddFontFromFileTTF(
-        "C:/Windows/Fonts/msyh.ttc",				// 微软雅黑字体路径
-        16.0f,										// 字体大小
-        nullptr									// 使用默认配置
-    );
-
     // 初始化ImGui平台和渲染器绑定
     ImGui_ImplWin32_Init(this->CS2hWnd);
     ImGui_ImplDX11_Init(this->pd3dDevice, this->pd3dContext);

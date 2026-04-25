@@ -3,7 +3,6 @@
     <Shared>
         <Path Name="Saves"/>
         <Path Name="Config"/>
-        <Path Name="Resource"/>
         <Path Name="Log"/>
     </Shared>
 

@@ -1,11 +1,13 @@
 #include "UISystem.hpp"
 
+#include <MulNX/Base/CharUtility/CharUtility.hpp>
 #include <MulNX/Base/UI/UI.hpp>
 #include <MulNX/Core/Core.hpp>
+#include <MulNX/Systems/PathManager/PathManager.hpp>
 #include <MulNX/Systems/MessageManager/IMessageManager.hpp>
 #include <MulNX/Systems/InputSystem/InputSystem.hpp>
 #include <MulNX/Systems/GlobalVars/GlobalVars.hpp>
-
+#include <yaml-cpp/yaml.h>
 #include <Windows.h>
 
 bool MulNX::UISystem::Init() {
@@ -24,6 +26,18 @@ void MulNX::UISystem::ProcessMsg(MulNX::Message& Msg) {
         this->UISystemRunning = true;
         this->ISys().LogWarning("接收到启动消息，UI系统开始启动");
         MulNX::SetUIStyle();
+        // 设置ini文件路径
+        ImGuiIO& io = ImGui::GetIO();
+        auto IniPath = this->ISys().PathGet("Config") / "MulNXUIConfig.ini";
+        // 这里需要进行转换，以适配ImGui的接口
+        this->strImguiIniPath = MulNX::Base::CharUtility::FilePathToString(IniPath);
+        io.IniFilename = this->strImguiIniPath.c_str();
+        // 加载字体
+        auto cfgPath = this->ISys().PathManager()->PathGetForShared("Config") / "ui.yaml";
+        YAML::Node root = YAML::LoadFile(cfgPath.string());
+        auto fontFilePath = root["font"]["path"].as<std::string>();
+        auto fontSize = root["font"]["size"].as<float>();
+        io.Fonts->AddFontFromFileTTF(fontFilePath.c_str(), fontSize);
         break;
     }
     case "UISystem/ModulePush"_hash: {
