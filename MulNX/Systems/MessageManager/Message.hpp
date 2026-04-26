@@ -6,14 +6,12 @@
 #include <cstdint>
 
 namespace MulNX {
-    
     class NetExt {
     public:
         std::string str1;
         std::string str2;
         int64_t timestamp_us = 0; // 微秒，Unix epoch
     };
-
     // MulNX消息，8+8+8+8（asp8字节实现），32对齐，半个Cache Line
     class Message {
         class Param {
@@ -40,14 +38,8 @@ namespace MulNX {
         Param p2;
         // 8字节类型安全擦除共享指针，使用时需用get方法正确恢复，类型错误返回nullptr
         MulNX::any_shared_ptr asp = nullptr;
-
         Message() = default;
         Message(size_t Type) :type(Type) {}
-        Message(const Message& Other) = default;
-        Message& operator=(const Message& other) = default;
-        Message(Message&& other) = default;
-        Message& operator=(Message&& other) = default;
-
         template<typename T, typename... Args>
         static std::pair<Message, T*> Create(size_t type, Args&&... args) {
             Message msg(type);

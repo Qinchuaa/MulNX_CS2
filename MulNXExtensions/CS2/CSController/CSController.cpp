@@ -7,63 +7,6 @@
 #include <MulNXExtensions/CS2/PlayerHub/ProjectileTracker/ProjectileTracker.hpp>
 #include <MulNXThirdParty/All_cs2_dumper.hpp>
 
-void CSController::HandleCameraSystemPlay(CS2::CViewSetup* viewSetup) {
-    // 加载来自摄像机系统的View
-    if (this->controlView.hasViewToGame.load(std::memory_order_acquire)) {
-        auto view = this->controlView.ViewToGame.Read();
-        *viewSetup->pViewOrigin() = view->position;
-        *viewSetup->pViewAngles() = view->rotation;
-
-        if (view->FOV > 0.01f) {
-            *viewSetup->pFov() = view->FOV;
-        }
-    }
-}
-
-void CSController::HandleOverrideView(CS2::CViewSetup* viewSetup) {
-    if (this->GlobalVars->SystemReady.load(std::memory_order_acquire)) {
-        this->Core->ModuleManager()->FindModule<CameraSystem>("CameraSystem")->HandleUpdate();
-    }
-    
-
-    static auto* pProjectileTracker = this->Core->ModuleManager()->FindModule<ProjectileTracker>("ProjectileTracker");
-    auto trckerView = pProjectileTracker->GetView();
-    if (trckerView.has_value()) {
-        *viewSetup->pViewOrigin() = trckerView.value().position;
-        *viewSetup->pViewAngles() = trckerView.value().rotation;
-    }
-
-    // 同步窗口尺寸到ControlView
-    this->controlView.WindowWidth.store(*viewSetup->pWidth(), std::memory_order_relaxed);
-    this->controlView.WindowHeight.store(*viewSetup->pHeight(), std::memory_order_relaxed);
-
-    // 执行roll覆盖，这是优先级最低的覆盖，保证运镜至少优先于此，且不影响于此
-    viewSetup->pViewAngles()->z = this->controlView.InputRoll.load(std::memory_order_acquire);
-    this->pAdvancedViewController->HandleUpdate(viewSetup);
-
-    // 根据状态调用不同的视角控制逻辑
-    // 自由摄像机优先级最高，其次是高级视角控制，最后是普通摄像机系统控制
-    if (this->pFreeCameraController->HandleUpdate(viewSetup)) {
-        this->pFreeCameraController->HandleOverrideView(viewSetup);
-    }
-    else if (this->pAdvancedViewController->HandleOverrideView(viewSetup)) {
-
-    }
-    else {
-        this->HandleCameraSystemPlay(viewSetup);
-    }
-
-    // 记录视角数据
-    {
-        auto currentView = this->controlView.currentView.Write();
-
-        currentView->position = *viewSetup->pViewOrigin();
-        currentView->rotation = *viewSetup->pViewAngles();
-
-        currentView->FOV = *viewSetup->pFov();
-    }
-}
-
 bool CSController::UINodeFunc(MulNX::UINode* node) {
     if (this->ESPDraw.load(std::memory_order_acquire)) {
         this->ESP();
@@ -109,18 +52,57 @@ bool CSController::UINodeFunc(MulNX::UINode* node) {
     return true;
 }
 
-void CSController::ProcessMsg(MulNX::Message& Msg) {
-    switch (Msg.type) {
-    case "Core/ReHook"_hash: {
-        this->ISys().LogSucc("已完成Hook重载！");
-        break;
+void CSController::HandleCameraSystemPlay(CS2::CViewSetup* viewSetup) {
+    // 加载来自摄像机系统的View
+    if (this->controlView.hasViewToGame.load(std::memory_order_acquire)) {
+        auto view = this->controlView.ViewToGame.Read();
+        *viewSetup->pViewOrigin() = view->position;
+        *viewSetup->pViewAngles() = view->rotation;
+
+        if (view->FOV > 0.01f) {
+            *viewSetup->pFov() = view->FOV;
+        }
     }
-    case "Game/Command"_hash: {
-        auto cmd = Msg.asp.get<MulNX::NetExt>()->str1;
-        this->ExecuteCommand(cmd);
-        break;
+}
+void CSController::HandleOverrideView(CS2::CViewSetup* viewSetup) {
+    if (this->GlobalVars->SystemReady.load(std::memory_order_acquire)) {
+        this->Core->ModuleManager()->FindModule<CameraSystem>("CameraSystem")->HandleUpdate();
+    }
+    static auto* pProjectileTracker = this->Core->ModuleManager()->FindModule<ProjectileTracker>("ProjectileTracker");
+    auto trckerView = pProjectileTracker->GetView();
+    if (trckerView.has_value()) {
+        *viewSetup->pViewOrigin() = trckerView.value().position;
+        *viewSetup->pViewAngles() = trckerView.value().rotation;
     }
 
+    // 同步窗口尺寸到ControlView
+    this->controlView.WindowWidth.store(*viewSetup->pWidth(), std::memory_order_relaxed);
+    this->controlView.WindowHeight.store(*viewSetup->pHeight(), std::memory_order_relaxed);
+
+    // 执行roll覆盖，这是优先级最低的覆盖，保证运镜至少优先于此，且不影响于此
+    viewSetup->pViewAngles()->z = this->controlView.InputRoll.load(std::memory_order_acquire);
+    this->pAdvancedViewController->HandleUpdate(viewSetup);
+
+    // 根据状态调用不同的视角控制逻辑
+    // 自由摄像机优先级最高，其次是高级视角控制，最后是普通摄像机系统控制
+    if (this->pFreeCameraController->HandleUpdate(viewSetup)) {
+        this->pFreeCameraController->HandleOverrideView(viewSetup);
+    }
+    else if (this->pAdvancedViewController->HandleOverrideView(viewSetup)) {
+
+    }
+    else {
+        this->HandleCameraSystemPlay(viewSetup);
+    }
+
+    // 记录视角数据
+    {
+        auto currentView = this->controlView.currentView.Write();
+
+        currentView->position = *viewSetup->pViewOrigin();
+        currentView->rotation = *viewSetup->pViewAngles();
+
+        currentView->FOV = *viewSetup->pFov();
     }
 }
 
@@ -179,6 +161,21 @@ bool CSController::Init() {
     return true;
 }
 
+void CSController::ProcessMsg(MulNX::Message& Msg) {
+    switch (Msg.type) {
+    case "Core/ReHook"_hash: {
+        this->ISys().LogSucc("已完成Hook重载！");
+        break;
+    }
+    case "Game/Command"_hash: {
+        auto cmd = Msg.asp.get<MulNX::NetExt>()->str1;
+        this->ExecuteCommand(cmd);
+        break;
+    }
+
+    }
+}
+
 void CSController::Update() {
     // 获取CS2全局变量
     this->CSGlobalVars = MulNX::MRead<C_GlobalVars*>(this->Modules.client.GetBaseAddress() + cs2_dumper::offsets::client_dll::dwGlobalVars);
@@ -224,7 +221,6 @@ void CSController::Update() {
     }
     return;
 }
-
 
 void CSController::HandleFreeCameraPath(const CameraSystemIO* const IO) {
     const auto& pos = IO->Frame.view.position;

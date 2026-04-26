@@ -3,12 +3,6 @@
 #include <MulNX/Base/UI/UI.hpp>
 #include <MulNXExtensions/CS2/CSController/CSController.hpp>
 
-bool AdvancedViewController::Init() {
-    this->SendUINode(this->GetName(), [this](MulNX::UINode* node) {return this->Menu(node); });
-
-    return true;
-}
-
 bool AdvancedViewController::Menu(MulNX::UINode* node) {
     if (ImGui::CollapsingHeader("高级视角控制")) {
         MulNX::UI::Checkbox("启用高级视角控制", this->Enable);
@@ -80,6 +74,12 @@ bool AdvancedViewController::Menu(MulNX::UINode* node) {
             }
         }
     }
+
+    return true;
+}
+
+bool AdvancedViewController::Init() {
+    this->SendUINode(this->GetName(), [this](MulNX::UINode* node) {return this->Menu(node); });
 
     return true;
 }

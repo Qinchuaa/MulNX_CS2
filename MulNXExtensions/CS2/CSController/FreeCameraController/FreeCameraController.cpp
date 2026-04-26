@@ -2,11 +2,6 @@
 
 #include <MulNX/Base/UI/UI.hpp>
 
-bool FreeCameraController::Init() {
-    this->SendUINode(this->GetName(), [this](MulNX::UINode* node) {return this->Menu(node);});
-    return true;
-}
-
 void FreeCameraController::Menu(MulNX::UINode* node) {
     // 自由摄像机控制
     if (ImGui::CollapsingHeader("自由摄像机控制")) {
@@ -31,6 +26,11 @@ void FreeCameraController::Menu(MulNX::UINode* node) {
             MulNX::UI::SliderFloat("移动速度", this->MoveSpeed, 10.0f, 1000.0f);
         }
     }
+}
+
+bool FreeCameraController::Init() {
+    this->SendUINode(this->GetName(), [this](MulNX::UINode* node) {return this->Menu(node);});
+    return true;
 }
 
 bool FreeCameraController::HandleUpdate(CS2::CViewSetup* viewSetup) {

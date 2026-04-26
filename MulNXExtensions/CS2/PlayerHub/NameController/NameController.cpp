@@ -69,6 +69,7 @@ void NameController::ProcessMsg(MulNX::Message& Msg) {
     case "Name/Player/Set"_hash: {
         auto uid = Msg.p1.as<Steam64UID>();
         auto newName = Msg.asp.get<MulNX::NetExt>()->str1;
+        std::unique_lock lock(this->Hub()->smutex);
         this->SetReplace(uid, newName);
         break;
     }
@@ -109,7 +110,6 @@ void NameController::HandleVHook(CS2::CCSPlayerController* pPlayerController) {
 }
 
 bool NameController::SetReplace(Steam64UID uid, const std::string& newName) {
-    std::unique_lock lock(this->Hub()->smutex);
     if (newName.empty()) {
         auto it = this->nameReplaceInfo.find(uid);
         if (it == this->nameReplaceInfo.end()) {

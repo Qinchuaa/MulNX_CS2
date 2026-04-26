@@ -101,7 +101,7 @@ public:
     template<typename T>
     T* GetPtr() {
         T* pValue = nullptr;
-        pValue = reinterpret_cast<T*>((uintptr_t)(this) + 88);
+        pValue = reinterpret_cast<T*>((uintptr_t)(this) + 0x58);
         return pValue;
     }
 

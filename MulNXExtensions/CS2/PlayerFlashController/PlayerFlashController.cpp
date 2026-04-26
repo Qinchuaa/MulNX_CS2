@@ -2,17 +2,17 @@
 #include <MulNX/Base/UI/UI.hpp>
 #include <MulNXExtensions/CS2/CSController/CSController.hpp>
 
-bool PlayerFlashController::Init() {
-    this->SendUINode(this->GetName(), [this](MulNX::UINode* node) {return this->Menu(node);});
-    this->CS2()->handlesControlPlayer.push_back([this](CS2::CCSPlayerController* controller, CS2::C_CSPlayerPawn* pawn) {return this->HandleForceFlash(controller, pawn);});
-    return true;
-}
-
 bool PlayerFlashController::Menu(MulNX::UINode* node) {
     if (ImGui::CollapsingHeader("闪光效果控制")) {
         MulNX::UI::Checkbox("强制移除闪光效果", this->bForceNoFlash);
     }
 
+    return true;
+}
+
+bool PlayerFlashController::Init() {
+    this->SendUINode(this->GetName(), [this](MulNX::UINode* node) {return this->Menu(node);});
+    this->CS2()->handlesControlPlayer.push_back([this](CS2::CCSPlayerController* controller, CS2::C_CSPlayerPawn* pawn) {return this->HandleForceFlash(controller, pawn);});
     return true;
 }
 

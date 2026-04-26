@@ -3,6 +3,76 @@
 #include <MulNXExtensions/CS2/CSController/CSController.hpp>
 #include <MulNXExtensions/CS2/PlayerHub/PlayerHub.hpp>
 
+void SmokeController::Menu(MulNX::UINode* node) {
+    auto view = this->Hub()->showView.load(std::memory_order_acquire);
+    if (view == PlayerHub::View::Player) {
+        this->MenuPlayer(node);
+    }
+    else {
+        this->MenuTeam(node);
+    }
+}
+
+void SmokeController::MenuPlayer(MulNX::UINode* node) {
+    auto uid = this->Hub()->currentSteamId.load(std::memory_order_acquire);
+
+    uint32_t currentColorU32 = IM_COL32(255, 255, 255, 255);
+    auto it = this->playerColors.find(uid);
+    if (it != this->playerColors.end()) {
+        currentColorU32 = it->second;
+    }
+    else {
+        ImGui::Text("当前玩家没有自定义烟雾颜色，使用默认颜色");
+    }
+
+    ImVec4 colorVec4 = ImGui::ColorConvertU32ToFloat4(currentColorU32);
+    if (ImGui::ColorEdit4("烟雾颜色修改", (float*)&colorVec4,
+        ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel)) {
+        uint32_t newColorU32 = ImGui::ColorConvertFloat4ToU32(colorVec4);
+        MulNX::Message msg("Smoke/Player/Set"_hash);
+        msg.p1.as<Steam64UID>() = uid;
+        msg.p2.low<uint32_t>() = newColorU32;
+        this->ISys().PublishAsync(std::move(msg));
+    }
+
+    ImGui::SameLine();
+    if (ImGui::Button("重置")) {
+        MulNX::Message msg("Smoke/Player/Clear"_hash);
+        msg.p1.as<Steam64UID>() = uid;
+        this->ISys().PublishAsync(std::move(msg));
+    }
+}
+
+void SmokeController::MenuTeam(MulNX::UINode* node) {
+    auto team = this->Hub()->currentTeam.load(std::memory_order_acquire);
+
+    uint32_t currentColorU32 = IM_COL32(255, 255, 255, 255);
+    auto it = this->teamColors.find(team);
+    if (it != this->teamColors.end()) {
+        currentColorU32 = it->second;
+    }
+    else {
+        ImGui::Text("当前队伍没有自定义烟雾颜色，使用默认颜色");
+    }
+
+    ImVec4 colorVec4 = ImGui::ColorConvertU32ToFloat4(currentColorU32);
+    if (ImGui::ColorEdit4("烟雾颜色修改", (float*)&colorVec4,
+        ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel)) {
+        uint32_t newColorU32 = ImGui::ColorConvertFloat4ToU32(colorVec4);
+        MulNX::Message msg("Smoke/Team/Set"_hash);
+        msg.p1.low<uint32_t>() = newColorU32;
+        msg.p1.high<CS2::ui8TeamNum>() = team;
+        this->ISys().PublishAsync(std::move(msg));
+    }
+
+    ImGui::SameLine();
+    if (ImGui::Button("重置")) {
+        MulNX::Message msg("Smoke/Team/Clear"_hash);
+        msg.p1.high<CS2::ui8TeamNum>() = team;
+        this->ISys().PublishAsync(std::move(msg));
+    }
+}
+
 bool SmokeController::Init() {
     // 1. 定位并挂钩 SetSmokeProps
     auto target = this->CS2()->Modules.client.GetTextRegion()
@@ -132,75 +202,5 @@ void SmokeController::MySetSmokeProps(CS2::C_SmokeGrenadeProjectile* pSmoke) {
         pColorVec->y = (float)((c >> 8) & 0xFF);         // G
         pColorVec->z = (float)((c >> 16) & 0xFF);        // B
         return;
-    }
-}
-
-void SmokeController::Menu(MulNX::UINode* node) {
-    auto view = this->Hub()->showView.load(std::memory_order_acquire);
-    if (view == PlayerHub::View::Player) {
-        this->MenuPlayer(node);
-    }
-    else {
-        this->MenuTeam(node);
-    }
-}
-
-void SmokeController::MenuPlayer(MulNX::UINode* node) {
-    auto uid = this->Hub()->currentSteamId.load(std::memory_order_acquire);
-
-    uint32_t currentColorU32 = IM_COL32(255, 255, 255, 255);
-    auto it = this->playerColors.find(uid);
-    if (it != this->playerColors.end()) {
-        currentColorU32 = it->second;
-    }
-    else {
-        ImGui::Text("当前玩家没有自定义烟雾颜色，使用默认颜色");
-    }
-
-    ImVec4 colorVec4 = ImGui::ColorConvertU32ToFloat4(currentColorU32);
-    if (ImGui::ColorEdit4("烟雾颜色修改", (float*)&colorVec4,
-        ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel)) {
-        uint32_t newColorU32 = ImGui::ColorConvertFloat4ToU32(colorVec4);
-        MulNX::Message msg("Smoke/Player/Set"_hash);
-        msg.p1.as<Steam64UID>() = uid;
-        msg.p2.low<uint32_t>() = newColorU32;
-        this->ISys().PublishAsync(std::move(msg));
-    }
-
-    ImGui::SameLine();
-    if (ImGui::Button("重置")) {
-        MulNX::Message msg("Smoke/Player/Clear"_hash);
-        msg.p1.as<Steam64UID>() = uid;
-        this->ISys().PublishAsync(std::move(msg));
-    }
-}
-
-void SmokeController::MenuTeam(MulNX::UINode* node) {
-    auto team = this->Hub()->currentTeam.load(std::memory_order_acquire);
-
-    uint32_t currentColorU32 = IM_COL32(255, 255, 255, 255);
-    auto it = this->teamColors.find(team);
-    if (it != this->teamColors.end()) {
-        currentColorU32 = it->second;
-    }
-    else {
-        ImGui::Text("当前队伍没有自定义烟雾颜色，使用默认颜色");
-    }
-
-    ImVec4 colorVec4 = ImGui::ColorConvertU32ToFloat4(currentColorU32);
-    if (ImGui::ColorEdit4("烟雾颜色修改", (float*)&colorVec4,
-        ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel)) {
-        uint32_t newColorU32 = ImGui::ColorConvertFloat4ToU32(colorVec4);
-        MulNX::Message msg("Smoke/Team/Set"_hash);
-        msg.p1.low<uint32_t>() = newColorU32;
-        msg.p1.high<CS2::ui8TeamNum>() = team;
-        this->ISys().PublishAsync(std::move(msg));
-    }
-
-    ImGui::SameLine();
-    if (ImGui::Button("重置")) {
-        MulNX::Message msg("Smoke/Team/Clear"_hash);
-        msg.p1.high<CS2::ui8TeamNum>() = team;
-        this->ISys().PublishAsync(std::move(msg));
     }
 }
