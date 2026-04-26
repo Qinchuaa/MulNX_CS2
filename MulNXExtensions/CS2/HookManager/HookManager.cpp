@@ -18,12 +18,10 @@ bool HookManager::Init() {
 void HookManager::ActiveSystem() {
     this->CreateHook();
 }
-
 void HookManager::CreateHook() {
     // 准备临时的D3D11设备和交换链，以获取函数地址
     ID3D11Device* pTempD3DDevice = nullptr;
     IDXGISwapChain* pTempSwapChain = nullptr;
-
     // 尝试创建D3D11设备和交换链
     const unsigned level_count = 2;
     D3D_FEATURE_LEVEL levels[level_count] = { D3D_FEATURE_LEVEL_11_0, D3D_FEATURE_LEVEL_10_0 };
@@ -48,33 +46,34 @@ void HookManager::CreateHook() {
         &pTempD3DDevice,
         nullptr,
         nullptr);
-
     // 检查是否成功创建设备和交换链
     if (FAILED(hRusult)) {
         MulNX::ErrorTerminate("无法创建D3D11设备和交换链，错误代码: " + std::to_string(hRusult));
     }
-
     // Hook Present函数
-    this->hkPresent = MulNX::Hook::Create((uint8_t*)IVClass::Assume(pTempSwapChain)->GetVFuncPtr(8),
-        0, false, [this](RegContext* ctx, MulNX::Hook* hk)->bool {
+    // 函数开头：
+    // 0~4：Steam钩子（OBS游戏捕获钩子会与其交互，进行画面捕获）
+    // 5~9：在这里部署MulNX的钩子，注意此时OBS捕获已经完成，可以做到启动顺序无关的渲染分离
+    // 10+：其它汇编指令，我们的MulNX钩子最终跳转继续执行
+    this->hkPresent = MulNX::Hook::Create((uint8_t*)IVClass::Assume(pTempSwapChain)->GetVFuncPtr(8) + 5,
+        0, false, [this](RegContext* ctx, MulNX::Hook* hk) {
             if (this->GlobalVars->SystemReady.load(std::memory_order_acquire)) {
-                // 这里是Hook Present
-                // 我们从这里，偷到了游戏的真正的交换链指针
+                // 从这里偷取游戏真正的交换链指针
                 this->pSwapChain = (IDXGISwapChain*)ctx->rcx;
                 this->d3dInit();
                 this->BuildNew();
                 this->pUISystem->Render();
             }
-            return true;
+            return MulNX::Hook::Then::Continue;
         }).value();
     this->hkPresent->Attach();
     this->ISys().LogSucc("Present钩子已部署");
 
     // Hook ResizeBuffers函数
     this->hkResizeBuffers = MulNX::Hook::Create((uint8_t*)IVClass::Assume(pTempSwapChain)->GetVFuncPtr(13),
-        0, false, [this](RegContext* ctx, MulNX::Hook* hk)->bool {
+        0, false, [this](RegContext* ctx, MulNX::Hook* hk) {
             this->ReleaseOld();
-            return true;
+            return MulNX::Hook::Then::Continue;
         }).value();
     this->hkResizeBuffers->Attach();
     this->ISys().LogSucc("ResizeBuffers钩子已部署");
@@ -110,9 +109,8 @@ void HookManager::d3dInit() {
     this->CS2hWnd = sd.OutputWindow;
     // 以此为基础，Hook窗口过程，以便处理输入等消息
     this->hkWndProc = MulNX::Hook::Create((uint8_t*)GetWindowLongPtrW(this->CS2hWnd, GWLP_WNDPROC),
-        0, false, [this](RegContext* ctx, MulNX::Hook* hk)->bool {
-            bool CallRawFunc = this->MyWndProc((HWND)ctx->rcx, ctx->rdx, ctx->r8, ctx->r9);
-            return CallRawFunc;
+        0, false, [this](RegContext* ctx, MulNX::Hook* hk) {
+            return this->MyWndProc((HWND)ctx->rcx, ctx->rdx, ctx->r8, ctx->r9);
         }).value();
     this->hkWndProc->Attach();
     this->ISys().LogSucc("窗口过程钩子已部署");
@@ -148,22 +146,22 @@ void HookManager::BuildNew() {
 
 // ImGui窗口处理函数导入
 extern LRESULT ImGui_ImplWin32_WndProcHandler(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
-bool HookManager::MyWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
+MulNX::Hook::Then HookManager::MyWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
     if (uMsg == WM_CLOSE) {
         this->ISys().LogWarning(I18n("sys.shutdown_warning"));
     }
     std::unique_lock lock(this->pUISystem->UIMtx);
     if (ImGui_ImplWin32_WndProcHandler(hwnd, uMsg, wParam, lParam)) {
-        return false;
+        return MulNX::Hook::Then::Return;
     }
     ImGuiIO& io = ImGui::GetIO();
     // 鼠标：当ImGui想要捕获时总是拦截
     if (io.WantCaptureMouse && MulNX::Base::WIN32Msg::IsMouseMessage(uMsg)) {
-        return false;
+        return MulNX::Hook::Then::Return;
     }
     // 键盘：只在WantTextInput为true时拦截（表示输入框激活）
     else if (io.WantTextInput && MulNX::Base::WIN32Msg::IsKeyboardMessage(uMsg)) {
-        return false;
+        return MulNX::Hook::Then::Return;
     }
-    return true;
+    return MulNX::Hook::Then::Continue;
 }

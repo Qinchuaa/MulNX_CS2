@@ -4,7 +4,7 @@ config:
     PreviewOverride: true
   solutions:
     shortcutEnable: true
-    PlayingDraw: true
+    PlayingDraw: false
     PlayingOverride: true
   projects:
     ProjectShortcutEnable: true

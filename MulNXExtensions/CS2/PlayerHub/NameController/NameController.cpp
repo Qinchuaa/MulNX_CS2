@@ -36,14 +36,14 @@ void NameController::Menu(MulNX::UINode* node) {
 bool NameController::Init() {
     auto FnGetDecoratedPlayerName = this->CS2()->Modules.client.GetTextRegion().FindRegion(MulNX::CS2::Signatures::GetDecoratedPlayerName);
     this->hkGetDecoratedPlayerName = MulNX::Hook::Create(FnGetDecoratedPlayerName.Data(), 0, false,
-        [this](RegContext* ctx, MulNX::Hook* hk)->bool {
+        [this](RegContext* ctx, MulNX::Hook* hk) {
             // 这里注意，这里的名称获取，是需要进一步调用GetPlayerName的
             // 我们借助这一个比较稳定的特征，创建延迟Hook
             // 所以，这里同时不需要加锁，因为它已经满足上下文无关于我们的数据结构的访问了
             // 这里也一定不能加锁，不然可能会被写锁请求打断，导致死锁！
             auto playerController = (CS2::CCSPlayerController*)ctx->rcx;
             this->HandleVHook(playerController);
-            return true; // 继续执行原始函数，获取装饰名并写入 pBuffer
+            return MulNX::Hook::Then::Continue; // 继续执行原始函数，获取装饰名并写入 pBuffer
         }).value();
     this->hkGetDecoratedPlayerName->Attach();
     this->ISys().LogSucc("装饰玩家名称获取钩子已部署");
@@ -80,7 +80,7 @@ void NameController::ProcessMsg(MulNX::Message& Msg) {
 void NameController::HandleVHook(CS2::CCSPlayerController* pPlayerController) {
     if (this->bGetPlayerNameHooked)return;
     this->hkGetPlayerName = MulNX::Hook::Create(reinterpret_cast<uint8_t*>(pPlayerController->GetVFuncPtr(226)), 0, false,
-        [this](RegContext* ctx, MulNX::Hook* hk)->bool {
+        [this](RegContext* ctx, MulNX::Hook* hk) {
             // 而在这里，我们则需要加锁，因为我们要访问替换表了
             std::shared_lock lock(this->Hub()->smutex);
 
@@ -101,7 +101,7 @@ void NameController::HandleVHook(CS2::CCSPlayerController* pPlayerController) {
                 ctx->rax = (uintptr_t)originalName;
             }
 
-            return false; // 已调用原始函数，不再重复执行
+            return MulNX::Hook::Then::Return; // 已调用原始函数，不再重复执行
         }).value();
     this->hkGetPlayerName->Attach();
     this->bGetPlayerNameHooked = true;

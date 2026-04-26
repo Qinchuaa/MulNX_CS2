@@ -6,12 +6,11 @@
 #include <format>
 
 uintptr_t MulNX::Hook::Dispatch(Hook* pHookInstance, RegContext* ctx) {
-    // 返回true继续执行剩余指令，返回false则在恢复寄存器后直接ret
-    if (pHookInstance->callback(ctx, pHookInstance)) {
-        return pHookInstance->jmpTarget1;
-    }
-    else {
-        return pHookInstance->jmpTarget0;
+    auto then = pHookInstance->callback(ctx, pHookInstance);
+    switch (then) {
+    case MulNX::Hook::Then::Return:return pHookInstance->jmpTarget0;
+    case MulNX::Hook::Then::Continue:return pHookInstance->jmpTarget1;
+    default: return pHookInstance->jmpTarget1;
     }
 }
 
@@ -71,7 +70,7 @@ void* TryAlloc(uintptr_t target, size_t size) {
     return nullptr;
 }
 
-std::expected<std::unique_ptr<MulNX::Hook>, std::string> MulNX::Hook::Create(uint8_t* Target, int Len, bool extraStackAdjust, std::function<bool(RegContext*, Hook*)>&& callback) {
+std::expected<std::unique_ptr<MulNX::Hook>, std::string> MulNX::Hook::Create(uint8_t* Target, int Len, bool extraStackAdjust, std::function<MulNX::Hook::Then(RegContext*, Hook*)>&& callback) {
     if (0 < Len && Len < 5) {
         return std::unexpected(std::format("参数指定的长度是：{}  ，这个长度怎么可能放得下一个jmp rel32？？", Len));
     }

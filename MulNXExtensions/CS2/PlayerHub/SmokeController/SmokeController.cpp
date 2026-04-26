@@ -9,10 +9,10 @@ bool SmokeController::Init() {
         .FindRegion(MulNX::CS2::Signatures::SetSmokeProps).Data();
 
     this->hkSetSmokeProps = MulNX::Hook::Create(target, 0, false,
-        [this](RegContext* ctx, MulNX::Hook* hook) -> bool {
+        [this](RegContext* ctx, MulNX::Hook* hook) {
             // 再应用自定义颜色
             this->MySetSmokeProps(*ctx->P1<CS2::C_SmokeGrenadeProjectile*>());
-            return true;
+            return MulNX::Hook::Then::Continue;
         }).value();
     this->hkSetSmokeProps->Attach();
     this->ISys().LogSucc("烟雾属性设置钩子已部署");

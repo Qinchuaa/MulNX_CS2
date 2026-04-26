@@ -151,9 +151,9 @@ bool CSController::Init() {
     const auto& pattern = MulNX::CS2::Signatures::CallIsPlayingDemo;
     auto target = this->Modules.client.GetTextRegion().FindRegion(pattern);
 
-    this->hkPosCallIsPlayingDemo = MulNX::Hook::Create(target.Data(), 0, true, [this](RegContext* ctx, MulNX::Hook* Hook)->bool {
+    this->hkPosCallIsPlayingDemo = MulNX::Hook::Create(target.Data(), 0, true, [this](RegContext* ctx, MulNX::Hook* Hook) {
         this->HandleOverrideView((CS2::CViewSetup*)ctx->rsi);
-        return true;
+        return MulNX::Hook::Then::Continue;
         }).value();
     this->hkPosCallIsPlayingDemo->Attach();
     this->ISys().LogSucc("视角调用演示钩子已部署");

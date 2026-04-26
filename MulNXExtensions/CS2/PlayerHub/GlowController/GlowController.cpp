@@ -83,9 +83,9 @@ void GlowController::MenuTeam(MulNX::UINode* node) {
 bool GlowController::Init() {
     auto region = this->CS2()->Modules.client.GetTextRegion().FindRegion(MulNX::CS2::Signatures::SetGlowColor);
     auto target = region.Data();
-    this->hkSetGlowColor = MulNX::Hook::Create(target, 0, false, [this](RegContext* ctx, MulNX::Hook* hk)->bool {
+    this->hkSetGlowColor = MulNX::Hook::Create(target, 0, false, [this](RegContext* ctx, MulNX::Hook* hk) {
         this->MySetGlowColor(*ctx->P1<CS2::CGlowProperty*>(), ctx->P2<uint32_t>());
-        return true;
+        return MulNX::Hook::Then::Continue;
         }).value();
     this->hkSetGlowColor->Attach();
     this->ISys().LogSucc("发光颜色设置钩子已部署");

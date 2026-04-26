@@ -44,6 +44,7 @@ namespace MulNX {
     };
 
     class Hook {
+    public:
         enum class Result :uint8_t {
             Attached,
             AttachSuccess,
@@ -54,10 +55,15 @@ namespace MulNX {
             DetachError
         };
 
+        enum class Then {
+            Continue,
+            Return
+        };
+    private:
         const static size_t allocSize = 1000;
 
         bool attached = false;
-        std::function<bool(RegContext*, Hook*)> callback;
+        std::function<Then(RegContext*, Hook*)> callback;
         size_t threadNumInAsm = 0;
 
         void* pAsmDispatcher = nullptr;
@@ -88,7 +94,7 @@ namespace MulNX {
         void* GetRawStackAddr(RegContext* ctx);
 
         // 关于栈调整参数，当其为false时，模拟原始栈状态进行回调；当其为true时，则认为栈状态非16字节对齐，内部进行对齐操作（常常是函数中间Hook）
-        static std::expected<std::unique_ptr<Hook>, std::string> Create(uint8_t* Target, int Len, bool extraStackAdjust, std::function<bool(RegContext*, Hook*)>&& callback);
+        static std::expected<std::unique_ptr<Hook>, std::string> Create(uint8_t* Target, int Len, bool extraStackAdjust, std::function<Then(RegContext*, Hook*)>&& callback);
         Result Attach();
         Result Detach();
     };

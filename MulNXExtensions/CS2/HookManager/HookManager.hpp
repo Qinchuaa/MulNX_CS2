@@ -14,7 +14,7 @@ private:
     std::unique_ptr<MulNX::Hook> hkResizeBuffers = nullptr;
     // 窗口过程Hook
     std::unique_ptr<MulNX::Hook> hkWndProc = nullptr;
-    bool MyWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+    MulNX::Hook::Then MyWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
     // D3D11指针组
     ID3D11Device* pd3dDevice = nullptr;
