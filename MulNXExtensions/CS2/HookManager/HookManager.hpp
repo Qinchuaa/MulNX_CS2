@@ -6,7 +6,7 @@
 
 class HookManager final :public MulNX::Core::CoreStarterBase {
 private:
-    MulNX::IUISystem* pUISystem = nullptr;
+    MulNX::UISystem* pUISystem = nullptr;
 
     // Present函数Hook
     std::unique_ptr<MulNX::Hook> hkPresent = nullptr;

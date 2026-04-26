@@ -58,59 +58,55 @@ void ProjectManager::Project_DebugWindow() {
     auto w = MulNX::UI::RAIIWindow(I18n("camsys.proj.debug_window").c_str(), this->ShowWindow);
     if (!w)return;
     // 检查当前操作项目
-    if (this->ControllingProject) {
-        ImGui::Text(I18n("camsys.proj.current_label").c_str());
-        ImGui::SameLine();
-        ImGui::Text(this->ControllingProject->Name.c_str());
-        if (ImGui::Button(I18n("camsys.proj.switch_to_current").c_str())) {
-            this->Project_Apply(this->ControllingProject);
-        }
-        if (ImGui::Button(I18n("camsys.proj.unload_current").c_str())) {
-            this->Project_Delete(this->ControllingProject->Name);
-            this->ShowWindow.store(false, std::memory_order_release);
-            return;
-        }
-        if (ImGui::Button(I18n("camsys.proj.modify_keybind").c_str())) {
-            this->Buffer_KCPack = this->ControllingProject->KCPack;
-            this->OpenProjectKCPackDebugWindow = true;
-        }
-        ImGui::Separator();
-        ImGui::Separator();
-        if (ImGui::TreeNode(I18n("camsys.proj.enter_new_round").c_str())) {
-            if (!this->ControllingProject->OnNewRound.empty()) {
-                for (const std::string SolutionName : this->ControllingProject->OnNewRound) {
-                    ImGui::Text(SolutionName.c_str());
-                    ImGui::SameLine();
-                    if (ImGui::Button((I18n("camsys.proj.delete_on_new_round") + SolutionName).c_str())) {
-                        auto it = std::find(this->ControllingProject->OnNewRound.begin(), this->ControllingProject->OnNewRound.end(), SolutionName);
-                        if (it != this->ControllingProject->OnNewRound.end()) {
-                            this->ControllingProject->OnNewRound.erase(it);
-                        }
+    if (!this->ControllingProject) {
+        ImGui::Text(I18n("camsys.proj.no_selected").c_str());
+        return;
+    }
+    ImGui::Text(I18n("camsys.proj.current_label").c_str());
+    ImGui::SameLine();
+    ImGui::Text(this->ControllingProject->Name.c_str());
+    if (ImGui::Button(I18n("camsys.proj.switch_to_current").c_str())) {
+        this->Project_Apply(this->ControllingProject);
+    }
+    if (ImGui::Button(I18n("camsys.proj.unload_current").c_str())) {
+        this->Project_Delete(this->ControllingProject->Name);
+        this->ShowWindow.store(false, std::memory_order_release);
+        return;
+    }
+    if (ImGui::Button(I18n("camsys.proj.modify_keybind").c_str())) {
+        this->Buffer_KCPack = this->ControllingProject->KCPack;
+        this->OpenProjectKCPackDebugWindow = true;
+    }
+    ImGui::Separator();
+    ImGui::Separator();
+    if (ImGui::TreeNode(I18n("camsys.proj.enter_new_round").c_str())) {
+        if (!this->ControllingProject->OnNewRound.empty()) {
+            for (const std::string SolutionName : this->ControllingProject->OnNewRound) {
+                ImGui::Text(SolutionName.c_str());
+                ImGui::SameLine();
+                if (ImGui::Button((I18n("camsys.proj.delete_on_new_round") + SolutionName).c_str())) {
+                    auto it = std::find(this->ControllingProject->OnNewRound.begin(), this->ControllingProject->OnNewRound.end(), SolutionName);
+                    if (it != this->ControllingProject->OnNewRound.end()) {
+                        this->ControllingProject->OnNewRound.erase(it);
                     }
                 }
             }
-            else {
-                ImGui::Text(I18n("text.empty").c_str());
-            }
-            ImGui::TreePop();
         }
-        if (ImGui::TreeNode(I18n("camsys.proj.round_end").c_str())) {
-            if (!this->ControllingProject->OnRoundEnd.empty()) {
-                for (const std::string SolutionName : this->ControllingProject->OnRoundEnd) {
-                    ImGui::Text(SolutionName.c_str());
-                }
-            }
-            else {
-                ImGui::Text(I18n("text.empty").c_str());
-            }
-            ImGui::TreePop();
+        else {
+            ImGui::Text(I18n("text.empty").c_str());
         }
+        ImGui::TreePop();
     }
-    else {
-        ImGui::Text(I18n("camsys.proj.no_selected").c_str());
-    }
-    if (ImGui::Button(I18n("camsys.proj.close_debug_page").c_str())) {
-        this->ShowWindow.store(false, std::memory_order_release);
+    if (ImGui::TreeNode(I18n("camsys.proj.round_end").c_str())) {
+        if (!this->ControllingProject->OnRoundEnd.empty()) {
+            for (const std::string SolutionName : this->ControllingProject->OnRoundEnd) {
+                ImGui::Text(SolutionName.c_str());
+            }
+        }
+        else {
+            ImGui::Text(I18n("text.empty").c_str());
+        }
+        ImGui::TreePop();
     }
 }
 

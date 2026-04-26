@@ -36,7 +36,7 @@ namespace MulNX {
     // 3D抽象层
     class IAbstractLayer3D;
     // MulNX UI系统
-    class IUISystem;
+    class UISystem;
     // MulNX消息
     class Message;
     // MulNX消息类型

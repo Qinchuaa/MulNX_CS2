@@ -5,7 +5,7 @@
 #include "InputSystem/InputSystem.hpp"
 #include "MessageManager/IMessageManager.hpp"
 #include "GlobalVars/GlobalVars.hpp"
-#include "UISystem/IUISystem.hpp"
+#include "UISystem/UISystem.hpp"
 #include "Debugger/Debugger.hpp"
 #include "AbstractLayer3D/IAbstractLayer3D.hpp"
 #include "PathManager/PathManager.hpp"

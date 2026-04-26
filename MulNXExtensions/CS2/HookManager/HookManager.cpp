@@ -12,7 +12,7 @@
 using ResizeBuffers_t = HRESULT(__stdcall*)(IDXGISwapChain* This, UINT BufferCount, UINT Width, UINT Height, DXGI_FORMAT NewFormat, UINT SwapChainFlags);
 
 bool HookManager::Init() {
-    this->pUISystem = this->Core->ModuleManager()->FindModule<MulNX::IUISystem>("UISystem");
+    this->pUISystem = this->Core->ModuleManager()->FindModule<MulNX::UISystem>("UISystem");
     return true;
 }
 void HookManager::ActiveSystem() {
@@ -143,24 +143,15 @@ void HookManager::BuildNew() {
         this->needReBuild.store(false, std::memory_order_release);
     }
 }
-
-// ImGui窗口处理函数导入
-extern LRESULT ImGui_ImplWin32_WndProcHandler(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 MulNX::Hook::Then HookManager::MyWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
     if (uMsg == WM_CLOSE) {
         this->ISys().LogWarning(I18n("sys.shutdown_warning"));
     }
-    std::unique_lock lock(this->pUISystem->UIMtx);
-    if (ImGui_ImplWin32_WndProcHandler(hwnd, uMsg, wParam, lParam)) {
+    this->pUISystem->winMsgs.enqueue({ hwnd,uMsg,wParam,lParam });
+    if (this->pUISystem->WantCaptureMouse.load(std::memory_order_acquire) && MulNX::Win32::IsMouseMessage(uMsg)) {
         return MulNX::Hook::Then::Return;
     }
-    ImGuiIO& io = ImGui::GetIO();
-    // 鼠标：当ImGui想要捕获时总是拦截
-    if (io.WantCaptureMouse && MulNX::Base::WIN32Msg::IsMouseMessage(uMsg)) {
-        return MulNX::Hook::Then::Return;
-    }
-    // 键盘：只在WantTextInput为true时拦截（表示输入框激活）
-    else if (io.WantTextInput && MulNX::Base::WIN32Msg::IsKeyboardMessage(uMsg)) {
+    else if (this->pUISystem->WantTextInput.load(std::memory_order_acquire) && MulNX::Win32::IsKeyboardMessage(uMsg)) {
         return MulNX::Hook::Then::Return;
     }
     return MulNX::Hook::Then::Continue;

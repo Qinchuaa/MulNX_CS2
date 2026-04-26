@@ -1,8 +1,6 @@
 #include "WIN32Msg.hpp"
 
-#include <Windows.h>
-
-bool MulNX::Base::WIN32Msg::IsMouseMessage(UINT uMsg) {
+bool MulNX::Win32::IsMouseMessage(UINT uMsg) {
 	switch (uMsg) {
 	case WM_MOUSEMOVE:
 	case WM_LBUTTONDOWN: case WM_LBUTTONUP: case WM_LBUTTONDBLCLK:
@@ -20,7 +18,7 @@ bool MulNX::Base::WIN32Msg::IsMouseMessage(UINT uMsg) {
 		return false;
 	}
 }
-bool MulNX::Base::WIN32Msg::IsKeyboardMessage(UINT uMsg) {
+bool MulNX::Win32::IsKeyboardMessage(UINT uMsg) {
 	switch (uMsg) {
 	case WM_KEYDOWN: case WM_KEYUP: case WM_CHAR:
 	case WM_SYSKEYDOWN: case WM_SYSKEYUP: case WM_SYSCHAR:
