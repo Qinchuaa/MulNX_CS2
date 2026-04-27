@@ -1,131 +1,118 @@
-# Multiple Next eXtension (MulNX)
+# MulNX — CS2 多功能 OB 与制作平台
 
-## 前情提要
+**MulNX — A Multi-Functional CS2 Observing & Production Platform*
 
-- **请务必完整阅读此文档！！！！！**
-- **如果您只是用户，请下载Releases，而非代码库，代码库不保证稳定性**
-- <https://www.agtmatch.com/wlzlserver> 此为AGT赛事中心国内镜像源站点（非此项目官方）
+> 为 CS2 赛事直播、内容创作与游戏体验增强提供一站式解决方案。
+> *A one-stop solution for CS2 esports broadcasting, content creation, and gameplay enhancement.*
 
-## 概述
-
-- MulNX_CS2 是一款免费的 CS2 一站式运镜工具包，融合实时 GOTV 与后期 Demo 工作流，支持位置、欧拉角、FOV、景深全参数插值与自动运镜。
-- 提供即时模式 UI 与磁盘路径管理，同一工程数据可同时用于直播调试与后期制作，极大提升后期内容创作和赛事 OB 效率。
-- 独有 UI 与网络双接口设计：既可通过界面实时操控，也支持 WebSocket 协议与外部程序联动，满足自动化需求。
-- 内置 OBS 渲染分离机制，录制或推流时自动隐藏界面元素，输出纯净游戏画面，并支持高级视角控制实现复杂镜头运动。
-
-## 🚨 重要安全声明
-
-**请在使用前仔细阅读并理解以下内容，您的使用行为将被视为接受全部风险和同意MulNX许可证。**
-
-### 必须科普
-
-- **-insecure**：该启动项是V社提供的CS2可选启动参数，该参数将标记您的客户端为不可信状态，不被允许作为玩家的身份连接进入受VAC保护的服务器，以此换取您加载任意第三方插件而不会受到VAC监管的权力
-- **GOTV**：是V社提供的，对于任意服务器，即使受任何保护，可以让不可信客户端以**游戏外观察者（而非游戏内）**连接比赛服务器，获得游戏数据，以进行观战
-- **GSI**：全称*Game State Integration*是V社提供的，以网络为基础，传递本地客户端所在的，以观战身份连接的（无论游戏内外），游戏场上的数据，可以用于HUD开发（本项目**未利用**，而是允许兼容使用GSI和本项目）
-
-### 核心安全警告
-
-- **唯一官方启动方式**：必须通过CS2Injector.exe以管理员权限运行，并点击"打开CS2"按钮启动游戏，这会自动附加-insecure参数以关闭VAC，以此保护您的账号
-- **严禁手动注入**：禁止任何形式的自行DLL注入行为，否则可能触发VAC导致永久封禁
-- **关闭第三方平台**：运行时请关闭所有第三方游戏平台，防止误封风险，第三方平台可能缺失-insecure识别
-
-### 固有风险
-
-- 任何第三方程序都存在被反作弊系统误判的潜在风险
-- 游戏更新可能导致软件暂时不可用或不稳定
-
-### 另有特殊
-
-- DLL部分**没有**强制的-insecure识别，但这**不意味着**您可以在对局使用
-- 该设计仅仅是为了方便在**自有环境**使用本软件，而不是为了**游戏作弊**
-- 如果您尝试用来**作弊**，MulNX框架的庞大**运行时特征**足以让**任何**反作弊**轻易**识别并***封禁***您的**非法使用**！
-
-## 🛠️ 安装与使用
-
-### 运行环境要求
-
-- 《Counter-Strike 2》游戏
-- 基础功能正常的Windows10或Windows11
-- 部分情况可能需要“管理员权限”“兼容模式”
-
-### 快速开始
-
-1. 运行CS2Injector.exe（管理员权限）
-2. 点击*打开CS2*
-3. 首次使用需选择CS2安装目录
-
-### 使用前准备
-
-- 提前保存好游戏设置文件（MulNX可能会修改一些设置）
-- 关闭所有第三方游戏平台
-
-## 📈 版本信息
-
-### 版本号规则
-
-- **B版本号反映API版本，按照常规语义化版本规则分划版本，C版本号按如下规则定义**
-
-- `X`：决定性更新，范式变化、具有里程碑意义（较大可能引发部分资源文件不兼容）
-- `Y`：阶段性更新，新工具加入或旧功能改变（不包括旧功能完善）（可能引发部分资源文件不兼容）
-- `Z`：维护性更新，Bug修复、优化、适配性更新、旧功能完善（几乎不可能发生任何不兼容）
-
-## 💡 使用建议
-
-### 最佳实践
-
-- 始终通过MulNX打开游戏
-- 关注版本更新及时适配新版游戏
-- 使用前备份游戏设置文件
-
-### 故障排除
-
-- 如遇崩溃请检查是否关闭第三方平台
-- 游戏更新后请等待软件适配
-- 查看调试器输出信息排查问题
-
-## 开发者与支持
-
-- 开发者为**独立开发者**，此项目不经任何个人，组织协助完成
-- 开发者B站主页链接（有教学视频）：<https://space.bilibili.com/3546957930826262>
-- 项目交流QQ群号：1082590843
-- 开发者亦是完美世界电竞官方公会主播，完美世界是Valve游戏CS2于中国大陆地区官方代理
-- GitHub发布issue，亦可得到回复
-
-## 文档
-
-- 文档均位于**!docs**文件夹之下
-- 第三方库及许可，请参阅 Licenses
-- API开发相关，请参阅dev文件夹
-- 独立编译，请参阅 构建指南
-- 项目特色，请参阅 项目特色
-- 理解代码，请参阅 快速理解MulNX代码
-
-## 鸣谢
-
-- 向项目**HLAE**致以最崇高的敬意！致敬HLAE对于CS2注入式工具的伟大探索，开创了内容创作的新纪元！
-- 向项目**MinHook**致以最崇高的敬意！致敬MinHook对Hook的优雅实现，虽已不再使用，但其设计思想为 MulNX Hook 指明了方向！
-- 向本项目使用的所有第三方库致以最崇高的敬意！感谢它们的作者对计算机世界的伟大贡献！
-
-## 捐赠
-
-- 感谢以下用户的捐赠：
-- 慵懒
-- ｜
-- 天街下小鱼
-- 这里的黎明静悄悄
-- OA
+[![License](https://img.shields.io/badge/License-MulNX%201.0-blue)](LICENSE.txt)
 
 ---
 
-## 总结：安全使用准则
+## ⚠️ 安全声明 · Safety Notice
 
-为确保您的账号安全与最佳体验，请您务必：
+**使用本软件前，请务必阅读对应语言的用户手册与完整安全指南。**
+*You MUST read the full user guide and safety instructions in your language before using this software.*
 
-1. ✅ 关闭所有第三方平台
-2. ✅ 始终使用MulNX启动器打开游戏  
-3. ✅ 永不自行进行DLL注入
-4. ✅ 关注版本更新，及时适配新版游戏
+→ **简体中文**：[用户手册](docs/readmes/zh-CN/user.md)
+→ **English**：[User Guide](docs/readmes/en/user.md)
 
-您对本软件的负责任使用，是保障其持续发展和整个社区安全的基础。
+---
 
-**祝您使用愉快！**
+## ◇ 核心领域 · Key Domains
+
+**核心特性**
+*Core features.*
+
+实时 GOTV 与后期 Demo 双模式无缝衔接，同一工程数据同时服务于直播调试与后期精编。
+*Seamless dual-mode support for live GOTV and post-production demos. One project file serves both live broadcast and cinematic editing.*
+
+---
+
+**运镜领域**
+*Camera domain.*
+
+全参数关键帧插值，四层资源管理体系，支持位置、角度、FOV、景深的平滑过渡。
+*Full keyframe interpolation for position, rotation, FOV, and depth of field. Four-layer resource management.*
+
+---
+
+**UI 领域 — 幽灵 UI**
+*UI domain — Ghost UI.*
+
+UI 事实显现于游戏画面之上，OBS 游戏捕获却看到纯净画面，无需任何额外设置。
+*The UI renders visibly in-game, yet OBS game capture sees a clean image. No extra setup required.*
+
+---
+
+**游戏控制领域**
+*Game control domain.*
+
+发光、烟雾、投掷物、闪光 — 视觉增强与信息辅助的全局控制。
+*Glow, smoke, projectiles, flash — unified control for visual enhancement and information assistance.*
+
+---
+
+**独立输入控制领域**
+*Independent input control domain.*
+
+捕获键盘原始输入，独立于游戏自身输入系统，支持组合键与连击检测，为高速操作提供稳定可靠的控制层。
+*Captures raw keyboard input independently of the game's own input system, supporting key combinations and multi-tap detection. A stable and reliable control layer for high-speed operation.*
+
+---
+
+**网络领域**
+*Network domain.*
+
+WebSocket 开放接口，可与外部程序、导播台联动，满足专业制播需求。
+*Open WebSocket API for integration with external software and broadcast controllers.*
+
+---
+
+**架构领域**
+*Architecture domain.*
+
+严谨的多线程设计确保高性能与稳定性，异步日志系统不阻塞主渲染流程。
+*Rigorous multi-threading design for high performance and stability. Asynchronous logging keeps the main rendering thread unblocked.*
+
+---
+
+**国际化领域**
+*Internationalization domain.*
+
+内置多语言支持，界面与文档均可按语言分流，方便全球用户使用。
+*Built-in multi-language support; both the interface and documentation can adapt to different locales.*
+
+---
+
+## ◇ 文档 · Documentation
+
+| 简体中文 | English |
+| --- | --- |
+| [用户手册](docs/readmes/zh-CN/user.md) | [User Guide](docs/readmes/en/user.md) |
+| [技术总览](docs/readmes/zh-CN/tech.md) | [Technical Overview](docs/readmes/en/tech.md) |
+
+---
+
+## ◇ 社区与支持 · Community & Support
+
+**Bilibili**：[开发者主页与教程](https://space.bilibili.com/3546957930826262)
+*Developer's Bilibili channel (Chinese, with tutorial videos)*
+
+**QQ 群**：1082590843
+*QQ group (Chinese)*
+
+**GitHub Issues**：
+
+---
+
+## ◇ 许可证 · License
+
+本项目采用 [**MulNX 许可证 1.0**](LICENSE.txt)。
+*This project is licensed under the [**MulNX License 1.0**](LICENSE.txt).*
+
+**核心条款概要**：未修改本软件 → 可自由使用、再分发（含商用）；修改本软件 → 仅限内部使用，禁止再分发或对外提供服务。
+*In short: Unmodified → free to use and redistribute, including commercially. Modified → internal use only; redistribution and providing as a service are prohibited.*
+
+英文参考翻译：[LICENSE.en.txt](LICENSE.en.txt)
+*[LICENSE.en.txt](LICENSE.en.txt) is an unofficial reference translation. The Chinese original is the legally binding version.*
