@@ -27,34 +27,27 @@ void ModuleManager::ProcessMsg(MulNX::Message& Msg) {
     }
 }
 
-bool ModuleManager::RegisteModule(std::unique_ptr<MulNX::ModuleBase>&& Module, int Priority) {
+bool ModuleManager::RegisteModule(std::unique_ptr<MulNX::ModuleBase>&& Module) {
     std::unique_lock lock(this->smutex);
-    if (!Module->HModule.IsValid()) {
-        Module->HModule = MulNXHandle::CreateHandle();
-    }
-    // 先保存模块句柄，因为后续需要使用
-    MulNXHandle hModule = Module->HModule;
-    // 再创建名称到句柄的映射
+    MulNXHandle hModule = MulNXHandle::CreateHandle();
+    Module->HModule = hModule;    
     this->NameToHandleMap[Module->GetName()] = hModule;
-    // 最后将模块保存到Modules中
-    this->Modules[hModule] = std::move(Module);
-    // 同时记录优先级
-    this->PriorityToHandleMap[Priority] = hModule;
+    this->modules[hModule] = std::move(Module);
     return true;
 }
 ModuleManager& ModuleManager::CreateSystemModules() {
     (*this)
-        .CreateModule<MulNX::IPCer>("IPCer", 3)// IPC模块
-        .CreateModule<MulNX::PathManager>("PathManager", 4)// 路径管理器模块
-        .CreateModule<MulNX::I18nManager>("I18nManager", 5)
-        .CreateModule<MulNX::MessageManager>("MessageManager", 6)// 消息管理器模块
-        .CreateModule<MulNX::UISystem>("UISystem", 7)// UI系统模块
-        .CreateModule<MulNX::Logger>("Logger", 8)
-        .CreateModule<MulNX::Debugger>("Debugger", 10)// 调试器模块
-        .CreateModule<MulNX::HandleSystem>("HandleSystem", 20)// 句柄系统模块
-        .CreateModule<MulNX::InputSystem>("InputSystem", 50)// 输入系统模块
-        .CreateModule<MulNX::GlobalVars>("GlobalVars", 70)// 全局变量模块
-        .CreateModule<MulNX::TaskSystem>("TaskSystem", 80)// 任务系统
+        .CreateModule<MulNX::IPCer>("IPCer")// IPC模块
+        .CreateModule<MulNX::PathManager>("PathManager")// 路径管理器模块
+        .CreateModule<MulNX::I18nManager>("I18nManager")
+        .CreateModule<MulNX::MessageManager>("MessageManager")// 消息管理器模块
+        .CreateModule<MulNX::UISystem>("UISystem")// UI系统模块
+        .CreateModule<MulNX::Logger>("Logger")
+        .CreateModule<MulNX::Debugger>("Debugger")// 调试器模块
+        .CreateModule<MulNX::HandleSystem>("HandleSystem")// 句柄系统模块
+        .CreateModule<MulNX::InputSystem>("InputSystem")// 输入系统模块
+        .CreateModule<MulNX::GlobalVars>("GlobalVars")// 全局变量模块
+        .CreateModule<MulNX::TaskSystem>("TaskSystem")// 任务系统
         // ID 100(最后一个模块)分配给3D抽象层
         ;
 
@@ -68,12 +61,12 @@ MulNX::ModuleBase* ModuleManager::FindModule(const std::string& Name) {
         return nullptr;
     }
     MulNXHandle HModule = it->second;
-    auto mit = this->Modules.find(HModule);
-    if (mit == this->Modules.end()) {
+    auto it2 = this->modules.find(HModule);
+    if (it2 == this->modules.end()) {
         MulNX::ErrorTerminate("查找模块错误 0x2");
         return nullptr;
     }
-    return mit->second.get();
+    return it2->second.get();
 }
 MulNX::IAbstractLayer3D* ModuleManager::FindAbstractLayer3D() {
     return this->FindModule<MulNX::IAbstractLayer3D>(this->AbstractLayer3DName);
@@ -81,9 +74,7 @@ MulNX::IAbstractLayer3D* ModuleManager::FindAbstractLayer3D() {
 
 bool ModuleManager::ModulesBaseInit() {
     std::shared_lock lock(this->smutex);
-    // 通过有序的初始化任务列表进行初始化，尽管Modules是无序的
-    for (auto& [Priority, hModule] : this->PriorityToHandleMap) {
-        auto* pModule = this->Modules[hModule].get();
+    for (auto& [hModule,pModule] : this->modules) {
         if (!pModule->BaseInit(this->Core)) {
             MulNX::ErrorTerminate("在模块初始化时出现错误，模块名：" + pModule->GetName());
             return false;
@@ -101,15 +92,11 @@ bool ModuleManager::ModulesBaseInit() {
 bool ModuleManager::ModulesInit() {
     std::shared_lock lock(this->smutex);
     // 通过有序的初始化任务列表进行初始化，尽管Modules是无序的
-    for (auto& [Priority, hModule] : this->PriorityToHandleMap) {
-        auto* pModule = this->Modules[hModule].get();
+    for (auto& [hModule, pModule] : this->modules) {
         if (!pModule->EntryInit()) {
             MulNX::ErrorTerminate("在模块初始化时出现错误，模块名：" + pModule->GetName());
             return false;
         }
     }
-    this->ISys().LogInfo("注意: AbstractLayer3D(3D抽象层)被绑定为" + this->AbstractLayer3DName);
-
-    // 完成初始化
     return true;
 }

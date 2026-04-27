@@ -14,6 +14,3 @@ bool MulNXHandle::IsValid()const {
 uint64_t MulNXHandle::GetValue()const {
     return this->Value;
 }
-bool MulNXHandle::operator == (const MulNXHandle& Other)const {
-    return this->Value == Other.Value;
-}

@@ -1,5 +1,6 @@
 #pragma once
 
+#include <compare>
 #include <cstdint>
 #include <atomic>
 
@@ -15,7 +16,8 @@ public:
     static MulNXHandle CreateHandle();
     bool IsValid()const;
     uint64_t GetValue()const;
-    bool operator == (const MulNXHandle& Other)const;
+    bool operator == (const MulNXHandle& Other)const = default;
+    auto operator<=>(const MulNXHandle&)const = default;
 };
 namespace std {
     template<>
