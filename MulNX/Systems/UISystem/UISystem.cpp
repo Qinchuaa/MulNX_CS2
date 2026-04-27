@@ -9,7 +9,9 @@
 #include <MulNX/Systems/InputSystem/InputSystem.hpp>
 #include <MulNX/Systems/GlobalVars/GlobalVars.hpp>
 #include <yaml-cpp/yaml.h>
+#include <MulNXThirdParty/ImGuiStyleSerializer.h>
 #include <Windows.h>
+#include <fstream>
 
 bool MulNX::UISystem::Init() {
     this->ISys()
@@ -19,6 +21,14 @@ bool MulNX::UISystem::Init() {
     return true;
 }
 
+
+// auto stylePath = this->ISys().PathGet("Config") / "ImStyle.yaml";
+// ImGuiStyle& style = ImGui::GetStyle();
+// YAML::Node sroot;
+// ImGuiYaml::StyleToYaml(style, sroot);
+// std::ofstream fout(stylePath);
+// fout << sroot;
+
 void MulNX::UISystem::ProcessMsg(MulNX::Message& Msg) {
     switch (Msg.type) {
     case "UISystem/Start"_hash: {
@@ -26,7 +36,7 @@ void MulNX::UISystem::ProcessMsg(MulNX::Message& Msg) {
         this->UIContext.EntryDraw = std::move(*pStr);
         this->UISystemRunning = true;
         this->ISys().LogWarning("接收到启动消息，UI系统开始启动");
-        MulNX::SetUIStyle();
+
         // 设置ini文件路径
         ImGuiIO& io = ImGui::GetIO();
         auto IniPath = this->ISys().PathGet("Config") / "MulNXUIConfig.ini";
@@ -34,16 +44,27 @@ void MulNX::UISystem::ProcessMsg(MulNX::Message& Msg) {
         this->strImguiIniPath = MulNX::Base::CharUtility::FilePathToString(IniPath);
         io.IniFilename = this->strImguiIniPath.c_str();
         try {
-            // 加载字体
-            auto cfgPath = this->ISys().PathManager()->PathGetForShared("Config") / "ui.yaml";
-            this->ISys().LogInfo(I18n("ui.font.cfg.load", cfgPath.string()));
-            YAML::Node root = YAML::LoadFile(cfgPath.string());
-            auto fontFilePath = root["font"]["path"].as<std::string>();
-            auto fontSize = root["font"]["size"].as<float>();
-            this->ISys().LogSucc(I18n("ui.font.cfg.load_succ", fontFilePath, fontSize));
-            this->ISys().LogInfo(I18n("ui.font.load", fontFilePath));
-            io.Fonts->AddFontFromFileTTF(fontFilePath.c_str(), fontSize);
-            this->ISys().LogSucc(I18n("ui.font.load_succ", fontFilePath));
+            {
+                // 加载字体
+                auto cfgPath = this->ISys().PathGet("Config") / "ui.yaml";
+                this->ISys().LogInfo(I18n("ui.font.cfg.load", cfgPath.string()));
+                YAML::Node root = YAML::LoadFile(cfgPath.string());
+                auto fontFilePath = root["font"]["path"].as<std::string>();
+                auto fontSize = root["font"]["size"].as<float>();
+                this->ISys().LogSucc(I18n("ui.font.cfg.load_succ", fontFilePath, fontSize));
+                this->ISys().LogInfo(I18n("ui.font.load", fontFilePath));
+                io.Fonts->AddFontFromFileTTF(fontFilePath.c_str(), fontSize);
+                this->ISys().LogSucc(I18n("ui.font.load_succ", fontFilePath));
+            }
+            {
+                // 加载Style
+                auto stylePath = this->ISys().PathGet("Config") / "ImStyle.yaml";
+                YAML::Node root = YAML::LoadFile(stylePath.string());
+                ImGuiStyle newStyle;
+                if (ImGuiYaml::YamlToStyle(root, newStyle)) {
+                    ImGui::GetStyle() = newStyle;
+                }
+            }
         }
         catch (const std::exception& e) {
             this->ISys().LogError(e.what());
