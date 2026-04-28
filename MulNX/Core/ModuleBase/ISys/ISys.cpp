@@ -1,5 +1,5 @@
-#include <MulNX/Core/Cores.hpp>
-#include <MulNX/Systems/ISystems.hpp>
+#include <MulNX/Systems/MessageManager/MessageManager.hpp>
+#include <MulNX/Systems/PathManager/PathManager.hpp>
 
 MulNX::C_ISys MulNX::ModuleBase::ISys() {
     return C_ISys(this);
@@ -44,10 +44,10 @@ MulNX::C_ISys& MulNX::C_ISys::SubscribeAsync(const std::string& MsgType) {
     return *this;
 }
 void MulNX::C_ISys::PublishAsync(MulNX::Message&& Msg) {
-    this->pModuleBase->IMsgManager->Publish(std::move(Msg));
+    this->pModuleBase->pMsgManager->Publish(std::move(Msg));
 }
 void MulNX::C_ISys::PublishAsync(MulNX::MsgType Msg) {
-    this->pModuleBase->IMsgManager->Publish(MulNX::Message(Msg));
+    this->pModuleBase->pMsgManager->Publish(MulNX::Message(Msg));
 }
 
 std::filesystem::path MulNX::C_ISys::PathGet(const std::string& Target) {

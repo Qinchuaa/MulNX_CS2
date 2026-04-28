@@ -4,7 +4,7 @@
 // 管理整个系统消息的发送和接受
 // 消息由发布者创建，经过发布后，生命周期的管理即委托给消息管理器
 
-#include "IMessageManager.hpp"
+#include <MulNX/Core/ModuleBase/ModuleBase.hpp>
 #include "MessageChannel/MessageChannel.hpp"
 #include <unordered_map>
 #include <MulNXThirdParty/queue/concurrentqueue.h>
@@ -15,9 +15,8 @@ namespace MulNX {
         std::vector<MessageChannel*>Subscribers;
         std::string RawString;
     };
-    class MessageManager final :public IMessageManager {
+    class MessageManager final :public MulNX::ModuleBase {
         friend MessageChannel;
-        friend IMessageManager;
     private:
         // 存储类
         std::unordered_map<MulNX::MsgType, MsgMeta>MsgMap{};
@@ -31,11 +30,11 @@ namespace MulNX {
         // 接口实现：
 
         // 创建私有消息队列（但是生命周期仍然委托给消息管理器）
-        MulNXHandle CreateMessageChannel()override;
+        MulNXHandle CreateMessageChannel();
         // 获取消息管道
-        IMessageChannel* GetMessageChannel(const MulNXHandle& hChannel)override;
+        MessageChannel* GetMessageChannel(const MulNXHandle& hChannel);
         // 需要在堆中构建消息，消息的创建由发送者负责，消息的销毁由消息总线负责
-        bool Publish(Message&& Msg)override;
+        bool Publish(Message&& Msg);
 
         bool Subscribe(MessageChannel* const pChannel, const std::string& Type);
 

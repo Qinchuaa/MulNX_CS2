@@ -1,8 +1,6 @@
 #include "GlobalVars.hpp"
 
 #include <MulNX/Core/Core.hpp>
-#include <MulNX/Systems/MessageManager/IMessageManager.hpp>
-
 #include <chrono>
 
 bool MulNX::GlobalVars::Init() {

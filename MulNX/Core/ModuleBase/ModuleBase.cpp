@@ -1,8 +1,11 @@
 #include "ModuleBase.hpp"
 
 #include <MulNX/Base/UI/UI.hpp>
-#include <MulNX/Core/Cores.hpp>
-#include <MulNX/Systems/ISystems.hpp>
+#include <MulNX/Core/Core.hpp>
+#include <MulNX/Core/ModuleManager/ModuleManager.hpp>
+#include <MulNX/Systems/MessageManager/MessageManager.hpp>
+#include <MulNX/Systems/UISystem/UISystem.hpp>
+#include <MulNX/Systems/TaskSystem/TaskSystem.hpp>
 
 bool MulNX::ModuleBase::SetName(std::string&& Name) {
     this->ModuleName = std::move(Name);
@@ -22,18 +25,13 @@ bool MulNX::ModuleBase::BaseInit(MulNX::Core::Core* core) {
     this->Core = core;
     try {
         auto* moduleManager = this->Core->ModuleManager();
-        this->IMsgManager = moduleManager->FindModule<MulNX::IMessageManager>("MessageManager");
+        this->pMsgManager = moduleManager->FindModule<MulNX::MessageManager>("MessageManager");
         this->IDebugger = moduleManager->FindModule<MulNX::Debugger>("Debugger");
         this->GlobalVars = moduleManager->FindModule<MulNX::GlobalVars>("GlobalVars");
         this->AL3D = moduleManager->FindAbstractLayer3D();
         this->pInputSystem = moduleManager->FindModule<MulNX::InputSystem>("InputSystem");
         this->pPathManager = moduleManager->FindModule<MulNX::PathManager>("PathManager");
-
-        if (!this->HModule.IsValid()) {
-            this->HModule = MulNXHandle::CreateHandle();
-        }
-
-        this->MainMsgChannel = this->IMsgManager->GetMessageChannel(this->IMsgManager->CreateMessageChannel());
+        this->MainMsgChannel = this->pMsgManager->GetMessageChannel(this->pMsgManager->CreateMessageChannel());
     }
     catch (...) {
         return false;
@@ -71,7 +69,7 @@ bool MulNX::ModuleBase::EntryInit() {
     return true;
 }
 void MulNX::ModuleBase::EntryProcessMsg() {
-    MulNX::IMessageChannel* Channel = this->MainMsgChannel;
+    MulNX::MessageChannel* Channel = this->MainMsgChannel;
     MulNX::Message Msg{};
     while (Channel->PullMessage(Msg)) {
         this->ProcessMsg(Msg);

@@ -1,7 +1,10 @@
 #include "CoreStarterBase.hpp"
 
-#include <MulNX/Core/Cores.hpp>
-#include <MulNX/Systems/ISystems.hpp>
+#include <MulNX/Common/Message.hpp>
+#include <MulNX/Core/Core.hpp>
+#include <MulNX/Core/ModuleManager/ModuleManager.hpp>
+#include <MulNX/Systems/I18nManager/I18nManager.hpp>
+#include <MulNX/Systems/GlobalVars/GlobalVars.hpp>
 
 bool MulNX::Core::CoreStarterBase::SystemInit(MulNX::Core::Core* pCore) {
     // 一阶段初始化核心启动器

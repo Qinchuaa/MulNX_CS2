@@ -11,7 +11,7 @@ namespace MulNX {
         friend MulNX::Core::Core;
         friend C_ISys;
     private:
-        MulNX::IMessageManager* IMsgManager = nullptr;
+        MulNX::MessageManager* pMsgManager = nullptr;
         MulNX::PathManager* pPathManager = nullptr;
     protected:
         // 父模块句柄
@@ -30,7 +30,7 @@ namespace MulNX {
 		MulNXHandle HModule;
         IAbstractLayer3D* AL3D = nullptr;
         Debugger* IDebugger = nullptr;
-        MulNX::IMessageChannel* MainMsgChannel = nullptr;
+        MulNX::MessageChannel* MainMsgChannel = nullptr;
         // 用于指示UI不应该再发送消息
         std::atomic<bool> UIBusy = false;
         std::shared_mutex smutex;

@@ -1,11 +1,12 @@
 #pragma once
 
-#include "IMessageChannel.hpp"
-#include <MulNX/Systems/MessageManager/Message.hpp>
+#include <MulNX/Base/MulNXHandle/MulNXHandle.hpp>
+#include <MulNX/Common/Message.hpp>
+#include <MulNX/Config/Config.hpp>
 #include <MulNXThirdParty/queue/concurrentqueue.h>
 
 namespace MulNX {
-	class MessageChannel final :public IMessageChannel {
+	class MessageChannel final {
 		friend class IMessageManager;
 		friend class MessageManager;
 		MessageManager* MsgManager = nullptr;
@@ -14,11 +15,10 @@ namespace MulNX {
         moodycamel::ConcurrentQueue<MulNX::Message>Messages;
     public:
 		MessageChannel(MessageManager* MsgManager);
-	private:
-        IMessageChannel& Subscribe(const std::string& MsgType)override;
-		bool PushMessage(Message&& Msg)override;
-		bool PullMessage(Message& OutMsg)override;
-		bool HasMessage()const override;
-		MulNXHandle GetHandle()const override;
+        MessageChannel& Subscribe(const std::string& MsgType);
+		bool PushMessage(Message&& Msg);
+		bool PullMessage(Message& OutMsg);
+		bool HasMessage()const;
+		MulNXHandle GetHandle()const;
 	};
 }

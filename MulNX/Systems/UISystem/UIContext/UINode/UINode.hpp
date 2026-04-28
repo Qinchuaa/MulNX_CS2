@@ -1,10 +1,7 @@
 #pragma once
 
-#include <MulNX/Systems/HandleSystem/IHandleSystem.hpp>
-#include <MulNX/Systems/MessageManager/IMessageManager.hpp>
+#include <MulNX/Systems/MessageManager/MessageManager.hpp>
 #include <functional>
-
-
 
 namespace MulNX {
     class UIContext;
@@ -12,7 +9,7 @@ namespace MulNX {
     public:
         std::string name{};
         std::function<void(UINode*)>MyFunc = nullptr;
-        MulNX::IMessageManager* pMsgManager = nullptr;
+        MulNX::MessageManager* pMsgManager = nullptr;
 
         // 按照线程管理进行成员分类
 

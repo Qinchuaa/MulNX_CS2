@@ -1,6 +1,18 @@
 #include "ModuleManager.hpp"
+#include <MulNX/Common/Message.hpp>
 #include <MulNX/Core/Core.hpp>
-#include <MulNX/Systems/Systems.hpp>
+
+#include <MulNX/Systems/IPCer/IPCer.hpp>
+#include <MulNX/Systems/PathManager/PathManager.hpp>
+#include <MulNX/Systems/I18nManager/I18nManager.hpp>
+#include <MulNX/Systems/MessageManager/MessageManager.hpp>
+#include <MulNX/Systems/UISystem/UISystem.hpp>
+#include <MulNX/Systems/Logger/Logger.hpp>
+#include <MulNX/Systems/Debugger/Debugger.hpp>
+#include <MulNX/Systems/HandleSystem/HandleSystem.hpp>
+#include <MulNX/Systems/InputSystem/InputSystem.hpp>
+#include <MulNX/Systems/GlobalVars/GlobalVars.hpp>
+#include <MulNX/Systems/TaskSystem/TaskSystem.hpp>
 
 using namespace MulNX::Core;
 

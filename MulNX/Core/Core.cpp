@@ -1,7 +1,6 @@
 #include "Core.hpp"
 #include "CoreStarterBase/CoreStarterBase.hpp"
 #include "ModuleManager/ModuleManager.hpp"
-#include <MulNX/Systems/ISystems.hpp>
 
 MulNX::Core::Core::Core(std::string&& Name) :
     CoreName(Name) {

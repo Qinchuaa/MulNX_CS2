@@ -1,13 +1,8 @@
 #pragma once
 
+#include <MulNX/Common/Message.hpp>
 #include <MulNX/Core/ModuleBase/ModuleBase.hpp>
-#include <MulNX/Systems/MessageManager/Message.hpp>
-
-#include <algorithm>
 #include <deque>
-#include <string>
-#include <filesystem>
-#include <fstream>
 
 namespace MulNX {
     class Debugger final :public MulNX::ModuleBase {

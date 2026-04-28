@@ -1,290 +1,338 @@
 +----------新的日志片段----------+
 当游戏关闭时发生异常是可预见的，请忽略
 
-[2026-04-27 09:34:37.4396450][提示][ModuleManager]注意: AbstractLayer3D(3D抽象层)被绑定为CSController
-[2026-04-27 09:34:37.4396920][成功][ModuleManager]成功订阅消息：ModuleManager/ModuleInfo/Request
-[2026-04-27 09:34:37.4396990][提示][ModuleManager]发送了一个任务进入消息系统
-[2026-04-27 09:34:37.4397000][成功][ModuleManager]初始化成功!
-[2026-04-27 09:34:37.4397110][成功][HookManager]初始化成功!
-[2026-04-27 09:34:37.4402530][成功][IPCer]初始化成功!
-[2026-04-27 09:34:37.4405980][提示][PathManager]检测到共享目录已创建：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\Saves
-[2026-04-27 09:34:37.4406350][提示][PathManager]检测到共享目录已创建：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\Config
-[2026-04-27 09:34:37.4406690][提示][PathManager]检测到共享目录已创建：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\Log
-[2026-04-27 09:34:37.4406720][成功][PathManager]初始化成功!
-[2026-04-27 09:34:37.4509020][成功][I18nManager]语言文件加载成功：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\I18nManager\Language\lan.yaml
-[2026-04-27 09:34:37.4512470][成功][I18nManager]初始化成功!
-[2026-04-27 09:34:37.4512500][成功][MessageManager]初始化成功!
-[2026-04-27 09:34:37.4512650][成功][UISystem]成功订阅消息：UISystem/Start
-[2026-04-27 09:34:37.4512680][成功][UISystem]成功订阅消息：UISystem/ModulePush
-[2026-04-27 09:34:37.4512690][成功][UISystem]初始化成功!
-[2026-04-27 09:34:37.4516800][提示][Logger]发送了一个任务进入消息系统
-[2026-04-27 09:34:37.4516820][成功][Logger]初始化成功!
-[2026-04-27 09:34:37.4517050][提示][Debugger]发送了一个UI节点进入消息系统
-[2026-04-27 09:34:37.4517080][提示][Debugger]发送了一个任务进入消息系统
-[2026-04-27 09:34:37.4517150][成功][Debugger]成功订阅消息：Log/Info
-[2026-04-27 09:34:37.4517170][成功][Debugger]成功订阅消息：Log/Succ
-[2026-04-27 09:34:37.4517200][成功][Debugger]成功订阅消息：Log/Warning
-[2026-04-27 09:34:37.4517220][成功][Debugger]成功订阅消息：Log/Error
-[2026-04-27 09:34:37.4517240][成功][Debugger]成功订阅消息：Debugger/SetMaxInfoCount
-[2026-04-27 09:34:37.4517280][成功][Debugger]初始化成功!
-[2026-04-27 09:34:37.4517290][成功][HandleSystem]初始化成功!
-[2026-04-27 09:34:37.4517350][提示][InputSystem]发送了一个任务进入消息系统
-[2026-04-27 09:34:37.4517370][成功][InputSystem]初始化成功!
-[2026-04-27 09:34:37.4517390][提示][GlobalVars]发送了一个任务进入消息系统
-[2026-04-27 09:34:37.4517410][成功][GlobalVars]初始化成功!
-[2026-04-27 09:34:37.4517490][成功][TaskSystem]成功订阅消息：Task/Create
-[2026-04-27 09:34:37.4518410][成功][TaskSystem]成功创建工作者：Messaging
-[2026-04-27 09:34:37.4518530][成功][TaskSystem]成功将任务添加进入工作者：Messaging
-[2026-04-27 09:34:37.4520920][成功][TaskSystem]成功将任务添加进入工作者：Messaging
-[2026-04-27 09:34:37.4520960][成功][TaskSystem]初始化成功!
-[2026-04-27 09:34:37.4521050][成功][CSController]成功订阅消息：Core/ReHook
-[2026-04-27 09:34:37.4521070][成功][CSController]成功订阅消息：Game/Command
-[2026-04-27 09:34:37.4521200][提示][CSController]发送了一个UI节点进入消息系统
-[2026-04-27 09:34:37.5055010][成功][CSController]视角调用演示钩子已部署
-[2026-04-27 09:34:37.5055370][提示][CSController]发送了一个任务进入消息系统
-[2026-04-27 09:34:37.5055390][成功][CSController]初始化成功!
-[2026-04-27 09:34:37.5055580][成功][WebSocketManager]成功订阅消息：WebSocketManager/Post
-[2026-04-27 09:34:37.5056780][提示][WebSocketManager]发送了一个任务进入消息系统
-[2026-04-27 09:34:37.5056810][提示][WebSocketManager]发送了一个任务进入消息系统
-[2026-04-27 09:34:37.5056830][成功][WebSocketManager]初始化成功!
-[2026-04-27 09:34:37.5058970][提示][CameraSystem]发送了一个UI节点进入消息系统
-[2026-04-27 09:34:37.5059030][成功][CameraSystem]成功订阅消息：Global/Save
-[2026-04-27 09:34:37.5059060][成功][CameraSystem]成功订阅消息：Global/Save/Strong
-[2026-04-27 09:34:37.5059080][成功][CameraSystem]成功订阅消息：Command/SpecPlayer
-[2026-04-27 09:34:37.5059110][成功][CameraSystem]成功订阅消息：Game/NewRound
-[2026-04-27 09:34:37.5059130][成功][CameraSystem]成功订阅消息：CameraSystem/Play/Shutdown
-[2026-04-27 09:34:37.5059150][成功][CameraSystem]初始化成功!
-[2026-04-27 09:34:37.5059360][提示][WorkspaceManager]发送了一个UI节点进入消息系统
-[2026-04-27 09:34:37.5059390][成功][WorkspaceManager]成功订阅消息：CamereSystem/Workspace/Set
-[2026-04-27 09:34:37.5059420][成功][WorkspaceManager]成功订阅消息：CameraSystem/Workspace/Save
-[2026-04-27 09:34:37.5059430][成功][WorkspaceManager]初始化成功!
-[2026-04-27 09:34:37.5059570][提示][ProjectManager]发送了一个UI节点进入消息系统
-[2026-04-27 09:34:37.5059620][提示][ProjectManager]发送了一个UI节点进入消息系统
-[2026-04-27 09:34:37.5059850][成功][ProjectManager]初始化成功!
-[2026-04-27 09:34:37.5060100][提示][SolutionManager]发送了一个UI节点进入消息系统
-[2026-04-27 09:34:37.5060140][提示][SolutionManager]发送了一个UI节点进入消息系统
-[2026-04-27 09:34:37.5060220][成功][SolutionManager]成功订阅消息：CameraSystem/Element/Deleted
-[2026-04-27 09:34:37.5060240][成功][SolutionManager]成功订阅消息：CameraSystem/Solution/Create
-[2026-04-27 09:34:37.5060270][成功][SolutionManager]成功订阅消息：CameraSystem/Solution/Delete
-[2026-04-27 09:34:37.5060290][成功][SolutionManager]成功订阅消息：CameraSystem/Solution/Play
-[2026-04-27 09:34:37.5060330][成功][SolutionManager]初始化成功!
-[2026-04-27 09:34:37.5060450][提示][ElementManager]发送了一个UI节点进入消息系统
-[2026-04-27 09:34:37.5060550][提示][ElementManager]发送了一个UI节点进入消息系统
-[2026-04-27 09:34:37.5060660][成功][ElementManager]成功订阅消息：Element/Create
-[2026-04-27 09:34:37.5060680][成功][ElementManager]成功订阅消息：Element/Delete
-[2026-04-27 09:34:37.5060700][成功][ElementManager]初始化成功!
-[2026-04-27 09:34:37.5063070][成功][HookEntitySystem]实体添加钩子已部署
-[2026-04-27 09:34:37.5063950][成功][HookEntitySystem]实体移除钩子已部署
-[2026-04-27 09:34:37.5063970][成功][HookEntitySystem]初始化成功!
-[2026-04-27 09:34:37.5064120][提示][AdvancedViewController]发送了一个UI节点进入消息系统
-[2026-04-27 09:34:37.5064140][成功][AdvancedViewController]初始化成功!
-[2026-04-27 09:34:37.5064200][提示][FreeCameraController]发送了一个UI节点进入消息系统
-[2026-04-27 09:34:37.5064210][成功][FreeCameraController]初始化成功!
-[2026-04-27 09:34:37.5064300][提示][PlayerHub]发送了一个UI节点进入消息系统
-[2026-04-27 09:34:37.5064320][成功][PlayerHub]初始化成功!
-[2026-04-27 09:34:37.5064540][提示][PlayerFlashController]发送了一个UI节点进入消息系统
-[2026-04-27 09:34:37.5064710][成功][PlayerFlashController]初始化成功!
-[2026-04-27 09:34:37.5184050][成功][NameController]装饰玩家名称获取钩子已部署
-[2026-04-27 09:34:37.5184250][提示][NameController]发送了一个UI节点进入消息系统
-[2026-04-27 09:34:37.5184290][提示][NameController]发送了一个任务进入消息系统
-[2026-04-27 09:34:37.5184390][成功][NameController]成功订阅消息：Name/Player/Set
-[2026-04-27 09:34:37.5184440][成功][NameController]初始化成功!
-[2026-04-27 09:34:37.5358110][成功][GlowController]发光颜色设置钩子已部署
-[2026-04-27 09:34:37.5358380][提示][GlowController]发送了一个UI节点进入消息系统
-[2026-04-27 09:34:37.5358420][提示][GlowController]发送了一个任务进入消息系统
-[2026-04-27 09:34:37.5358560][成功][GlowController]成功订阅消息：Glow/Player/Set
-[2026-04-27 09:34:37.5358590][成功][GlowController]成功订阅消息：Glow/Player/Clear
-[2026-04-27 09:34:37.5358610][成功][GlowController]成功订阅消息：Glow/Player/ClearAll
-[2026-04-27 09:34:37.5358640][成功][GlowController]成功订阅消息：Glow/Team/Set
-[2026-04-27 09:34:37.5358670][成功][GlowController]成功订阅消息：Glow/Team/Clear
-[2026-04-27 09:34:37.5358700][成功][GlowController]成功订阅消息：Glow/Team/ClearAll
-[2026-04-27 09:34:37.5358720][成功][GlowController]成功订阅消息：Glow/ClearAll
-[2026-04-27 09:34:37.5358770][成功][GlowController]初始化成功!
-[2026-04-27 09:34:37.5479500][成功][SmokeController]烟雾属性设置钩子已部署
-[2026-04-27 09:34:37.5479690][提示][SmokeController]发送了一个UI节点进入消息系统
-[2026-04-27 09:34:37.5479750][提示][SmokeController]发送了一个任务进入消息系统
-[2026-04-27 09:34:37.5479860][成功][SmokeController]成功订阅消息：Smoke/Player/Set
-[2026-04-27 09:34:37.5479880][成功][SmokeController]成功订阅消息：Smoke/Player/Clear
-[2026-04-27 09:34:37.5479910][成功][SmokeController]成功订阅消息：Smoke/Player/ClearAll
-[2026-04-27 09:34:37.5479940][成功][SmokeController]成功订阅消息：Smoke/Team/Set
-[2026-04-27 09:34:37.5479970][成功][SmokeController]成功订阅消息：Smoke/Team/Clear
-[2026-04-27 09:34:37.5479990][成功][SmokeController]成功订阅消息：Smoke/Team/ClearAll
-[2026-04-27 09:34:37.5480010][成功][SmokeController]成功订阅消息：Smoke/ClearAll
-[2026-04-27 09:34:37.5480040][成功][SmokeController]初始化成功!
-[2026-04-27 09:34:37.5480120][成功][ObserverController]成功订阅消息：CameraSystem/Play/Started
-[2026-04-27 09:34:37.5480140][成功][ObserverController]成功订阅消息：CameraSystem/Play/Ended
-[2026-04-27 09:34:37.5480170][成功][ObserverController]成功订阅消息：spec_mode_changed_to
-[2026-04-27 09:34:37.5480290][提示][ObserverController]发送了一个任务进入消息系统
-[2026-04-27 09:34:37.5480300][成功][ObserverController]初始化成功!
-[2026-04-27 09:34:37.5480360][提示][ProjectileTracker]发送了一个任务进入消息系统
-[2026-04-27 09:34:37.5480410][提示][ProjectileTracker]发送了一个UI节点进入消息系统
-[2026-04-27 09:34:37.5480440][成功][ProjectileTracker]成功订阅消息：Game/Entity/Added
-[2026-04-27 09:34:37.5480470][成功][ProjectileTracker]成功订阅消息：Game/Entity/Removed
-[2026-04-27 09:34:37.5480480][成功][ProjectileTracker]初始化成功!
-[2026-04-27 09:34:37.5480610][提示][MiniMap]发送了一个UI节点进入消息系统
-[2026-04-27 09:34:37.5480630][提示][MiniMap]发送了一个任务进入消息系统
-[2026-04-27 09:34:37.5480650][成功][MiniMap]初始化成功!
-[2026-04-27 09:34:37.5480700][成功][VirtualUser]成功订阅消息：Core/Tick30min
-[2026-04-27 09:34:37.5480730][成功][VirtualUser]成功订阅消息：Core/Tick60
-[2026-04-27 09:34:37.5480760][成功][VirtualUser]成功订阅消息：Command/SpecPlayer
-[2026-04-27 09:34:37.5480780][成功][VirtualUser]成功订阅消息：Game/NewRound
-[2026-04-27 09:34:37.5480850][提示][VirtualUser]发送了一个UI节点进入消息系统
-[2026-04-27 09:34:37.5480880][提示][VirtualUser]发送了一个任务进入消息系统
-[2026-04-27 09:34:37.5480890][成功][VirtualUser]初始化成功!
-[2026-04-27 09:34:37.5487710][成功][GameCfgManager]Cfg文件列表更新完成
-[2026-04-27 09:34:37.5487820][提示][GameCfgManager]发送了一个UI节点进入消息系统
-[2026-04-27 09:34:37.5487830][成功][GameCfgManager]初始化成功!
-[2026-04-27 09:34:37.5487940][成功][DemoHelper]成功订阅消息：DemoHelper/MarkTime
-[2026-04-27 09:34:37.5487960][成功][DemoHelper]成功订阅消息：DemoHelper/JumpTIme
-[2026-04-27 09:34:37.5488060][提示][DemoHelper]发送了一个UI节点进入消息系统
-[2026-04-27 09:34:37.5488080][提示][DemoHelper]发送了一个任务进入消息系统
-[2026-04-27 09:34:37.5488100][成功][DemoHelper]初始化成功!
-[2026-04-27 09:34:37.5499430][提示][GameSettingsManager]发送了一个UI节点进入消息系统
-[2026-04-27 09:34:37.5499520][成功][GameSettingsManager]初始化成功!
-[2026-04-27 09:34:37.5500590][提示][ConsoleManager]发送了一个UI节点进入消息系统
-[2026-04-27 09:34:37.5500620][成功][ConsoleManager]初始化成功!
-[2026-04-27 09:34:37.5500790][成功][MulNXController]成功订阅消息：ModuleManager/ModuleInfo/Response
-[2026-04-27 09:34:37.5500870][提示][MulNXController]发送了一个UI节点进入消息系统
-[2026-04-27 09:34:37.5500900][提示][MulNXController]发送了一个任务进入消息系统
-[2026-04-27 09:34:37.5500910][成功][MulNXController]初始化成功!
-[2026-04-27 09:34:37.5500960][提示][MainDraw]发送了一个UI节点进入消息系统
-[2026-04-27 09:34:37.5501290][成功][MainDraw]初始化成功!
-[2026-04-27 09:34:37.6415790][成功][HookManager]Present钩子已部署
-[2026-04-27 09:34:37.6416600][成功][HookManager]ResizeBuffers钩子已部署
-[2026-04-27 09:34:37.6996040][成功][HookManager]各模块初始化完毕，系统已启动
-[2026-04-27 09:34:37.6996450][警告][HookManager]当前版本是否为测试版：true
-[2026-04-27 09:34:37.6996510][警告][HookManager]当前版本号：B0.2.0C0.15.12
-[2026-04-27 09:34:37.6996550][警告][HookManager]当前版本构建时间：Built: Apr 27 2026 16:21:39
-[2026-04-27 09:34:37.6997750][警告][HookManager]发送了UI启动指令！渲染即将开始！
-[2026-04-27 09:34:37.7093230][提示][TaskSystem]接收到一个任务！
-[2026-04-27 09:34:37.7097720][成功][TaskSystem]成功创建工作者：MulNXMain
-[2026-04-27 09:34:37.7097930][成功][TaskSystem]成功将任务添加进入工作者：MulNXMain
-[2026-04-27 09:34:37.7098080][提示][TaskSystem]接收到一个任务！
-[2026-04-27 09:34:37.7098550][成功][TaskSystem]成功创建工作者：Loging
-[2026-04-27 09:34:37.7098610][成功][TaskSystem]成功将任务添加进入工作者：Loging
-[2026-04-27 09:34:37.7100320][提示][TaskSystem]接收到一个任务！
-[2026-04-27 09:34:37.7100420][成功][TaskSystem]成功将任务添加进入工作者：MulNXMain
-[2026-04-27 09:34:37.7100500][提示][TaskSystem]接收到一个任务！
-[2026-04-27 09:34:37.7101010][成功][TaskSystem]成功创建工作者：InputSystem
-[2026-04-27 09:34:37.7101070][成功][TaskSystem]成功将任务添加进入工作者：InputSystem
-[2026-04-27 09:34:37.7101110][提示][TaskSystem]接收到一个任务！
-[2026-04-27 09:34:37.7101150][成功][TaskSystem]成功将任务添加进入工作者：MulNXMain
-[2026-04-27 09:34:37.7101230][提示][TaskSystem]接收到一个任务！
-[2026-04-27 09:34:37.7103640][成功][TaskSystem]成功创建工作者：CSControl
-[2026-04-27 09:34:37.7103740][成功][TaskSystem]成功将任务添加进入工作者：CSControl
-[2026-04-27 09:34:37.7105350][提示][TaskSystem]接收到一个任务！
-[2026-04-27 09:34:37.7106050][成功][TaskSystem]成功创建工作者：Web
-[2026-04-27 09:34:37.7107710][成功][TaskSystem]成功将任务添加进入工作者：Web
-[2026-04-27 09:34:37.7107780][提示][TaskSystem]接收到一个任务！
-[2026-04-27 09:34:37.7107830][成功][TaskSystem]成功将任务添加进入工作者：MulNXMain
-[2026-04-27 09:34:37.7108010][提示][TaskSystem]接收到一个任务！
-[2026-04-27 09:34:37.7108050][成功][TaskSystem]成功将任务添加进入工作者：CSControl
-[2026-04-27 09:34:37.7108110][提示][TaskSystem]接收到一个任务！
-[2026-04-27 09:34:37.7108150][成功][TaskSystem]成功将任务添加进入工作者：CSControl
-[2026-04-27 09:34:37.7108220][提示][TaskSystem]接收到一个任务！
-[2026-04-27 09:34:37.7108260][成功][TaskSystem]成功将任务添加进入工作者：CSControl
-[2026-04-27 09:34:37.7108320][提示][TaskSystem]接收到一个任务！
-[2026-04-27 09:34:37.7108510][成功][TaskSystem]成功将任务添加进入工作者：CSControl
-[2026-04-27 09:34:37.7108700][提示][TaskSystem]接收到一个任务！
-[2026-04-27 09:34:37.7108790][成功][TaskSystem]成功将任务添加进入工作者：CSControl
-[2026-04-27 09:34:37.7108840][提示][TaskSystem]接收到一个任务！
-[2026-04-27 09:34:37.7108880][成功][TaskSystem]成功将任务添加进入工作者：MulNXMain
-[2026-04-27 09:34:37.7108940][提示][TaskSystem]接收到一个任务！
-[2026-04-27 09:34:37.7108980][成功][TaskSystem]成功将任务添加进入工作者：MulNXMain
-[2026-04-27 09:34:37.7109030][提示][TaskSystem]接收到一个任务！
-[2026-04-27 09:34:37.7109070][成功][TaskSystem]成功将任务添加进入工作者：MulNXMain
-[2026-04-27 09:34:37.7109130][提示][TaskSystem]接收到一个任务！
-[2026-04-27 09:34:37.7109170][成功][TaskSystem]成功将任务添加进入工作者：MulNXMain
-[2026-04-27 09:34:37.7145100][成功][WebSocketManager]正在监听端口：55202
-[2026-04-27 09:34:37.7665940][成功][HookManager]窗口过程钩子已部署
-[2026-04-27 09:34:37.7711530][成功][UISystem]接收到一个UI节点
-[2026-04-27 09:34:37.7711690][成功][UISystem]接收到一个UI节点
-[2026-04-27 09:34:37.7711790][成功][UISystem]接收到一个UI节点
-[2026-04-27 09:34:37.7711890][成功][UISystem]接收到一个UI节点
-[2026-04-27 09:34:37.7711990][成功][UISystem]接收到一个UI节点
-[2026-04-27 09:34:37.7712060][成功][UISystem]接收到一个UI节点
-[2026-04-27 09:34:37.7712140][成功][UISystem]接收到一个UI节点
-[2026-04-27 09:34:37.7712230][成功][UISystem]接收到一个UI节点
-[2026-04-27 09:34:37.7712420][成功][UISystem]接收到一个UI节点
-[2026-04-27 09:34:37.7712520][成功][UISystem]接收到一个UI节点
-[2026-04-27 09:34:37.7712600][成功][UISystem]接收到一个UI节点
-[2026-04-27 09:34:37.7712700][成功][UISystem]接收到一个UI节点
-[2026-04-27 09:34:37.7712810][成功][UISystem]接收到一个UI节点
-[2026-04-27 09:34:37.7712940][成功][UISystem]接收到一个UI节点
-[2026-04-27 09:34:37.7713040][成功][UISystem]接收到一个UI节点
-[2026-04-27 09:34:37.7713150][成功][UISystem]接收到一个UI节点
-[2026-04-27 09:34:37.7713230][成功][UISystem]接收到一个UI节点
-[2026-04-27 09:34:37.7713360][成功][UISystem]接收到一个UI节点
-[2026-04-27 09:34:37.7713450][成功][UISystem]接收到一个UI节点
-[2026-04-27 09:34:37.7713540][成功][UISystem]接收到一个UI节点
-[2026-04-27 09:34:37.7713620][成功][UISystem]接收到一个UI节点
-[2026-04-27 09:34:37.7713690][成功][UISystem]接收到一个UI节点
-[2026-04-27 09:34:37.7713740][成功][UISystem]接收到一个UI节点
-[2026-04-27 09:34:37.7713780][成功][UISystem]接收到一个UI节点
-[2026-04-27 09:34:37.7713840][成功][UISystem]接收到一个UI节点
-[2026-04-27 09:34:37.7713880][成功][UISystem]接收到一个UI节点
-[2026-04-27 09:34:37.7713930][警告][UISystem]接收到启动消息，UI系统开始启动
-[2026-04-27 09:34:37.7720250][提示][UISystem]尝试解析字体配置：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\UISystem\Config\ui.yaml
-[2026-04-27 09:34:37.7726130][成功][UISystem]字体配置解析成功！字体路径：C:/Windows/Fonts/msyh.ttc  字体大小：16
-[2026-04-27 09:34:37.7726280][提示][UISystem]尝试加载字体：C:/Windows/Fonts/msyh.ttc
-[2026-04-27 09:34:37.7805070][成功][UISystem]字体加载成功：C:/Windows/Fonts/msyh.ttc
-[2026-04-27 09:34:39.4418380][提示][VirtualUser]接收到新回合信息
-[2026-04-27 09:34:39.4447270][提示][VirtualUser]接收到新回合信息
-[2026-04-27 09:34:39.5144850][提示][ProjectManager]项目管理器正在处理消息！
-[2026-04-27 09:34:39.5144960][警告][ProjectManager]无活跃项目，无法执行自动操作
-[2026-04-27 09:34:39.5145030][提示][ProjectManager]项目管理器正在处理消息！
-[2026-04-27 09:34:39.5145090][警告][ProjectManager]无活跃项目，无法执行自动操作
-[2026-04-27 09:34:39.5240070][成功][NameController]玩家名称获取钩子已部署
-[2026-04-27 09:34:43.1907990][警告][HookManager]检测到 WM_CLOSE 消息，游戏即将关闭，系统进入终止态，后续日志请忽略
-[2026-04-27 09:34:43.6189780][错误][ObserverController]UpdateObserverState error: read error at: 0x7FFF5FED8520
-[2026-04-27 09:34:43.6194030][警告][CSController]在更新数据时捕获到异常：read error at: 0x7FFF5FC196A0
-[2026-04-27 09:34:43.6222680][错误][ObserverController]UpdateObserverState error: read error at: 0x7FFF5FED8520
-[2026-04-27 09:34:43.6227500][警告][CSController]在更新数据时捕获到异常：read error at: 0x7FFF5FC196A0
-[2026-04-27 09:34:43.6263010][错误][ObserverController]UpdateObserverState error: read error at: 0x7FFF5FED8520
-[2026-04-27 09:34:43.6267780][警告][CSController]在更新数据时捕获到异常：read error at: 0x7FFF5FC196A0
-[2026-04-27 09:34:43.6297730][错误][ObserverController]UpdateObserverState error: read error at: 0x7FFF5FED8520
-[2026-04-27 09:34:43.6303410][警告][CSController]在更新数据时捕获到异常：read error at: 0x7FFF5FC196A0
-[2026-04-27 09:34:43.6333760][错误][ObserverController]UpdateObserverState error: read error at: 0x7FFF5FED8520
-[2026-04-27 09:34:43.6337920][警告][CSController]在更新数据时捕获到异常：read error at: 0x7FFF5FC196A0
-[2026-04-27 09:34:43.6373300][错误][ObserverController]UpdateObserverState error: read error at: 0x7FFF5FED8520
-[2026-04-27 09:34:43.6377810][警告][CSController]在更新数据时捕获到异常：read error at: 0x7FFF5FC196A0
-[2026-04-27 09:34:43.6417790][错误][ObserverController]UpdateObserverState error: read error at: 0x7FFF5FED8520
-[2026-04-27 09:34:43.6424550][警告][CSController]在更新数据时捕获到异常：read error at: 0x7FFF5FC196A0
-[2026-04-27 09:34:43.6458150][错误][ObserverController]UpdateObserverState error: read error at: 0x7FFF5FED8520
-[2026-04-27 09:34:43.6462630][警告][CSController]在更新数据时捕获到异常：read error at: 0x7FFF5FC196A0
-[2026-04-27 09:34:43.6498840][错误][ObserverController]UpdateObserverState error: read error at: 0x7FFF5FED8520
-[2026-04-27 09:34:43.6504040][警告][CSController]在更新数据时捕获到异常：read error at: 0x7FFF5FC196A0
-[2026-04-27 09:34:43.6532340][错误][ObserverController]UpdateObserverState error: read error at: 0x7FFF5FED8520
-[2026-04-27 09:34:43.6536660][警告][CSController]在更新数据时捕获到异常：read error at: 0x7FFF5FC196A0
-[2026-04-27 09:34:43.6596570][错误][ObserverController]UpdateObserverState error: read error at: 0x7FFF5FED8520
-[2026-04-27 09:34:43.6603030][警告][CSController]在更新数据时捕获到异常：read error at: 0x7FFF5FC196A0
-[2026-04-27 09:34:43.6639060][错误][ObserverController]UpdateObserverState error: read error at: 0x7FFF5FED8520
-[2026-04-27 09:34:43.6643310][警告][CSController]在更新数据时捕获到异常：read error at: 0x7FFF5FC196A0
-[2026-04-27 09:34:43.6687720][错误][ObserverController]UpdateObserverState error: read error at: 0x7FFF5FED8520
-[2026-04-27 09:34:43.6699580][警告][CSController]在更新数据时捕获到异常：read error at: 0x7FFF5FC196A0
-[2026-04-27 09:34:43.6739500][错误][ObserverController]UpdateObserverState error: read error at: 0x7FFF5FED8520
-[2026-04-27 09:34:43.6743730][警告][CSController]在更新数据时捕获到异常：read error at: 0x7FFF5FC196A0
-[2026-04-27 09:34:43.6769670][错误][ObserverController]UpdateObserverState error: read error at: 0x7FFF5FED8520
-[2026-04-27 09:34:43.6773490][警告][CSController]在更新数据时捕获到异常：read error at: 0x7FFF5FC196A0
-[2026-04-27 09:34:43.6814390][错误][ObserverController]UpdateObserverState error: read error at: 0x7FFF5FED8520
-[2026-04-27 09:34:43.6817740][警告][CSController]在更新数据时捕获到异常：read error at: 0x7FFF5FC196A0
-[2026-04-27 09:34:43.6875610][错误][ObserverController]UpdateObserverState error: read error at: 0x7FFF5FED8520
-[2026-04-27 09:34:43.6882490][警告][CSController]在更新数据时捕获到异常：read error at: 0x7FFF5FC196A0
-[2026-04-27 09:34:43.6918830][错误][ObserverController]UpdateObserverState error: read error at: 0x7FFF5FED8520
-[2026-04-27 09:34:43.6923260][警告][CSController]在更新数据时捕获到异常：read error at: 0x7FFF5FC196A0
-[2026-04-27 09:34:43.6988410][错误][ObserverController]UpdateObserverState error: read error at: 0x7FFF5FED8520
-[2026-04-27 09:34:43.7033240][警告][CSController]在更新数据时捕获到异常：read error at: 0x7FFF5FC196A0
-[2026-04-27 09:34:43.7103110][错误][ObserverController]UpdateObserverState error: read error at: 0x7FFF5FED8520
-[2026-04-27 09:34:43.7112380][警告][CSController]在更新数据时捕获到异常：read error at: 0x7FFF5FC196A0
-[2026-04-27 09:34:43.7151570][错误][ObserverController]UpdateObserverState error: read error at: 0x7FFF5FED8520
-[2026-04-27 09:34:43.7156480][警告][CSController]在更新数据时捕获到异常：read error at: 0x7FFF5FC196A0
-[2026-04-27 09:34:43.7344130][错误][ObserverController]UpdateObserverState error: read error at: 0x7FFF5FED8520
-[2026-04-27 09:34:43.7351550][警告][CSController]在更新数据时捕获到异常：read error at: 0x7FFF5FC196A0
-[2026-04-27 09:34:43.7382990][错误][ObserverController]UpdateObserverState error: read error at: 0x7FFF5FED8520
-[2026-04-27 09:34:43.7387360][警告][CSController]在更新数据时捕获到异常：read error at: 0x7FFF5FC196A0
-[2026-04-27 09:34:43.7416880][错误][ObserverController]UpdateObserverState error: read error at: 0x7FFF5FED8520
-[2026-04-27 09:34:43.7421720][警告][CSController]在更新数据时捕获到异常：read error at: 0x7FFF5FC196A0
-[2026-04-27 09:34:43.7609060][错误][ObserverController]UpdateObserverState error: read error at: 0x7FFF5FED8520
-[2026-04-27 09:34:43.7617640][警告][CSController]在更新数据时捕获到异常：read error at: 0x7FFF5FC196A0
-[2026-04-27 09:34:43.7660870][错误][ObserverController]UpdateObserverState error: read error at: 0x7FFF5FED8520
-[2026-04-27 09:34:43.7669900][警告][CSController]在更新数据时捕获到异常：read error at: 0x7FFF5FC196A0
+[2026-04-28 01:01:02.2725390][提示][ModuleManager]注意: AbstractLayer3D(3D抽象层)被绑定为CSController
+[2026-04-28 01:01:02.2725850][成功][ModuleManager]成功订阅消息：ModuleManager/ModuleInfo/Request
+[2026-04-28 01:01:02.2725930][提示][ModuleManager]发送了一个任务进入消息系统
+[2026-04-28 01:01:02.2725950][成功][ModuleManager]初始化成功!
+[2026-04-28 01:01:02.2726040][成功][HookManager]初始化成功!
+[2026-04-28 01:01:02.2728800][成功][IPCer]初始化成功!
+[2026-04-28 01:01:02.2732990][提示][PathManager]检测到共享目录已创建：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\Saves
+[2026-04-28 01:01:02.2733440][提示][PathManager]检测到共享目录已创建：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\Config
+[2026-04-28 01:01:02.2733780][提示][PathManager]检测到共享目录已创建：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\Log
+[2026-04-28 01:01:02.2733810][成功][PathManager]初始化成功!
+[2026-04-28 01:01:02.2811690][成功][I18nManager]语言文件加载成功：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\I18nManager\Language\lan.yaml
+[2026-04-28 01:01:02.2814810][成功][I18nManager]初始化成功!
+[2026-04-28 01:01:02.2814840][成功][MessageManager]初始化成功!
+[2026-04-28 01:01:02.2814990][成功][UISystem]成功订阅消息：UISystem/Start
+[2026-04-28 01:01:02.2815010][成功][UISystem]成功订阅消息：UISystem/ModulePush
+[2026-04-28 01:01:02.2815030][成功][UISystem]初始化成功!
+[2026-04-28 01:01:02.2823410][提示][Logger]发送了一个任务进入消息系统
+[2026-04-28 01:01:02.2823430][成功][Logger]初始化成功!
+[2026-04-28 01:01:02.2823770][提示][Debugger]发送了一个UI节点进入消息系统
+[2026-04-28 01:01:02.2823800][提示][Debugger]发送了一个任务进入消息系统
+[2026-04-28 01:01:02.2823850][成功][Debugger]成功订阅消息：Log/Info
+[2026-04-28 01:01:02.2823870][成功][Debugger]成功订阅消息：Log/Succ
+[2026-04-28 01:01:02.2823890][成功][Debugger]成功订阅消息：Log/Warning
+[2026-04-28 01:01:02.2823910][成功][Debugger]成功订阅消息：Log/Error
+[2026-04-28 01:01:02.2823930][成功][Debugger]成功订阅消息：Debugger/SetMaxInfoCount
+[2026-04-28 01:01:02.2823970][成功][Debugger]初始化成功!
+[2026-04-28 01:01:02.2824020][成功][HandleSystem]初始化成功!
+[2026-04-28 01:01:02.2824120][提示][InputSystem]发送了一个任务进入消息系统
+[2026-04-28 01:01:02.2824150][成功][InputSystem]初始化成功!
+[2026-04-28 01:01:02.2824240][提示][GlobalVars]发送了一个任务进入消息系统
+[2026-04-28 01:01:02.2824260][成功][GlobalVars]初始化成功!
+[2026-04-28 01:01:02.2824340][成功][TaskSystem]成功订阅消息：Task/Create
+[2026-04-28 01:01:02.2825270][成功][TaskSystem]成功创建工作者：Messaging
+[2026-04-28 01:01:02.2825380][成功][TaskSystem]成功将任务添加进入工作者：Messaging
+[2026-04-28 01:01:02.2828020][成功][TaskSystem]成功将任务添加进入工作者：Messaging
+[2026-04-28 01:01:02.2828070][成功][TaskSystem]初始化成功!
+[2026-04-28 01:01:02.2828280][成功][CSController]成功订阅消息：Core/ReHook
+[2026-04-28 01:01:02.2828300][成功][CSController]成功订阅消息：Game/Command
+[2026-04-28 01:01:02.2828430][提示][CSController]发送了一个UI节点进入消息系统
+[2026-04-28 01:01:02.3283930][成功][CSController]视角调用演示钩子已部署
+[2026-04-28 01:01:02.3284760][提示][CSController]发送了一个任务进入消息系统
+[2026-04-28 01:01:02.3284810][成功][CSController]初始化成功!
+[2026-04-28 01:01:02.3284960][成功][WebSocketManager]成功订阅消息：WebSocketManager/Post
+[2026-04-28 01:01:02.3291210][提示][WebSocketManager]发送了一个任务进入消息系统
+[2026-04-28 01:01:02.3291240][提示][WebSocketManager]发送了一个任务进入消息系统
+[2026-04-28 01:01:02.3291260][成功][WebSocketManager]初始化成功!
+[2026-04-28 01:01:02.3295640][提示][CameraSystem]发送了一个UI节点进入消息系统
+[2026-04-28 01:01:02.3295710][成功][CameraSystem]成功订阅消息：Global/Save
+[2026-04-28 01:01:02.3295750][成功][CameraSystem]成功订阅消息：Global/Save/Strong
+[2026-04-28 01:01:02.3295780][成功][CameraSystem]成功订阅消息：Command/SpecPlayer
+[2026-04-28 01:01:02.3295810][成功][CameraSystem]成功订阅消息：Game/NewRound
+[2026-04-28 01:01:02.3295830][成功][CameraSystem]成功订阅消息：CameraSystem/Play/Shutdown
+[2026-04-28 01:01:02.3295850][成功][CameraSystem]初始化成功!
+[2026-04-28 01:01:02.3296130][提示][WorkspaceManager]发送了一个UI节点进入消息系统
+[2026-04-28 01:01:02.3296170][成功][WorkspaceManager]成功订阅消息：CamereSystem/Workspace/Set
+[2026-04-28 01:01:02.3296200][成功][WorkspaceManager]成功订阅消息：CameraSystem/Workspace/Save
+[2026-04-28 01:01:02.3296220][成功][WorkspaceManager]初始化成功!
+[2026-04-28 01:01:02.3296370][提示][ProjectManager]发送了一个UI节点进入消息系统
+[2026-04-28 01:01:02.3296400][提示][ProjectManager]发送了一个UI节点进入消息系统
+[2026-04-28 01:01:02.3296600][成功][ProjectManager]初始化成功!
+[2026-04-28 01:01:02.3296800][提示][SolutionManager]发送了一个UI节点进入消息系统
+[2026-04-28 01:01:02.3296870][提示][SolutionManager]发送了一个UI节点进入消息系统
+[2026-04-28 01:01:02.3296960][成功][SolutionManager]成功订阅消息：CameraSystem/Element/Deleted
+[2026-04-28 01:01:02.3296980][成功][SolutionManager]成功订阅消息：CameraSystem/Solution/Create
+[2026-04-28 01:01:02.3297010][成功][SolutionManager]成功订阅消息：CameraSystem/Solution/Delete
+[2026-04-28 01:01:02.3297030][成功][SolutionManager]成功订阅消息：CameraSystem/Solution/Play
+[2026-04-28 01:01:02.3297050][成功][SolutionManager]初始化成功!
+[2026-04-28 01:01:02.3297170][提示][ElementManager]发送了一个UI节点进入消息系统
+[2026-04-28 01:01:02.3297220][提示][ElementManager]发送了一个UI节点进入消息系统
+[2026-04-28 01:01:02.3297310][成功][ElementManager]成功订阅消息：Element/Create
+[2026-04-28 01:01:02.3297320][成功][ElementManager]成功订阅消息：Element/Delete
+[2026-04-28 01:01:02.3297340][成功][ElementManager]初始化成功!
+[2026-04-28 01:01:02.3298730][成功][HookEntitySystem]实体添加钩子已部署
+[2026-04-28 01:01:02.3299770][成功][HookEntitySystem]实体移除钩子已部署
+[2026-04-28 01:01:02.3299800][成功][HookEntitySystem]初始化成功!
+[2026-04-28 01:01:02.3299960][提示][AdvancedViewController]发送了一个UI节点进入消息系统
+[2026-04-28 01:01:02.3299980][成功][AdvancedViewController]初始化成功!
+[2026-04-28 01:01:02.3300090][提示][FreeCameraController]发送了一个UI节点进入消息系统
+[2026-04-28 01:01:02.3300110][成功][FreeCameraController]初始化成功!
+[2026-04-28 01:01:02.3300280][提示][PlayerHub]发送了一个UI节点进入消息系统
+[2026-04-28 01:01:02.3300290][成功][PlayerHub]初始化成功!
+[2026-04-28 01:01:02.3300420][提示][PlayerFlashController]发送了一个UI节点进入消息系统
+[2026-04-28 01:01:02.3300450][成功][PlayerFlashController]初始化成功!
+[2026-04-28 01:01:02.3411340][成功][NameController]装饰玩家名称获取钩子已部署
+[2026-04-28 01:01:02.3411490][提示][NameController]发送了一个UI节点进入消息系统
+[2026-04-28 01:01:02.3411530][提示][NameController]发送了一个任务进入消息系统
+[2026-04-28 01:01:02.3411630][成功][NameController]成功订阅消息：Name/Player/Set
+[2026-04-28 01:01:02.3411650][成功][NameController]初始化成功!
+[2026-04-28 01:01:02.3547360][成功][GlowController]发光颜色设置钩子已部署
+[2026-04-28 01:01:02.3547530][提示][GlowController]发送了一个UI节点进入消息系统
+[2026-04-28 01:01:02.3547580][提示][GlowController]发送了一个任务进入消息系统
+[2026-04-28 01:01:02.3547670][成功][GlowController]成功订阅消息：Glow/Player/Set
+[2026-04-28 01:01:02.3547700][成功][GlowController]成功订阅消息：Glow/Player/Clear
+[2026-04-28 01:01:02.3547720][成功][GlowController]成功订阅消息：Glow/Player/ClearAll
+[2026-04-28 01:01:02.3547750][成功][GlowController]成功订阅消息：Glow/Team/Set
+[2026-04-28 01:01:02.3547770][成功][GlowController]成功订阅消息：Glow/Team/Clear
+[2026-04-28 01:01:02.3547790][成功][GlowController]成功订阅消息：Glow/Team/ClearAll
+[2026-04-28 01:01:02.3547810][成功][GlowController]成功订阅消息：Glow/ClearAll
+[2026-04-28 01:01:02.3547880][成功][GlowController]初始化成功!
+[2026-04-28 01:01:02.3652860][成功][SmokeController]烟雾属性设置钩子已部署
+[2026-04-28 01:01:02.3653030][提示][SmokeController]发送了一个UI节点进入消息系统
+[2026-04-28 01:01:02.3653070][提示][SmokeController]发送了一个任务进入消息系统
+[2026-04-28 01:01:02.3653190][成功][SmokeController]成功订阅消息：Smoke/Player/Set
+[2026-04-28 01:01:02.3653230][成功][SmokeController]成功订阅消息：Smoke/Player/Clear
+[2026-04-28 01:01:02.3653260][成功][SmokeController]成功订阅消息：Smoke/Player/ClearAll
+[2026-04-28 01:01:02.3653290][成功][SmokeController]成功订阅消息：Smoke/Team/Set
+[2026-04-28 01:01:02.3653350][成功][SmokeController]成功订阅消息：Smoke/Team/Clear
+[2026-04-28 01:01:02.3653380][成功][SmokeController]成功订阅消息：Smoke/Team/ClearAll
+[2026-04-28 01:01:02.3653400][成功][SmokeController]成功订阅消息：Smoke/ClearAll
+[2026-04-28 01:01:02.3653420][成功][SmokeController]初始化成功!
+[2026-04-28 01:01:02.3653470][成功][ObserverController]成功订阅消息：CameraSystem/Play/Started
+[2026-04-28 01:01:02.3653490][成功][ObserverController]成功订阅消息：CameraSystem/Play/Ended
+[2026-04-28 01:01:02.3653510][成功][ObserverController]成功订阅消息：spec_mode_changed_to
+[2026-04-28 01:01:02.3653600][提示][ObserverController]发送了一个任务进入消息系统
+[2026-04-28 01:01:02.3653610][成功][ObserverController]初始化成功!
+[2026-04-28 01:01:02.3653670][提示][ProjectileTracker]发送了一个任务进入消息系统
+[2026-04-28 01:01:02.3653710][提示][ProjectileTracker]发送了一个UI节点进入消息系统
+[2026-04-28 01:01:02.3653740][成功][ProjectileTracker]成功订阅消息：Game/Entity/Added
+[2026-04-28 01:01:02.3653770][成功][ProjectileTracker]成功订阅消息：Game/Entity/Removed
+[2026-04-28 01:01:02.3653790][成功][ProjectileTracker]初始化成功!
+[2026-04-28 01:01:02.3653890][提示][MiniMap]发送了一个UI节点进入消息系统
+[2026-04-28 01:01:02.3653920][提示][MiniMap]发送了一个任务进入消息系统
+[2026-04-28 01:01:02.3653940][成功][MiniMap]初始化成功!
+[2026-04-28 01:01:02.3654000][成功][VirtualUser]成功订阅消息：Core/Tick30min
+[2026-04-28 01:01:02.3654030][成功][VirtualUser]成功订阅消息：Core/Tick60
+[2026-04-28 01:01:02.3654060][成功][VirtualUser]成功订阅消息：Command/SpecPlayer
+[2026-04-28 01:01:02.3654080][成功][VirtualUser]成功订阅消息：Game/NewRound
+[2026-04-28 01:01:02.3654170][提示][VirtualUser]发送了一个UI节点进入消息系统
+[2026-04-28 01:01:02.3654190][提示][VirtualUser]发送了一个任务进入消息系统
+[2026-04-28 01:01:02.3654210][成功][VirtualUser]初始化成功!
+[2026-04-28 01:01:02.3660500][成功][GameCfgManager]Cfg文件列表更新完成
+[2026-04-28 01:01:02.3660590][提示][GameCfgManager]发送了一个UI节点进入消息系统
+[2026-04-28 01:01:02.3660600][成功][GameCfgManager]初始化成功!
+[2026-04-28 01:01:02.3660690][成功][DemoHelper]成功订阅消息：DemoHelper/MarkTime
+[2026-04-28 01:01:02.3660710][成功][DemoHelper]成功订阅消息：DemoHelper/JumpTIme
+[2026-04-28 01:01:02.3660830][提示][DemoHelper]发送了一个UI节点进入消息系统
+[2026-04-28 01:01:02.3660860][提示][DemoHelper]发送了一个任务进入消息系统
+[2026-04-28 01:01:02.3660870][成功][DemoHelper]初始化成功!
+[2026-04-28 01:01:02.3673920][提示][GameSettingsManager]发送了一个UI节点进入消息系统
+[2026-04-28 01:01:02.3673940][成功][GameSettingsManager]初始化成功!
+[2026-04-28 01:01:02.3674000][提示][ConsoleManager]发送了一个UI节点进入消息系统
+[2026-04-28 01:01:02.3674010][成功][ConsoleManager]初始化成功!
+[2026-04-28 01:01:02.3674110][成功][MulNXController]成功订阅消息：ModuleManager/ModuleInfo/Response
+[2026-04-28 01:01:02.3674580][提示][MulNXController]发送了一个UI节点进入消息系统
+[2026-04-28 01:01:02.3675610][提示][MulNXController]发送了一个任务进入消息系统
+[2026-04-28 01:01:02.3675650][成功][MulNXController]初始化成功!
+[2026-04-28 01:01:02.3675750][提示][MainDraw]发送了一个UI节点进入消息系统
+[2026-04-28 01:01:02.3675770][成功][MainDraw]初始化成功!
+[2026-04-28 01:01:02.4655860][成功][HookManager]Present钩子已部署
+[2026-04-28 01:01:02.4656580][成功][HookManager]ResizeBuffers钩子已部署
+[2026-04-28 01:01:02.4927670][成功][HookManager]各模块初始化完毕，系统已启动
+[2026-04-28 01:01:02.4927910][警告][HookManager]当前版本是否为测试版：true
+[2026-04-28 01:01:02.4928000][警告][HookManager]当前版本号：B0.2.0C0.15.13
+[2026-04-28 01:01:02.4928040][警告][HookManager]当前版本构建时间：Built: Apr 28 2026 08:56:26
+[2026-04-28 01:01:02.4928680][警告][HookManager]发送了UI启动指令！渲染即将开始！
+[2026-04-28 01:01:02.4940630][提示][TaskSystem]接收到一个任务！
+[2026-04-28 01:01:02.4941180][成功][TaskSystem]成功创建工作者：MulNXMain
+[2026-04-28 01:01:02.4942740][成功][TaskSystem]成功将任务添加进入工作者：MulNXMain
+[2026-04-28 01:01:02.4942860][提示][TaskSystem]接收到一个任务！
+[2026-04-28 01:01:02.4943250][成功][TaskSystem]成功创建工作者：Loging
+[2026-04-28 01:01:02.4943300][成功][TaskSystem]成功将任务添加进入工作者：Loging
+[2026-04-28 01:01:02.4944720][提示][TaskSystem]接收到一个任务！
+[2026-04-28 01:01:02.4944840][成功][TaskSystem]成功将任务添加进入工作者：MulNXMain
+[2026-04-28 01:01:02.4944900][提示][TaskSystem]接收到一个任务！
+[2026-04-28 01:01:02.4945430][成功][TaskSystem]成功创建工作者：InputSystem
+[2026-04-28 01:01:02.4945480][成功][TaskSystem]成功将任务添加进入工作者：InputSystem
+[2026-04-28 01:01:02.4947160][提示][TaskSystem]接收到一个任务！
+[2026-04-28 01:01:02.4947280][成功][TaskSystem]成功将任务添加进入工作者：MulNXMain
+[2026-04-28 01:01:02.4947360][提示][TaskSystem]接收到一个任务！
+[2026-04-28 01:01:02.4947840][成功][TaskSystem]成功创建工作者：CSControl
+[2026-04-28 01:01:02.4949240][成功][TaskSystem]成功将任务添加进入工作者：CSControl
+[2026-04-28 01:01:02.4949280][提示][TaskSystem]接收到一个任务！
+[2026-04-28 01:01:02.4949660][成功][TaskSystem]成功创建工作者：Web
+[2026-04-28 01:01:02.4949710][成功][TaskSystem]成功将任务添加进入工作者：Web
+[2026-04-28 01:01:02.4951050][提示][TaskSystem]接收到一个任务！
+[2026-04-28 01:01:02.4951200][成功][TaskSystem]成功将任务添加进入工作者：MulNXMain
+[2026-04-28 01:01:02.4951440][提示][TaskSystem]接收到一个任务！
+[2026-04-28 01:01:02.4951490][成功][TaskSystem]成功将任务添加进入工作者：CSControl
+[2026-04-28 01:01:02.4951540][提示][TaskSystem]接收到一个任务！
+[2026-04-28 01:01:02.4951580][成功][TaskSystem]成功将任务添加进入工作者：CSControl
+[2026-04-28 01:01:02.4951640][提示][TaskSystem]接收到一个任务！
+[2026-04-28 01:01:02.4951690][成功][TaskSystem]成功将任务添加进入工作者：CSControl
+[2026-04-28 01:01:02.4951740][提示][TaskSystem]接收到一个任务！
+[2026-04-28 01:01:02.4951780][成功][TaskSystem]成功将任务添加进入工作者：CSControl
+[2026-04-28 01:01:02.4951840][提示][TaskSystem]接收到一个任务！
+[2026-04-28 01:01:02.4951890][成功][TaskSystem]成功将任务添加进入工作者：CSControl
+[2026-04-28 01:01:02.4951950][提示][TaskSystem]接收到一个任务！
+[2026-04-28 01:01:02.4951990][成功][TaskSystem]成功将任务添加进入工作者：MulNXMain
+[2026-04-28 01:01:02.4952050][提示][TaskSystem]接收到一个任务！
+[2026-04-28 01:01:02.4952100][成功][TaskSystem]成功将任务添加进入工作者：MulNXMain
+[2026-04-28 01:01:02.4952160][提示][TaskSystem]接收到一个任务！
+[2026-04-28 01:01:02.4952190][成功][TaskSystem]成功将任务添加进入工作者：MulNXMain
+[2026-04-28 01:01:02.4952250][提示][TaskSystem]接收到一个任务！
+[2026-04-28 01:01:02.4952290][成功][TaskSystem]成功将任务添加进入工作者：MulNXMain
+[2026-04-28 01:01:02.4985980][成功][WebSocketManager]正在监听端口：55202
+[2026-04-28 01:01:02.5727620][成功][HookManager]窗口过程钩子已部署
+[2026-04-28 01:01:02.5757420][成功][UISystem]接收到一个UI节点
+[2026-04-28 01:01:02.5757500][成功][UISystem]接收到一个UI节点
+[2026-04-28 01:01:02.5757560][成功][UISystem]接收到一个UI节点
+[2026-04-28 01:01:02.5757590][成功][UISystem]接收到一个UI节点
+[2026-04-28 01:01:02.5757620][成功][UISystem]接收到一个UI节点
+[2026-04-28 01:01:02.5757640][成功][UISystem]接收到一个UI节点
+[2026-04-28 01:01:02.5757670][成功][UISystem]接收到一个UI节点
+[2026-04-28 01:01:02.5757700][成功][UISystem]接收到一个UI节点
+[2026-04-28 01:01:02.5757810][成功][UISystem]接收到一个UI节点
+[2026-04-28 01:01:02.5757840][成功][UISystem]接收到一个UI节点
+[2026-04-28 01:01:02.5757870][成功][UISystem]接收到一个UI节点
+[2026-04-28 01:01:02.5757910][成功][UISystem]接收到一个UI节点
+[2026-04-28 01:01:02.5757930][成功][UISystem]接收到一个UI节点
+[2026-04-28 01:01:02.5757960][成功][UISystem]接收到一个UI节点
+[2026-04-28 01:01:02.5757990][成功][UISystem]接收到一个UI节点
+[2026-04-28 01:01:02.5758010][成功][UISystem]接收到一个UI节点
+[2026-04-28 01:01:02.5758040][成功][UISystem]接收到一个UI节点
+[2026-04-28 01:01:02.5758070][成功][UISystem]接收到一个UI节点
+[2026-04-28 01:01:02.5758100][成功][UISystem]接收到一个UI节点
+[2026-04-28 01:01:02.5758130][成功][UISystem]接收到一个UI节点
+[2026-04-28 01:01:02.5758160][成功][UISystem]接收到一个UI节点
+[2026-04-28 01:01:02.5758190][成功][UISystem]接收到一个UI节点
+[2026-04-28 01:01:02.5758230][成功][UISystem]接收到一个UI节点
+[2026-04-28 01:01:02.5758250][成功][UISystem]接收到一个UI节点
+[2026-04-28 01:01:02.5758290][成功][UISystem]接收到一个UI节点
+[2026-04-28 01:01:02.5758320][成功][UISystem]接收到一个UI节点
+[2026-04-28 01:01:02.5758360][警告][UISystem]接收到启动消息，UI系统开始启动
+[2026-04-28 01:01:02.5760860][提示][UISystem]尝试解析字体配置：C:\Users\lenovo\Desktop\核心科技\MulNX_CS2\bin\MulNX\MulNX\CS2OBTool\UISystem\Config\ui.yaml
+[2026-04-28 01:01:02.5767390][成功][UISystem]字体配置解析成功！字体路径：C:/Windows/Fonts/msyh.ttc  字体大小：16
+[2026-04-28 01:01:02.5767640][提示][UISystem]尝试加载字体：C:/Windows/Fonts/msyh.ttc
+[2026-04-28 01:01:02.5851900][成功][UISystem]字体加载成功：C:/Windows/Fonts/msyh.ttc
+[2026-04-28 01:01:04.2610970][提示][VirtualUser]接收到新回合信息
+[2026-04-28 01:01:04.2640720][提示][VirtualUser]接收到新回合信息
+[2026-04-28 01:01:04.3092260][提示][ProjectManager]项目管理器正在处理消息！
+[2026-04-28 01:01:04.3092330][警告][ProjectManager]无活跃项目，无法执行自动操作
+[2026-04-28 01:01:04.3092390][提示][ProjectManager]项目管理器正在处理消息！
+[2026-04-28 01:01:04.3092440][警告][ProjectManager]无活跃项目，无法执行自动操作
+[2026-04-28 01:01:04.3171340][成功][NameController]玩家名称获取钩子已部署
+[2026-04-28 01:01:33.8402930][提示][ProjectileTracker]记录 projectile(smokegrenade_projectile) -> 控制器 SteamID=76561199560778677 
+[2026-04-28 01:01:35.4315840][提示][ProjectileTracker]记录 projectile(flashbang_projectile) -> 控制器 SteamID=76561199560778677 
+[2026-04-28 01:01:40.9825660][提示][ProjectileTracker]记录 projectile(flashbang_projectile) -> 控制器 SteamID=76561199560778677 
+[2026-04-28 01:01:59.7955610][警告][SmokeController]未找到投掷者的控制器，无法应用烟雾颜色
+[2026-04-28 01:01:59.9015600][警告][SmokeController]未找到投掷者的控制器，无法应用烟雾颜色
+[2026-04-28 01:02:00.0097680][警告][SmokeController]未找到投掷者的控制器，无法应用烟雾颜色
+[2026-04-28 01:02:00.1211430][警告][SmokeController]未找到投掷者的控制器，无法应用烟雾颜色
+[2026-04-28 01:02:00.2308120][警告][SmokeController]未找到投掷者的控制器，无法应用烟雾颜色
+[2026-04-28 01:02:00.3402750][警告][SmokeController]未找到投掷者的控制器，无法应用烟雾颜色
+[2026-04-28 01:02:00.4509330][警告][SmokeController]未找到投掷者的控制器，无法应用烟雾颜色
+[2026-04-28 01:02:00.5574680][警告][SmokeController]未找到投掷者的控制器，无法应用烟雾颜色
+[2026-04-28 01:02:02.5142400][提示][VirtualUser]已触发自动保存（频率：每分钟）
+[2026-04-28 01:02:15.2253930][警告][HookManager]检测到 WM_CLOSE 消息，游戏即将关闭，系统进入终止态，后续日志请忽略
+[2026-04-28 01:02:15.6667360][错误][ObserverController]UpdateObserverState error: read error at: 0x7FFAD2388520
+[2026-04-28 01:02:15.6673430][警告][CSController]在更新数据时捕获到异常：read error at: 0x7FFAD20C96A0
+[2026-04-28 01:02:15.6702510][错误][ObserverController]UpdateObserverState error: read error at: 0x7FFAD2388520
+[2026-04-28 01:02:15.6708600][警告][CSController]在更新数据时捕获到异常：read error at: 0x7FFAD20C96A0
+[2026-04-28 01:02:15.6743250][错误][ObserverController]UpdateObserverState error: read error at: 0x7FFAD2388520
+[2026-04-28 01:02:15.6748630][警告][CSController]在更新数据时捕获到异常：read error at: 0x7FFAD20C96A0
+[2026-04-28 01:02:15.6779990][错误][ObserverController]UpdateObserverState error: read error at: 0x7FFAD2388520
+[2026-04-28 01:02:15.6784960][警告][CSController]在更新数据时捕获到异常：read error at: 0x7FFAD20C96A0
+[2026-04-28 01:02:15.6818530][错误][ObserverController]UpdateObserverState error: read error at: 0x7FFAD2388520
+[2026-04-28 01:02:15.6823170][警告][CSController]在更新数据时捕获到异常：read error at: 0x7FFAD20C96A0
+[2026-04-28 01:02:15.6864770][错误][ObserverController]UpdateObserverState error: read error at: 0x7FFAD2388520
+[2026-04-28 01:02:15.6869770][警告][CSController]在更新数据时捕获到异常：read error at: 0x7FFAD20C96A0
+[2026-04-28 01:02:15.6906460][错误][ObserverController]UpdateObserverState error: read error at: 0x7FFAD2388520
+[2026-04-28 01:02:15.6914780][警告][CSController]在更新数据时捕获到异常：read error at: 0x7FFAD20C96A0
+[2026-04-28 01:02:15.6943120][错误][ObserverController]UpdateObserverState error: read error at: 0x7FFAD2388520
+[2026-04-28 01:02:15.6948010][警告][CSController]在更新数据时捕获到异常：read error at: 0x7FFAD20C96A0
+[2026-04-28 01:02:15.6986470][错误][ObserverController]UpdateObserverState error: read error at: 0x7FFAD2388520
+[2026-04-28 01:02:15.6992700][警告][CSController]在更新数据时捕获到异常：read error at: 0x7FFAD20C96A0
+[2026-04-28 01:02:15.7028140][错误][ObserverController]UpdateObserverState error: read error at: 0x7FFAD2388520
+[2026-04-28 01:02:15.7032790][警告][CSController]在更新数据时捕获到异常：read error at: 0x7FFAD20C96A0
+[2026-04-28 01:02:15.7062660][错误][ObserverController]UpdateObserverState error: read error at: 0x7FFAD2388520
+[2026-04-28 01:02:15.7068250][警告][CSController]在更新数据时捕获到异常：read error at: 0x7FFAD20C96A0
+[2026-04-28 01:02:15.7242290][错误][ObserverController]UpdateObserverState error: read error at: 0x7FFAD2388520
+[2026-04-28 01:02:15.7324820][警告][CSController]在更新数据时捕获到异常：read error at: 0x7FFAD20C96A0
+[2026-04-28 01:02:15.7388290][错误][ObserverController]UpdateObserverState error: read error at: 0x7FFAD2388520
+[2026-04-28 01:02:15.7394830][警告][CSController]在更新数据时捕获到异常：read error at: 0x7FFAD20C96A0
+[2026-04-28 01:02:15.7451430][错误][ObserverController]UpdateObserverState error: read error at: 0x7FFAD2388520
+[2026-04-28 01:02:15.7473600][警告][CSController]在更新数据时捕获到异常：read error at: 0x7FFAD20C96A0
+[2026-04-28 01:02:15.7537060][错误][ObserverController]UpdateObserverState error: read error at: 0x7FFAD2388520
+[2026-04-28 01:02:15.7551070][警告][CSController]在更新数据时捕获到异常：read error at: 0x7FFAD20C96A0
+[2026-04-28 01:02:15.7587080][错误][ObserverController]UpdateObserverState error: read error at: 0x7FFAD2388520
+[2026-04-28 01:02:15.7592550][警告][CSController]在更新数据时捕获到异常：read error at: 0x7FFAD20C96A0
+[2026-04-28 01:02:15.7623860][错误][ObserverController]UpdateObserverState error: read error at: 0x7FFAD2388520
+[2026-04-28 01:02:15.7629700][警告][CSController]在更新数据时捕获到异常：read error at: 0x7FFAD20C96A0
+[2026-04-28 01:02:15.7691570][错误][ObserverController]UpdateObserverState error: read error at: 0x7FFAD2388520
+[2026-04-28 01:02:15.7696350][警告][CSController]在更新数据时捕获到异常：read error at: 0x7FFAD20C96A0
+[2026-04-28 01:02:15.7740300][错误][ObserverController]UpdateObserverState error: read error at: 0x7FFAD2388520
+[2026-04-28 01:02:15.7747490][警告][CSController]在更新数据时捕获到异常：read error at: 0x7FFAD20C96A0
+[2026-04-28 01:02:15.7781900][错误][ObserverController]UpdateObserverState error: read error at: 0x7FFAD2388520
+[2026-04-28 01:02:15.7786460][警告][CSController]在更新数据时捕获到异常：read error at: 0x7FFAD20C96A0
+[2026-04-28 01:02:15.7819030][错误][ObserverController]UpdateObserverState error: read error at: 0x7FFAD2388520
+[2026-04-28 01:02:15.7823840][警告][CSController]在更新数据时捕获到异常：read error at: 0x7FFAD20C96A0
+[2026-04-28 01:02:15.7880830][错误][ObserverController]UpdateObserverState error: read error at: 0x7FFAD2388520
+[2026-04-28 01:02:15.7886360][警告][CSController]在更新数据时捕获到异常：read error at: 0x7FFAD20C96A0
+[2026-04-28 01:02:15.7921870][错误][ObserverController]UpdateObserverState error: read error at: 0x7FFAD2388520
+[2026-04-28 01:02:15.7926740][警告][CSController]在更新数据时捕获到异常：read error at: 0x7FFAD20C96A0
+[2026-04-28 01:02:15.7960360][错误][ObserverController]UpdateObserverState error: read error at: 0x7FFAD2388520
+[2026-04-28 01:02:15.7965620][警告][CSController]在更新数据时捕获到异常：read error at: 0x7FFAD20C96A0
+[2026-04-28 01:02:15.7992640][错误][ObserverController]UpdateObserverState error: read error at: 0x7FFAD2388520
+[2026-04-28 01:02:15.7997190][警告][CSController]在更新数据时捕获到异常：read error at: 0x7FFAD20C96A0
+[2026-04-28 01:02:15.8032730][错误][ObserverController]UpdateObserverState error: read error at: 0x7FFAD2388520
+[2026-04-28 01:02:15.8038010][警告][CSController]在更新数据时捕获到异常：read error at: 0x7FFAD20C96A0
+[2026-04-28 01:02:15.8068730][错误][ObserverController]UpdateObserverState error: read error at: 0x7FFAD2388520
+[2026-04-28 01:02:15.8073950][警告][CSController]在更新数据时捕获到异常：read error at: 0x7FFAD20C96A0
+[2026-04-28 01:02:15.8108820][错误][ObserverController]UpdateObserverState error: read error at: 0x7FFAD2388520
+[2026-04-28 01:02:15.8113750][警告][CSController]在更新数据时捕获到异常：read error at: 0x7FFAD20C96A0
+[2026-04-28 01:02:15.8148650][错误][ObserverController]UpdateObserverState error: read error at: 0x7FFAD2388520
+[2026-04-28 01:02:15.8156370][警告][CSController]在更新数据时捕获到异常：read error at: 0x7FFAD20C96A0
+[2026-04-28 01:02:15.8183610][错误][ObserverController]UpdateObserverState error: read error at: 0x7FFAD2388520
+[2026-04-28 01:02:15.8190050][警告][CSController]在更新数据时捕获到异常：read error at: 0x7FFAD20C96A0
+[2026-04-28 01:02:15.8226370][错误][ObserverController]UpdateObserverState error: read error at: 0x7FFAD2388520
+[2026-04-28 01:02:15.8231210][警告][CSController]在更新数据时捕获到异常：read error at: 0x7FFAD20C96A0
+[2026-04-28 01:02:15.8263470][错误][ObserverController]UpdateObserverState error: read error at: 0x7FFAD2388520
+[2026-04-28 01:02:15.8268550][警告][CSController]在更新数据时捕获到异常：read error at: 0x7FFAD20C96A0
+[2026-04-28 01:02:15.8294600][错误][ObserverController]UpdateObserverState error: read error at: 0x7FFAD2388520
+[2026-04-28 01:02:15.8301880][警告][CSController]在更新数据时捕获到异常：read error at: 0x7FFAD20C96A0
+[2026-04-28 01:02:15.8335240][错误][ObserverController]UpdateObserverState error: read error at: 0x7FFAD2388520
+[2026-04-28 01:02:15.8340270][警告][CSController]在更新数据时捕获到异常：read error at: 0x7FFAD20C96A0
+[2026-04-28 01:02:15.8373030][错误][ObserverController]UpdateObserverState error: read error at: 0x7FFAD2388520
+[2026-04-28 01:02:15.8377790][警告][CSController]在更新数据时捕获到异常：read error at: 0x7FFAD20C96A0
+[2026-04-28 01:02:15.8410390][错误][ObserverController]UpdateObserverState error: read error at: 0x7FFAD2388520
+[2026-04-28 01:02:15.8415410][警告][CSController]在更新数据时捕获到异常：read error at: 0x7FFAD20C96A0
+[2026-04-28 01:02:15.8451520][错误][ObserverController]UpdateObserverState error: read error at: 0x7FFAD2388520
+[2026-04-28 01:02:15.8456350][警告][CSController]在更新数据时捕获到异常：read error at: 0x7FFAD20C96A0
+[2026-04-28 01:02:15.8486150][错误][ObserverController]UpdateObserverState error: read error at: 0x7FFAD2388520
+[2026-04-28 01:02:15.8497510][警告][CSController]在更新数据时捕获到异常：read error at: 0x7FFAD20C96A0
+[2026-04-28 01:02:15.8525320][错误][ObserverController]UpdateObserverState error: read error at: 0x7FFAD2388520
+[2026-04-28 01:02:15.8529780][警告][CSController]在更新数据时捕获到异常：read error at: 0x7FFAD20C96A0
+[2026-04-28 01:02:15.8561490][错误][ObserverController]UpdateObserverState error: read error at: 0x7FFAD2388520
+[2026-04-28 01:02:15.8568650][警告][CSController]在更新数据时捕获到异常：read error at: 0x7FFAD20C96A0
+[2026-04-28 01:02:15.8600440][错误][ObserverController]UpdateObserverState error: read error at: 0x7FFAD2388520
+[2026-04-28 01:02:15.8604320][警告][CSController]在更新数据时捕获到异常：read error at: 0x7FFAD20C96A0
+[2026-04-28 01:02:15.8630730][错误][ObserverController]UpdateObserverState error: read error at: 0x7FFAD2388520
+[2026-04-28 01:02:15.8635650][警告][CSController]在更新数据时捕获到异常：read error at: 0x7FFAD20C96A0
+[2026-04-28 01:02:15.8687700][错误][ObserverController]UpdateObserverState error: read error at: 0x7FFAD2388520
+[2026-04-28 01:02:15.8695560][警告][CSController]在更新数据时捕获到异常：read error at: 0x7FFAD20C96A0
+[2026-04-28 01:02:15.8729460][错误][ObserverController]UpdateObserverState error: read error at: 0x7FFAD2388520
+[2026-04-28 01:02:15.8733390][警告][CSController]在更新数据时捕获到异常：read error at: 0x7FFAD20C96A0

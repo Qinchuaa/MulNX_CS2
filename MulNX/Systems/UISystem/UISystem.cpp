@@ -5,7 +5,7 @@
 #include <MulNX/Core/Core.hpp>
 #include <MulNX/Systems/PathManager/PathManager.hpp>
 #include <MulNX/Systems/I18nManager/I18nManager.hpp>
-#include <MulNX/Systems/MessageManager/IMessageManager.hpp>
+#include <MulNX/Systems/MessageManager/MessageManager.hpp>
 #include <MulNX/Systems/InputSystem/InputSystem.hpp>
 #include <MulNX/Systems/GlobalVars/GlobalVars.hpp>
 #include <yaml-cpp/yaml.h>

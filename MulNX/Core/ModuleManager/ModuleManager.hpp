@@ -52,7 +52,7 @@ namespace MulNX {
             // 按类型查找模块
             template<typename T>
             T* FindModule(const std::string& Name) {
-                return dynamic_cast<T*>(this->FindModule(Name));
+                return reinterpret_cast<T*>(this->FindModule(Name));
             }
 
             // 初始化最后部分使用

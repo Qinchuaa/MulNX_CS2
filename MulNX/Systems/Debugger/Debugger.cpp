@@ -1,11 +1,10 @@
 #include "Debugger.hpp"
 
 #include <MulNX/Base/UI/UI.hpp>
-#include <MulNX/Core/Cores.hpp>
-#include <MulNX/Systems/ISystems.hpp>
+#include <MulNX/Core/Core.hpp>
+#include <MulNX/Core/ModuleManager/ModuleManager.hpp>
 #include <MulNX/Systems/Logger/Logger.hpp>
-
-#include <bitset>
+#include <MulNX/Systems/I18nManager/I18nManager.hpp>
 
 bool MulNX::Debugger::UINodeFunc(MulNX::UINode* ThisNode) {
     auto w = MulNX::UI::RAIIWindow("调试器", this->ShowWindow);

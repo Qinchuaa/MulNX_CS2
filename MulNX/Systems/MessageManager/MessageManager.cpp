@@ -1,7 +1,6 @@
 #include "MessageManager.hpp"
 #include "MessageChannel/MessageChannel.hpp"
 #include <MulNX/Core/Core.hpp>
-#include <MulNX/Systems/HandleSystem/IHandleSystem.hpp>
 #include <MulNX/Systems/GlobalVars/GlobalVars.hpp>
 
 bool MulNX::MessageManager::Init() {
@@ -18,7 +17,7 @@ MulNXHandle MulNX::MessageManager::CreateMessageChannel() {
 	this->Channels[hChannel] = std::move(Channel);
 	return hChannel;
 }
-MulNX::IMessageChannel* MulNX::MessageManager::GetMessageChannel(const MulNXHandle& hChannel) {
+MulNX::MessageChannel* MulNX::MessageManager::GetMessageChannel(const MulNXHandle& hChannel) {
     std::unique_lock lock(this->smutex);
 	auto it = this->Channels.find(hChannel);
 	if (it == this->Channels.end())return nullptr;

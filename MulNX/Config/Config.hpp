@@ -42,9 +42,9 @@ namespace MulNX {
     // MulNX消息类型
     using MsgType = size_t;
     // 消息管理器
-    class IMessageManager;
+    class MessageManager;
     // 消息管道
-    class IMessageChannel;
+    class MessageChannel;
     // 路径管理器
     class PathManager;
     // UI节点
