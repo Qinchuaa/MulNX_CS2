@@ -176,6 +176,7 @@ void SolutionManager::Solution_DebugWindow() {
     static int IndexForReset = 0;
     static int PreIndex = -1;
     ImGui::SliderInt(I18n("camsys.sol.adjust_element_index").c_str(), &IndexForReset, 0, this->CurrentSolution->elements.size() - 1);
+    if (this->CurrentSolution->elements.empty())return;
     std::shared_ptr<ElementBase> element = this->CurrentSolution->elements.at(IndexForReset).Element;
     if (element) {
         const float& Offset = this->CurrentSolution->elements.at(IndexForReset).Offset;
