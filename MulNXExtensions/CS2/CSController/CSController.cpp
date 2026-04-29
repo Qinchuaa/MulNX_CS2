@@ -18,6 +18,9 @@ bool CSController::UINodeFunc(MulNX::UINode* node) {
     info.windowHeight = this->GetWinHeight();
     info.windowWidth = this->GetWinWidth();
 
+    auto tick = this->GetDemoTick();
+    ImGui::Text("当前demotick：%d", tick);
+
     MulNX::UI::SliderFloat("roll调整", this->controlView.InputRoll, -179.99f, 179.99f);
     auto* pGlobalFOV = this->CvarSystem.GetCvar("fov_cs_debug")->GetPtr<float>();
     ImGui::SliderFloat("fov调整", pGlobalFOV, 0, 179.99f);
@@ -117,22 +120,10 @@ bool CSController::Init() {
     this->pAdvancedViewController = this->Core->ModuleManager()->FindModule<AdvancedViewController>("AdvancedViewController");
     this->pFreeCameraController = this->Core->ModuleManager()->FindModule<FreeCameraController>("FreeCameraController");
 
-    this->Modules.client = CS2::Module::Client(L"client.dll");
-    this->Modules.engine2 = CS2::Module::engine2(L"engine2.dll");
-    this->Modules.tier0 = MulNX::Memory::DllModule(L"tier0.dll");
-
-    this->Source2EngineToClient001 =
-        this->Modules.engine2.GetProcAddressT<void* (const char*, int*)>("CreateInterface")
-        ("Source2EngineToClient001", nullptr);
-    this->executor = IVClass::Assume(this->Source2EngineToClient001)->GetVFunc<void(int, const char*, int)>(50);
-
-    this->CvarSystem.Address =
-        (uintptr_t)this->Modules.tier0.GetProcAddressT<void* (const char*, int*)>("CreateInterface")
-        ("VEngineCvar007", nullptr);
+    this->EnlistExecutors();
 
     const auto& pattern = MulNX::CS2::Signatures::CallIsPlayingDemo;
     auto target = this->Modules.client.GetTextRegion().FindRegion(pattern);
-
     this->hkPosCallIsPlayingDemo = MulNX::Hook::Create(target.Data(), 0, true, [this](RegContext* ctx, MulNX::Hook* Hook) {
         this->HandleOverrideView((CS2::CViewSetup*)ctx->rsi);
         return MulNX::Hook::Then::Continue;
@@ -149,6 +140,7 @@ bool CSController::Init() {
         try {
             this->Update();
             this->EntryProcessMsg();
+            
         }
         catch (const std::runtime_error& e) {
             this->ISys().LogWarning("在更新数据时捕获到异常：" + std::string(e.what()));
@@ -159,6 +151,26 @@ bool CSController::Init() {
         });
 
     return true;
+}
+
+void CSController::EnlistExecutors() {
+    this->Modules.client = CS2::Module::Client(L"client.dll");
+    this->Modules.engine2 = CS2::Module::engine2(L"engine2.dll");
+    this->Modules.tier0 = MulNX::Memory::DllModule(L"tier0.dll");
+
+    // 加载来自Source2EngineToClient001的模块
+    this->Source2EngineToClient001 =
+        this->Modules.engine2.GetProcAddressT<void* (const char*, int*)>("CreateInterface")
+        ("Source2EngineToClient001", nullptr);
+    this->executor = IVClass::Assume(this->Source2EngineToClient001)->GetVFunc<void(int, const char*, int)>(50);
+    this->GetDemo = IVClass::Assume(this->Source2EngineToClient001)->GetVFunc<void* ()>(68);
+    auto demo = this->GetDemo();
+    this->GetDemoTick = IVClass::Assume(demo)->GetVFunc<int()>(3);
+
+    // 获取CvarSystem
+    this->CvarSystem.Address =
+        (uintptr_t)this->Modules.tier0.GetProcAddressT<void* (const char*, int*)>("CreateInterface")
+        ("VEngineCvar007", nullptr);
 }
 
 void CSController::ProcessMsg(MulNX::Message& Msg) {

@@ -22,14 +22,13 @@ private:
     ID3D11DeviceContext* pd3dContext = nullptr;
     ID3D11RenderTargetView* view = nullptr;
     bool d3dInited = false;
-    HWND CS2hWnd = nullptr;//CS2窗口句柄    
-public:
-    bool Init()override;
-    void ActiveSystem()override;
-private:
-    void CreateHook();
+    HWND CS2hWnd = nullptr;//CS2窗口句柄
+
     void d3dInit();
     void ReleaseOld();
     std::atomic<bool> needReBuild = false;
     void BuildNew();
+public:
+    bool Init()override;
+    void ActiveSystem()override;
 };

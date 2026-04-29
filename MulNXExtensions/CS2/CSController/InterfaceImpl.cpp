@@ -39,12 +39,13 @@ float CSController::GetTime() {
     
 }
 bool CSController::JumpTime(const float time) {
-    // 这个函数的实现思路是通过demo_gototick命令跳转到指定时间的tick上，CS2每秒钟有64个tick，所以需要将时间转换为tick
-    if (this->autoTick.load(std::memory_order_acquire)) {
-        float startTime = MulNX::MRead(this->Modules.client.dwGameRules()->m_fWarmupPeriodEnd());
-        this->deltaTick.store(static_cast<int>(startTime * 64.0), std::memory_order_release);
-    }
-    int tick = static_cast<int>(time * 64.0f) - this->deltaTick.load(std::memory_order_acquire);
+    int currentGameTick = this->Time()->GetReal() * 64;
+    int currentDemoTick = this->GetDemoTick();
+
+    int targetGameTick = static_cast<int>(time * 64);
+    int deltaTick = currentGameTick - currentDemoTick;
+    int tick = targetGameTick - deltaTick;
+
     std::string command = std::format("demo_gototick {}", tick);
     this->ExecuteCommand(command);
     return true;

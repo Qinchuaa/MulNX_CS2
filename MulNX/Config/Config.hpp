@@ -55,8 +55,6 @@ namespace MulNX {
 
     [[noreturn]] void ErrorTerminate(const std::string& Msg,
         const std::source_location& loc = std::source_location::current());
-
-    void SetUIStyle();
 }
 
 // 辅助模板：将函数签名 R(Args...) 转换为对应的函数指针类型 R(*)(Args...)

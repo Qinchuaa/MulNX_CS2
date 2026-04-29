@@ -13,21 +13,27 @@
 #include <Windows.h>
 #include <fstream>
 
-bool MulNX::UISystem::Init() {
-    this->ISys()
-        .SubscribeAsync("UISystem/Start")
-        .SubscribeAsync("UISystem/ModulePush");
-    this->UIContext.Core = this->Core;
+bool MulNX::UISystem::Menu(MulNX::UINode* node) {
+    ImGui::Text(I18n("ui.style.info").c_str());
+    if (ImGui::Button(I18n("ui.style.save").c_str())) {
+        this->ISys().PublishAsync("UISystem/SaveStyle"_hash);
+    }
+    ImGui::Separator();
+    ImGui::ShowStyleEditor();
     return true;
 }
 
+bool MulNX::UISystem::Init() {
+    this->UIContext.Core = this->Core;
+    this->ISys()
+        .SubscribeAsync("UISystem/Start")
+        .SubscribeAsync("UISystem/ModulePush")
+        .SubscribeAsync("UISystem/SaveStyle");
 
-// auto stylePath = this->ISys().PathGet("Config") / "ImStyle.yaml";
-// ImGuiStyle& style = ImGui::GetStyle();
-// YAML::Node sroot;
-// ImGuiYaml::StyleToYaml(style, sroot);
-// std::ofstream fout(stylePath);
-// fout << sroot;
+    this->SendUINode(this->GetName(), [this](MulNX::UINode* node) {return this->Menu(node);});
+
+    return true;
+}
 
 void MulNX::UISystem::ProcessMsg(MulNX::Message& Msg) {
     switch (Msg.type) {
@@ -43,42 +49,18 @@ void MulNX::UISystem::ProcessMsg(MulNX::Message& Msg) {
         // 这里需要进行转换，以适配ImGui的接口
         this->strImguiIniPath = MulNX::Base::CharUtility::FilePathToString(IniPath);
         io.IniFilename = this->strImguiIniPath.c_str();
-        try {
-            {
-                // 加载字体
-                auto cfgPath = this->ISys().PathGet("Config") / "ui.yaml";
-                this->ISys().LogInfo(I18n("ui.font.cfg.load", cfgPath.string()));
-                YAML::Node root = YAML::LoadFile(cfgPath.string());
-                auto fontFilePath = root["font"]["path"].as<std::string>();
-                auto fontSize = root["font"]["size"].as<float>();
-                this->ISys().LogSucc(I18n("ui.font.cfg.load_succ", fontFilePath, fontSize));
-                this->ISys().LogInfo(I18n("ui.font.load", fontFilePath));
-                io.Fonts->AddFontFromFileTTF(fontFilePath.c_str(), fontSize);
-                this->ISys().LogSucc(I18n("ui.font.load_succ", fontFilePath));
-            }
-            {
-                // 加载Style
-                auto stylePath = this->ISys().PathGet("Config") / "ImStyle.yaml";
-                YAML::Node root = YAML::LoadFile(stylePath.string());
-                ImGuiStyle newStyle;
-                if (ImGuiYaml::YamlToStyle(root, newStyle)) {
-                    ImGui::GetStyle() = newStyle;
-                }
-            }
-        }
-        catch (const std::exception& e) {
-            this->ISys().LogError(e.what());
-        }
-        catch (...) {
-            MulNX::ErrorTerminate("Unknown Error On Load Font!");
-        }
-
+        this->LoadFont();
+        this->LoadStyle();
         break;
     }
     case "UISystem/ModulePush"_hash: {
         MulNX::UINode* node = Msg.asp.get<MulNX::UINode>();
         this->UIContext.AddUINode(node->hSelf, std::move(*node));
         this->ISys().LogSucc("接收到一个UI节点");
+        break;
+    }
+    case "UISystem/SaveStyle"_hash: {
+        this->SaveStyle();
         break;
     }
     }
@@ -115,11 +97,63 @@ int MulNX::UISystem::Render() {
     return 0;
 }
 
-void MulNX::UISystem::SetFrameBefore(std::function<void(void)>Before) {
-    this->FrameBefore = Before;
-    return;
+void MulNX::UISystem::LoadFont() {
+    try {
+        auto cfgPath = this->ISys().PathGet("Config") / "ui.yaml";
+        this->ISys().LogInfo(I18n("ui.font.cfg.load", cfgPath.string()));
+        YAML::Node root = YAML::LoadFile(cfgPath.string());
+        auto fontFilePath = root["font"]["path"].as<std::string>();
+        auto fontSize = root["font"]["size"].as<float>();
+        this->ISys().LogSucc(I18n("ui.font.cfg.load_succ", fontFilePath, fontSize));
+        this->ISys().LogInfo(I18n("ui.font.load", fontFilePath));
+
+        ImGuiIO& io = ImGui::GetIO();
+        io.Fonts->AddFontFromFileTTF(fontFilePath.c_str(), fontSize);
+        this->ISys().LogSucc(I18n("ui.font.load_succ", fontFilePath));
+    }
+    catch (const std::exception& e) {
+        this->ISys().LogError(e.what());
+    }
+    catch (...) {
+        MulNX::ErrorTerminate("Unknown Error On Load Font!");
+    }
 }
-void MulNX::UISystem::SetFrameBehind(std::function<void(void)>Behind) {
-    this->FrameBehind = Behind;
-    return;
+void MulNX::UISystem::LoadStyle() {
+    try {
+        // 加载Style
+        auto stylePath = this->ISys().PathGet("Config") / "ImStyle.yaml";
+        this->ISys().LogInfo(I18n("ui.style.load", stylePath.string()));
+        YAML::Node root = YAML::LoadFile(stylePath.string());
+        ImGuiStyle newStyle;
+        if (!ImGuiYaml::YamlToStyle(root, newStyle)) {
+            this->ISys().LogError(I18n("ui.style.load_file_error", stylePath.string()));
+            return;
+        }
+        ImGui::GetStyle() = newStyle;
+        this->ISys().LogSucc(I18n("ui.style.load_succ", stylePath.string()));
+    }
+    catch (const std::exception& e) {
+        this->ISys().LogError(e.what());
+    }
+    catch (...) {
+        MulNX::ErrorTerminate("Unknown Error On Load Style!");
+    }
+}
+void MulNX::UISystem::SaveStyle() {
+    try {
+        // 保存Style
+        auto stylePath = this->ISys().PathGet("Config") / "ImStyle.yaml";
+        ImGuiStyle& style = ImGui::GetStyle();
+        YAML::Node root;
+        ImGuiYaml::StyleToYaml(style, root);
+        std::ofstream fout(stylePath);
+        fout << root;
+        this->ISys().LogSucc(I18n("ui.style.save_succ", stylePath.string()));
+    }
+    catch (const std::exception& e) {
+        this->ISys().LogError(I18n("ui.style.save_error_with", e.what()));
+    }
+    catch (...) {
+        this->ISys().LogError(I18n("ui.style.save_error"));
+    }
 }

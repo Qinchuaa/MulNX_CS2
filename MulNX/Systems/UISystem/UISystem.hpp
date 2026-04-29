@@ -8,28 +8,27 @@
 namespace MulNX {
     class UISystem final :public MulNX::ModuleBase {
     private:
-        std::shared_mutex UIMutex{};
         MulNX::UIContext UIContext{};
         bool UISystemRunning = false;
-        std::function<void(void)>FrameBefore = nullptr;
-        std::function<void(void)>FrameBehind = nullptr;
-        std::string strImguiIniPath;
         
+        std::string strImguiIniPath;
+
+        void LoadFont();
+        void LoadStyle();
+        void SaveStyle();
+
+        bool Menu(MulNX::UINode* node);
     public:
         std::atomic<bool>WantCaptureMouse{ false };
         std::atomic<bool>WantTextInput{ false };
         moodycamel::ConcurrentQueue<MulNX::Win32::Msg4>winMsgs{};
+        std::function<void(void)>FrameBefore = nullptr;
+        std::function<void(void)>FrameBehind = nullptr;
+
         bool Init()override;
-
         void ProcessMsg(MulNX::Message& Msg)override;
-
-        std::shared_mutex& GetMutex() { return this->UIMutex; }
-
         int Render();
 
         MulNX::UIContext* GetUIContext() { return &this->UIContext; }
-
-        void SetFrameBefore(std::function<void(void)>Before);
-        void SetFrameBehind(std::function<void(void)>Behind);
     };
 }

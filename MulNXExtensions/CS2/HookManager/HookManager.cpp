@@ -16,9 +16,6 @@ bool HookManager::Init() {
     return true;
 }
 void HookManager::ActiveSystem() {
-    this->CreateHook();
-}
-void HookManager::CreateHook() {
     // 准备临时的D3D11设备和交换链，以获取函数地址
     ID3D11Device* pTempD3DDevice = nullptr;
     IDXGISwapChain* pTempSwapChain = nullptr;
@@ -82,19 +79,19 @@ void HookManager::CreateHook() {
     pTempD3DDevice->Release();
     pTempSwapChain->Release();
 
-    this->pUISystem->SetFrameBefore([this]()->void {
+    this->pUISystem->FrameBefore = [this]()->void {
         ImGui_ImplDX11_NewFrame();
         ImGui_ImplWin32_NewFrame();
         ImGui::NewFrame();
         return;
-        });
-    this->pUISystem->SetFrameBehind([this]()->void {
+        };
+    this->pUISystem->FrameBehind = [this]()->void {
         ImGui::EndFrame();
         ImGui::Render();
         this->pd3dContext->OMSetRenderTargets(1, &this->view, nullptr);
         ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
         return;
-        });
+        };
 }
 
 void HookManager::d3dInit() {

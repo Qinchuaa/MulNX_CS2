@@ -8,6 +8,7 @@ add_subdirectory("MiniMap")
 add_subdirectory("VirtualUser")
 add_subdirectory("MulNXController")
 add_subdirectory("WebSocketManager")
+add_subdirectory("MediaRemoter")
 
 target_link_libraries(MulNXExtensions INTERFACE
     MulNX
@@ -18,4 +19,5 @@ target_link_libraries(MulNXExtensions INTERFACE
     VirtualUser
     MulNXController
     WebSocketManager
+    MediaRemoter
 )

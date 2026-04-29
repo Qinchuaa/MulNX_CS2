@@ -7,6 +7,7 @@
 #include <MulNXExtensions/VirtualUser/VirtualUser.hpp>
 #include <MulNXExtensions/MulNXController/MulNXController.hpp>
 #include <MulNXExtensions/WebSocketManager/WebSocketManager.hpp>
+#include <MulNXExtensions/MediaRemoter/MediaRemoter.hpp>
 
 #include <Windows.h>
 
@@ -36,6 +37,10 @@ void MainDraw::Window(MulNX::UINode* node) {
         if (ImGui::BeginTabItem(I18n("ui.mulnx_control").c_str())) {
             node->CallUINode("VirtualUser");
             node->CallUINode("MulNXController");
+            ImGui::EndTabItem();
+        }
+        if (ImGui::BeginTabItem(I18n("ui.settings").c_str())) {
+            node->CallUINode("UISystem");
             ImGui::EndTabItem();
         }
         ImGui::EndTabBar();
@@ -123,6 +128,8 @@ DWORD MulNX_CS2_Start(void*) {
             .CreateModule<DemoHelper>("DemoHelper")
             .CreateModule<GameSettingsManager>("GameSettingsManager")
             .CreateModule<ConsoleManager>("ConsoleManager")
+            .CreateModule<MediaRemoter>("MediaRemoter")
+            // 管理
             .CreateModule<MulNXController>("MulNXController")
             .CreateModule<MainDraw>("MainDraw")
             ;

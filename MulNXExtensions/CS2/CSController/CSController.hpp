@@ -47,6 +47,8 @@ private:
     // 控制台指令执行器
     void* Source2EngineToClient001 = nullptr;
     VExecutor<void(int, const char*, int)> executor{};
+    VExecutor<void* ()> GetDemo{};
+    VExecutor<int()>GetDemoTick{};
     // 控制台变量系统
     C_ConVarSystem CvarSystem{};
     // CS2全局变量
@@ -63,6 +65,7 @@ public:
     std::atomic<bool> ESPDraw = false;
     
     bool Init()override;
+    void EnlistExecutors();
     bool UINodeFunc(MulNX::UINode* node);
     void ProcessMsg(MulNX::Message& Msg)override;
     void Update();
