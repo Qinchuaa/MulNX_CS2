@@ -27,6 +27,8 @@ namespace MulNX {
         // 根据类型自动构建消息并发送
         void PublishAsync(MulNX::MsgType MsgType);
 
+        void AsyncCommand(std::string&& cmd);
+
         std::filesystem::path PathGet(const std::string& Target);
         MulNX::PathManager* PathManager();
     };

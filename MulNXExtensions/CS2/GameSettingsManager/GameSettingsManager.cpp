@@ -5,31 +5,6 @@
 #include <MulNXExtensions/CS2/CSController/CSController.hpp>
 
 bool GameSettingsManager::UINodeFunc(MulNX::UINode* ThisNode) {
-    if (ImGui::Button("一键修复数字切人bug")) {
-        this->AL3D->ExecuteCommand("unbind 1");
-        this->AL3D->ExecuteCommand("unbind 2");
-        this->AL3D->ExecuteCommand("unbind 3");
-        this->AL3D->ExecuteCommand("unbind 4");
-        this->AL3D->ExecuteCommand("unbind 5");
-        this->AL3D->ExecuteCommand("unbind 6");
-        this->AL3D->ExecuteCommand("unbind 7");
-        this->AL3D->ExecuteCommand("unbind 8");
-        this->AL3D->ExecuteCommand("unbind 9");
-        this->AL3D->ExecuteCommand("unbind 0");
-
-
-        this->AL3D->ExecuteCommand("bind 1 spec_player 1");
-        this->AL3D->ExecuteCommand("bind 2 spec_player 2");
-        this->AL3D->ExecuteCommand("bind 3 spec_player 3");
-        this->AL3D->ExecuteCommand("bind 4 spec_player 4");
-        this->AL3D->ExecuteCommand("bind 5 spec_player 5");
-        this->AL3D->ExecuteCommand("bind 6 spec_player 6");
-        this->AL3D->ExecuteCommand("bind 7 spec_player 7");
-        this->AL3D->ExecuteCommand("bind 8 spec_player 8");
-        this->AL3D->ExecuteCommand("bind 9 spec_player 9");
-        this->AL3D->ExecuteCommand("bind 0 spec_player 10");
-    }
-
     ImGui::Checkbox("作弊模式", this->sv_cheats);
 
     ImGui::SliderFloat("游戏速度", this->GameSettings.host_timescale, 0.001f, 10.000f);
@@ -45,7 +20,7 @@ bool GameSettingsManager::UINodeFunc(MulNX::UINode* ThisNode) {
             ImGui::SliderInt("展示Tick", this->GameSettings.cl_showtick, 0, 3, "%d");
             ImGui::SliderInt("TrueView控制", this->GameSettings.cl_trueview_show_status, 0, 2);
             if (ImGui::Button("切换Demo进度条UI显示")) {
-                this->AL3D->ExecuteCommand("demoui");
+                this->ISys().AsyncCommand("demoui");
             }
 
             ImGui::TreePop();

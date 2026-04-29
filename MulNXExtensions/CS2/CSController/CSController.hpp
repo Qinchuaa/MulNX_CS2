@@ -77,7 +77,6 @@ public:
     bool SpecHandle(CS2::CHandleBase handle);
 
     // 核心接口
-    bool ExecuteCommand(const std::string& cmd)override;
     float* GetViewMatrix()override;
     MulNX::Math::View GetView()override;
     float GetTime()override;

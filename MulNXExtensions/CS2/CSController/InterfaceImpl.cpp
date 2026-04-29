@@ -1,9 +1,5 @@
 #include "CSController.hpp"
 
-bool CSController::ExecuteCommand(const std::string& cmd) {
-    this->executor(0, cmd.c_str(), 1);
-    return true;
-}
 float* CSController::GetViewMatrix() {
     return this->Modules.client.dwViewMatrix();
 }
@@ -47,7 +43,7 @@ bool CSController::JumpTime(const float time) {
     int tick = targetGameTick - deltaTick;
 
     std::string command = std::format("demo_gototick {}", tick);
-    this->ExecuteCommand(command);
+    this->ISys().AsyncCommand(std::move(command));
     return true;
 }
 float CSController::GetWinWidth()const {
@@ -57,7 +53,7 @@ float CSController::GetWinHeight()const {
     return this->controlView.WindowHeight.load(std::memory_order_relaxed);
 }
 bool CSController::SpecPlayer(int IndexInMap) {
-    this->ExecuteCommand("spec_mode 2;spec_player " + std::to_string(this->AL3DGameData.Players[IndexInMap].IndexInMap));
+    this->ISys().AsyncCommand("spec_mode 2;spec_player " + std::to_string(this->AL3DGameData.Players[IndexInMap].IndexInMap));
     return true;
 }
 D_Player& CSController::GetPlayerMsg(int Index) {
@@ -65,7 +61,7 @@ D_Player& CSController::GetPlayerMsg(int Index) {
     return this->AL3DGameData.Players[Index];
 }
 void CSController::spec_goto_ex(const DirectX::XMFLOAT3& pos, const DirectX::XMFLOAT3& rot) {
-    this->ExecuteCommand(std::format("spec_goto {} {} {} {} {}", pos.x, pos.y, pos.z, rot.x, rot.y));
+    this->ISys().AsyncCommand(std::format("spec_goto {} {} {} {} {}", pos.x, pos.y, pos.z, rot.x, rot.y));
     this->controlView.InputRoll.store(rot.z, std::memory_order_release);
 }
 void CSController::ClearViewOverride() {

@@ -93,7 +93,7 @@ DWORD MulNX_CS2_Start(void*) {
         // 设置初始化完成回调
         starter->InitEndCall = [starter]() {
 #ifdef _DEBUG
-            starter->AL3D->ExecuteCommand("playdemo 111");
+            starter->ISys().AsyncCommand("playdemo 111");
             std::thread([]() {
                 MessageBoxW(NULL, L"MulNX 注入成功！", L"MulNX", MB_OK | MB_ICONINFORMATION);
                 }).detach();

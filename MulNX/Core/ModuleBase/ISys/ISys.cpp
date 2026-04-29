@@ -49,6 +49,11 @@ void MulNX::C_ISys::PublishAsync(MulNX::Message&& Msg) {
 void MulNX::C_ISys::PublishAsync(MulNX::MsgType Msg) {
     this->pModuleBase->pMsgManager->Publish(MulNX::Message(Msg));
 }
+void MulNX::C_ISys::AsyncCommand(std::string&& cmd) {
+    auto [msg, rp] = MulNX::Message::Create<MulNX::NetExt>("Game/Command"_hash);
+    rp->str1 = std::move(cmd);
+    this->PublishAsync(std::move(msg));
+}
 
 std::filesystem::path MulNX::C_ISys::PathGet(const std::string& Target) {
     return this->pModuleBase->pPathManager->PathGetForModule(this->pModuleBase->GetName(), Target);

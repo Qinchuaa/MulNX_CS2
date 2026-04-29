@@ -50,7 +50,7 @@ void VirtualUser::ProcessMsg(MulNX::Message& Msg) {
     }
 #ifdef _DEBUG
     case "Core/Tick30min"_hash: {
-        this->AL3D->ExecuteCommand("playdemo 111");
+        this->ISys().AsyncCommand("playdemo 111");
         break;
     }
 #endif // _DEBUG

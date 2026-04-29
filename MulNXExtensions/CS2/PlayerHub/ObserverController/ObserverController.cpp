@@ -73,7 +73,7 @@ bool ObserverController::HandlePlayStarted() {
 
     if (this->currentMode != 4) {   // 不是自由视角，需要切换
         this->ISys().LogInfo("运镜开始时当前模式非 spec_mode 4，尝试切换并等待生效。");
-        this->CS2()->ExecuteCommand("spec_mode 4");
+        this->ISys().AsyncCommand("spec_mode 4");
         this->waitingForSpecMode4 = true;
     }
     else {
@@ -86,7 +86,7 @@ bool ObserverController::HandlePlayStarted() {
 bool ObserverController::HandlePlayEnded() {
     if (startedAsSpecMode == 2) {
         this->ISys().LogInfo("运镜结束后恢复 spec_mode 2。");
-        this->CS2()->ExecuteCommand("spec_mode 2");
+        this->ISys().AsyncCommand("spec_mode 2");
     }
     this->CampathPlaying = false;
     this->waitingForSpecMode4 = false;

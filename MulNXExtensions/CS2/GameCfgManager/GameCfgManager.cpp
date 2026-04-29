@@ -157,7 +157,7 @@ bool GameCfgManager::LoadCfg(const std::string& CfgName) {
 		this->ISys().LogError("指定的配置文件不存在，无法加载配置文件！  路径：" + CfgPath.string());
 		return false;
 	}
-	this->AL3D->ExecuteCommand("exec " + CfgName);
+	this->ISys().AsyncCommand("exec " + CfgName);
 	this->ISys().LogSucc("成功加载配置文件，路径：" + CfgPath.string());
 	return true;
 }

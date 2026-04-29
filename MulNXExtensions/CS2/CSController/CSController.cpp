@@ -36,12 +36,12 @@ bool CSController::UINodeFunc(MulNX::UINode* node) {
         ImGui::SliderFloat("虚拟时间流速", &virtualTimeScale, 0.0f, 5.0f);
 
         if (ImGui::Button("启用时间虚拟化")) {
-            this->AL3D->ExecuteCommand(std::format("host_timescale {}", gameTimeScale));
+            this->ISys().AsyncCommand(std::format("host_timescale {}", gameTimeScale));
             this->AL3D->Time()->RefreshVirtual(true, virtualTimeScale);
         }
         ImGui::SameLine();
         if (ImGui::Button("解除时间虚拟化")) {
-            this->AL3D->ExecuteCommand("host_timescale 1");
+            this->ISys().AsyncCommand(std::format("host_timescale 1"));
             this->AL3D->Time()->RefreshVirtual(false, 1.0f);
         }
 
@@ -181,7 +181,7 @@ void CSController::ProcessMsg(MulNX::Message& Msg) {
     }
     case "Game/Command"_hash: {
         auto cmd = Msg.asp.get<MulNX::NetExt>()->str1;
-        this->ExecuteCommand(cmd);
+        this->executor(0, cmd.c_str(), 1);
         break;
     }
 

@@ -70,9 +70,6 @@ namespace MulNX {
         virtual float GetWinHeight()const = 0;
 
         virtual bool CameraSystemIOOverride(const CameraSystemIO* const IO) = 0;
-		//执行命令
-        virtual bool ExecuteCommand(const std::string& command) = 0;
-
 		//信息
         virtual D_Player& GetPlayerMsg(int Index) = 0;
 

@@ -34,7 +34,7 @@ bool MulNXController::UINodeFunc(MulNX::UINode* ThisNode) {
     }
     ImGui::SameLine();
     if (ImGui::Button("注入到游戏")) {
-        this->AL3D->ExecuteCommand(msg);
+        this->ISys().AsyncCommand(std::move(msg));
         msg.clear();
     }
     return true;
