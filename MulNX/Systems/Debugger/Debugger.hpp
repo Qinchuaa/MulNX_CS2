@@ -24,7 +24,7 @@ namespace MulNX {
 		void ProcessMsg(MulNX::Message& Msg)override;
 	private:
         void Main();
-        bool UINodeFunc(MulNX::UINode* ThisNode);		
+        bool Window(MulNX::UINode* ThisNode);		
         void ResetMaxMsgCount(const int Max);
         void PushBack(MulNX::NetExt&& pack,const std::string& strLevel);
     public:

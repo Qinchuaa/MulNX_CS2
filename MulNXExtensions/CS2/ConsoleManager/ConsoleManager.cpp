@@ -9,7 +9,8 @@ bool ConsoleManager::Init() {
     return true;
 }
 
-bool ConsoleManager::UINodeFunc(MulNX::UINode* ThisNode) {
+bool ConsoleManager::UINodeFunc(MulNX::UINode* node) {
+    node->CallUINode("GraphicsManager");
     MulNX::UI::Checkbox("小地图窗口", this->Core->ModuleManager()->FindModule("MiniMap")->ShowWindow);
     MulNX::UI::Checkbox("游戏配置管理器窗口", this->Core->ModuleManager()->FindModule("GameCfgManager")->ShowWindow);
     MulNX::UI::Checkbox("快捷操作窗口", this->Core->ModuleManager()->FindModule("CSController")->ShowWindow);

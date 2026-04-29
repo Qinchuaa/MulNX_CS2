@@ -6,7 +6,7 @@
 #include <MulNX/Systems/Logger/Logger.hpp>
 #include <MulNX/Systems/I18nManager/I18nManager.hpp>
 
-bool MulNX::Debugger::UINodeFunc(MulNX::UINode* ThisNode) {
+bool MulNX::Debugger::Window(MulNX::UINode* ThisNode) {
     auto w = MulNX::UI::RAIIWindow("调试器", this->ShowWindow);
     if (!w)return true;
     std::shared_lock lock(this->smutex);
@@ -63,7 +63,7 @@ bool MulNX::Debugger::UINodeFunc(MulNX::UINode* ThisNode) {
 bool MulNX::Debugger::Init() {
     this->pLogger = this->Core->ModuleManager()->FindModule<MulNX::Logger>("Logger");
 
-    this->SendUINode(this->GetName(), [this](MulNX::UINode* node) {return this->UINodeFunc(node);});
+    this->SendUINode(this->GetName(), [this](MulNX::UINode* node) {return this->Window(node);});
 
     this->SendTask("MulNXMain", [this]()->bool {
         this->Main();
