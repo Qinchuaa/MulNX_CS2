@@ -33,7 +33,6 @@ public:
     std::atomic<int> WindowWidth = 1920;
     std::atomic<int> WindowHeight = 1080;
     
-
     Dofs dofs{};
 };
 
@@ -44,39 +43,39 @@ private:
     FreeCameraController* pFreeCameraController{};
     AdvancedViewController* pAdvancedViewController = nullptr;
 
-    // 控制台指令执行器
     void* Source2EngineToClient001 = nullptr;
+    // 控制台指令执行器
     VExecutor<void(int, const char*, int)> executor{};
-    VExecutor<void* ()> GetDemo{};
-    VExecutor<int()>GetDemoTick{};
     // 控制台变量系统
     C_ConVarSystem CvarSystem{};
     // CS2全局变量
     C_GlobalVars* CSGlobalVars{};
+    // 视角控制钩子
     std::unique_ptr<MulNX::Hook> hkPosCallIsPlayingDemo = nullptr;
 
-    std::atomic<bool> autoTick = true;
-    std::atomic<int> deltaTick = 0;
-
     void ESP();
+    bool Window(MulNX::UINode* node);
+
+    void HandleOverrideView(CS2::CViewSetup* viewSetup);
+    void HandleCameraSystemPlay(CS2::CViewSetup* viewSetup);
+
+    void EnlistExecutors();
+    void ProcessMsg(MulNX::Message& Msg)override;
+    void Update();
 public:
     std::vector<std::function<bool(CS2::CCSPlayerController*, CS2::C_CSPlayerPawn*)>>handlesControlPlayer{};
     CS2::Modules Modules{};
     std::atomic<bool> ESPDraw = false;
-    
-    bool Init()override;
-    void EnlistExecutors();
-    bool UINodeFunc(MulNX::UINode* node);
-    void ProcessMsg(MulNX::Message& Msg)override;
-    void Update();
-
-    void HandleOverrideView(CS2::CViewSetup* viewSetup);
-    void HandleCameraSystemPlay(CS2::CViewSetup* viewSetup);
     // 获取控制台变量系统
     C_ConVarSystem& GetCvarSystem() { return this->CvarSystem; }
+    
+    bool Init()override;
+    
+    VExecutor<void* ()> GetDemo{};
+    VExecutor<int()>GetDemoTick{};
     bool SpecHandle(CS2::CHandleBase handle);
-
-    // 核心接口
+    
+    // AbstractLayer3D接口实现
     float* GetViewMatrix()override;
     MulNX::Math::View GetView()override;
     float GetTime()override;
@@ -88,9 +87,6 @@ public:
     void spec_goto_ex(const DirectX::XMFLOAT3& pos, const DirectX::XMFLOAT3& rot)override;
     void ClearViewOverride()override;
     void SetDOF(const MulNX::Math::DOFParam& dof)override;
-
-    // CameraSystemIO的处理
-
     void HandleFreeCameraPath(const CameraSystemIO* const IO);
     bool CameraSystemIOOverride(const CameraSystemIO* const IO)override;
 };

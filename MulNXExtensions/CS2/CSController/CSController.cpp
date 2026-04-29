@@ -7,7 +7,7 @@
 #include <MulNXExtensions/CS2/PlayerHub/ProjectileTracker/ProjectileTracker.hpp>
 #include <MulNXThirdParty/All_cs2_dumper.hpp>
 
-bool CSController::UINodeFunc(MulNX::UINode* node) {
+bool CSController::Window(MulNX::UINode* node) {
     if (this->ESPDraw.load(std::memory_order_acquire)) {
         this->ESP();
     }
@@ -44,9 +44,6 @@ bool CSController::UINodeFunc(MulNX::UINode* node) {
             this->ISys().AsyncCommand(std::format("host_timescale 1"));
             this->AL3D->Time()->RefreshVirtual(false, 1.0f);
         }
-
-        MulNX::UI::Checkbox("自动分析tick", this->autoTick);
-        MulNX::UI::SliderInt("GameTick与DemoTick差值", this->deltaTick, 0, 10000);
     }
     node->CallUINode("PlayerFlashController");
     node->CallUINode("AdvancedViewController");
@@ -115,7 +112,7 @@ bool CSController::Init() {
         .SubscribeAsync("Core/ReHook")
         .SubscribeAsync("Game/Command");
 
-    this->SendUINode(this->GetName(), [this](MulNX::UINode* node) {return this->UINodeFunc(node);});
+    this->SendUINode(this->GetName(), [this](MulNX::UINode* node) {return this->Window(node);});
 
     this->pAdvancedViewController = this->Core->ModuleManager()->FindModule<AdvancedViewController>("AdvancedViewController");
     this->pFreeCameraController = this->Core->ModuleManager()->FindModule<FreeCameraController>("FreeCameraController");
