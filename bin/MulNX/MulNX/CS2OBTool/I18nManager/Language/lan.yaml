@@ -69,6 +69,11 @@ math:
   camera_keyframe:
     fmt: "时间：{0}  坐标（XYZ）：{1}，{2}，{3}  FOV：{4}  角度： 俯仰：{5}  偏航：{6}  滚转：{7}  景深： 近模糊：{8}  近清晰：{9}  远清晰：{10}  远模糊：{11}"
 
+module:
+  inited: 初始化成功！
+  send_ui: 将UI节点注册信息推送到了消息系统
+  send_task: 将任务注册信息推送到了消息系统
+
 sys:
   i18n_load_succ: 语言文件加载成功：{}
   version_is_testing: 当前版本是否为测试版：{} 
@@ -189,3 +194,9 @@ free_campath:
   fmt: "编号： {0}  {1}\n" # {1}为关键帧参数
   fmt_edit: "正在调整的关键帧编号： {0}  {1}\n" # {1}为关键帧参数
   add: 添加关键帧
+
+dthmsg:
+  window:
+    name: 击杀信息控制
+    control: 击杀信息控制窗口
+  enable: 启用击杀控制

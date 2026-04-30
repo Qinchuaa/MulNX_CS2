@@ -66,14 +66,14 @@ bool DemoHelper::Init() {
     return true;
 }
 
-void DemoHelper::ProcessMsg(MulNX::Message& Msg) {
-    switch (Msg.type) {
+void DemoHelper::ProcessMsg(MulNX::Message& msg) {
+    switch (msg.type) {
     case "DemoHelper/MarkTime"_hash: {
         this->MarkTime();
         break;
     }
     case "DemoHelper/JumpTIme"_hash: {
-        float data = Msg.p1.low<float>();
+        float data = msg.p1.low<float>();
         std::string str = "跳转到" + std::to_string(data);
         this->ISys().LogInfo(str);
         this->AL3D->Time()->JumpReal(data);

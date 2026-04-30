@@ -14,7 +14,7 @@ public:
     bool Init()override;
 
     void Main();
-    void ProcessMsg(MulNX::Message& Msg)override;
+    void ProcessMsg(MulNX::Message& msg)override;
     bool UINodeFunc(MulNX::UINode* node);
     //void HandleUICommand(MulNXMessage* Msg);
 

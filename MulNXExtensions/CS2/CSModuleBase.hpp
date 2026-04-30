@@ -2,7 +2,7 @@
 
 #include <MulNX/MulNX.hpp>
 #include <MulNXExtensions/CS2/CSClasses/tree/tree.hpp>
-#include <MulNXExtensions/WinExt/WinExt.hpp>
+#include <MulNXExtensions/CS2/Signatures.hpp>
 
 class CSController;
 class PlayerHub;

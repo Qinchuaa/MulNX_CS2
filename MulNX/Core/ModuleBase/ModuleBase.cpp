@@ -6,6 +6,7 @@
 #include <MulNX/Systems/MessageManager/MessageManager.hpp>
 #include <MulNX/Systems/UISystem/UISystem.hpp>
 #include <MulNX/Systems/TaskSystem/TaskSystem.hpp>
+#include <MulNX/Systems/I18nManager/I18nManager.hpp>
 
 bool MulNX::ModuleBase::SetName(std::string&& Name) {
     this->ModuleName = std::move(Name);
@@ -50,7 +51,7 @@ bool MulNX::ModuleBase::SendUINode(std::string&& name, std::function<void(MulNX:
     auto [msg, rp] = MulNX::Message::Create<MulNX::UINode>("UISystem/ModulePush"_hash, std::move(UINode));
     // 发送UI消息
     this->ISys().PublishAsync(std::move(msg));
-    this->ISys().LogInfo("发送了一个UI节点进入消息系统");
+    this->ISys().LogInfo(I18n("module.send_ui"));
     return true;
 }
 void MulNX::ModuleBase::SendTask(std::string&& workerName, std::function<bool()>&& task) {
@@ -58,14 +59,14 @@ void MulNX::ModuleBase::SendTask(std::string&& workerName, std::function<bool()>
     rp->targetWorker = std::move(workerName);
     rp->task = std::move(task);
     this->ISys().PublishAsync(std::move(msg));
-    this->ISys().LogInfo("发送了一个任务进入消息系统");
+    this->ISys().LogInfo(I18n("module.send_task"));
 }
 
 bool MulNX::ModuleBase::EntryInit() {
     if (!this->Init()) {
         return false;
     }
-    this->ISys().LogSucc("初始化成功!");
+    this->ISys().LogSucc(I18n("module.inited"));
     return true;
 }
 void MulNX::ModuleBase::EntryProcessMsg() {

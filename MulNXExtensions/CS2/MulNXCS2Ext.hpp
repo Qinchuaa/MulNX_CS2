@@ -8,6 +8,7 @@
 #include "GameSettingsManager/GameSettingsManager.hpp"
 #include "HookManager/HookManager.hpp"
 #include "PlayerFlashController/PlayerFlashController.hpp"
+#include "DeathMsgController/DeathMsgController.hpp"
 
 #include "PlayerHub/PlayerHub.hpp"
 #include "PlayerHub/NameController/NameController.hpp"

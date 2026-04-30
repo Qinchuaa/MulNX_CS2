@@ -18,9 +18,27 @@ CS2::C_BaseEntity* CS2::Module::Client::GetBaseEntityFromHandle(CS2::CHandleBase
 }
 
 CS2::C_CSPlayerPawn* CS2::Module::Client::GetLocalPlayerPawn() {
-    auto* localController = this->dwLocalPlayerController();
-    if (!localController) return nullptr;
-    auto hLocalPawn = MulNX::MRead(localController->m_hPawn());
-    auto* localPawn = this->GetBaseEntityFromHandle(hLocalPawn)->As<CS2::C_CSPlayerPawn>();
-    return localPawn;
+    try {
+        auto* localController = this->dwLocalPlayerController();
+        if (!localController) return nullptr;
+        auto hLocalPawn = MulNX::MRead(localController->m_hPawn());
+        auto* localPawn = this->GetBaseEntityFromHandle(hLocalPawn)->As<CS2::C_CSPlayerPawn>();
+        return localPawn;
+    }
+    catch (...) {
+        return nullptr;
+    }
+}
+
+CS2::C_CSPlayerPawn* CS2::Module::Client::TryGetObservingPawn() {
+    try {
+        auto* localPawn = this->GetLocalPlayerPawn();
+        if (!localPawn) return nullptr;
+        auto hObserverTarget = localPawn->GetHandleObserverTarget();
+        auto* target = this->GetBaseEntityFromHandle(hObserverTarget)->As<CS2::C_CSPlayerPawn>();
+        return target;
+    }
+    catch (...) {
+        return nullptr;
+    }
 }

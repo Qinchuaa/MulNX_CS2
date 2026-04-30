@@ -56,6 +56,7 @@ void MainDraw::Window(MulNX::UINode* node) {
     node->CallUINode("DemoHelper");
     node->CallUINode("PlayerHub");
     node->CallUINode("ProjectileTracker");
+    node->CallUINode("DeathMsgController");
 }
 
 BOOL APIENTRY DllMain(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserved) {
@@ -124,6 +125,8 @@ DWORD MulNX_CS2_Start(void*) {
             .CreateModule<SmokeController>("SmokeController")
             .CreateModule<ObserverController>("ObserverController")
             .CreateModule<ProjectileTracker>("ProjectileTracker")
+            .CreateModule<DeathMsgController>("DeathMsgController")
+            // 较为上层
             .CreateModule<MiniMap>("MiniMap")
             .CreateModule<VirtualUser>("VirtualUser")
             .CreateModule<GameCfgManager>("GameCfgManager")

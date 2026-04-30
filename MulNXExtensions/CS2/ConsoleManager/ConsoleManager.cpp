@@ -17,6 +17,7 @@ bool ConsoleManager::UINodeFunc(MulNX::UINode* node) {
     MulNX::UI::Checkbox("Demo辅助窗口", this->Core->ModuleManager()->FindModule("DemoHelper")->ShowWindow);
     MulNX::UI::Checkbox("玩家信息管理窗口", this->Core->ModuleManager()->FindModule("PlayerHub")->ShowWindow);
     MulNX::UI::Checkbox("投掷物追踪器窗口", this->Core->ModuleManager()->FindModule("ProjectileTracker")->ShowWindow);
+    MulNX::UI::Checkbox(I18n("dthmsg.window.control").c_str(), this->Core->ModuleManager()->FindModule("DeathMsgController")->ShowWindow);
 
     if (ImGui::CollapsingHeader("CS2控制台")) {
         if (ImGui::Button("解限所有CS2控制台变量")) {

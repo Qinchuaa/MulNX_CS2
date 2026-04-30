@@ -3,6 +3,10 @@
 #include <yaml-cpp/yaml.h>
 #include <stack>
 
+MulNX::I18nManager::I18nManager() {
+    this->pThis = this;
+}
+
 bool MulNX::I18nManager::Init() {
     auto path = this->ISys().PathGet("Language");
     auto filePath = path / "lan.yaml";
@@ -11,7 +15,6 @@ bool MulNX::I18nManager::Init() {
     YAML::Node root = YAML::LoadFile(filePath.string());
     this->LoadYaml(root, {});
     
-    this->pThis = this;
     this->ISys().LogSucc(I18n("sys.i18n_load_succ", filePath.string()));
     return true;
 }
