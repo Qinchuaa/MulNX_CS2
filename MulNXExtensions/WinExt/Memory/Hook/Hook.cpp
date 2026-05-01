@@ -6,12 +6,22 @@
 #include <format>
 
 uintptr_t MulNX::Hook::Dispatch(Hook* pHookInstance, RegContext* ctx) {
+    pHookInstance->threadNumInAsm.fetch_add(1, std::memory_order_release);
     auto then = pHookInstance->callback(ctx, pHookInstance);
+    uint64_t target;
     switch (then) {
-    case MulNX::Hook::Then::Return:return pHookInstance->jmpTarget0;
-    case MulNX::Hook::Then::Continue:return pHookInstance->jmpTarget1;
-    default: return pHookInstance->jmpTarget1;
+    case MulNX::Hook::Then::Return:
+        target = pHookInstance->jmpTarget0;
+        break;
+    case MulNX::Hook::Then::Continue:
+        target = pHookInstance->jmpTarget1;
+        break;
+    default: 
+        target = pHookInstance->jmpTarget1;
+        break;
     }
+    pHookInstance->threadNumInAsm.fetch_sub(1, std::memory_order_release);
+    return target;
 }
 
 void* TryAlloc(uintptr_t target, size_t size) {
@@ -278,9 +288,10 @@ MulNX::Hook::Result MulNX::Hook::Detach() {
 MulNX::Hook::~Hook() {
     if (this->pAsmDispatcher == nullptr)return;
     this->Detach();
-    std::atomic_ref<size_t> threads(this->threadNumInAsm);
-    while (threads.load(std::memory_order_acquire) > 0) {
-        std::this_thread::sleep_for(std::chrono::milliseconds(1));
+    std::this_thread::sleep_for(std::chrono::milliseconds(1));// 这个暂停是为了让汇编执行流有时间进入分派函数，是窗口保护
+    while (this->threadNumInAsm.load(std::memory_order_acquire) > 0) {
+        std::this_thread::sleep_for(std::chrono::milliseconds(1));// 持续等待从回调中离开
     }
-    VirtualFree(this->pAsmDispatcher, 0, MEM_RELEASE);
+    std::this_thread::sleep_for(std::chrono::milliseconds(5));// 再一个窗口保护让执行流有时间跳回原处，防止还没回去就释放
+    VirtualFree(this->pAsmDispatcher, 0, MEM_RELEASE);// 释放空间
 }

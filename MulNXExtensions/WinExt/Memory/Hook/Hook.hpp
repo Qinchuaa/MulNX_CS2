@@ -64,7 +64,7 @@ namespace MulNX {
 
         bool attached = false;
         std::function<Then(RegContext*, Hook*)> callback;
-        size_t threadNumInAsm = 0;
+        std::atomic<size_t> threadNumInAsm = 0;
 
         void* pAsmDispatcher = nullptr;
         MulNX::Memory::Asm::Code dispatcherAsmCode{};
