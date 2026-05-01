@@ -1,5 +1,11 @@
+disclaimer: |
+  欢迎使用MulNX，这是一款运行于-insecure模式的综合内容增强工具。
+  在MulNX中，存在一些“作弊”模块，常常用于验证程序实现正确性。
+  但请注意，在正常情况下，您无法使用MulNX进行作弊，也奉劝您打消作弊想法，否则后果自负！
+
+# 此部分归属UI系统，和主要的，公有的UI部分翻译
 ui:
-  main: 主窗口
+  main: 主窗口（按下 Insert 键隐藏所有绘制）
   camera_system: 摄像机系统
   game_settings: 游戏设置
   game_enhance: 游戏增强
@@ -29,6 +35,26 @@ graph:
   chroma_key:
     enable: 启用绿幕分离
     threshold: 设置阈值
+
+media:
+  obs:
+    connect:
+      please_try: |
+        当前尚未连接OBS，请尝试连接
+        关于OBS连接：
+          1.确保OBS已经运行
+          2.标题栏-工具（T）-WebSocket 服务器设置
+          3.开启 WebSocket 服务器
+          4.服务器端口号应保持OBS默认端口：4455
+          5.取消勾选 开启身份认证
+          6.应用，随后尝试连接
+      try: 尝试连接
+      succ: 成功连接OBS WebSocket接口！身份认证成功 (Identified)！
+      cant_again: OBS连接已创建，请勿重复连接！
+      error_empty: OBS连接未建立！请先建立OBS连接！
+    record:
+      start: 开始录制
+      stop: 停止录制
     
 text:
   entered: 已进入

@@ -3,6 +3,7 @@
 #include <cstddef>
 #include <type_traits>
 #include <chrono>
+#include <concepts>
 
 namespace MulNX {
     template<typename T>

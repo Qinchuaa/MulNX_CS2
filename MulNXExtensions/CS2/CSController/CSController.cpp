@@ -177,7 +177,7 @@ void CSController::ProcessMsg(MulNX::Message& Msg) {
         break;
     }
     case "Game/Command"_hash: {
-        auto cmd = Msg.asp.get<MulNX::NetExt>()->str1;
+        auto cmd = std::move(Msg.asp.get<MulNX::NetExt>()->str1);
         this->executor(0, cmd.c_str(), 1);
         break;
     }

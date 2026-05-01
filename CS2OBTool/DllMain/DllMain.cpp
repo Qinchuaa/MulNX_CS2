@@ -57,6 +57,7 @@ void MainDraw::Window(MulNX::UINode* node) {
     node->CallUINode("PlayerHub");
     node->CallUINode("ProjectileTracker");
     node->CallUINode("DeathMsgController");
+    node->CallUINode("MediaRemoter");
 }
 
 BOOL APIENTRY DllMain(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserved) {
@@ -93,6 +94,7 @@ DWORD MulNX_CS2_Start(void*) {
         starter->SetName("HookManager");
         // 设置初始化完成回调
         starter->InitEndCall = [starter]() {
+            starter->ISys().LogWarning(I18n("disclaimer"));
 #ifdef _DEBUG
             starter->ISys().AsyncCommand("playdemo 111");
             std::thread([]() {
