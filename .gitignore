@@ -7,3 +7,5 @@ bin/**/*.dll
 bin/**/*.ini
 bin/**/*.zip
 *.yaml
+*.txt
+*.xml

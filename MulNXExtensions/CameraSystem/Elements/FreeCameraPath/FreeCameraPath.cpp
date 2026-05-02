@@ -50,24 +50,35 @@ void FreeCameraPath::DebugUI(ElementManager* EManager) {
         this->AddKeyframe(keyframe);
     }
 
+    ImGui::SameLine();
     if (ImGui::Button(I18n("text.clear").c_str()) || EManager->pInputSystem->CheckComboClick(VK_DELETE, 2)) {
         this->Clear();
     }
 
+    ImGui::SameLine();
     if (ImGui::Button(I18n("text.normalize").c_str())) {
         this->TimeNormalize();
     }
 
+    ImGui::SameLine();
     if (ImGui::Button(I18n("text.preview").c_str())) {
         EManager->Preview_SetElement(this->Name);
         EManager->Preview_SetPreviewSchema(EManager->AL3D->Time()->GetReal());
         EManager->Preview_Enable();
     }
-
-    ImGui::Separator();
-
+    bool confirmModify = false;
+    bool deleteKeyframe = false;
+    bool copyKeyframe = false;
     if (0 <= IndexForReset && IndexForReset < this->CameraKeyframes.size()) {
         const MulNX::Math::CameraKeyframe& keyframe = this->GetKeyFrame(IndexForReset);
+        ImGui::SameLine();
+        confirmModify = ImGui::Button(I18n("text.confirm_modify").c_str());
+        ImGui::SameLine();
+        deleteKeyframe = ImGui::Button(I18n("text.delete").c_str());
+        ImGui::SameLine();
+        copyKeyframe = ImGui::Button(I18n("text.copy").c_str());
+
+        ImGui::Separator();
         ImGui::Text(I18n("free_campath.fmt_edit", IndexForReset, keyframe.GetMsg()).c_str());
         ImGui::Separator();
 
@@ -89,7 +100,7 @@ void FreeCameraPath::DebugUI(ElementManager* EManager) {
         ImGui::SliderFloat(I18n("math.fov").c_str(), &tempPositionAndFOV.w, 10, 170);
 
         EManager->CamSys()->CamDrawer.DrawCamera(DirectX::XMFLOAT3{ tempPositionAndFOV.x,tempPositionAndFOV.y ,tempPositionAndFOV.z }, tempRotationEuler, "目标摄像机关键帧");
-        if (ImGui::Button(I18n("text.confirm_modify").c_str())) {
+        if (confirmModify) {
             // 构造临时摄像机关键帧
             MulNX::Math::CameraKeyframe tempKey;
             // 注入时间
@@ -106,13 +117,13 @@ void FreeCameraPath::DebugUI(ElementManager* EManager) {
             this->AddKeyframe(std::move(tempKey));
             PreIndex = -1;
         }
-        if (ImGui::Button(I18n("text.delete").c_str())) {
+        if (deleteKeyframe) {
             //删除并刷新
             this->CameraKeyframes.erase(this->CameraKeyframes.begin() + IndexForReset);
             this->Refresh();
             PreIndex = -1;
         }
-        if (ImGui::Button(I18n("text.copy").c_str())) {
+        if (copyKeyframe) {
             //拷贝复制
             this->AddKeyframe(this->GetKeyFrame(IndexForReset));
             PreIndex = -1;

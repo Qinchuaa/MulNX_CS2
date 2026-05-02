@@ -13,7 +13,7 @@ bool WorkspaceManager::MenuWorkspace(MulNX::UINode* node) {
     static std::vector<std::string> CachedWorkspaceNames{};
     static bool NeedRefreshWorkspaceNames = true;
     auto RefreshWorkspaceNames = [&]() {
-        CachedWorkspaceNames = this->pIPCer->GetProjectsNames(this->ISys().PathGet("Workspaces"));
+        CachedWorkspaceNames = this->pIPCer->GetProjectsNames(this->CamSys()->ISys().PathGet("Workspaces"));
         NeedRefreshWorkspaceNames = false;
         };
     if (NeedRefreshWorkspaceNames) {
@@ -193,7 +193,7 @@ bool WorkspaceManager::Workspace_Create(const std::string& Name) {
         this->ISys().LogError(I18n("result.error_empty_name"));
         return false;
     }
-    auto workspacePath = this->ISys().PathGet("Workspaces") / Name;
+    auto workspacePath = this->CamSys()->ISys().PathGet("Workspaces") / Name;
     if (std::filesystem::exists(workspacePath)) {
         this->ISys().LogWarning("工作区已存在：" + workspacePath.string());
         return false;
@@ -245,7 +245,7 @@ bool WorkspaceManager::Workspace_Delete(const std::string& Name) {
         this->ISys().LogError(I18n("result.error_empty_name"));
         return false;
     }
-    auto workspacePath = this->ISys().PathGet("Workspaces") / Name;
+    auto workspacePath = this->CamSys()->ISys().PathGet("Workspaces") / Name;
     if (!std::filesystem::exists(workspacePath) || !std::filesystem::is_directory(workspacePath)) {
         this->ISys().LogError("工作区不存在，无法删除：" + workspacePath.string());
         return false;
