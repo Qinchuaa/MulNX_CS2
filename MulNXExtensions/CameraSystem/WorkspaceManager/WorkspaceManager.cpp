@@ -9,6 +9,16 @@
 
 bool WorkspaceManager::MenuWorkspace(MulNX::UINode* node) {
     std::shared_lock lock(this->CamSys()->smutex);
+    static std::string TargetWorkspaceName{};
+    static std::vector<std::string> CachedWorkspaceNames{};
+    static bool NeedRefreshWorkspaceNames = true;
+    auto RefreshWorkspaceNames = [&]() {
+        CachedWorkspaceNames = this->pIPCer->GetProjectsNames(this->ISys().PathGet("Workspaces"));
+        NeedRefreshWorkspaceNames = false;
+        };
+    if (NeedRefreshWorkspaceNames) {
+        RefreshWorkspaceNames();
+    }
     // 顶部：工作区信息（始终显示）
     auto c = MulNX::UI::RAIIChild("工作区面板", ImVec2(0, 150), true);
     // 工作区状态
@@ -25,7 +35,7 @@ bool WorkspaceManager::MenuWorkspace(MulNX::UINode* node) {
     }
     // 打开工作区后允许保存工作区
     if (this->InWorkspace) {
-        ImGui::Text(I18n("camsys.ws.current_workspace", this->CurrentWorkspace->Name).c_str());
+        ImGui::TextColored(ImVec4(0.95f, 0.82f, 0.35f, 1.0f), I18n("camsys.ws.current_workspace", this->CurrentWorkspace->Name).c_str());
         ImGui::SameLine();
         if (ImGui::Button(I18n("camsys.ws.save").c_str())) {
             this->ISys().PublishAsync("CameraSystem/Workspace/Save"_hash);
@@ -35,19 +45,82 @@ bool WorkspaceManager::MenuWorkspace(MulNX::UINode* node) {
     ImGui::Separator();
     auto c2 = MulNX::UI::RAIIChild("工作区详情菜单");
     if (ImGui::CollapsingHeader(I18n("text.detail_info").c_str())) {
-        static std::string TargetWorkspaceName{};
+        const char* previewName = TargetWorkspaceName.empty()
+            ? (this->CurrentWorkspace ? this->CurrentWorkspace->Name.c_str() : I18n("text.none").c_str())
+            : TargetWorkspaceName.c_str();
+        if (ImGui::BeginCombo("当前工作区", previewName)) {
+            for (const auto& workspaceName : CachedWorkspaceNames) {
+                const bool selected = TargetWorkspaceName == workspaceName
+                    || (TargetWorkspaceName.empty() && this->CurrentWorkspace && this->CurrentWorkspace->Name == workspaceName);
+                std::string label = workspaceName;
+                const bool isCurrent = this->CurrentWorkspace && this->CurrentWorkspace->Name == workspaceName;
+                if (isCurrent) {
+                    label = "[当前] " + workspaceName;
+                }
+                if (ImGui::Selectable(label.c_str(), selected)) {
+                    TargetWorkspaceName = workspaceName;
+                    if (!isCurrent) {
+                        auto [msg, rp] = MulNX::Message::Create<MulNX::NetExt>("CamereSystem/Workspace/Set"_hash);
+                        rp->str1 = workspaceName;
+                        this->ISys().PublishAsync(std::move(msg));
+                    }
+                }
+                if (selected) {
+                    ImGui::SetItemDefaultFocus();
+                }
+            }
+            ImGui::EndCombo();
+        }
+        ImGui::SameLine();
+        if (ImGui::Button("刷新工作区列表")) {
+            RefreshWorkspaceNames();
+        }
+
         ImGui::Text(I18n("camsys.ws.target_name").c_str());
         ImGui::SameLine();
         ImGui::InputText("##TargetWorkspaceName", &TargetWorkspaceName);
         ImGui::SameLine();
-        if (ImGui::Button(I18n("text.change").c_str())) {
+        if (ImGui::Button("创建")) {
             if (TargetWorkspaceName.empty()) {
                 this->ISys().LogError(I18n("result.error_empty_name"));
                 return true;
             }
-            auto [msg, rp] = MulNX::Message::Create<MulNX::NetExt>("CamereSystem/Workspace/Set"_hash);
-            rp->str1 = std::move(TargetWorkspaceName);
-            this->ISys().PublishAsync(std::move(msg));
+            if (this->Workspace_Create(TargetWorkspaceName)) {
+                RefreshWorkspaceNames();
+            }
+        }
+        ImGui::SameLine();
+        const bool canDeleteCurrent = this->CurrentWorkspace != nullptr;
+        if (!canDeleteCurrent) {
+            ImGui::BeginDisabled();
+        }
+        if (ImGui::Button("删除")) {
+            ImGui::OpenPopup("删除当前工作区确认");
+        }
+        if (!canDeleteCurrent) {
+            ImGui::EndDisabled();
+        }
+        if (ImGui::BeginPopupModal("删除当前工作区确认", nullptr, ImGuiWindowFlags_AlwaysAutoResize)) {
+            if (this->CurrentWorkspace) {
+                ImGui::Text("确定删除当前工作区吗？");
+                ImGui::TextColored(ImVec4(0.95f, 0.55f, 0.55f, 1.0f), "%s", this->CurrentWorkspace->Name.c_str());
+            }
+            else {
+                ImGui::Text("当前没有可删除的工作区。");
+            }
+            if (this->CurrentWorkspace && ImGui::Button("确认删除")) {
+                auto [msg, rp] = MulNX::Message::Create<MulNX::NetExt>("CameraSystem/Workspace/Delete"_hash);
+                rp->str1 = this->CurrentWorkspace->Name;
+                this->ISys().PublishAsync(std::move(msg));
+                TargetWorkspaceName.clear();
+                NeedRefreshWorkspaceNames = true;
+                ImGui::CloseCurrentPopup();
+            }
+            ImGui::SameLine();
+            if (ImGui::Button("取消")) {
+                ImGui::CloseCurrentPopup();
+            }
+            ImGui::EndPopup();
         }
         if (!this->CurrentWorkspace) {// 无工作区
             ImGui::Text(I18n("camsys.ws.current_null").c_str());
@@ -67,7 +140,8 @@ bool WorkspaceManager::Init() {
 
     this->ISys()
         .SubscribeAsync("CamereSystem/Workspace/Set")
-        .SubscribeAsync("CameraSystem/Workspace/Save");
+        .SubscribeAsync("CameraSystem/Workspace/Save")
+        .SubscribeAsync("CameraSystem/Workspace/Delete");
 
     return true;
 }
@@ -83,6 +157,12 @@ void WorkspaceManager::ProcessMsg(MulNX::Message& msg) {
     case "CameraSystem/Workspace/Save"_hash: {
         std::unique_lock lock(this->CamSys()->smutex);
         this->Workspace_Save();
+        break;
+    }
+    case "CameraSystem/Workspace/Delete"_hash: {
+        auto name = msg.asp.get<MulNX::NetExt>()->str1;
+        std::unique_lock lock(this->CamSys()->smutex);
+        this->Workspace_Delete(name);
         break;
     }
     }
@@ -106,6 +186,29 @@ bool WorkspaceManager::Workspace_Save() {
         return false;
     }
     this->ISys().LogSucc(I18n("result.save_success"));
+    return true;
+}
+bool WorkspaceManager::Workspace_Create(const std::string& Name) {
+    if (Name.empty()) {
+        this->ISys().LogError(I18n("result.error_empty_name"));
+        return false;
+    }
+    auto workspacePath = this->ISys().PathGet("Workspaces") / Name;
+    if (std::filesystem::exists(workspacePath)) {
+        this->ISys().LogWarning("工作区已存在：" + workspacePath.string());
+        return false;
+    }
+    try {
+        if (!std::filesystem::create_directories(workspacePath)) {
+            this->ISys().LogError("创建工作区失败：" + workspacePath.string());
+            return false;
+        }
+    }
+    catch (const std::filesystem::filesystem_error& e) {
+        this->ISys().LogError("创建工作区时发生错误：" + std::string(e.what()));
+        return false;
+    }
+    this->ISys().LogSucc("成功创建工作区：" + workspacePath.string());
     return true;
 }
 bool WorkspaceManager::Workspace_Set(const std::string& Name) {
@@ -135,6 +238,40 @@ bool WorkspaceManager::Workspace_Set(const std::string& Name) {
             this->PManager->Project_Load(ProjectPath, ProjectName);
         }
     }
+    return true;
+}
+bool WorkspaceManager::Workspace_Delete(const std::string& Name) {
+    if (Name.empty()) {
+        this->ISys().LogError(I18n("result.error_empty_name"));
+        return false;
+    }
+    auto workspacePath = this->ISys().PathGet("Workspaces") / Name;
+    if (!std::filesystem::exists(workspacePath) || !std::filesystem::is_directory(workspacePath)) {
+        this->ISys().LogError("工作区不存在，无法删除：" + workspacePath.string());
+        return false;
+    }
+
+    const bool deletingCurrent = this->CurrentWorkspace && this->CurrentWorkspace->Name == Name;
+    if (deletingCurrent) {
+        this->InWorkspace = false;
+        this->EManager->Element_ClearAll();
+        this->SManager->Solution_ClearAll();
+        this->PManager->Project_ClearAll();
+        auto* pathManager = this->ISys().PathManager();
+        pathManager->KeySetCurrent("CurrentProject", {});
+        pathManager->KeySetCurrent("CurrentWorkspace", {});
+        this->CurrentWorkspace.reset();
+    }
+
+    try {
+        std::filesystem::remove_all(workspacePath);
+    }
+    catch (const std::filesystem::filesystem_error& e) {
+        this->ISys().LogError("删除工作区时发生错误：" + std::string(e.what()));
+        return false;
+    }
+
+    this->ISys().LogSucc("成功删除工作区：" + workspacePath.string());
     return true;
 }
 

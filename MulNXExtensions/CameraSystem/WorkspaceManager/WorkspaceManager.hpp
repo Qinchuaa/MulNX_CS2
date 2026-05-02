@@ -22,10 +22,14 @@ public:
 
     //工作区
 
+    //创建工作区目录
+    bool Workspace_Create(const std::string& Name);
     //保存工作区所有内容到磁盘中
     bool Workspace_Save();
     //真正切换到目标工作区并清空当前数据（在开始会先调用Workspace_TrySetPath进行检测，通过后才会从当前工作区退出）
     bool Workspace_Set(const std::string& Name);
+    //删除指定工作区目录；如果删除的是当前工作区，会自动退出当前工作区
+    bool Workspace_Delete(const std::string& Name);
 
 
     //工作区配置相关
