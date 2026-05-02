@@ -9,3 +9,4 @@ bin/**/*.zip
 *.yaml
 *.txt
 *.xml
+*.md
