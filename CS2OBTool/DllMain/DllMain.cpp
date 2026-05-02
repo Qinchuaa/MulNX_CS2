@@ -11,6 +11,37 @@
 
 #include <Windows.h>
 
+namespace {
+    enum class MainPanelPage {
+        Overview = 0,
+        CameraSystem,
+        GameSettings,
+        GameEnhance,
+        ControlCenter,
+        UISettings,
+    };
+
+    bool MainNavButton(const char* label, MainPanelPage page, MainPanelPage& currentPage) {
+        const bool selected = currentPage == page;
+        if (ImGui::Selectable(label, selected, ImGuiSelectableFlags_None, ImVec2(-1.0f, 36.0f))) {
+            currentPage = page;
+            return true;
+        }
+        return false;
+    }
+
+    void QuickWindowToggle(const char* label, MulNX::ModuleBase* module) {
+        if (!module) {
+            ImGui::BeginDisabled();
+            bool unavailable = false;
+            ImGui::Checkbox(label, &unavailable);
+            ImGui::EndDisabled();
+            return;
+        }
+        MulNX::UI::Checkbox(label, module->ShowWindow);
+    }
+}
+
 // 这是MulNX_CS2项目的入口文件，也是MulNX项目的示例模块
 // 本文件展示了如何使用MulNX核心系统创建一个功能完整的注入式DLL工具。
 
@@ -20,30 +51,167 @@ bool MainDraw::Init() {
 }
 
 void MainDraw::Window(MulNX::UINode* node) {
+    auto* workspaceManager = this->Core->ModuleManager()->FindModule<WorkspaceManager>("WorkspaceManager");
+    auto* projectManager = this->Core->ModuleManager()->FindModule<ProjectManager>("ProjectManager");
+    auto* solutionManager = this->Core->ModuleManager()->FindModule<SolutionManager>("SolutionManager");
+    auto* elementManager = this->Core->ModuleManager()->FindModule<ElementManager>("ElementManager");
+
+    auto* miniMap = this->Core->ModuleManager()->FindModule("MiniMap");
+    auto* gameCfgManager = this->Core->ModuleManager()->FindModule("GameCfgManager");
+    auto* csController = this->Core->ModuleManager()->FindModule("CSController");
+    auto* demoHelper = this->Core->ModuleManager()->FindModule("DemoHelper");
+    auto* playerHub = this->Core->ModuleManager()->FindModule("PlayerHub");
+    auto* projectileTracker = this->Core->ModuleManager()->FindModule("ProjectileTracker");
+    auto* deathMsgController = this->Core->ModuleManager()->FindModule("DeathMsgController");
+    auto* mediaRemoter = this->Core->ModuleManager()->FindModule("MediaRemoter");
+    auto* debugger = this->Core->ModuleManager()->FindModule("Debugger");
+
+    static MainPanelPage currentPage = MainPanelPage::Overview;
+
+    ImGui::SetNextWindowSize(ImVec2(1280.0f, 760.0f), ImGuiCond_FirstUseEver);
     ImGui::Begin(I18n("ui.main").c_str());
-    if (ImGui::BeginTabBar("TabBar")) {
-        if (ImGui::BeginTabItem(I18n("ui.camera_system").c_str())) {
+
+    if (ImGui::BeginChild("##MainTopBar", ImVec2(0, 88), true)) {
+        ImGui::TextUnformatted("MulNX 主控面板");
+        ImGui::TextUnformatted("将高频控制集中在一个入口中，保留原有模块逻辑与独立浮窗。");
+        ImGui::Separator();
+        ImGui::Text("快捷键: Insert 隐藏/显示主 UI");
+        ImGui::SameLine();
+        ImGui::Text("| Alt+M 小地图");
+        ImGui::SameLine();
+        ImGui::Text("| Alt+T 自动化增强");
+        ImGui::SameLine();
+        ImGui::Text("| Alt+P 停止播放");
+    }
+    ImGui::EndChild();
+
+    if (ImGui::BeginChild("##MainNav", ImVec2(220, 0), true)) {
+        ImGui::TextUnformatted("主导航");
+        ImGui::Separator();
+        MainNavButton("总览", MainPanelPage::Overview, currentPage);
+        MainNavButton(I18n("ui.camera_system").c_str(), MainPanelPage::CameraSystem, currentPage);
+        MainNavButton(I18n("ui.game_settings").c_str(), MainPanelPage::GameSettings, currentPage);
+        MainNavButton(I18n("ui.game_enhance").c_str(), MainPanelPage::GameEnhance, currentPage);
+        MainNavButton(I18n("ui.mulnx_control").c_str(), MainPanelPage::ControlCenter, currentPage);
+        MainNavButton(I18n("ui.settings").c_str(), MainPanelPage::UISettings, currentPage);
+
+        ImGui::Separator();
+        ImGui::TextUnformatted("快捷开关");
+        QuickWindowToggle("小地图", miniMap);
+        QuickWindowToggle("快捷操作", csController);
+        QuickWindowToggle("Demo辅助", demoHelper);
+        QuickWindowToggle("玩家信息", playerHub);
+        QuickWindowToggle("投掷物追踪", projectileTracker);
+        QuickWindowToggle("击杀信息", deathMsgController);
+        QuickWindowToggle("调试器", debugger);
+    }
+    ImGui::EndChild();
+
+    ImGui::SameLine();
+
+    if (ImGui::BeginChild("##MainContent", ImVec2(0, 0), true)) {
+        switch (currentPage) {
+        case MainPanelPage::Overview: {
+            ImGui::TextUnformatted("总览");
+            ImGui::Separator();
+
+            if (ImGui::BeginChild("##OverviewStatus", ImVec2(0, 150), true)) {
+                ImGui::Text("工作区状态: %s", workspaceManager && workspaceManager->InWorkspace.load() ? "已进入" : "未进入");
+                ImGui::Text("当前项目: %s",
+                    projectManager && projectManager->ActiveProject ? projectManager->ActiveProject->Name.c_str() : "无");
+                ImGui::Text("解决方案数量: %d", solutionManager ? static_cast<int>(solutionManager->solutions.size()) : 0);
+                ImGui::Text("元素数量: %d", elementManager ? static_cast<int>(elementManager->elements.size()) : 0);
+                ImGui::Separator();
+                ImGui::TextUnformatted("常用入口");
+                if (ImGui::Button("进入摄像机系统", ImVec2(180, 0))) {
+                    currentPage = MainPanelPage::CameraSystem;
+                }
+                ImGui::SameLine();
+                if (ImGui::Button("进入游戏设置", ImVec2(180, 0))) {
+                    currentPage = MainPanelPage::GameSettings;
+                }
+                ImGui::SameLine();
+                if (ImGui::Button("进入增强面板", ImVec2(180, 0))) {
+                    currentPage = MainPanelPage::GameEnhance;
+                }
+            }
+            ImGui::EndChild();
+
+            if (ImGui::BeginChild("##OverviewQuick", ImVec2(0, 0), false)) {
+                if (ImGui::CollapsingHeader("常用浮窗控制", ImGuiTreeNodeFlags_DefaultOpen)) {
+                    QuickWindowToggle("小地图窗口", miniMap);
+                    QuickWindowToggle("游戏配置管理器窗口", gameCfgManager);
+                    QuickWindowToggle("快捷操作窗口", csController);
+                    QuickWindowToggle("Demo辅助窗口", demoHelper);
+                    QuickWindowToggle("玩家信息管理窗口", playerHub);
+                    QuickWindowToggle("投掷物追踪器窗口", projectileTracker);
+                    QuickWindowToggle("击杀信息窗口", deathMsgController);
+                    QuickWindowToggle("媒体遥控窗口", mediaRemoter);
+                }
+                if (ImGui::CollapsingHeader("使用建议", ImGuiTreeNodeFlags_DefaultOpen)) {
+                    ImGui::BulletText("先在摄像机系统中进入工作区，再加载项目。");
+                    ImGui::BulletText("播放、预览和资源编辑仍由原模块负责，本面板只负责入口整理。");
+                    ImGui::BulletText("独立浮窗仍可照常显示，便于保留原有工作流。");
+                }
+            }
+            ImGui::EndChild();
+            break;
+        }
+        case MainPanelPage::CameraSystem: {
+            ImGui::TextUnformatted("摄像机系统");
+            ImGui::Separator();
             node->CallUINode("CameraSystem");
-            ImGui::EndTabItem();
+            break;
         }
-        if (ImGui::BeginTabItem(I18n("ui.game_settings").c_str())) {
+        case MainPanelPage::GameSettings: {
+            ImGui::TextUnformatted("游戏设置");
+            ImGui::Separator();
             node->CallUINode("GameSettingsManager");
-            ImGui::EndTabItem();
+            break;
         }
-        if (ImGui::BeginTabItem(I18n("ui.game_enhance").c_str())) {
+        case MainPanelPage::GameEnhance: {
+            ImGui::TextUnformatted("游戏增强");
+            ImGui::Separator();
             node->CallUINode("ConsoleManager");
-            ImGui::EndTabItem();
+            break;
         }
-        if (ImGui::BeginTabItem(I18n("ui.mulnx_control").c_str())) {
-            node->CallUINode("VirtualUser");
-            node->CallUINode("MulNXController");
-            ImGui::EndTabItem();
+        case MainPanelPage::ControlCenter: {
+            ImGui::TextUnformatted("MulNX 控制中心");
+            ImGui::Separator();
+            if (ImGui::BeginTabBar("##ControlCenterTabs")) {
+                if (ImGui::BeginTabItem("自动化")) {
+                    node->CallUINode("VirtualUser");
+                    ImGui::EndTabItem();
+                }
+                if (ImGui::BeginTabItem("框架控制")) {
+                    node->CallUINode("MulNXController");
+                    ImGui::EndTabItem();
+                }
+                if (ImGui::BeginTabItem("辅助窗口")) {
+                    QuickWindowToggle("小地图窗口", miniMap);
+                    QuickWindowToggle("游戏配置管理器窗口", gameCfgManager);
+                    QuickWindowToggle("快捷操作窗口", csController);
+                    QuickWindowToggle("Demo辅助窗口", demoHelper);
+                    QuickWindowToggle("玩家信息管理窗口", playerHub);
+                    QuickWindowToggle("投掷物追踪器窗口", projectileTracker);
+                    QuickWindowToggle("击杀信息窗口", deathMsgController);
+                    QuickWindowToggle("媒体遥控窗口", mediaRemoter);
+                    QuickWindowToggle("调试器窗口", debugger);
+                    ImGui::EndTabItem();
+                }
+                ImGui::EndTabBar();
+            }
+            break;
         }
-        if (ImGui::BeginTabItem(I18n("ui.settings").c_str())) {
+        case MainPanelPage::UISettings: {
+            ImGui::TextUnformatted("UI 个性配置");
+            ImGui::Separator();
             node->CallUINode("UISystem");
-            ImGui::EndTabItem();
+            break;
         }
-        ImGui::EndTabBar();
+        default:
+            break;
+        }
     }
     ImGui::End();
     node->CallUINode("Debugger");
