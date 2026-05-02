@@ -140,7 +140,15 @@ bool CSController::Init() {
             
         }
         catch (const std::runtime_error& e) {
-            this->ISys().LogWarning("在更新数据时捕获到异常：" + std::string(e.what()));
+            static std::string lastError{};
+            static auto lastLogTime = std::chrono::steady_clock::time_point{};
+            const std::string currentError = e.what();
+            const auto now = std::chrono::steady_clock::now();
+            if (currentError != lastError || now - lastLogTime > std::chrono::seconds(1)) {
+                this->ISys().LogWarning("在更新数据时捕获到异常：" + currentError);
+                lastError = currentError;
+                lastLogTime = now;
+            }
         }
 
         std::this_thread::sleep_for(std::chrono::milliseconds(2));
@@ -188,6 +196,7 @@ void CSController::ProcessMsg(MulNX::Message& Msg) {
 void CSController::Update() {
     // 获取CS2全局变量
     this->CSGlobalVars = MulNX::MRead<C_GlobalVars*>(this->Modules.client.GetBaseAddress() + cs2_dumper::offsets::client_dll::dwGlobalVars);
+    if (!this->CSGlobalVars) return;
 
     auto pGameRules = this->Modules.client.dwGameRules();
     if (!pGameRules) return;
@@ -202,30 +211,46 @@ void CSController::Update() {
     std::unique_lock lock(this->smutex);
     // 玩家控制器，地图上从1到10
     int playerNum = 0;
-    for (int i = 0; i < this->Modules.client.dwGameEntitySystem_highestEntityIndex(); ++i) {
-        auto* controller = this->Modules.client.GetBaseEntity(i)->As<CS2::CCSPlayerController>();
-        if (!controller)continue;
-        auto hPawn = MulNX::MRead(controller->m_hPlayerPawn());
-        auto* pawn = this->Modules.client.GetBaseEntityFromHandle(hPawn.GetIndexInEntityList())->As<CS2::C_CSPlayerPawn>();
-        if (!pawn)continue;
+    const int highestEntityIndex = this->Modules.client.dwGameEntitySystem_highestEntityIndex();
+    if (highestEntityIndex <= 0) return;
 
-        auto team = MulNX::MRead(pawn->iTeamNum());
-        if (team != CS2::ui8TeamNum::T && team != CS2::ui8TeamNum::CT)continue;
-        ++playerNum;
+    for (int i = 0; i < highestEntityIndex; ++i) {
+        try {
+            auto* baseEntity = this->Modules.client.GetBaseEntity(i);
+            if (!baseEntity) continue;
 
-        for (const auto& handle : this->handlesControlPlayer) {
-            handle(controller, pawn);
+            auto* controller = baseEntity->As<CS2::CCSPlayerController>();
+            if (!controller) continue;
+
+            auto hPawn = MulNX::MRead(controller->m_hPlayerPawn());
+            auto* pawnEntity = this->Modules.client.GetBaseEntityFromHandle(hPawn.GetIndexInEntityList());
+            if (!pawnEntity) continue;
+
+            auto* pawn = pawnEntity->As<CS2::C_CSPlayerPawn>();
+            if (!pawn) continue;
+
+            auto team = MulNX::MRead(pawn->iTeamNum());
+            if (team != CS2::ui8TeamNum::T && team != CS2::ui8TeamNum::CT) continue;
+            ++playerNum;
+
+            for (const auto& handle : this->handlesControlPlayer) {
+                handle(controller, pawn);
+            }
+
+            if (playerNum <= 10) {
+                auto& AL3DEntity = this->AL3DGameData.Players[playerNum];
+                const auto origin = MulNX::MRead(pawn->vOldOrigin());
+                AL3DEntity.Position = origin;
+                AL3DEntity.EyePosition = origin + MulNX::MRead(pawn->vecViewOffset());
+                AL3DEntity.Rotation = MulNX::MRead(pawn->angEyeAngles());
+                AL3DEntity.HP = MulNX::MRead(pawn->iHealth());
+                AL3DEntity.Team = static_cast<int>(team);
+                AL3DEntity.Alive = AL3DEntity.HP;
+                AL3DEntity.IndexInMap = playerNum;
+            }
         }
-
-        if (playerNum <= 10) {
-            auto& AL3DEntity = this->AL3DGameData.Players[playerNum];
-            AL3DEntity.Position = MulNX::MRead(pawn->vOldOrigin());
-            AL3DEntity.EyePosition = MulNX::MRead(pawn->vOldOrigin()) + MulNX::MRead(pawn->vecViewOffset());
-            AL3DEntity.Rotation = MulNX::MRead(pawn->angEyeAngles());
-            AL3DEntity.HP = MulNX::MRead(pawn->iHealth());
-            AL3DEntity.Team = static_cast<int>(team);
-            AL3DEntity.Alive = AL3DEntity.HP;
-            AL3DEntity.IndexInMap = playerNum;
+        catch (const std::runtime_error&) {
+            continue;
         }
     }
     return;

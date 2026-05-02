@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Path>
+    <Shared>
+        <Path Name="Saves"/>
+        <Path Name="Config"/>
+        <Path Name="Log"/>
+    </Shared>
+
+    <Subdirectory>
+        <Directory Name="CS2Injector"/>
+        <Directory Name="CS2OBTool"/>
+    </Subdirectory>
+
+    <Keys>
+        <Static>
+            <Key Name="cs2" WindowName="Counter-Strike 2"/>
+        </Static>
+        <Dynamic>
+            
+        </Dynamic>
+    </Keys>
+</Path>

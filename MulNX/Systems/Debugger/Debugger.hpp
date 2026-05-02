@@ -16,7 +16,7 @@ namespace MulNX {
     public:
 		bool IfShowStream = true;
 		int MaxMsgCount = 1000;
-        bool ShowWhenError = true;
+        bool ShowWhenError = false;
         bool AutoScroll = true;
 		bool NeedAutoScroll = false;
 
