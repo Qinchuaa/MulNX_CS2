@@ -45,12 +45,6 @@ bool ProjectManager::UINodeFunc(MulNX::UINode* node) {
     if (this->ShowWindow.load(std::memory_order_acquire)) {
         //项目调试窗口
         this->Project_DebugWindow();
-        if (this->OpenProjectKCPackDebugWindow) {
-            //项目按键绑定调试窗口
-            if(this->Buffer_KCPack.DebugWindow(this->OpenProjectKCPackDebugWindow)) {
-                this->ControllingProject->KCPack = this->Buffer_KCPack;//修改按键绑定
-            }
-        }
     }
     return true;
 }
@@ -72,10 +66,6 @@ void ProjectManager::Project_DebugWindow() {
         this->Project_Delete(this->ControllingProject->Name);
         this->ShowWindow.store(false, std::memory_order_release);
         return;
-    }
-    if (ImGui::Button(I18n("camsys.proj.modify_keybind").c_str())) {
-        this->Buffer_KCPack = this->ControllingProject->KCPack;
-        this->OpenProjectKCPackDebugWindow = true;
     }
     ImGui::Separator();
     ImGui::Separator();
@@ -149,11 +139,6 @@ bool ProjectManager::Init() {
 }
 void ProjectManager::HandleUpdate() {
     if (!this->Config.ProjectShortcutEnable)return;
-    for (const auto& [name, project] : this->projects) {
-        if (this->pInputSystem->CheckWithPack(project->KCPack)) {
-            this->Project_Apply(project);
-        }
-    }
 }
 
 bool ProjectManager::Project_Delete(const std::string& name) {
@@ -234,11 +219,7 @@ bool ProjectManager::Project_Apply(const std::shared_ptr<Project> Project) {
     }
     //获取元素文件夹路径
     std::filesystem::path ElementsPath = this->ISys().PathManager()->PathGetFromKey("Elements");
-    std::vector<std::string>Elements = this->pIPCer->GetFileNamesByPath(ElementsPath);
-    //遍历加载元素
-    for (const std::string& Element : Elements) {
-        this->EManager->Element_Load(ElementsPath / Element);
-    }
+    this->EManager->Element_LoadAll(ElementsPath);
     //获取解决方案文件夹路径
     std::filesystem::path SolutionsPath = this->ISys().PathManager()->PathGetFromKey("Solutions");
     std::vector<std::string>Solutions = this->pIPCer->GetFileNamesByPath(SolutionsPath);
@@ -248,7 +229,6 @@ bool ProjectManager::Project_Apply(const std::shared_ptr<Project> Project) {
     }
     this->ActiveProject = Project;
     this->ISys().LogSucc("已切换至项目" + Project->Name);
-    this->ISys().LogSucc("尝试加载元素总数：" + std::to_string(Elements.size()));
     this->ISys().LogSucc("尝试加载解决方案总数：" + std::to_string(Solutions.size()));
     this->ISys().LogSucc("成功加载元素总数：" + std::to_string(this->EManager->elements.size()));
     this->ISys().LogSucc("成功加载解决方案总数：" + std::to_string(this->SManager->solutions.size()));
@@ -284,6 +264,16 @@ bool ProjectManager::Project_Load(const std::filesystem::path& ProjectPath, cons
         auto loadProject = std::make_shared<Project>(loadProjectName);
         loadProject->KCPack = root["KCP"].as<MulNX::KeyCheckPack>();
         loadProject->OnNewRound = root["OnNewRound"].as<std::vector<std::string>>();
+        if (root["ElementKeybinds"] && root["ElementKeybinds"].IsMap()) {
+            for (const auto& bindingNode : root["ElementKeybinds"]) {
+                loadProject->ElementKeybinds[bindingNode.first.as<std::string>()] = bindingNode.second.as<MulNX::KeyCheckPack>();
+            }
+        }
+        if (root["SolutionKeybinds"] && root["SolutionKeybinds"].IsMap()) {
+            for (const auto& bindingNode : root["SolutionKeybinds"]) {
+                loadProject->SolutionKeybinds[bindingNode.first.as<std::string>()] = bindingNode.second.as<MulNX::KeyCheckPack>();
+            }
+        }
 
         loadProject->Refresh();
         this->ISys().LogSucc("成功从文件加载项目：" + loadProjectName);
@@ -297,6 +287,24 @@ bool ProjectManager::Project_Load(const std::filesystem::path& ProjectPath, cons
         return false;
     }
 }
+
+std::vector<std::shared_ptr<Project>> ProjectManager::GetProjects() const {
+    std::vector<std::shared_ptr<Project>> result;
+    result.reserve(this->projects.size());
+    for (const auto& [name, project] : this->projects) {
+        result.push_back(project);
+    }
+    return result;
+}
+
+std::shared_ptr<Project> ProjectManager::FindProject(const std::string& name) const {
+    auto it = this->projects.find(name);
+    if (it == this->projects.end()) {
+        return nullptr;
+    }
+    return it->second;
+}
+
 bool ProjectManager::Playing_AutoCall(const MulNX::Message& Msg) {
     this->ISys().LogInfo("项目管理器正在处理消息！");
     if (!this->ActiveProject) {

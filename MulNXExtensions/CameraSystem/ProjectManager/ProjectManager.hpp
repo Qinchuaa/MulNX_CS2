@@ -11,12 +11,7 @@ private:
     ElementManager* EManager = nullptr;
     SolutionManager* SManager = nullptr;
     MulNX::IPCer* pIPCer = nullptr;
-
-    std::atomic<bool> OpenProjectKCPackDebugWindow = false;
     std::unordered_map<std::string, std::shared_ptr<Project>> projects{};
-
-    //快捷键修改缓存
-    MulNX::KeyCheckPack Buffer_KCPack{};
 public:
     //当前操作项目指针（操作对象）
     std::shared_ptr<Project> ControllingProject = nullptr;
@@ -49,6 +44,8 @@ public:
     bool Project_Apply(const std::shared_ptr<Project> project);
     //从文件加载项目
     bool Project_Load(const std::filesystem::path& projectPath, const std::string& name);
+    std::vector<std::shared_ptr<Project>> GetProjects() const;
+    std::shared_ptr<Project> FindProject(const std::string& name) const;
 
     //通过信息设置当前播放的解决方案（0：默认游戏时间轴播放，1：偏移时间轴播放）
     bool Playing_AutoCall(const MulNX::Message& msg);

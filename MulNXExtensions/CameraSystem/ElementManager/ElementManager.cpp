@@ -4,8 +4,10 @@
 #include <MulNXExtensions/CameraSystem/CameraDrawer/CameraDrawer.hpp>
 #include <MulNXExtensions/CameraSystem/SolutionManager/SolutionManager.hpp>
 #include <MulNXExtensions/CameraSystem/ProjectManager/ProjectManager.hpp>
+#include <algorithm>
 
 bool ElementManager::MenuElement(MulNX::UINode* node) {
+    std::vector<std::string> groups = this->GetElementGroups();
     // 展示预览功能相关状态
     ImGui::TextUnformatted(I18n(
         "camsys.elem.preview_status",
@@ -24,6 +26,23 @@ bool ElementManager::MenuElement(MulNX::UINode* node) {
 
     // 创建元素
     if (ImGui::CollapsingHeader(I18n("camsys.elem.create").c_str())) {
+        ImGui::Text("目标元素组");
+        ImGui::SameLine();
+        const std::string currentGroupLabel = this->CurrentElementGroup.empty() ? "Elements" : this->CurrentElementGroup;
+        if (ImGui::BeginCombo("##当前元素组", currentGroupLabel.c_str())) {
+            const bool selectedRoot = this->CurrentElementGroup.empty();
+            if (ImGui::Selectable("Elements", selectedRoot)) {
+                this->CurrentElementGroup.clear();
+            }
+            for (const auto& groupName : groups) {
+                const bool isSelected = this->CurrentElementGroup == groupName;
+                if (ImGui::Selectable(groupName.c_str(), isSelected)) {
+                    this->CurrentElementGroup = groupName;
+                }
+            }
+            ImGui::EndCombo();
+        }
+
         ImGui::Text(I18n("camsys.elem.new_name").c_str());
         ImGui::SameLine();
         static std::string newElementName = "";
@@ -36,15 +55,40 @@ bool ElementManager::MenuElement(MulNX::UINode* node) {
             else {
                 auto [msg, rp] = MulNX::Message::Create<MulNX::NetExt>("Element/Create"_hash);
                 rp->str1 = std::move(newElementName);
+                rp->str2 = this->CurrentElementGroup;
                 this->ISys().PublishAsync(std::move(msg));
             }
             newElementName.clear();
         }
+
+        static std::string newGroupName = "";
+        ImGui::Separator();
+        ImGui::Text("新元素组");
+        ImGui::SameLine();
+        ImGui::InputText("##新元素组名", &newGroupName);
+        ImGui::SameLine();
+        if (ImGui::Button("创建元素组")) {
+            if (newGroupName.empty()) {
+                this->ISys().LogError(I18n("result.error_empty_name").c_str());
+            }
+            else if (this->ElementGroup_Create(newGroupName)) {
+                this->CurrentElementGroup = newGroupName;
+            }
+            newGroupName.clear();
+        }
     }
     // 展示修改元素
     if (ImGui::CollapsingHeader(I18n("camsys.elem.list").c_str())) {
+        if (ImGui::Selectable("Elements##选择根元素", this->CurrentElementGroup.empty())) {
+            this->CurrentElementGroup.clear();
+        }
         for (const auto& [name, element] : this->elements) {
-            this->Element_ShowInLine(element);
+            if (!element->InGroup()) {
+                this->Element_ShowInLine(element);
+            }
+        }
+        for (const auto& groupName : groups) {
+            this->ElementGroup_ShowInLine(groupName);
         }
     }
 
@@ -78,6 +122,29 @@ void ElementManager::Element_ShowInLine(const std::shared_ptr<ElementBase> eleme
 
     ImGui::SameLine();
     ImGui::Text(I18n("camsys.elem.type_duration", element->TypeGet_String(), std::to_string(element->DurationTime)).c_str());
+}
+
+void ElementManager::ElementGroup_ShowInLine(const std::string& groupName) {
+    auto groupElements = this->GetElementsInGroup(groupName);
+    std::sort(groupElements.begin(), groupElements.end(), [](const auto& lhs, const auto& rhs) {
+        return lhs->GetName() < rhs->GetName();
+    });
+
+    ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_DefaultOpen;
+    if (this->CurrentElementGroup == groupName) {
+        flags |= ImGuiTreeNodeFlags_Selected;
+    }
+    const bool open = ImGui::TreeNodeEx((groupName + "##元素组").c_str(), flags, "%s (%d)", groupName.c_str(), static_cast<int>(groupElements.size()));
+    if (ImGui::IsItemClicked()) {
+        this->CurrentElementGroup = groupName;
+    }
+    if (!open) {
+        return;
+    }
+    for (const auto& element : groupElements) {
+        this->Element_ShowInLine(element);
+    }
+    ImGui::TreePop();
 }
 
 bool ElementManager::UINodeFunc(MulNX::UINode* node) {
@@ -133,8 +200,9 @@ void ElementManager::ProcessMsg(MulNX::Message& msg) {
     switch (msg.type) {
     case "Element/Create"_hash: {
         auto& name = msg.asp.get<MulNX::NetExt>()->str1;
+        auto& groupName = msg.asp.get<MulNX::NetExt>()->str2;
         std::unique_lock lock(this->CamSys()->smutex);
-        if (!this->Element_Create(ElementType::FreeCameraPath, name)) {
+        if (!this->Element_Create(ElementType::FreeCameraPath, name, groupName)) {
             this->ISys().LogError(std::format("元素创建失败：{}", name));
         }
         break;
@@ -152,6 +220,20 @@ void ElementManager::ProcessMsg(MulNX::Message& msg) {
 
 void ElementManager::HandleUpdate() {
     this->EntryProcessMsg();
+    if (this->PManager && this->PManager->ActiveProject) {
+        for (const auto& [name, element] : this->elements) {
+            auto bindingIt = this->PManager->ActiveProject->ElementKeybinds.find(name);
+            if (bindingIt == this->PManager->ActiveProject->ElementKeybinds.end() || !bindingIt->second.Usable) {
+                continue;
+            }
+            if (this->pInputSystem->CheckWithPack(bindingIt->second)) {
+                this->Preview_SetElement(name);
+                this->Preview_SetPreviewSchema(this->AL3D->Time()->GetReal());
+                this->Preview_Enable();
+                break;
+            }
+        }
+    }
     if (this->OnPreview) {
         CameraSystemIO IO;
         IO.ElementTime = this->AL3D->Time()->GetReal();
@@ -179,9 +261,17 @@ void ElementManager::HandleUpdate() {
 
 //创建元素函数，支持传递任意参数给元素构造函数
 ElementBase* ElementManager::Element_Create(const ElementType type, const std::string& name) {
+    return this->Element_Create(type, name, "");
+}
+
+ElementBase* ElementManager::Element_Create(const ElementType type, const std::string& name, const std::string& groupName) {
     // 检查是否已存在同名元素
     if (this->elements.find(name) != this->elements.end()) {
         this->ISys().LogError("元素名已占用！ 元素名：" + name);
+        return nullptr;
+    }
+    if (!groupName.empty() && !this->ElementGroup_Exists(groupName)) {
+        this->ISys().LogError("目标元素组不存在，无法创建元素！ 元素组：" + groupName);
         return nullptr;
     }
     std::shared_ptr<ElementBase> pElement = nullptr;
@@ -199,25 +289,101 @@ ElementBase* ElementManager::Element_Create(const ElementType type, const std::s
     this->ISys().LogSucc("成功创建元素！  元素名：" + name);
     // 设置元素类型
     pElement->Type = type;
+    pElement->SetGroupName(groupName);
     // 添加进Elements
     this->elements[name] = std::move(pElement);
     return this->elements[name].get();
 }
 
+std::filesystem::path ElementManager::GetElementSaveFolder(const std::shared_ptr<ElementBase>& element) {
+    std::filesystem::path elementsRoot = this->ISys().PathManager()->PathGetFromKey("Elements");
+    if (!element || !element->InGroup()) {
+        return elementsRoot;
+    }
+    return elementsRoot / element->GetGroupName();
+}
+
+bool ElementManager::RegisterGroupFromPath(const std::filesystem::path& groupPath) {
+    const std::string groupName = groupPath.filename().string();
+    if (groupName.empty()) {
+        return false;
+    }
+    this->elementGroups.insert(groupName);
+    return true;
+}
+
+bool ElementManager::ElementGroup_Create(const std::string& groupName) {
+    if (groupName.empty()) {
+        this->ISys().LogError("元素组名为空，无法创建元素组！");
+        return false;
+    }
+    if (this->ElementGroup_Exists(groupName)) {
+        this->ISys().LogWarning("元素组已存在：" + groupName);
+        return true;
+    }
+    std::filesystem::path groupPath = this->ISys().PathManager()->PathGetFromKey("Elements") / groupName;
+    try {
+        std::filesystem::create_directories(groupPath);
+        this->elementGroups.insert(groupName);
+        this->ISys().LogSucc("成功创建元素组：" + groupName);
+        return true;
+    }
+    catch (const std::exception& e) {
+        this->ISys().LogError("创建元素组失败：" + groupName + "  原因：" + e.what());
+        return false;
+    }
+}
+
+bool ElementManager::ElementGroup_Exists(const std::string& groupName) const {
+    return this->elementGroups.find(groupName) != this->elementGroups.end();
+}
+
+std::vector<std::string> ElementManager::GetElementGroups() const {
+    std::vector<std::string> groups(this->elementGroups.begin(), this->elementGroups.end());
+    std::sort(groups.begin(), groups.end());
+    return groups;
+}
+
+float ElementManager::GetElementGroupMaxDuration(const std::string& groupName) const {
+    float maxDuration = 0.0f;
+    for (const auto& element : this->GetElementsInGroup(groupName)) {
+        if (element) {
+            maxDuration = std::max(maxDuration, element->GetDurationTime());
+        }
+    }
+    return maxDuration;
+}
+
+std::vector<std::shared_ptr<ElementBase>> ElementManager::GetElementsInGroup(const std::string& groupName) const {
+    std::vector<std::shared_ptr<ElementBase>> result;
+    for (const auto& [name, element] : this->elements) {
+        if (element && element->GetGroupName() == groupName) {
+            result.push_back(element);
+        }
+    }
+    return result;
+}
+
 bool ElementManager::Element_SaveAll() {
+    std::filesystem::path ElementFolderPath = this->ISys().PathManager()->PathGetFromKey("Elements");
+    std::filesystem::create_directories(ElementFolderPath);
+    for (const auto& groupName : this->elementGroups) {
+        std::filesystem::create_directories(ElementFolderPath / groupName);
+    }
     //检查是否有元素
     if (this->elements.empty()) {
         this->ISys().LogWarning("当前没有任何元素，跳过保存操作！");
         return true;
     }
-    std::filesystem::path ElementFolderPath = this->ISys().PathManager()->PathGetFromKey("Elements");
     //遍历所有元素并保存
     for (const auto& [name, elem] : this->elements) {
         if (!elem->Dirty) {
             //如果不脏则跳过保存
             continue;
         }
-        auto [ok, msg] = elem->Save(ElementFolderPath);
+        auto saveFolderPath = this->GetElementSaveFolder(elem);
+        std::filesystem::create_directories(saveFolderPath);
+        auto [ok, msg] = elem->Save(saveFolderPath);
         if (ok) {
             this->ISys().LogSucc(std::move(msg));
         }
@@ -229,6 +395,30 @@ bool ElementManager::Element_SaveAll() {
     this->ISys().LogSucc("成功保存所有元素到磁盘！");
     return true;
 }
+
+bool ElementManager::Element_LoadAll(const std::filesystem::path& elementsRoot) {
+    this->elementGroups.clear();
+    if (!std::filesystem::exists(elementsRoot)) {
+        this->ISys().LogWarning("元素目录不存在，跳过元素加载：" + elementsRoot.string());
+        return true;
+    }
+
+    for (const auto& entry : std::filesystem::directory_iterator(elementsRoot)) {
+        if (entry.is_directory()) {
+            this->RegisterGroupFromPath(entry.path());
+            for (const auto& groupEntry : std::filesystem::directory_iterator(entry.path())) {
+                if (groupEntry.is_regular_file()) {
+                    this->Element_Load(groupEntry.path());
+                }
+            }
+        }
+        else if (entry.is_regular_file()) {
+            this->Element_Load(entry.path());
+        }
+    }
+    return true;
+}
+
 bool ElementManager::Element_Load(const std::filesystem::path& FullPath) {
     this->ISys().LogInfo("尝试从磁盘文件加载元素，文件路径：" + FullPath.string());
     // 检查文件本身存在性
@@ -263,7 +453,25 @@ bool ElementManager::Element_Load(const std::filesystem::path& FullPath) {
         // 创建基类指针
         this->ISys().LogInfo("尝试进行分发，元素类型为 " + NewElementTypeString + " ，文件路径：" + FullPath.string());
 
-        auto pElement = this->Element_Create(NewElementType, NewElementName);
+        std::string groupName;
+        if (root["group"]) {
+            groupName = root["group"].as<std::string>();
+        }
+        else {
+            const auto elementsRoot = this->ISys().PathManager()->PathGetFromKey("Elements");
+            const auto parentPath = FullPath.parent_path();
+            if (parentPath != elementsRoot) {
+                const auto relativeParent = std::filesystem::relative(parentPath, elementsRoot);
+                if (relativeParent.begin() != relativeParent.end() && std::next(relativeParent.begin()) == relativeParent.end()) {
+                    groupName = relativeParent.begin()->string();
+                }
+            }
+        }
+        if (!groupName.empty()) {
+            this->elementGroups.insert(groupName);
+        }
+
+        auto pElement = this->Element_Create(NewElementType, NewElementName, groupName);
         // 判空
         if (!pElement) {
             this->ISys().LogError("尝试从磁盘文件加载元素失败，无法创建指定类型的元素实例！ 元素类型：" + NewElementTypeString);
@@ -321,16 +529,18 @@ bool ElementManager::Element_Delete(const std::string Name) {
     return true;
 }
 bool ElementManager::Element_ClearAll() {
-    // 检查是否有元素
-    if (this->elements.empty()) {
-        this->ISys().LogWarning("当前没有任何元素，跳过清空操作！");
-        return true;
-    }
     // 禁用预览
     this->Preview_Disable();
     this->Preview_CurrentElement = nullptr;
     // 清空当前操作元素
     this->CurrentElement = nullptr;
+    this->CurrentElementGroup.clear();
+    this->elementGroups.clear();
+    // 检查是否有元素
+    if (this->elements.empty()) {
+        this->ISys().LogWarning("当前没有任何元素，跳过清空操作！");
+        return true;
+    }
     // 把所有元素标记为需要清理并从Elements中释放
     for (auto& [name, elem] : this->elements) {
         elem->NeedBeDelete = true;

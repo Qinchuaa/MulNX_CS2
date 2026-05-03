@@ -10,16 +10,63 @@
 #include <MulNXExtensions/MediaRemoter/MediaRemoter.hpp>
 
 #include <Windows.h>
+#include <algorithm>
+#include <fstream>
 
 namespace {
     enum class MainPanelPage {
         Overview = 0,
         CameraSystem,
+        Keybinds,
         GameSettings,
         GameEnhance,
         ControlCenter,
         UISettings,
     };
+
+    bool IsModifierKey(const unsigned char vkCode) {
+        return vkCode == VK_CONTROL || vkCode == VK_LCONTROL || vkCode == VK_RCONTROL
+            || vkCode == VK_SHIFT || vkCode == VK_LSHIFT || vkCode == VK_RSHIFT
+            || vkCode == VK_MENU || vkCode == VK_LMENU || vkCode == VK_RMENU;
+    }
+
+    std::vector<std::string> GetSortedProjectNames(const std::vector<std::shared_ptr<Project>>& projects) {
+        std::vector<std::string> names;
+        names.reserve(projects.size());
+        for (const auto& project : projects) {
+            if (project) {
+                names.push_back(project->Name);
+            }
+        }
+        std::sort(names.begin(), names.end());
+        return names;
+    }
+
+    std::vector<std::string> GetSortedElementNames(const ElementManager* elementManager) {
+        std::vector<std::string> names;
+        if (!elementManager) {
+            return names;
+        }
+        names.reserve(elementManager->elements.size());
+        for (const auto& [name, element] : elementManager->elements) {
+            names.push_back(name);
+        }
+        std::sort(names.begin(), names.end());
+        return names;
+    }
+
+    std::vector<std::string> GetSortedSolutionNames(const SolutionManager* solutionManager) {
+        std::vector<std::string> names;
+        if (!solutionManager) {
+            return names;
+        }
+        names.reserve(solutionManager->solutions.size());
+        for (const auto& [name, solution] : solutionManager->solutions) {
+            names.push_back(name);
+        }
+        std::sort(names.begin(), names.end());
+        return names;
+    }
 
     bool MainNavButton(const char* label, MainPanelPage page, MainPanelPage& currentPage) {
         const bool selected = currentPage == page;
@@ -74,6 +121,222 @@ bool MainDraw::Init() {
     return true;
 }
 
+void MainDraw::StartKeybindRecording(KeybindRecordTarget target, const std::string& itemName) {
+    this->RecordingTarget = target;
+    this->RecordingItemName = itemName;
+    this->RecordingMainKey = 0;
+    this->PendingRecordedKeybind = {};
+    for (int vk = 0; vk < 256; ++vk) {
+        this->RecordingPrevKeys[vk] = this->pInputSystem->IsKeyPressed(static_cast<unsigned char>(vk));
+    }
+}
+
+void MainDraw::StopKeybindRecording() {
+    this->RecordingTarget = KeybindRecordTarget::None;
+    this->RecordingItemName.clear();
+    this->RecordingMainKey = 0;
+    this->PendingRecordedKeybind = {};
+    this->RecordingPrevKeys.fill(false);
+}
+
+bool MainDraw::UpdateKeybindRecording(MulNX::KeyCheckPack& outBinding) {
+    if (this->RecordingTarget == KeybindRecordTarget::None) {
+        return false;
+    }
+
+    for (int vk = 0; vk < 256; ++vk) {
+        const auto key = static_cast<unsigned char>(vk);
+        const bool isPressed = this->pInputSystem->IsKeyPressed(key);
+        const bool wasPressed = this->RecordingPrevKeys[vk];
+
+        if (!wasPressed && isPressed && !IsModifierKey(key) && this->RecordingMainKey == 0) {
+            this->RecordingMainKey = key;
+            this->PendingRecordedKeybind.Ctrl =
+                this->pInputSystem->IsKeyPressed(VK_CONTROL) ||
+                this->pInputSystem->IsKeyPressed(VK_LCONTROL) ||
+                this->pInputSystem->IsKeyPressed(VK_RCONTROL);
+            this->PendingRecordedKeybind.Shift =
+                this->pInputSystem->IsKeyPressed(VK_SHIFT) ||
+                this->pInputSystem->IsKeyPressed(VK_LSHIFT) ||
+                this->pInputSystem->IsKeyPressed(VK_RSHIFT);
+            this->PendingRecordedKeybind.Alt =
+                this->pInputSystem->IsKeyPressed(VK_MENU) ||
+                this->pInputSystem->IsKeyPressed(VK_LMENU) ||
+                this->pInputSystem->IsKeyPressed(VK_RMENU);
+            this->PendingRecordedKeybind.vkCode = key;
+            this->PendingRecordedKeybind.ComboClick = 1;
+        }
+
+        if (this->RecordingMainKey != 0 && key == this->RecordingMainKey && wasPressed && !isPressed) {
+            this->PendingRecordedKeybind.Refresh();
+            outBinding = this->PendingRecordedKeybind;
+            this->StopKeybindRecording();
+            return true;
+        }
+
+        this->RecordingPrevKeys[vk] = isPressed;
+    }
+
+    return false;
+}
+
+void MainDraw::RenderKeybindPage(ProjectManager* projectManager, ElementManager* elementManager, SolutionManager* solutionManager) {
+    ImGui::TextUnformatted("绑键");
+    ImGui::Separator();
+
+    if (!projectManager) {
+        ImGui::TextUnformatted("项目管理器不可用");
+        return;
+    }
+
+    auto projects = projectManager->GetProjects();
+    auto projectNames = GetSortedProjectNames(projects);
+
+    if (this->SelectedKeybindProjectName.empty() && !projectNames.empty()) {
+        this->SelectedKeybindProjectName = projectNames.front();
+    }
+
+    ImGui::Text("目标项目");
+    ImGui::SameLine();
+    const char* currentProjectLabel = this->SelectedKeybindProjectName.empty() ? "无" : this->SelectedKeybindProjectName.c_str();
+    if (ImGui::BeginCombo("##绑键项目", currentProjectLabel)) {
+        for (const auto& projectName : projectNames) {
+            const bool selected = this->SelectedKeybindProjectName == projectName;
+            if (ImGui::Selectable(projectName.c_str(), selected)) {
+                this->SelectedKeybindProjectName = projectName;
+                this->StopKeybindRecording();
+            }
+        }
+        ImGui::EndCombo();
+    }
+
+    auto selectedProject = projectManager->FindProject(this->SelectedKeybindProjectName);
+    const bool isActiveProject = selectedProject && projectManager->ActiveProject && projectManager->ActiveProject->Name == selectedProject->Name;
+    ImGui::Text("当前生效项目: %s", projectManager->ActiveProject ? projectManager->ActiveProject->Name.c_str() : "无");
+    ImGui::SameLine();
+    if (!selectedProject) {
+        ImGui::BeginDisabled();
+    }
+    if (ImGui::Button(isActiveProject ? "当前项目已生效" : "切换到当前项目")) {
+        if (selectedProject) {
+            projectManager->Project_Apply(selectedProject);
+        }
+    }
+    if (!selectedProject) {
+        ImGui::EndDisabled();
+    }
+    ImGui::SameLine();
+    if (!selectedProject) {
+        ImGui::BeginDisabled();
+    }
+    if (ImGui::Button("导出按键绑定")) {
+        std::filesystem::path exportPath = this->ISys().PathGet("Config") / ("keybinds_" + selectedProject->Name + ".txt");
+        std::ofstream fout(exportPath);
+        if (fout.is_open()) {
+            auto elementNames = GetSortedElementNames(elementManager);
+            for (const auto& elementName : elementNames) {
+                auto it = selectedProject->ElementKeybinds.find(elementName);
+                if (it != selectedProject->ElementKeybinds.end() && it->second.Usable) {
+                    fout << "Element/" << elementName << " : " << it->second.GetMsg() << "\n";
+                }
+            }
+            auto solutionNames = GetSortedSolutionNames(solutionManager);
+            for (const auto& solutionName : solutionNames) {
+                auto it = selectedProject->SolutionKeybinds.find(solutionName);
+                if (it != selectedProject->SolutionKeybinds.end() && it->second.Usable) {
+                    fout << "Solution/" << solutionName << " : " << it->second.GetMsg() << "\n";
+                }
+            }
+            fout.close();
+            this->ISys().LogSucc("已导出按键绑定：" + exportPath.string());
+        }
+        else {
+            this->ISys().LogError("导出按键绑定失败");
+        }
+    }
+    if (!selectedProject) {
+        ImGui::EndDisabled();
+    }
+
+    if (!selectedProject) {
+        ImGui::Separator();
+        ImGui::TextUnformatted("无可用项目");
+        return;
+    }
+
+    if (!isActiveProject) {
+        ImGui::Separator();
+        ImGui::TextUnformatted("当前仅可编辑所选项目的绑键，切换到该项目后这些绑键才会生效");
+    }
+
+    const auto recordedTarget = this->RecordingTarget;
+    const auto recordedItemName = this->RecordingItemName;
+    MulNX::KeyCheckPack recordedBinding{};
+    const bool hasRecordedBinding = this->UpdateKeybindRecording(recordedBinding);
+    if (hasRecordedBinding) {
+        if (recordedTarget == KeybindRecordTarget::Element) {
+            selectedProject->ElementKeybinds[recordedItemName] = recordedBinding;
+        }
+        else if (recordedTarget == KeybindRecordTarget::Solution) {
+            selectedProject->SolutionKeybinds[recordedItemName] = recordedBinding;
+        }
+    }
+
+    ImGui::Separator();
+
+    if (ImGui::CollapsingHeader("元素", ImGuiTreeNodeFlags_DefaultOpen)) {
+        auto elementNames = GetSortedElementNames(elementManager);
+        for (const auto& elementName : elementNames) {
+            ImGui::TextUnformatted(elementName.c_str());
+            ImGui::SameLine(320.0f);
+            auto bindingIt = selectedProject->ElementKeybinds.find(elementName);
+            const std::string bindingText = (bindingIt != selectedProject->ElementKeybinds.end() && bindingIt->second.Usable)
+                ? bindingIt->second.GetMsg()
+                : "无绑键";
+            ImGui::Text("%s", bindingText.c_str());
+            ImGui::SameLine(540.0f);
+            const bool isRecordingThis = this->RecordingTarget == KeybindRecordTarget::Element && this->RecordingItemName == elementName;
+            const std::string bindButtonLabel = std::string(isRecordingThis ? "记录中..." : "绑键") + "##ElementBind" + elementName;
+            if (ImGui::Button(bindButtonLabel.c_str())) {
+                this->StartKeybindRecording(KeybindRecordTarget::Element, elementName);
+            }
+            ImGui::SameLine();
+            if (ImGui::Button(("重置##ElementReset" + elementName).c_str())) {
+                selectedProject->ElementKeybinds.erase(elementName);
+                if (isRecordingThis) {
+                    this->StopKeybindRecording();
+                }
+            }
+        }
+    }
+
+    if (ImGui::CollapsingHeader("解决方案", ImGuiTreeNodeFlags_DefaultOpen)) {
+        auto solutionNames = GetSortedSolutionNames(solutionManager);
+        for (const auto& solutionName : solutionNames) {
+            ImGui::TextUnformatted(solutionName.c_str());
+            ImGui::SameLine(320.0f);
+            auto bindingIt = selectedProject->SolutionKeybinds.find(solutionName);
+            const std::string bindingText = (bindingIt != selectedProject->SolutionKeybinds.end() && bindingIt->second.Usable)
+                ? bindingIt->second.GetMsg()
+                : "无绑键";
+            ImGui::Text("%s", bindingText.c_str());
+            ImGui::SameLine(540.0f);
+            const bool isRecordingThis = this->RecordingTarget == KeybindRecordTarget::Solution && this->RecordingItemName == solutionName;
+            const std::string bindButtonLabel = std::string(isRecordingThis ? "记录中..." : "绑键") + "##SolutionBind" + solutionName;
+            if (ImGui::Button(bindButtonLabel.c_str())) {
+                this->StartKeybindRecording(KeybindRecordTarget::Solution, solutionName);
+            }
+            ImGui::SameLine();
+            if (ImGui::Button(("重置##SolutionReset" + solutionName).c_str())) {
+                selectedProject->SolutionKeybinds.erase(solutionName);
+                if (isRecordingThis) {
+                    this->StopKeybindRecording();
+                }
+            }
+        }
+    }
+}
+
 void MainDraw::Window(MulNX::UINode* node) {
     auto* workspaceManager = this->Core->ModuleManager()->FindModule<WorkspaceManager>("WorkspaceManager");
     auto* projectManager = this->Core->ModuleManager()->FindModule<ProjectManager>("ProjectManager");
@@ -104,6 +367,8 @@ void MainDraw::Window(MulNX::UINode* node) {
         ImGui::Text("| Alt+T 自动化增强");
         ImGui::SameLine();
         ImGui::Text("| Alt+P 停止播放");
+        ImGui::SameLine();
+        ImGui::Text("| F 添加关键帧");
     }
     ImGui::EndChild();
 
@@ -113,6 +378,7 @@ void MainDraw::Window(MulNX::UINode* node) {
         if (ImGui::BeginChild("##MainNavPages", ImVec2(0, 260), true)) {
             MainNavButton("总览", MainPanelPage::Overview, currentPage);
             MainNavButton(I18n("ui.camera_system").c_str(), MainPanelPage::CameraSystem, currentPage);
+            MainNavButton("绑键", MainPanelPage::Keybinds, currentPage);
             MainNavButton(I18n("ui.game_settings").c_str(), MainPanelPage::GameSettings, currentPage);
             MainNavButton(I18n("ui.game_enhance").c_str(), MainPanelPage::GameEnhance, currentPage);
             MainNavButton(I18n("ui.mulnx_control").c_str(), MainPanelPage::ControlCenter, currentPage);
@@ -158,10 +424,13 @@ void MainDraw::Window(MulNX::UINode* node) {
                     currentPage = MainPanelPage::CameraSystem;
                 }
                 ImGui::SameLine();
+                if (ImGui::Button("进入绑键", ImVec2(180, 0))) {
+                    currentPage = MainPanelPage::Keybinds;
+                }
+                ImGui::SameLine();
                 if (ImGui::Button("进入游戏设置", ImVec2(180, 0))) {
                     currentPage = MainPanelPage::GameSettings;
                 }
-                ImGui::SameLine();
                 if (ImGui::Button("进入增强面板", ImVec2(180, 0))) {
                     currentPage = MainPanelPage::GameEnhance;
                 }
@@ -187,6 +456,10 @@ void MainDraw::Window(MulNX::UINode* node) {
             ImGui::TextUnformatted("摄像机系统");
             ImGui::Separator();
             node->CallUINode("CameraSystem");
+            break;
+        }
+        case MainPanelPage::Keybinds: {
+            this->RenderKeybindPage(projectManager, elementManager, solutionManager);
             break;
         }
         case MainPanelPage::GameSettings: {

@@ -1,4 +1,4 @@
-﻿#include "ElementBase.hpp"
+#include "ElementBase.hpp"
 
 #include <fstream>
 
@@ -36,8 +36,17 @@ std::string ElementBase::GetMsg()const {
 std::string ElementBase::GetName()const {
     return this->Name;
 }
+std::string ElementBase::GetGroupName()const {
+    return this->GroupName;
+}
+bool ElementBase::InGroup()const {
+    return !this->GroupName.empty();
+}
 void ElementBase::ResetName(const std::string& NewName) {
     this->Name = NewName;
+}
+void ElementBase::SetGroupName(const std::string& NewGroupName) {
+    this->GroupName = NewGroupName;
 }
 
 bool ElementBase::CalculateFrame(CameraSystemIO* IO)const {
@@ -72,6 +81,9 @@ std::pair<bool, std::string> ElementBase::Save(const std::filesystem::path& fold
         root["name"] = this->Name;
         root["type"] = this->TypeGet_String();
         root["duration"] = this->DurationTime;
+        if (!this->GroupName.empty()) {
+            root["group"] = this->GroupName;
+        }
 
         auto [ok, msg] = this->SaveImpl(root);
         if (!ok)return { false,std::move(msg) + " 文件路径：" + filePath.string() };

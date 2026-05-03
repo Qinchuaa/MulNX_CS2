@@ -25,6 +25,17 @@ std::pair<bool, std::string> Project::Save(const std::filesystem::path& FolderPa
         root["name"] = this->Name;
         root["KCP"] = this->KCPack;
         root["OnNewRound"] = this->OnNewRound;
+        YAML::Node elementKeybindsNode;
+        for (const auto& [name, binding] : this->ElementKeybinds) {
+            elementKeybindsNode[name] = binding;
+        }
+        root["ElementKeybinds"] = elementKeybindsNode;
+
+        YAML::Node solutionKeybindsNode;
+        for (const auto& [name, binding] : this->SolutionKeybinds) {
+            solutionKeybindsNode[name] = binding;
+        }
+        root["SolutionKeybinds"] = solutionKeybindsNode;
 
         std::ofstream fout(FullPath);
         fout << root;

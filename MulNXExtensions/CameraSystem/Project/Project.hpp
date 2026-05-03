@@ -3,6 +3,7 @@
 #include <MulNX/MulNX.hpp>
 
 #include <filesystem>
+#include <unordered_map>
 
 class Project {
 public:
@@ -19,6 +20,8 @@ public:
     std::vector<std::string> OnNewRound{};
     std::vector<std::string> OnRoundStart{};
     std::vector<std::string> OnRoundEnd{};
+    std::unordered_map<std::string, MulNX::KeyCheckPack> ElementKeybinds{};
+    std::unordered_map<std::string, MulNX::KeyCheckPack> SolutionKeybinds{};
 
     //构造函数
     explicit Project(const std::string& name) :

@@ -15,12 +15,9 @@ private:
 
     //当前操作的解决方案指针
     Solution* CurrentSolution = nullptr;
-    //按键调试缓存
-    MulNX::KeyCheckPack Buffer_KCPack{};
-    //是否打开解决方案按键绑定调试窗口
-    std::atomic<bool> OpenSolutionKCPackDebugWindow = false;
     // 当前播放的解决方案
     Solution* Playing_pSolution = nullptr;
+    std::string PendingDeleteSolutionName{};
     // 是否处于播放状态
     // 播放完成之后需要变为false，切换解决方案要变成true
     bool Playing = false;

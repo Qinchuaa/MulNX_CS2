@@ -3,12 +3,18 @@
 #include <MulNX/MulNX.hpp>
 #include <MulNXExtensions/CameraSystem/Elements/Elements.hpp>
 
-class ElementWithOffset {
-public:
-    //元素
-    std::shared_ptr<ElementBase> Element;
+class ElementManager;
 
-    //这个Offset决定了元素的播放时间头
+enum class SolutionElementType {
+    Element,
+    ElementGroup
+};
+
+class SolutionWithOffset {
+public:
+    SolutionElementType Type = SolutionElementType::Element;
+    std::shared_ptr<ElementBase> Element;
+    std::string GroupName{};
     float Offset = 0;
 };
 
@@ -22,13 +28,15 @@ private:
     //解决方案名称
     std::string name{};
 
-    //存储元素的指针，允许调用不同元素的同一个Call函数（多态，内部实现不同）
-    std::vector<ElementWithOffset> elements;
+    //存储编排项，允许混合单元素与元素组
+    std::vector<SolutionWithOffset> elements;
 
     //开始时间
     float startTime{};
     //结束时间
     float endTime{};
+    //当前播放解析后的结束时间
+    float activeEndTime{};
     //总持续时间
     float totalDurationTime{};
     //解决方案时间偏移
@@ -41,9 +49,19 @@ private:
 
     //脏标记，需要重新保存
     bool dirty = false;
+    ElementManager* elementManager = nullptr;
+    std::vector<SolutionWithOffset> resolvedElements;
+    bool playbackPlanReady = false;
+    bool playbackPlanDirty = true;
+
+    float GetEntryDuration(const SolutionWithOffset& item) const;
+    std::string GetEntryLabel(const SolutionWithOffset& item) const;
+    void SortElements();
+    void InvalidatePlaybackPlan();
+    bool PreparePlaybackPlan();
 public:
-    Solution(const std::string& name) :
-        name(name) {
+    Solution(const std::string& name, ElementManager* elementManager = nullptr) :
+        name(name), elementManager(elementManager) {
         this->Refresh();
     }
     ~Solution() = default;
@@ -55,8 +73,12 @@ public:
     //添加元素
     //常量指针常量说明没有修改权，时间偏移默认是0.0f
     bool AddElement(const std::shared_ptr<ElementBase> element, const float Offset = 0.0f);
+    bool AddElementGroup(const std::string& groupName, const float Offset = 0.0f);
     //移除指定位置的元素
     bool RemoveElementAt(const size_t Index);
+    bool SetElementOffsetAt(const size_t Index, const float Offset);
+    float GetAppendOffset() const;
+    void BindElementManager(ElementManager* elementManager);
 
     std::pair<bool, std::string> Save(const std::filesystem::path& folderPath);
     std::pair<bool, std::string> Load(YAML::Node& root, ElementManager* elementManager);

@@ -1,16 +1,22 @@
 #include "Solution.hpp"
 #include <MulNXExtensions/CameraSystem/ElementManager/ElementManager.hpp>
 #include <yaml-cpp/yaml.h>
+#include <algorithm>
 #include <fstream>
+#include <random>
+#include <sstream>
 
 bool Solution::AddElement(const std::shared_ptr<ElementBase> element, const float Offset) {
+    if (!element) {
+        return false;
+    }
     //检查重复
     auto it = std::find_if(this->elements.begin(), this->elements.end(),
-        [&element](const ElementWithOffset& ew) {
-            if (auto el = ew.Element) {
-                return el == element;
+        [&element](const SolutionWithOffset& item) {
+            if (item.Type != SolutionElementType::Element) {
+                return false;
             }
-            return false;
+            return item.Element == element;
         });
 
     if (it != this->elements.end()) {
@@ -18,27 +24,158 @@ bool Solution::AddElement(const std::shared_ptr<ElementBase> element, const floa
     }
 
     //创建新元素
-    ElementWithOffset newElement{ element, Offset };
-
-    //找到正确的插入位置以保持排序
-    auto insertPos = std::lower_bound(this->elements.begin(), this->elements.end(), newElement,
-        [](const ElementWithOffset& a, const ElementWithOffset& b) {
-            return a.Offset < b.Offset;
-        });
-
-    //插入元素
-    this->elements.insert(insertPos, std::move(newElement));
+    SolutionWithOffset newElement;
+    newElement.Type = SolutionElementType::Element;
+    newElement.Element = element;
+    newElement.Offset = Offset;
+    this->elements.push_back(std::move(newElement));
 
     //计算自身大小同时检验所有元素有效性
+    this->SortElements();
+    this->InvalidatePlaybackPlan();
     this->Refresh();
     return true;
 }
+
+bool Solution::AddElementGroup(const std::string& groupName, const float Offset) {
+    if (!this->elementManager || groupName.empty()) {
+        return false;
+    }
+    if (!this->elementManager->ElementGroup_Exists(groupName)) {
+        return false;
+    }
+    if (this->elementManager->GetElementsInGroup(groupName).empty()) {
+        return false;
+    }
+
+    SolutionWithOffset newElement;
+    newElement.Type = SolutionElementType::ElementGroup;
+    newElement.GroupName = groupName;
+    newElement.Offset = Offset;
+    this->elements.push_back(std::move(newElement));
+
+    this->SortElements();
+    this->InvalidatePlaybackPlan();
+    this->Refresh();
+    return true;
+}
+
 bool Solution::RemoveElementAt(const size_t Index) {
-    if (Index < 0 || Index >= this->elements.size()) {
+    if (Index >= this->elements.size()) {
         return false;
     }
     this->elements.erase(this->elements.begin() + Index);
+    this->InvalidatePlaybackPlan();
     this->Refresh();
+    return true;
+}
+
+bool Solution::SetElementOffsetAt(const size_t Index, const float Offset) {
+    if (Index >= this->elements.size()) {
+        return false;
+    }
+    this->elements[Index].Offset = Offset;
+    this->SortElements();
+    this->InvalidatePlaybackPlan();
+    this->Refresh();
+    return true;
+}
+
+float Solution::GetAppendOffset() const {
+    float appendOffset = 0.0f;
+    for (const auto& item : this->elements) {
+        appendOffset = std::max(appendOffset, item.Offset + this->GetEntryDuration(item));
+    }
+    return appendOffset;
+}
+
+void Solution::BindElementManager(ElementManager* elementManager) {
+    this->elementManager = elementManager;
+    this->InvalidatePlaybackPlan();
+    this->Refresh();
+}
+
+float Solution::GetEntryDuration(const SolutionWithOffset& item) const {
+    if (item.Type == SolutionElementType::Element) {
+        return item.Element ? item.Element->GetDurationTime() : 0.0f;
+    }
+    if (!this->elementManager || item.GroupName.empty()) {
+        return 0.0f;
+    }
+    return this->elementManager->GetElementGroupMaxDuration(item.GroupName);
+}
+
+std::string Solution::GetEntryLabel(const SolutionWithOffset& item) const {
+    if (item.Type == SolutionElementType::Element) {
+        return item.Element ? ("元素: " + item.Element->GetName()) : "元素: <null>";
+    }
+    return "元素组: " + item.GroupName;
+}
+
+void Solution::SortElements() {
+    std::sort(this->elements.begin(), this->elements.end(), [](const SolutionWithOffset& lhs, const SolutionWithOffset& rhs) {
+        return lhs.Offset < rhs.Offset;
+    });
+}
+
+void Solution::InvalidatePlaybackPlan() {
+    this->playbackPlanReady = false;
+    this->playbackPlanDirty = true;
+    this->activeEndTime = 0.0f;
+    this->resolvedElements.clear();
+}
+
+bool Solution::PreparePlaybackPlan() {
+    this->Refresh();
+    if (!this->safeUse) {
+        return false;
+    }
+    if (!this->playbackPlanDirty && this->playbackPlanReady) {
+        return true;
+    }
+
+    this->resolvedElements.clear();
+    this->activeEndTime = 0.0f;
+
+    static thread_local std::mt19937 rng{ std::random_device{}() };
+    float resolvedOffset = 0.0f;
+
+    for (size_t i = 0; i < this->elements.size(); ++i) {
+        const auto& item = this->elements[i];
+        SolutionWithOffset resolvedItem = item;
+        if (item.Type == SolutionElementType::ElementGroup) {
+            if (!this->elementManager) {
+                return false;
+            }
+            auto groupElements = this->elementManager->GetElementsInGroup(item.GroupName);
+            if (groupElements.empty()) {
+                return false;
+            }
+            std::uniform_int_distribution<size_t> dist(0, groupElements.size() - 1);
+            resolvedItem.Element = groupElements[dist(rng)];
+        }
+        if (!resolvedItem.Element) {
+            return false;
+        }
+
+        // 以当前随机结果重算实际时间轴，避免元素组按最长时长占位后产生额外停顿。
+        if (i == 0) {
+            resolvedOffset = item.Offset;
+        }
+        else {
+            const auto& previousPlannedItem = this->elements[i - 1];
+            const auto& previousResolvedItem = this->resolvedElements.back();
+            const float plannedGap = item.Offset - (previousPlannedItem.Offset + this->GetEntryDuration(previousPlannedItem));
+            resolvedOffset = previousResolvedItem.Offset + previousResolvedItem.Element->GetDurationTime() + plannedGap;
+        }
+        resolvedItem.Offset = resolvedOffset;
+
+        this->activeEndTime = std::max(this->activeEndTime, resolvedItem.Offset + resolvedItem.Element->GetDurationTime());
+        this->resolvedElements.push_back(std::move(resolvedItem));
+    }
+
+    this->playbackPlanReady = true;
+    this->playbackPlanDirty = false;
     return true;
 }
 
@@ -54,13 +191,30 @@ void Solution::Refresh() {
         return;
     }
 
+    this->endTime = 0.0f;
+    this->startTime = 0.0f;
+    bool allEntriesUsable = true;
+
     //清理过期元素的同时查找整个解决方案的结束时间点
     for (auto It = this->elements.begin(); It != this->elements.end();) {
-        if (It->Element->NeedBeDelete) {
-            It = this->elements.erase(It);//erase返回下一个有效迭代器
+        bool shouldErase = false;
+        if (It->Type == SolutionElementType::Element) {
+            shouldErase = !It->Element || It->Element->NeedBeDelete;
         }
         else {
-            float ElementEndTime = It->Offset + It->Element->DurationTime;
+            shouldErase = It->GroupName.empty();
+        }
+
+        if (shouldErase) {
+            It = this->elements.erase(It);//erase返回下一个有效迭代器
+            this->InvalidatePlaybackPlan();
+        }
+        else {
+            const float entryDuration = this->GetEntryDuration(*It);
+            if (It->Type == SolutionElementType::ElementGroup && entryDuration <= 0.0f) {
+                allEntriesUsable = false;
+            }
+            float ElementEndTime = It->Offset + entryDuration;
             if (this->endTime < ElementEndTime) {
                 this->endTime = ElementEndTime;
             }
@@ -83,12 +237,9 @@ void Solution::Refresh() {
 
     //计算总持续时间（从第一个元素开始到最后一个元素结束）
     this->totalDurationTime = this->endTime - this->startTime;
-    this->safeUse = true;
+    this->safeUse = allEntriesUsable;
 
     return;
-}
-void Solution::SetSolutionOffset(const float Offset) {
-    this->solutionOffset = Offset;
 }
 bool Solution::TimeLineGenerate() {
     this->Refresh();
@@ -98,6 +249,9 @@ bool Solution::TimeLineGenerate() {
     }
     float TimeReference = this->elements[0].Offset;
     for (int i = 0; i < this->elements.size(); ++i) {
+        if (this->elements[i].Type != SolutionElementType::Element || !this->elements[i].Element) {
+            continue;
+        }
         //先获取最早的元素的开始时间作为参考时间
         if (TimeReference > this->elements[i].Element->GetStartTime()) {
             TimeReference = this->elements[i].Element->GetStartTime();
@@ -105,9 +259,14 @@ bool Solution::TimeLineGenerate() {
     }
     //然后设置元素偏移
     for (int i = 0; i < this->elements.size(); ++i) {
+        if (this->elements[i].Type != SolutionElementType::Element || !this->elements[i].Element) {
+            continue;
+        }
         this->elements[i].Offset = this->elements[i].Element->GetStartTime() - TimeReference;
     }
 
+    this->SortElements();
+    this->InvalidatePlaybackPlan();
     this->Refresh();
 
     return true;
@@ -125,14 +284,21 @@ std::string Solution::GetMsg() {
         << "\n";
 
     for (size_t i = 0; i < this->elements.size(); ++i) {
-        std::shared_ptr<ElementBase> element = this->elements.at(i).Element;
-        if (element) {
+        const auto& item = this->elements.at(i);
+        if (item.Type == SolutionElementType::Element && item.Element) {
             oss << i << ".  "
                 "  |元素编号：" << i <<
-                "  元素名称：" << element->Name <<
-                "  元素类型：" << element->TypeGet_String() <<
-                "  元素持续时间：" << element->DurationTime <<
+                "  元素名称：" << item.Element->Name <<
+                "  元素类型：" << item.Element->TypeGet_String() <<
+                "  元素持续时间：" << item.Element->DurationTime <<
                 "  元素偏移时间：" << this->elements[i].Offset << "\n";
+        }
+        else {
+            oss << i << ".  "
+                << "  |元素组编号：" << i
+                << "  元素组名称：" << item.GroupName
+                << "  元素组持续时间：" << this->GetEntryDuration(item)
+                << "  元素组偏移时间：" << item.Offset << "\n";
         }
     }
 
@@ -140,6 +306,7 @@ std::string Solution::GetMsg() {
 }
 void Solution::Clear() {
     this->elements.clear();
+    this->InvalidatePlaybackPlan();
     this->Refresh();
     this->solutionOffset = 0;
 
@@ -169,45 +336,27 @@ bool Solution::Call(CameraSystemIO* IO) {
     //编号靠后的元素有更高的决定权
     this->Refresh();//调用前立刻更新，智能共享指针锁定状态
 
-    //先分开播放模式逻辑
-    switch (this->playmode) {
-    case PlaybackMode::Orchestration: {
-        //偏移时间轴播放
-
-        //判断偏移后的时间是否位于解决方案持续范围之中（先统一计算偏移后时间，无论究竟有没有偏移）
-        float SolutionOffsetedTime = IO->SolutionTime - this->solutionOffset;
-
-        if (this->endTime < SolutionOffsetedTime) {
-            //播放结束
-            this->solutionOffset = 0;//归位时间
-            IO->isPlaying = false;//播放结束
-            return false;//无插值结果
-        }
-        for (size_t i = 0; i < this->elements.size(); ++i) {
-            //这里用减法得到相对于元素的时间
-            //尝试该元素插值，如果有结果则代表可以应用
-            //这里传入的时间已经是相对时间
-            //模式1自动减去头时间
-            auto& element = this->elements[i].Element;
-            IO->ElementTime = SolutionOffsetedTime - this->elements[i].Offset + element->GetStartTime();
-            bResult = bResult || element->CalculateFrame(IO);
-        }
-        break;
+    this->playmode = PlaybackMode::Orchestration;
+    //偏移时间轴播放
+    float SolutionOffsetedTime = IO->SolutionTime - this->solutionOffset;
+    if (!this->PreparePlaybackPlan()) {
+        IO->isPlaying = false;
+        return false;
     }
-    case PlaybackMode::Activation: {
-        //默认游戏时间轴播放
-        //if (Time < this->StartTime || this->EndTime < Time) {
-        //    return false;//无插值结果
-        //    //不修改isPlaying状态，使用者任意跳转时间，如果在范围内，仍能给出插值结果
-        //}
-        
-        IO->ElementTime = IO->SolutionTime;
-        for (size_t i = 0; i < this->elements.size(); ++i) {
-            auto& element = this->elements[i].Element;
-            bResult = bResult || element->CalculateFrame(IO);
-        }
-        break;
+
+    if (this->activeEndTime < SolutionOffsetedTime) {
+        //播放结束
+        this->solutionOffset = 0;//归位时间
+        IO->isPlaying = false;//播放结束
+        return false;//无插值结果
     }
+    for (size_t i = 0; i < this->resolvedElements.size(); ++i) {
+        //这里用减法得到相对于元素的时间
+        //尝试该元素插值，如果有结果则代表可以应用
+        //这里传入的时间已经是相对时间
+        auto& element = this->resolvedElements[i].Element;
+        IO->ElementTime = SolutionOffsetedTime - this->resolvedElements[i].Offset + element->GetStartTime();
+        bResult = bResult || element->CalculateFrame(IO);
     }
 
     return bResult;
@@ -238,11 +387,16 @@ std::pair<bool, std::string> Solution::Save(const std::filesystem::path& folderP
 
         YAML::Node elementsNode = root["elements"];
         for (size_t i = 0; i < this->elements.size(); ++i) {
-            std::shared_ptr<ElementBase> element = this->elements[i].Element;
-            if (!element) return { false, "疑似有元素在保存过程中被删除，保存终止！" };
-
             YAML::Node elemNode;
-            elemNode["name"] = element->Name;
+            elemNode["type"] = this->elements[i].Type == SolutionElementType::Element ? "element" : "group";
+            if (this->elements[i].Type == SolutionElementType::Element) {
+                std::shared_ptr<ElementBase> element = this->elements[i].Element;
+                if (!element) return { false, "疑似有元素在保存过程中被删除，保存终止！" };
+                elemNode["name"] = element->Name;
+            }
+            else {
+                elemNode["group"] = this->elements[i].GroupName;
+            }
             elemNode["offset"] = this->elements[i].Offset;
             elementsNode.push_back(elemNode);
         }
@@ -258,6 +412,7 @@ std::pair<bool, std::string> Solution::Save(const std::filesystem::path& folderP
     }
 }
 std::pair<bool, std::string> Solution::Load(YAML::Node& root, ElementManager* elementManager) {
+    this->BindElementManager(elementManager);
     this->KCPack = root["KCP"].as<MulNX::KeyCheckPack>();
     // 获取解决方案名称并检查是否为空
     this->name = root["name"].as<std::string>();
@@ -271,6 +426,17 @@ std::pair<bool, std::string> Solution::Load(YAML::Node& root, ElementManager* el
 
     // 读取流程
     for (const auto& nodeElement : root["elements"]) {
+        // 获取元素偏移
+        float ElementOffset = nodeElement["offset"].as<float>();
+        const std::string itemType = nodeElement["type"] ? nodeElement["type"].as<std::string>() : "element";
+        if (itemType == "group") {
+            std::string groupName = nodeElement["group"].as<std::string>();
+            if (!this->AddElementGroup(groupName, ElementOffset)) {
+                return { false,std::format("无法添加元素组到解决方案   解决方案名：{}  元素组名：{}" ,this->name, groupName) };
+            }
+            continue;
+        }
+
         // 获取元素名称
         std::string NewElementName = nodeElement["name"].as<std::string>();
         // 得到元素指针
@@ -279,8 +445,6 @@ std::pair<bool, std::string> Solution::Load(YAML::Node& root, ElementManager* el
         if (it==elementManager->elements.end()) {
             return { false,"找不到目标元素   元素名：" + NewElementName };
         }
-        // 获取元素偏移
-        float ElementOffset = nodeElement["offset"].as<float>();
         // 尝试创建带有时间偏移的弱引用指针并添加进新解决方案并判断是否成功
         if (!this->AddElement(it->second, ElementOffset)) {
             return { false,std::format("无法添加元素到解决方案   解决方案名：{}  元素名：{}" ,this->name, NewElementName) };
@@ -293,4 +457,10 @@ std::pair<bool, std::string> Solution::Load(YAML::Node& root, ElementManager* el
     this->dirty = false;
 
     return { true,"解决方案加载成功" };
+}
+
+void Solution::SetSolutionOffset(const float Offset) {
+    this->solutionOffset = Offset;
+    this->InvalidatePlaybackPlan();
+    this->PreparePlaybackPlan();
 }

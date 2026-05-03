@@ -4,6 +4,7 @@
 #include <MulNXExtensions/CameraSystem/Elements/Elements.hpp>
 #include <MulNXExtensions/CameraSystem/CameraSystem.hpp>
 #include "ElementConfig.hpp"
+#include <unordered_set>
 
 //元素管理器，用于管理元素
 class ElementManager final : public CamSysModule {
@@ -30,11 +31,18 @@ private:
     void Element_ShowInLine(const std::shared_ptr<ElementBase> element);
     std::atomic<bool> needDrawCamera = false;
     MulNX::NewestBuffer<MulNX::Math::Frame> drawCamera;
+    std::unordered_set<std::string> elementGroups;
+    std::string CurrentElementGroup{};
+    void ElementGroup_ShowInLine(const std::string& groupName);
+    std::filesystem::path GetElementSaveFolder(const std::shared_ptr<ElementBase>& element);
+    bool RegisterGroupFromPath(const std::filesystem::path& groupPath);
 public:
     ElementConfig Config{};
     std::atomic<bool> CompactElementDisplay = true;
     // 使用智能指针存储多态对象，以存储不同类型的元素
     std::unordered_map<std::string, std::shared_ptr<ElementBase>> elements;
+    std::vector<std::string> GetElementGroups() const;
+    float GetElementGroupMaxDuration(const std::string& groupName) const;
 
     bool MenuElement(MulNX::UINode* node);
     bool UINodeFunc(MulNX::UINode* node);
@@ -44,6 +52,11 @@ public:
     void HandleUpdate();
 
     ElementBase* Element_Create(const ElementType type, const std::string& name);
+    ElementBase* Element_Create(const ElementType type, const std::string& name, const std::string& groupName);
+    bool Element_LoadAll(const std::filesystem::path& elementsRoot);
+    bool ElementGroup_Create(const std::string& groupName);
+    bool ElementGroup_Exists(const std::string& groupName) const;
+    std::vector<std::shared_ptr<ElementBase>> GetElementsInGroup(const std::string& groupName) const;
     // 保存所有元素到磁盘文件
     bool Element_SaveAll();
     // 从磁盘文件加载元素的预处理函数，内部会创建对应类型的元素，并调用具体加载函数加载信息

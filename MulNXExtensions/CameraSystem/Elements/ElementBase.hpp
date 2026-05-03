@@ -36,6 +36,8 @@ protected:
     ElementType Type;
     //元素名称
     std::string Name{};
+    //所属元素组；为空表示直接位于Elements根目录
+    std::string GroupName{};
 
     //开始时间（绝对）
     float StartTime{};
@@ -75,8 +77,13 @@ public:
     std::string GetMsg()const;
     // 获取名字
     std::string GetName()const;
+    // 获取所属元素组
+    std::string GetGroupName()const;
+    bool InGroup()const;
     // 重设名字
     void ResetName(const std::string& NewName);
+    // 设置所属元素组
+    void SetGroupName(const std::string& NewGroupName);
 
     float GetStartTime()const;
     float GetEndTime()const;
