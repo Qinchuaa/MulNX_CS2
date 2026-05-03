@@ -4,6 +4,66 @@
 #include <MulNXExtensions/CameraSystem/ElementManager/ElementManager.hpp>
 #include <fstream>
 #include <format>
+#include <cmath>
+
+namespace {
+    constexpr float kCompactDisplayEpsilon = 0.001f;
+
+    std::string FormatCompactDelta(const char* label, float delta) {
+        return std::format("{}:{:+.2f}", label, delta);
+    }
+
+    void AppendCompactDelta(std::vector<std::string>& deltas, const char* label, float current, float previous) {
+        const float delta = current - previous;
+        if (std::fabs(delta) >= kCompactDisplayEpsilon) {
+            deltas.push_back(FormatCompactDelta(label, delta));
+        }
+    }
+
+    std::string JoinCompactDeltas(const std::vector<std::string>& deltas) {
+        if (deltas.empty()) {
+            return "unchanged";
+        }
+
+        std::ostringstream oss;
+        for (size_t i = 0; i < deltas.size(); ++i) {
+            if (i != 0) {
+                oss << " | ";
+            }
+            oss << deltas[i];
+        }
+        return oss.str();
+    }
+
+    std::string GetCompactKeyframeMsg(const MulNX::Math::CameraKeyframe& current, const MulNX::Math::CameraKeyframe* previous) {
+        if (previous == nullptr) {
+            return current.GetMsg();
+        }
+
+        const auto currentPosFov = current.GetPositionAndFOV();
+        const auto previousPosFov = previous->GetPositionAndFOV();
+        const auto currentEuler = current.GetRotationEuler();
+        const auto previousEuler = previous->GetRotationEuler();
+        const auto currentDof = current.GetDOF();
+        const auto previousDof = previous->GetDOF();
+
+        std::vector<std::string> deltas;
+        deltas.reserve(12);
+        AppendCompactDelta(deltas, "time", current.time, previous->time);
+        AppendCompactDelta(deltas, "x", currentPosFov.x, previousPosFov.x);
+        AppendCompactDelta(deltas, "y", currentPosFov.y, previousPosFov.y);
+        AppendCompactDelta(deltas, "z", currentPosFov.z, previousPosFov.z);
+        AppendCompactDelta(deltas, "fov", currentPosFov.w, previousPosFov.w);
+        AppendCompactDelta(deltas, "yaw", currentEuler.x, previousEuler.x);
+        AppendCompactDelta(deltas, "pitch", currentEuler.y, previousEuler.y);
+        AppendCompactDelta(deltas, "roll", currentEuler.z, previousEuler.z);
+        AppendCompactDelta(deltas, "dof_nb", currentDof.NearBlurry, previousDof.NearBlurry);
+        AppendCompactDelta(deltas, "dof_nc", currentDof.NearCrisp, previousDof.NearCrisp);
+        AppendCompactDelta(deltas, "dof_fc", currentDof.FarCrisp, previousDof.FarCrisp);
+        AppendCompactDelta(deltas, "dof_fb", currentDof.FarBlurry, previousDof.FarBlurry);
+        return JoinCompactDeltas(deltas);
+    }
+}
 
 std::string FreeCameraPath::GetPrivateMsg()const {
     std::ostringstream oss;
@@ -22,6 +82,10 @@ void FreeCameraPath::DebugUI(ElementManager* EManager) {
 
     for (size_t i = 0; i < this->CameraKeyframes.size(); ++i) {
         const MulNX::Math::CameraKeyframe& keyframe = this->CameraKeyframes.at(i);
+        const MulNX::Math::CameraKeyframe* previousKeyframe = i == 0 ? nullptr : &this->CameraKeyframes.at(i - 1);
+        const std::string keyframeDisplayMsg = EManager->CompactElementDisplay.load(std::memory_order_acquire)
+            ? GetCompactKeyframeMsg(keyframe, previousKeyframe)
+            : keyframe.GetMsg();
         if (ImGui::Selectable(std::to_string(i).c_str(), false, ImGuiSelectableFlags_AllowDoubleClick)) {
             IndexForReset = i;
             if (ImGui::IsMouseDoubleClicked(0)) {
@@ -37,7 +101,7 @@ void FreeCameraPath::DebugUI(ElementManager* EManager) {
             }
         }
         ImGui::SameLine();
-        ImGui::Text(I18n("free_campath.fmt", i, keyframe.GetMsg()).c_str());
+        ImGui::Text(I18n("free_campath.fmt", i, keyframeDisplayMsg).c_str());
     }
 
     if (ImGui::Button(I18n("free_campath.add").c_str()) || EManager->pInputSystem->CheckComboClick('F', 1)) {

@@ -32,6 +32,7 @@ private:
     MulNX::NewestBuffer<MulNX::Math::Frame> drawCamera;
 public:
     ElementConfig Config{};
+    std::atomic<bool> CompactElementDisplay = true;
     // 使用智能指针存储多态对象，以存储不同类型的元素
     std::unordered_map<std::string, std::shared_ptr<ElementBase>> elements;
 

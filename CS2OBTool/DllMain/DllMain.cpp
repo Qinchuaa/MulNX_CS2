@@ -53,6 +53,17 @@ namespace {
         }
         MulNX::UI::Checkbox(label, module->ShowWindow);
     }
+
+    void QuickBoolToggleThrottled(const char* label, std::atomic<bool>& target, ULONGLONG& lastUpdateTick, ULONGLONG throttleMs) {
+        bool value = target.load(std::memory_order_acquire);
+        if (ImGui::Checkbox(label, &value)) {
+            ULONGLONG now = GetTickCount64();
+            if (lastUpdateTick == 0 || now - lastUpdateTick >= throttleMs) {
+                target.store(value, std::memory_order_release);
+                lastUpdateTick = now;
+            }
+        }
+    }
 }
 
 // 这是MulNX_CS2项目的入口文件，也是MulNX项目的示例模块
@@ -80,6 +91,7 @@ void MainDraw::Window(MulNX::UINode* node) {
     auto* debugger = this->Core->ModuleManager()->FindModule("Debugger");
 
     static MainPanelPage currentPage = MainPanelPage::Overview;
+    static ULONGLONG lastCompactElementToggleTick = 0;
 
     ImGui::SetNextWindowSize(ImVec2(1280.0f, 760.0f), ImGuiCond_FirstUseEver);
     ImGui::Begin(I18n("ui.main").c_str());
@@ -118,6 +130,9 @@ void MainDraw::Window(MulNX::UINode* node) {
             QuickWindowToggle("投掷物追踪", projectileTracker);
             QuickWindowToggle("击杀信息", deathMsgController);
             QuickWindowToggle("调试器", debugger);
+            if (elementManager) {
+                QuickBoolToggleThrottled("简洁元素", elementManager->CompactElementDisplay, lastCompactElementToggleTick, 10000);
+            }
         }
         ImGui::EndChild();
     }
